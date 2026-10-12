@@ -1,0 +1,13 @@
+{
+  "name": "vote-button-diagnostics",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Passive diagnostics for a manually tested vote button on local/test deployments",
+  "scripts": {
+    "diagnose": "node diagnose.js"
+  },
+  "dependencies": {
+    "playwright": "^1.52.0"
+  }
+}
