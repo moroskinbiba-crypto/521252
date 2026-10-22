@@ -646,7 +646,8 @@ for(const el of document.querySelectorAll("[data-effect-strength]")){
   if(panelScope===mode)saveWorkspaceSettings(panelScope);
  });
 }
-function sync(){for(const k of ["algorithm","scale","levels","threshold","depth","contrast","brightness","midtones","highlights","blur","invert","colorMode","shape","jitter","shapeDistribution","shapeRotation","asciiWidth","asciiSet","asciiDepth","asciiCellSize","asciiOffset","asciiCustomChars","asciiColorMode","asciiBgMode","asciiBgColor","asciiTextColor","neoGlowDirection","neoGlowColor"])if($(k))$(k).value=s[k]??def[k];$("scaleV").textContent=s.scale+" px";$("levelsV").textContent=s.levels;$("thresholdV").textContent=s.threshold;$("depthV").textContent=(s.depth??70)+"%";$("contrastV").textContent=s.contrast+"%";$("brightnessV").textContent=s.brightness;$("midtonesV").textContent=s.midtones+"%";$("highlightsV").textContent=s.highlights+"%";$("shapeRotationV").textContent=s.shapeRotation+"°";$("blurV").textContent=s.blur+" px";$("jitterV").textContent=s.jitter+"%";$("asciiWidthV").textContent=s.asciiWidth;$("asciiDepthV").textContent=s.asciiDepth;$("asciiCellSizeV").textContent=s.asciiCellSize+" px";$("asciiOffsetV").textContent=s.asciiOffset;$("asciiCustomCount").textContent=Array.from(s.asciiCustomChars||"").length+" / 10";$("neoGlowLengthV").textContent=s.neoGlowLength+"%";$("neoGlowBrightnessV").textContent=s.neoGlowBrightness+"%";$("neoGlowVisibilityV").textContent=s.neoGlowVisibility+"%";$("neoGlowEnabled").checked=!!s.neoGlowEnabled;const activeScope=effectScopeForMode();
+}
+function sync(){for(const k of ["algorithm","scale","levels","threshold","depth","contrast","brightness","midtones","highlights","blur","invert","colorMode","shape","jitter","shapeDistribution","shapeRotation","asciiWidth","asciiSet","asciiDepth","asciiCellSize","asciiOffset","asciiCustomChars","asciiColorMode","asciiBgMode","asciiBgColor","asciiTextColor","neoGlowDirection","neoGlowColor"])if($(k))$(k).value=s[k]??def[k];if(["shape","ascii"].includes(s.algorithm))$("algorithm").value="bayer4";$("scaleV").textContent=s.scale+" px";$("levelsV").textContent=s.levels;$("thresholdV").textContent=s.threshold;$("depthV").textContent=(s.depth??70)+"%";$("contrastV").textContent=s.contrast+"%";$("brightnessV").textContent=s.brightness;$("midtonesV").textContent=s.midtones+"%";$("highlightsV").textContent=s.highlights+"%";$("shapeRotationV").textContent=s.shapeRotation+"°";$("blurV").textContent=s.blur+" px";$("jitterV").textContent=s.jitter+"%";$("asciiWidthV").textContent=s.asciiWidth;$("asciiDepthV").textContent=s.asciiDepth;$("asciiCellSizeV").textContent=s.asciiCellSize+" px";$("asciiOffsetV").textContent=s.asciiOffset;$("asciiCustomCount").textContent=Array.from(s.asciiCustomChars||"").length+" / 10";$("neoGlowLengthV").textContent=s.neoGlowLength+"%";$("neoGlowBrightnessV").textContent=s.neoGlowBrightness+"%";$("neoGlowVisibilityV").textContent=s.neoGlowVisibility+"%";$("neoGlowEnabled").checked=!!s.neoGlowEnabled;const activeScope=effectScopeForMode();
 document.querySelectorAll(".effect-control .effect-toggle[role=\\\"checkbox\\\"][data-effect]").forEach(e=>{
  if(e.closest("[data-effect-scope]")?.dataset.effectScope!==activeScope)return;
  const checked=(s.effects||[]).includes(e.dataset.effect);
@@ -741,12 +742,12 @@ function loadProject(f){
     c.getContext("2d").drawImage(im,0,0);
     // Save the currently edited workspace before replacing profiles from the project.
     if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
+    setMode("presets");
     if(p.workspaces&&typeof p.workspaces==="object")workspaceSettings=normaliseWorkspaceSettings(p.workspaces);
     workspaceSettings[target]=cloneSettings(loadedSettings);
     if(target==="shape")workspaceSettings[target].algorithm="shape";
     if(target==="script")workspaceSettings[target].algorithm="ascii";
     store("tgrmlithering-workspaces",workspaceSettings);
-    setMode("presets");
     loadImage(c,p.sourceName||"project",false);
     setMode(target);sync();render();say("Проект открыт");
    };
