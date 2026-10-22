@@ -1,0 +1,1 @@
+This marker starts the one-time portable v1.2.0 release workflow. The release package is built from main.
