@@ -361,7 +361,7 @@ async function downloadFrom(page, selector) {
       await page.waitForFunction(() => !!document.fullscreenElement, null, { timeout: 3000 }).catch(() => {});
       const enteredFullscreen = await page.evaluate(() => !!document.fullscreenElement);
       if (enteredFullscreen) {
-        assert.match(await page.locator("#fullscreenBtn").getAttribute("aria-label"), /выйти/i);
+        await page.waitForFunction(() => /выйти/i.test(document.querySelector("#fullscreenBtn")?.getAttribute("aria-label") || ""), null, { timeout: 2000 });
         await page.locator("#fullscreenBtn").click();
         await page.waitForFunction(() => !document.fullscreenElement, null, { timeout: 3000 });
       }

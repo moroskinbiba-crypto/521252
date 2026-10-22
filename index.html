@@ -1148,14 +1148,16 @@ window.addEventListener("paste",async e=>{
  try{const type=file.type||"image/png",extension=type==="image/jpeg"?"jpg":type==="image/webp"?"webp":type==="image/gif"?"gif":"png",named=new File([file],"clipboard-image."+extension,{type});loadImage(await fileCanvas(named),named.name);say("Изображение вставлено из буфера обмена")}
  catch(err){say("Не удалось вставить изображение из буфера обмена")}
 });
-$("fullscreenBtn").onclick=async()=>{
- try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else throw Error("fullscreen unavailable")}
- catch(err){say("Полный экран недоступен в этом браузере")}
-};
-document.addEventListener("fullscreenchange",()=>{
+function updateFullscreenButton(){
  const active=!!document.fullscreenElement,button=$("fullscreenBtn");
  button.textContent=active?"⛶ Выход":"⛶";button.title=active?"Выйти из полного экрана":"Редактор на весь экран";button.setAttribute("aria-label",button.title);
-});
+}
+$("fullscreenBtn").onclick=async()=>{
+ try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else throw Error("fullscreen unavailable");updateFullscreenButton()}
+ catch(err){say("Полный экран недоступен в этом браузере")}
+};
+document.addEventListener("fullscreenchange",updateFullscreenButton);
+updateFullscreenButton();
 $("reset").onclick=()=>{const algo=mode==="shape"?"shape":mode==="script"?"ascii":"bayer4";s=cloneSettings({...def,algorithm:algo,effects:[]});workspaceSettings[mode]=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Настройки текущего пространства сброшены")};
 $("randomize").onclick=()=>{let a=Object.keys(labels).filter(k=>k!=="ascii"&&k!=="shape"),p=Object.keys(pal);s.algorithm=a[Math.floor(Math.random()*a.length)];s.palette=p[Math.floor(Math.random()*p.length)];s.scale=2+Math.floor(Math.random()*15);s.contrast=80+Math.floor(Math.random()*70);s.threshold=-25+Math.floor(Math.random()*51);s.effects=["scanlines","glow","chromatic","vignette","noise"].filter(()=>Math.random()>.68);sync();render();say("Случайная комбинация готова")};
 $("toggleOriginal").onclick=()=>{original=!original;$("toggleOriginal").textContent=original?"◉ Показать результат":"◉ Показать оригинал";render()};$("zoom").onchange=zoom;
