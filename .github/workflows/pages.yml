@@ -38,7 +38,7 @@ jobs:
       - name: Install Chromium smoke-test dependencies
         run: |
           npm install --prefix /tmp/tgrmlithering-qa playwright@1.55.0
-          npx --yes playwright@1.55.0 install --with-deps chromium
+          npx --yes playwright@1.55.0 install chromium
       - name: Run browser smoke tests
         shell: bash
         run: |
