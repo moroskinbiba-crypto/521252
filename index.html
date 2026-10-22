@@ -388,6 +388,131 @@ header .brand b,.brand b{font-family:var(--ui-font)!important;font-weight:800!im
 .modal h2{font-size:15px!important}.toast{font-size:13px!important}
 @media(max-width:740px){.heading h1{font-size:17px!important;line-height:1.3!important}.topnav .navbtn{font-size:12px!important}.brand b{font-size:12px!important}.stagefoot .stats span{font-size:10px!important}}
 
+
+/* Mobile-first application shell: one workspace bar, one preview pane and one contextual settings pane. */
+.layout>.left{display:none!important}
+@media(min-width:741px){
+ .layout{grid-template-columns:minmax(0,1fr) minmax(260px,28vw)!important;overflow:hidden}
+ .layout>main{grid-column:1!important;grid-row:1;min-width:0}
+ .layout>aside.right{grid-column:2!important;grid-row:1;min-width:0}
+ body[data-mode="presets"] .layout{grid-template-columns:minmax(0,1fr) 0!important}
+ body[data-mode="presets"] .layout>main{grid-column:1!important}
+ body[data-mode="presets"] .layout>aside.right{display:none!important}
+}
+@media(min-width:741px) and (max-width:900px){
+ header{gap:6px;padding:0 7px}
+ .brand{min-width:110px}
+ .topright .local,.topright #offlineBtn{display:none}
+ .layout{grid-template-columns:minmax(0,1fr) minmax(255px,39%)!important}
+ .layout>main{padding:10px}
+ .layout>aside.right{padding:10px 8px!important}
+ .stage{height:clamp(210px,56dvh,520px);min-height:200px}
+ .stageactions{flex-wrap:wrap}
+}
+@media(max-width:740px){
+ html,body{width:100%;height:100%;height:100dvh;min-height:0;overflow:hidden!important;overscroll-behavior:none}
+ body{display:flex;flex-direction:column;min-width:0}
+ header{
+  flex:0 0 auto;width:100%;height:auto;min-height:0;
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;
+  grid-template-rows:auto auto;align-items:center;gap:5px;
+  padding:max(5px,env(safe-area-inset-top)) 8px 4px;
+  overflow:hidden
+ }
+ .brand{grid-column:1;grid-row:1;min-width:0;max-width:100%;gap:6px}
+ .brand .mark{width:27px;height:27px;flex:0 0 27px;padding:3px;gap:2px}
+ header .brand b,.brand b{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px!important;line-height:1.35!important}
+ .brand small{display:none!important}
+ #openImage{grid-column:2;grid-row:1;width:34px;height:32px;min-width:34px;padding:0;font-size:0!important;white-space:nowrap}
+ #openImage::before{content:"▣";font-family:var(--ui-font);font-size:18px;line-height:1}
+ .topright{grid-column:3;grid-row:1;margin:0;min-width:0;gap:4px;justify-content:flex-end}
+ .topright .local,.topright #offlineBtn{display:none!important}
+ .topright #topExport{height:32px;padding:4px 8px;font-size:12px!important;white-space:nowrap}
+ .topnav{
+  grid-column:1/-1;grid-row:2;order:0;display:flex;flex:initial;
+  width:100%;min-width:0;height:36px;max-height:36px;gap:4px;
+  overflow-x:auto;overflow-y:hidden;white-space:nowrap;
+  overscroll-behavior-x:contain;scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch
+ }
+ .topnav .navbtn{flex:0 0 auto;min-height:32px;padding:5px 9px;font-size:12px!important;white-space:nowrap;scroll-snap-align:start}
+ .layout{
+  display:flex!important;flex:1 1 auto;flex-direction:column;gap:0;
+  width:100%;height:auto!important;min-height:0;max-height:none;
+  overflow:hidden;align-items:stretch
+ }
+ .layout>.left{display:none!important}
+ .layout>main{
+  display:block;flex:0 0 clamp(250px,44dvh,390px);
+  height:auto;max-height:none;min-height:0;width:100%;min-width:0;
+  overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+  padding:8px 9px 10px!important;border:0;border-bottom:2px outset #fff
+ }
+ .layout>aside.right{
+  display:block;flex:1 1 0;height:auto;max-height:none;min-height:0;
+  width:100%;min-width:0;overflow-x:hidden;overflow-y:auto;
+  overscroll-behavior:contain;padding:10px 12px max(18px,env(safe-area-inset-bottom))!important;
+  border:0;border-top:2px outset #fff
+ }
+ .heading{display:flex;align-items:flex-start;gap:8px;margin:0 0 7px;min-width:0}
+ .heading>div{min-width:0}
+ .heading h1{font-size:17px!important;line-height:1.25!important;margin:2px 0 3px!important;overflow-wrap:anywhere}
+ .heading p{font-size:11px!important;line-height:1.4!important;margin:0!important}
+ .eyebrow,.badges{display:none!important}
+ .stagebar{display:flex;align-items:center;flex-wrap:wrap;gap:5px;padding:5px}
+ .stagebar .filename{flex:1 1 90px;min-width:0;max-width:none;font-size:10px!important;overflow:hidden;text-overflow:ellipsis}
+ .stageactions{display:flex;flex:0 1 auto;min-width:0;max-width:100%;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+ .stageactions .btn,.stageactions .select{font-size:11px!important;line-height:1.3!important;padding:4px 6px;max-width:78px;min-height:30px}
+ .stage{height:clamp(125px,21dvh,220px);min-height:125px;max-height:none;width:100%}
+ .canvaswrap{min-width:0;min-height:0;padding:6px}
+ .canvaswrap canvas{max-width:100%;max-height:100%;object-fit:contain}
+ .stagefoot{display:flex;align-items:flex-start;flex-wrap:wrap;gap:4px;padding-top:5px;font-size:10px!important}
+ .stats{gap:6px;flex-wrap:wrap}
+ .stats span,#dimensions{font-size:10px!important;line-height:1.4}
+ .stagefoot .textbtn{font-size:10px!important}
+ .layout>aside.right .control{padding-bottom:10px;margin-bottom:10px}
+ .layout>aside.right .field{min-width:0}
+ .layout>aside.right input[type="range"]{min-width:0;touch-action:pan-y}
+ .layout>aside.right .select,.layout>aside.right select{max-width:100%;min-width:0}
+ .effects{grid-template-columns:minmax(0,1fr)!important}
+ .effect-control{min-width:0}
+ .effect-control .effect{min-height:34px}
+ .effect-control .effect input[type="checkbox"]{width:20px;height:20px;flex-basis:20px}
+ .presetgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px}
+ .preset{min-width:0}
+ .previewart{height:clamp(82px,13dvh,120px)}
+ .presetname{overflow-wrap:anywhere;font-size:11px!important}
+ .video-stage{height:clamp(125px,19dvh,205px);min-height:125px;width:100%}
+ #videoOutput{max-width:100%;max-height:100%}
+ .video-time-row{gap:5px;flex-wrap:wrap}
+ .video-time-row span{min-width:50px;font-size:12px!important}
+ .video-hint{font-size:11px!important;line-height:1.4}
+ body[data-mode="presets"] .layout>main{flex:1 1 0;height:auto;max-height:none;min-height:0;border-bottom:0}
+ body[data-mode="presets"] .layout>aside.right{display:none!important}
+ body[data-mode="presets"] #presetsView{width:100%;min-width:0}
+ body[data-mode="presets"] .presetgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ body[data-mode="batch"] .layout>main,body[data-mode="video"] .layout>main{flex:1 1 0;height:auto;max-height:none;min-height:0}
+}
+@media(max-width:380px){
+ header{grid-template-columns:minmax(0,1fr) 32px auto;gap:4px;padding-left:6px;padding-right:6px}
+ .brand{gap:4px}.brand .mark{width:24px;height:24px;flex-basis:24px}
+ header .brand b,.brand b{font-size:11px!important}
+ .topnav .navbtn{padding:5px 7px;font-size:11px!important}
+ .topright #topExport{padding:4px 6px;font-size:11px!important}
+ .layout>main{flex-basis:clamp(238px,43dvh,340px)}
+ .stageactions .btn,.stageactions .select{max-width:68px;padding:4px}
+ .presetgrid{gap:5px}
+}
+@media(max-height:520px) and (max-width:740px){
+ header{gap:3px}
+ .topnav{height:32px;max-height:32px}
+ .topnav .navbtn{min-height:28px;padding:4px 8px}
+ .layout>main{flex-basis:46dvh}
+ .stage{height:clamp(110px,20dvh,170px);min-height:110px}
+ .video-stage{height:clamp(110px,19dvh,155px);min-height:110px}
+ .heading h1{font-size:15px!important}
+}
+
 </style>
 </head>
 <body data-mode="editor">

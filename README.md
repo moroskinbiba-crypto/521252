@@ -22,6 +22,11 @@ No installer, account, or backend is required. Image processing takes place in t
 - Script Slayer with 48 character families, live glyph preview, editable glyphs, depth/cell sizing, offset, palette/source/mono colour, transparent backgrounds, TXT export and animation.
 - User presets, project JSON, batch processing, PNG/JPEG, SVG pixel-grid export, WebM motion export, standalone HTML and PWA/offline cache.
 
+
+## Mobile and tablet support
+
+The web editor adapts to phones and tablets. On narrow screens, the workspace switcher becomes a horizontally scrollable touch bar; the preview and contextual controls use separate vertical scroll panes. The desktop layout keeps the preview and settings side by side. Use the latest version of a mobile browser for the best Canvas and WebM support.
+
 ## Run from source
 
 Open `index.html`, or run `python -m http.server 8080` in the repository folder and open `http://localhost:8080`.

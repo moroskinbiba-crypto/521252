@@ -142,16 +142,49 @@ async function downloadFrom(page, selector) {
     assert.equal(tablet.leftCount, 0, "duplicate side workspace navigation must not exist");
     assert.equal(tablet.topNavCount, 5, "all alternate workspaces must be available in the top navigation");
     assert.ok(tablet.inspectorWidth > 200 && tablet.canvasWidth > 0, "tablet layout should show controls and preview");
+    for (const viewport of [{ width: 390, height: 844 }, { width: 360, height: 740 }, { width: 320, height: 640 }, { width: 844, height: 390 }]) {
+      await page.setViewportSize(viewport);
+      const mobile = await page.evaluate(() => {
+        const rect = selector => document.querySelector(selector)?.getBoundingClientRect();
+        const header = rect("header"), layout = rect(".layout"), canvas = rect("#output");
+        const main = rect(".layout > main"), settings = rect("#inspector"), nav = rect(".topnav");
+        return {
+          width: innerWidth, height: innerHeight, pageX: scrollX, pageY: scrollY,
+          documentWidth: document.documentElement.scrollWidth,
+          header: header && { x: header.x, right: header.right, bottom: header.bottom, height: header.height },
+          layout: layout && { x: layout.x, right: layout.right, top: layout.top, bottom: layout.bottom, height: layout.height },
+          canvas: canvas && { x: canvas.x, right: canvas.right, width: canvas.width, height: canvas.height },
+          main: main && { x: main.x, right: main.right, height: main.height, bottom: main.bottom },
+          settings: settings && { x: settings.x, right: settings.right, height: settings.height, top: settings.top },
+          nav: nav && { x: nav.x, right: nav.right, height: nav.height, scrollWidth: nav.scrollWidth, clientWidth: nav.clientWidth },
+          leftDisplay: getComputedStyle(document.querySelector(".layout > .left")).display,
+          horizontalPageOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+          workspaceNavCount: document.querySelectorAll(".topnav [data-mode]").length
+        };
+      });
+      assert.equal(mobile.pageX, 0, "page must not scroll horizontally at " + viewport.width + "x" + viewport.height);
+      assert.equal(mobile.pageY, 0, "page must not scroll vertically at " + viewport.width + "x" + viewport.height);
+      assert.equal(mobile.horizontalPageOverflow, false, "mobile viewport must not have horizontal page overflow: " + JSON.stringify(mobile));
+      assert.equal(mobile.leftDisplay, "none", "the duplicate sidebar workspace navigation must stay hidden");
+      assert.equal(mobile.workspaceNavCount, 5, "all workspaces must remain reachable from the touch navigation");
+      assert.ok(mobile.header.height < 130 && mobile.header.height > 60, "mobile header should fit without consuming the screen: " + JSON.stringify(mobile));
+      assert.ok(Math.abs(mobile.layout.top - mobile.header.bottom) < 2, "work area should start directly below the header");
+      assert.ok(mobile.canvas.width > 0 && mobile.canvas.height > 0, "preview should remain visible at " + viewport.width + "x" + viewport.height);
+      assert.ok(mobile.main.height > 100 && mobile.settings.height > 100, "preview and settings panes should both be usable");
+      assert.ok(Math.abs(mobile.main.x - mobile.settings.x) < 2, "preview and settings should be stacked on mobile");
+      assert.ok(Math.abs(mobile.main.right - mobile.settings.right) < 2, "both mobile panes should use the full available width");
+    }
     await page.setViewportSize({ width: 390, height: 844 });
-    const mobile = await page.evaluate(() => ({
-      pageY: window.scrollY,
-      canvas: document.querySelector("#output").getBoundingClientRect().toJSON(),
-      mainHeight: document.querySelector(".layout > main").getBoundingClientRect().height,
-      settingsHeight: document.querySelector("#inspector").getBoundingClientRect().height
-    }));
-    assert.equal(mobile.pageY, 0);
-    assert.ok(mobile.canvas.width > 0 && mobile.canvas.height > 0, "mobile preview should remain visible");
-    assert.ok(mobile.mainHeight > 100 && mobile.settingsHeight > 100, "mobile split panes should both be usable");
+    await page.locator('.topnav [data-mode="script"]').click();
+    assert.equal(await page.locator("#asciiControl").isVisible(), true, "Script Slayer must remain accessible from mobile navigation");
+    await page.locator(".topnav").evaluate(el => { el.scrollLeft = el.scrollWidth; });
+    assert.ok(await page.locator('.topnav [data-mode="video"]').isVisible(), "Video Lab navigation must stay reachable by horizontal nav scrolling");
+    await page.locator(".topnav [data-mode=\"video\"]").click();
+    assert.equal(await page.locator("#videoView").isVisible(), true, "Video Lab should open on mobile");
+    await page.locator(".topnav [data-mode=\"presets\"]").click();
+    assert.ok(await page.locator("#presetGrid .preset").first().isVisible(), "presets should render in the mobile layout");
+    await page.locator("#homeLogo").click();
+    assert.equal(await page.locator("#editorView").isVisible(), true, "brand should return to Editor on mobile");
 
     // Upload a deterministic fixture and check real download contents.
     await page.setViewportSize({ width: 1440, height: 900 });
