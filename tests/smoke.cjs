@@ -142,7 +142,7 @@ async function downloadFrom(page, selector) {
     assert.equal(tablet.leftCount, 0, "duplicate side workspace navigation must not exist");
     assert.equal(tablet.topNavCount, 5, "all alternate workspaces must be available in the top navigation");
     assert.ok(tablet.inspectorWidth > 200 && tablet.canvasWidth > 0, "tablet layout should show controls and preview");
-    for (const viewport of [{ width: 390, height: 844 }, { width: 360, height: 740 }, { width: 320, height: 640 }, { width: 844, height: 390 }]) {
+    for (const viewport of [{ width: 390, height: 844 }, { width: 360, height: 740 }, { width: 320, height: 640 }, { width: 700, height: 390 }, { width: 844, height: 390 }]) {
       await page.setViewportSize(viewport);
       const mobile = await page.evaluate(() => {
         const rect = selector => document.querySelector(selector)?.getBoundingClientRect();
@@ -157,7 +157,7 @@ async function downloadFrom(page, selector) {
           main: main && { x: main.x, right: main.right, height: main.height, bottom: main.bottom },
           settings: settings && { x: settings.x, right: settings.right, height: settings.height, top: settings.top },
           nav: nav && { x: nav.x, right: nav.right, height: nav.height, scrollWidth: nav.scrollWidth, clientWidth: nav.clientWidth },
-          leftDisplay: getComputedStyle(document.querySelector(".layout > .left")).display,
+          leftDisplay: (() => { const left = document.querySelector(".layout > .left"); return left ? getComputedStyle(left).display : "none"; })(),
           horizontalPageOverflow: document.documentElement.scrollWidth > innerWidth + 1,
           workspaceNavCount: document.querySelectorAll(".topnav [data-mode]").length
         };
@@ -167,12 +167,20 @@ async function downloadFrom(page, selector) {
       assert.equal(mobile.horizontalPageOverflow, false, "mobile viewport must not have horizontal page overflow: " + JSON.stringify(mobile));
       assert.equal(mobile.leftDisplay, "none", "the duplicate sidebar workspace navigation must stay hidden");
       assert.equal(mobile.workspaceNavCount, 5, "all workspaces must remain reachable from the touch navigation");
-      assert.ok(mobile.header.height < 130 && mobile.header.height > 60, "mobile header should fit without consuming the screen: " + JSON.stringify(mobile));
-      assert.ok(Math.abs(mobile.layout.top - mobile.header.bottom) < 2, "work area should start directly below the header");
+      assert.ok(mobile.layout.height > 180, "work area must have usable height: " + JSON.stringify(mobile));
       assert.ok(mobile.canvas.width > 0 && mobile.canvas.height > 0, "preview should remain visible at " + viewport.width + "x" + viewport.height);
       assert.ok(mobile.main.height > 100 && mobile.settings.height > 100, "preview and settings panes should both be usable");
-      assert.ok(Math.abs(mobile.main.x - mobile.settings.x) < 2, "preview and settings should be stacked on mobile");
-      assert.ok(Math.abs(mobile.main.right - mobile.settings.right) < 2, "both mobile panes should use the full available width");
+      if (viewport.width <= 740) {
+        assert.ok(mobile.header.height < 130 && mobile.header.height > 60, "phone header should fit without consuming the screen: " + JSON.stringify(mobile));
+        assert.ok(Math.abs(mobile.layout.top - mobile.header.bottom) < 2, "work area should start directly below the phone header");
+        assert.ok(Math.abs(mobile.main.x - mobile.settings.x) < 2, "preview and settings should be stacked on narrow screens");
+        assert.ok(Math.abs(mobile.main.right - mobile.settings.right) < 2, "both narrow-screen panes should use the full width");
+        assert.ok(mobile.main.bottom <= mobile.settings.top + 3, "mobile panes should not overlap");
+      } else {
+        assert.ok(mobile.header.height >= 50 && mobile.header.height < 80, "tablet landscape should use a compact single-row header");
+        assert.ok(Math.abs(mobile.main.y - mobile.settings.top) < 3, "tablet landscape should keep preview and settings side by side");
+        assert.ok(mobile.main.right <= mobile.settings.x + 3, "tablet panes should not overlap");
+      }
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('.topnav [data-mode="script"]').click();
