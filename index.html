@@ -542,7 +542,7 @@ function setMode(m){
  $("shapeControl").classList.toggle("hidden",m!=="shape");
  $("asciiControl").classList.toggle("hidden",m!=="script");
  $("exportControl").classList.toggle("hidden",m==="video");
- $("inspectorTitle").textContent=m==="script"?"Script Slayer · символы и Neo Glow":m==="shape"?"Shape Lab · форма и распределение":m==="video"?"Видео · алгоритм и эффекты":"Эффекты и настройки";
+ $("inspectorTitle").textContent=m==="script"?"Script Slayer · символы и Neo Glow":m==="shape"?"Shape Lab · форма и распределение":m==="video"?"Видео · алгоритм и эффекты":"Эффекты и настройки";$("randomize").classList.toggle("hidden",m!=="editor");
  if(m==="shape"){s.algorithm="shape";$("algorithm").value="shape";$("pageTitle").innerHTML='Shape Lab<span style="color:var(--acid)">.</span>';$("pageSubtitle").textContent="Настройте формы, распределение и тональные полосы.";sync();render()}
  else if(m==="script"){s.algorithm="ascii";$("algorithm").value="ascii";$("pageTitle").innerHTML='Script Slayer<span style="color:var(--acid)">.</span>';$("pageSubtitle").textContent="Отдельный символьный движок с собственными настройками и Neo Glow.";sync();render()}
  else if(m==="editor"){if(["shape","ascii"].includes(s.algorithm))s.algorithm="bayer4";$("algorithm").value=s.algorithm;$("pageTitle").innerHTML='Dither workstation<span style="color:var(--acid)">.</span>';$("pageSubtitle").textContent="Загрузите изображение, выберите стиль и управляйте результатом.";sync();render()}
