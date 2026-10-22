@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#11130f">
+<meta name="theme-color" content="#245edb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <meta name="description" content="TGRMLithering — локальная мастерская дизеринга, пиксель-арта, полутонов, глитча и символьной графики.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
@@ -92,6 +95,189 @@ body{height:100vh;height:100dvh;overflow:hidden}
   .presetgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
   .previewart{height:90px}
 }
+
+/* Windows XP Luna + crisp pixel-graphics theme */
+:root{
+ color-scheme:light;
+ --bg:#3a6ea5;--panel:#ece9d8;--panel2:#f7f5ed;--line:#7f9db9;
+ --text:#202020;--muted:#526171;--acid:#0754c9;--purple:#6b64b5;
+ --xp-blue:#0054e3;--xp-blue-dark:#003c9d;--xp-blue-light:#78b4ff;
+ --xp-face:#ece9d8;--xp-shadow:#7a7a7a;--xp-highlight:#ffffff;
+}
+html,body{background:#3a6ea5!important;color:#202020!important;font-family:"VT323","Lucida Console","Courier New",monospace!important;font-size:18px;line-height:1.12}
+body{background-color:#3a6ea5!important;background-image:linear-gradient(135deg,#4f87bb 0%,#2e5f95 55%,#245185 100%)!important}
+button,input,select,textarea{font-family:"VT323","Lucida Console","Courier New",monospace!important;font-size:18px!important;letter-spacing:0!important}
+a{color:#003c9d}
+header{
+ background:linear-gradient(180deg,#3c8cf5 0%,#1767e9 12%,#0054e3 50%,#0050d5 51%,#0344ad 100%)!important;
+ color:#fff;border:2px solid #8bbdff;border-bottom-color:#003b95;
+ box-shadow:inset 1px 1px #c2ddff,inset -1px -1px #002c79;
+ backdrop-filter:none;z-index:10
+}
+.brand{min-width:165px;gap:8px;color:#fff;text-decoration:none}
+.brand b{font-family:"Press Start 2P","Lucida Console",monospace!important;font-size:10px;line-height:1.8;letter-spacing:0;color:#fff;text-shadow:1px 1px #003b95}
+.brand small{display:none}
+.mark{border:2px outset #c4ddff;border-radius:0;padding:3px;gap:2px;background:#0d4bb5}
+.mark i{border-radius:0;background:#fff}
+.topnav{gap:3px}
+.navbtn{color:#e0efff;border:1px solid transparent;border-radius:0;padding:7px 9px;font-size:18px!important;text-shadow:1px 1px #003b95}
+.navbtn:hover,.navbtn.active{background:linear-gradient(#6db1ff,#1764d9);color:#fff;border:1px solid #a6ceff;box-shadow:inset 1px 1px #d2e6ff,inset -1px -1px #003b95}
+.topright .local{font-size:16px;color:#fff}
+.live{background:#9cff73;box-shadow:none}
+.btn{
+ border:2px outset #fff;border-radius:0;
+ background:linear-gradient(#fff,#e2dfd3 48%,#c9c5b8);
+ color:#202020;font-size:18px!important;font-weight:400;padding:5px 10px;
+ box-shadow:none;text-shadow:none
+}
+.btn:hover{border-color:#fff;background:linear-gradient(#fff,#dbeaff 50%,#b8d5ff);color:#001e62}
+.btn:active,.btn.primary:active{border-style:inset;transform:translate(1px,1px)}
+.btn.primary{background:linear-gradient(#b8d7ff,#75afff 48%,#2a72de);border:2px outset #d9ecff;color:#081c48;font-weight:700}
+.btn.primary:hover{background:linear-gradient(#d8eaff,#9fcaff 48%,#4d8df1)}
+.btn.ghost{background:var(--xp-face)}
+.btn.sm{padding:3px 7px}
+.layout{background:transparent;gap:0}
+.layout>.left,.layout>main,.layout>aside.right{
+ border:2px outset #fff;background:#ece9d8!important;color:#202020;
+ box-shadow:inset 1px 1px #fdfcf6,inset -1px -1px #c3c0b5
+}
+.layout>.left{border-right:0}
+.layout>main{border-left:0;border-right:0;background:#f6f4eb!important}
+.layout>aside.right{border-left:0}
+.sectionlabel,.controltitle,.inspectorhead strong,.card h2,.custom-colors-head{
+ color:#003c9d;font-family:"Press Start 2P","Lucida Console",monospace!important;
+ font-size:8px!important;letter-spacing:0;line-height:1.8
+}
+.menu{gap:2px}
+.menu button{border:1px solid transparent;border-radius:0;background:transparent;color:#202020;padding:6px 7px;font-size:18px!important}
+.menu button:hover{background:#dcecff;border-color:#7aa7e2;color:#001e62}
+.menu button.active{background:linear-gradient(#d9eaff,#a9ceff);color:#002e7d;border:1px solid #316ac5;box-shadow:inset 1px 1px #fff}
+.menu button .mi{font-family:"VT323",monospace;font-size:23px}
+.menu button .tag{font-size:14px!important;color:#31598f}
+.privacy{border:2px inset #fff;border-radius:0;background:#e1e8f4;padding:9px}
+.privacy strong{color:#003c9d;font-size:16px}
+.privacy p{font-size:16px;color:#36495d}
+.privacy span{font-size:14px;color:#003c9d}
+.heading h1,.card h2{
+ font-family:"Press Start 2P","Lucida Console",monospace!important;color:#003c9d;
+ font-size:12px!important;line-height:2;margin:4px 0
+}
+.heading p,.card p{font-size:18px!important;color:#34465a}
+.stagebar{
+ background:linear-gradient(180deg,#3c8cf5,#0054e3 54%,#0347b4);
+ border:2px outset #8bbdff;border-bottom:0;border-radius:0;
+ color:#fff;padding:6px 9px
+}
+.stagebar .filename{font-size:18px;color:#fff;text-shadow:1px 1px #003b95}
+.stagebar .filename:before{background:#9cff73;border-radius:0}
+.stage{border:2px inset #fff;border-radius:0;background-color:#c8c8c8;background-image:linear-gradient(45deg,#bcbcbc 25%,transparent 25%),linear-gradient(-45deg,#bcbcbc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#bcbcbc 75%),linear-gradient(-45deg,transparent 75%,#bcbcbc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}
+.canvaswrap canvas{image-rendering:pixelated;box-shadow:2px 2px 0 #555,4px 4px 0 #eee;border:2px solid #fff}
+.stagefoot{color:#202020;font-size:16px}
+.stats b{color:#003c9d}
+.textbtn,.linkbtn{color:#003c9d;font-size:16px!important}
+.textbtn:hover,.linkbtn:hover{color:#0054e3;text-decoration:underline}
+.pill{border:1px solid #7f9db9;border-radius:0;color:#34465a;font-size:14px}
+.pill.green{background:#d5e7ff;color:#003c9d;border-color:#6495d1}
+.control{border-bottom:1px solid #c2c0b5}
+.controltitle{margin-bottom:7px}
+.controltitle small{color:#5b6573;font-family:"VT323",monospace!important;font-size:15px!important}
+.field label,.switchrow{color:#202020;font-size:18px!important}
+.val{color:#003c9d;font-size:16px!important}
+.select,.select.full{border:2px inset #fff;border-radius:0;background:#fff;color:#202020;max-width:100%;padding:4px 6px}
+.range{accent-color:#0754c9;height:15px;cursor:pointer}
+.range::-webkit-slider-runnable-track{height:5px;background:#b7c5d6;border:1px solid #8399ae}
+.range::-webkit-slider-thumb{margin-top:-6px}
+.switch{appearance:none!important;border:2px outset #fff;border-radius:0;background:#fff;width:32px;height:20px;flex:0 0 32px}
+.switch:before{content:"";width:10px;height:10px;top:3px;left:3px;border:1px solid #555;border-radius:0;background:#d0d0d0}
+.switch:checked{background:#6ea9f7}
+.switch:checked:before{left:15px;background:#fff}
+.palettes{gap:5px}
+.palette{border:2px outset #fff;border-radius:0;background:#ece9d8;padding:3px}
+.palette:hover{background:#dcecff;border-color:#8ab5ed}
+.palette.active{background:#c7ddff;border:2px inset #fff;box-shadow:none}
+.swatches{border:1px solid #888;border-radius:0}
+.pname{font-family:"VT323",monospace!important;font-size:14px!important;color:#202020}
+.effect-control{
+ position:relative;display:block;border:2px outset #fff;border-radius:0;
+ background:#f6f4eb;padding:5px 6px;isolation:isolate;overflow:visible
+}
+.effect-control.is-active{background:#e3edff;border-color:#7ca5df}
+.effect-control .effect{
+ position:relative;z-index:2;display:flex;align-items:center;gap:7px;
+ width:100%;min-height:27px;border:0;border-radius:0;padding:2px 1px 5px;
+ color:#202020;cursor:pointer;user-select:none;pointer-events:auto;font-size:18px!important
+}
+.effect-control .effect input[type="checkbox"]{
+ position:relative;z-index:3;display:inline-block;flex:0 0 16px;
+ width:16px;height:16px;margin:0 3px 0 0;padding:0;
+ appearance:auto!important;opacity:1!important;visibility:visible!important;
+ pointer-events:auto!important;accent-color:#0754c9;cursor:pointer
+}
+.effect-control .effect small{margin-left:auto;color:#4c6581;font-size:14px!important}
+.effect-control .effect-order-actions{position:relative;z-index:4;display:inline-flex;margin:0 0 5px auto}
+.effect-order-actions button{background:linear-gradient(#fff,#d3d0c7);border:2px outset #fff;border-radius:0;color:#003c9d;padding:1px 6px;font-size:16px!important;cursor:pointer}
+.effect-order-actions button:active{border-style:inset}
+.effect-intensity{position:relative;z-index:1;display:flex;align-items:center;gap:7px}
+.effect-intensity input[type="range"]{pointer-events:auto;cursor:pointer}
+.effect-intensity output{color:#003c9d;font-size:16px!important}
+.custom-colors,.ascii-neoglow,.shape-band,.card,.drop,.fileitem,.ascii{border:2px outset #fff;border-radius:0;background:#f6f4eb;color:#202020}
+.custom-colors-head,.shape-band>b{color:#003c9d}
+.color-pick{font-size:15px!important;color:#27384b}
+.color-pick input,.shape-band-row input[type=color],.color-select-row input[type=color]{border:2px inset #fff;border-radius:0;background:#fff;padding:1px}
+.color-grid{gap:5px}
+.effects{gap:5px}
+.effect{color:#202020}
+.effect-intensity output{font-size:16px!important}
+.presetgrid{gap:8px}
+.preset{border:2px outset #fff;border-radius:0;background:#ece9d8;color:#202020}
+.preset:hover{border-color:#8bbcff;background:#dceaff;transform:none}
+.previewart{border-bottom:2px solid #a6a397;background:#c8c8c8}
+.presetinfo{padding:8px}
+.ptag{color:#003c9d;font-size:14px!important}
+.presetname{font-family:"Press Start 2P","Lucida Console",monospace!important;font-size:8px;line-height:2}
+.presetdesc{font-size:16px!important;color:#34465a}
+.drop{background:#e4efff;border:2px dashed #4e80bf}
+.fileicon{border:1px solid #7f9db9;border-radius:0;background:#d8e6fa}
+.filetext b{font-size:16px!important;color:#003c9d}
+.filetext small{font-size:15px!important;color:#526171}
+.progress{height:7px;border:1px inset #fff;border-radius:0;background:#c8c8c8}
+.progress i{background:linear-gradient(#66a9ff,#0754c9);border-right:1px solid #003c9d}
+.ascii{background:#fff}
+.ascii summary{font-size:18px;color:#003c9d}
+.ascii pre{font:16px/1.1 "VT323","Lucida Console",monospace!important;color:#003c9d}
+.toast{border:2px outset #fff;border-radius:0;background:#ece9d8;color:#202020;font-size:18px;box-shadow:2px 2px 0 #333}
+.modalbg{background:#15396699}
+.modal{border:2px outset #fff;border-radius:0;background:#ece9d8;box-shadow:3px 3px 0 #1d3a5d}
+.modal h2{font-family:"Press Start 2P","Lucida Console",monospace!important;color:#003c9d;font-size:10px;line-height:2}
+.modal p{color:#34465a;font-size:18px!important}
+.modal input{border:2px inset #fff;border-radius:0;background:#fff;color:#202020;font-size:18px!important}
+.hidden{display:none!important}
+@media(max-width:1140px){
+ .layout{grid-template-columns:160px minmax(260px,1fr)}
+ .layout>.left{border-right:2px outset #fff}
+ .layout>main{border-left:0;border-right:0}
+ .layout>aside.right{border-left:2px outset #fff}
+}
+@media(max-width:740px){
+ header{padding:5px;gap:5px}
+ .brand{min-width:0;gap:5px}
+ .brand b{font-size:7px!important;line-height:1.4}
+ .topnav .navbtn{padding:5px;font-size:15px!important}
+ .topright{gap:4px}
+ .topright .btn{padding:4px;font-size:15px!important}
+ .layout>.left,.layout>main,.layout>aside.right{border-left:0;border-right:0}
+ .layout>.left{border-bottom:2px outset #fff}
+ .stage{min-height:135px}
+ .stagefoot{font-size:14px}
+ .stats{gap:4px}
+ .stats span{font-size:13px!important}
+ .stageactions{gap:3px}
+ .stageactions .btn,.stageactions .select{font-size:14px!important;padding:3px 4px}
+ .heading h1{font-size:8px!important}
+ .heading p{font-size:16px!important}
+ .presetname{font-size:7px!important}
+}
+
 </style>
 </head>
 <body data-mode="editor">
@@ -147,16 +333,16 @@ body{height:100vh;height:100dvh;overflow:hidden}
 </div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px"><button class="btn sm" id="useCustomPalette">Моя палитра</button><button class="btn sm" id="extractPalette">Извлечь из фото</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px"><button class="btn sm" id="exportPalette">↓ Палитра JSON</button><button class="btn sm" id="importPalette">↑ Палитра JSON</button></div></div>
 </section>
 <section class="control"><div class="controltitle"><span>04 / Эффекты</span><small>INTENSITY</small></div><div class="effects">
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="scanlines"> CRT scanlines <small>RETRO</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="scanlines" aria-label="scanlines intensity"><output id="strength-scanlines">50%</output></div></div>
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="glow"> Soft glow <small>LIGHT</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="glow" aria-label="glow intensity"><output id="strength-glow">50%</output></div></div>
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="chromatic"> Chromatic shift <small>RGB</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="chromatic" aria-label="chromatic intensity"><output id="strength-chromatic">50%</output></div></div>
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="vignette"> Vignette <small>OPTIC</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="vignette" aria-label="vignette intensity"><output id="strength-vignette">50%</output></div></div>
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="noise"> Film grain <small>TEXTURE</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="noise" aria-label="noise intensity"><output id="strength-noise">50%</output></div></div>
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="epsilon"> Epsilon Glow <small>HALO</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="epsilon" aria-label="epsilon intensity"><output id="strength-epsilon">50%</output></div></div>
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="jpeg"> JPEG Glitch <small>BLOCKS</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="jpeg" aria-label="jpeg intensity"><output id="strength-jpeg">50%</output></div></div>
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="lick"> Lick · painterly <small>TEXTURE</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="lick" aria-label="lick intensity"><output id="strength-lick">50%</output></div></div>
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="stress"> Stress Relief <small>WARP</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="stress" aria-label="stress intensity"><output id="strength-stress">50%</output></div></div>
-<div class="effect-control"><label class="effect"><input type="checkbox" data-effect="modlines"> Modulation Lines <small>LINES</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="modlines" aria-label="modulation intensity"><output id="strength-modlines">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-scanlines" data-effect="scanlines"> CRT scanlines <small>RETRO</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="scanlines" aria-label="scanlines intensity"><output id="strength-scanlines">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-glow" data-effect="glow"> Soft glow <small>LIGHT</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="glow" aria-label="glow intensity"><output id="strength-glow">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-chromatic" data-effect="chromatic"> Chromatic shift <small>RGB</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="chromatic" aria-label="chromatic intensity"><output id="strength-chromatic">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-vignette" data-effect="vignette"> Vignette <small>OPTIC</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="vignette" aria-label="vignette intensity"><output id="strength-vignette">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-noise" data-effect="noise"> Film grain <small>TEXTURE</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="noise" aria-label="noise intensity"><output id="strength-noise">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-epsilon" data-effect="epsilon"> Epsilon Glow <small>HALO</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="epsilon" aria-label="epsilon intensity"><output id="strength-epsilon">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-jpeg" data-effect="jpeg"> JPEG Glitch <small>BLOCKS</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="jpeg" aria-label="jpeg intensity"><output id="strength-jpeg">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-lick" data-effect="lick"> Lick · painterly <small>TEXTURE</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="lick" aria-label="lick intensity"><output id="strength-lick">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-stress" data-effect="stress"> Stress Relief <small>WARP</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="stress" aria-label="stress intensity"><output id="strength-stress">50%</output></div></div>
+<div class="effect-control"><label class="effect"><input type="checkbox" id="effect-modlines" data-effect="modlines"> Modulation Lines <small>LINES</small></label><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="modlines" aria-label="modulation intensity"><output id="strength-modlines">50%</output></div></div>
 </div></section><section class="control" id="shapeControl"><div class="controltitle"><span>05 / Shape Lab</span><small>CUSTOM FORM</small></div>
 <div class="field"><div class="fieldtop"><label for="shape">Форма элемента</label></div><select class="select full" id="shape"><option value="circle">Круги</option><option value="square">Квадраты</option><option value="diamond">Ромбы</option><option value="triangle">Треугольники</option><option value="line">Линии</option><option value="cross">Кресты</option></select></div>
 <div class="field"><div class="fieldtop"><label for="jitter">Вариативность</label><output class="val" id="jitterV">20%</output></div><input class="range" id="jitter" type="range" min="0" max="80" value="20"></div>
@@ -233,7 +419,7 @@ const glitchAlgorithms=["glitch_jpeg","glitch_chromatic","glitch_scanlines","gli
 const specialAlgorithms=["special_cmyk","special_threshold","special_posterize","special_edges","special_emboss","special_contour","special_mosaic","special_stipple","special_thermal","special_xray","special_relief","special_ditherMask","special_grainMap","special_invertBands","special_woodcut","special_outline"];
 function downsample(image,cfg){let step=Math.max(cfg.scale,Math.ceil(Math.sqrt(image.width*image.height/480000))),w=Math.max(1,Math.ceil(image.width/step)),h=Math.max(1,Math.ceil(image.height/step)),c=document.createElement("canvas");c.width=w;c.height=h;let x=c.getContext("2d",{willReadFrequently:true});if(cfg.blur)x.filter="blur("+cfg.blur+"px)";x.drawImage(image,0,0,w,h);x.filter="none";let im=x.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4)for(let j=0;j<3;j++){let v=clamp((d[i+j]-128)*cfg.contrast/100+128+cfg.brightness+Number(cfg.threshold||0)*1.25,0,255)/255;v=Math.pow(v,Math.pow(2,(50-clamp(Number(cfg.midtones??50),0,100))/50));const hi=(Number(cfg.highlights??50)-50)/50;v=clamp(v+hi*Math.max(0,v-.5)*Math.max(0,v-.5)*1.4,0,1);if(cfg.invert)v=1-v;d[i+j]=Math.round(v*255)}return {w,h,step,im,d}}
 function applyEffects(c,cfg,step){const order=[...(cfg.effectOrder||Object.keys(cfg.effectStrength||{}))];for(const k of Object.keys(cfg.effectStrength||{}))if(!order.includes(k))order.push(k);for(const key of order){if(!(cfg.effects||[]).includes(key))continue;const a=clamp(Number((cfg.effectStrength||{})[key]??50),0,100)/100;if(a)applyEffectLayer(c,key,a,step)}}
-function applyEffectLayer(c,key,a,step){const x=c.getContext("2d"),w=c.width,h=c.height;if(key==="chromatic"){const im=x.getImageData(0,0,w,h),d=im.data,s=new Uint8ClampedArray(d),sh=Math.max(1,Math.round(step*a));for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){let i=(y*w+xx)*4,l=(y*w+Math.max(0,xx-sh))*4,r=(y*w+Math.min(w-1,xx+sh))*4;d[i]=s[l];d[i+2]=s[r+2]}x.putImageData(im,0,0);return}if(key==="glow"||key==="epsilon"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);if(key==="epsilon"){const q=t.getContext("2d",{willReadFrequently:true}),im=q.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){const l=(d[i]*.2126+d[i+1]*.7152+d[i+2]*.0722)/255;d[i+3]=Math.round(d[i+3]*clamp((l-.18)*3.2,0,1))}q.putImageData(im,0,0)}x.save();x.globalCompositeOperation="screen";x.globalAlpha=(key==="epsilon"?.7:.5)*a;x.filter="blur("+Math.max(1,step*(key==="epsilon"?2:1.2)*a)+"px)";x.drawImage(t,0,0);x.restore();x.filter="none";return}if(key==="scanlines"||key==="modlines"){x.save();x.globalAlpha=(key==="scanlines"?.34:.45)*a;x.fillStyle="#030403";const gap=Math.max(3,Math.round(step*(key==="modlines"?.65:.9)));for(let y=0;y<h;y+=gap)x.fillRect(0,y+(key==="modlines"?Math.sin(y/Math.max(4,step*3))*step*a:0),w,Math.max(1,gap*.2));x.restore();return}if(key==="vignette"){const g=x.createRadialGradient(w/2,h/2,Math.min(w,h)*.18,w/2,h/2,Math.max(w,h)*.75);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,"+(.9*a)+")");x.fillStyle=g;x.fillRect(0,0,w,h);return}if(key==="noise"){const im=x.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){const n=(Math.random()-.5)*34*a;for(let k=0;k<3;k++)d[i+k]=clamp(d[i+k]+n,0,255)}x.putImageData(im,0,0);return}if(key==="jpeg"){const t=document.createElement("canvas"),q=Math.max(2,Math.round(step*(1+a*2)));t.width=Math.max(1,w/q|0);t.height=Math.max(1,h/q|0);t.getContext("2d").drawImage(c,0,0,t.width,t.height);x.save();x.globalAlpha=.8*a;x.imageSmoothingEnabled=false;x.drawImage(t,0,0,w,h);x.restore();return}if(key==="stress"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);x.clearRect(0,0,w,h);const row=Math.max(2,Math.round(step*.7));for(let y=0;y<h;y+=row){const sh=Math.round(Math.sin(y*.13)*step*3*a);x.drawImage(t,0,y,w,Math.min(row,h-y),sh,y,w,Math.min(row,h-y))}return}if(key==="lick"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);const q=t.getContext("2d",{willReadFrequently:true});x.save();x.globalAlpha=.5*a;x.lineCap="round";const stride=Math.max(4,Math.round(step*1.5));for(let y=0;y<h;y+=stride)for(let xx=0;xx<w;xx+=stride){const d=q.getImageData(xx,y,1,1).data;x.strokeStyle="rgb("+d[0]+","+d[1]+","+d[2]+")";x.lineWidth=Math.max(1,stride*.22);x.beginPath();x.moveTo(xx,y);x.lineTo(xx+stride*.7,y+stride*.25);x.stroke()}x.restore();return}}
+function applyEffectLayer(c,key,a,step){const x=c.getContext("2d"),w=c.width,h=c.height;if(key==="chromatic"){const im=x.getImageData(0,0,w,h),d=im.data,s=new Uint8ClampedArray(d),sh=Math.max(1,Math.round(step*a));for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){let i=(y*w+xx)*4,l=(y*w+Math.max(0,xx-sh))*4,r=(y*w+Math.min(w-1,xx+sh))*4;d[i]=s[l];d[i+2]=s[r+2]}x.putImageData(im,0,0);return}if(key==="glow"||key==="epsilon"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);if(key==="epsilon"){const q=t.getContext("2d",{willReadFrequently:true}),im=q.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){const l=(d[i]*.2126+d[i+1]*.7152+d[i+2]*.0722)/255;d[i+3]=Math.round(d[i+3]*clamp((l-.18)*3.2,0,1))}q.putImageData(im,0,0)}x.save();x.globalCompositeOperation="screen";x.globalAlpha=(key==="epsilon"?.7:.5)*a;x.filter="blur("+Math.max(1,step*(key==="epsilon"?2:1.2)*a)+"px)";x.drawImage(t,0,0);x.restore();x.filter="none";return}if(key==="scanlines"||key==="modlines"){x.save();x.globalAlpha=(key==="scanlines"?.34:.45)*a;x.fillStyle="#030403";const gap=Math.max(3,Math.round(step*(key==="modlines"?.65:.9)));for(let y=0;y<h;y+=gap)x.fillRect(0,y+(key==="modlines"?Math.sin(y/Math.max(4,step*3))*step*a:0),w,Math.max(1,gap*.2));x.restore();return}if(key==="vignette"){const g=x.createRadialGradient(w/2,h/2,Math.min(w,h)*.18,w/2,h/2,Math.max(w,h)*.75);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,"+(.9*a)+")");x.fillStyle=g;x.fillRect(0,0,w,h);return}if(key==="noise"){const im=x.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){const n=(Math.random()-.5)*34*a;for(let k=0;k<3;k++)d[i+k]=clamp(d[i+k]+n,0,255)}x.putImageData(im,0,0);return}if(key==="jpeg"){const t=document.createElement("canvas"),q=Math.max(2,Math.round(step*(1+a*2)));t.width=Math.max(1,w/q|0);t.height=Math.max(1,h/q|0);t.getContext("2d").drawImage(c,0,0,t.width,t.height);x.save();x.globalAlpha=.8*a;x.imageSmoothingEnabled=false;x.drawImage(t,0,0,w,h);x.restore();return}if(key==="stress"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);x.clearRect(0,0,w,h);const row=Math.max(2,Math.round(step*.7));for(let y=0;y<h;y+=row){const sh=Math.round(Math.sin(y*.13)*step*3*a);x.drawImage(t,0,y,w,Math.min(row,h-y),sh,y,w,Math.min(row,h-y))}return}if(key==="lick"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);const q=t.getContext("2d",{willReadFrequently:true}),pixels=q.getImageData(0,0,w,h).data;x.save();x.globalAlpha=.5*a;x.lineCap="round";const stride=Math.max(4,Math.round(step*1.5));for(let y=0;y<h;y+=stride)for(let xx=0;xx<w;xx+=stride){const i=(y*w+xx)*4;x.strokeStyle="rgb("+pixels[i]+","+pixels[i+1]+","+pixels[i+2]+")";x.lineWidth=Math.max(1,stride*.22);x.beginPath();x.moveTo(xx,y);x.lineTo(xx+stride*.7,y+stride*.25);x.stroke()}x.restore();return}}
 function raster(image,cfg){let p=downsample(image,cfg),{w,h,step,im,d}=p,cs=colors(),n=cs.length,alg=cfg.algorithm;
 if(diffusionKernels[alg]){for(let y=0;y<h;y++)for(let x=0;x<w;x++){let i=(y*w+x)*4,old=[d[i],d[i+1],d[i+2]],co=nearest(...old,cs);for(let k=0;k<3;k++)d[i+k]=co[k];let er=old.map((v,k)=>v-co[k]);for(const [dx,dy,f] of diffusionKernels[alg]){let xx=x+dx,yy=y+dy;if(xx<0||xx>=w||yy<0||yy>=h)continue;let j=(yy*w+xx)*4;for(let k=0;k<3;k++)d[j+k]=clamp(d[j+k]+er[k]*f,0,255)}}}
 else if(["bayer2","bayer4","bayer8","clustered4","clustered8","pixel"].includes(alg)){let size=alg==="bayer2"?2:alg==="bayer8"||alg==="clustered8"?8:4;for(let y=0;y<h;y++)for(let x=0;x<w;x++){let i=(y*w+x)*4,v=clamp(lumin(d[i],d[i+1],d[i+2])/255,0,1),t=getBayer(size,x,y);if(alg.startsWith("clustered")){const mid=size/2-.5;t=clamp(1-Math.hypot(x%size-mid,y%size-mid)/(size*.72),0,1)}else if(alg==="pixel")t=.5;v=clamp(v+(t-.5)/(n-1||1),0,1);let co=cs[Math.round(v*(n-1))];for(let k=0;k<3;k++)d[i+k]=co[k]}}
@@ -258,7 +444,7 @@ function loadImage(c,n,isDemo=false){src=c;srcName=n||"image";demo=isDemo;origin
 function refresh(){if(!src)return;$("filename").textContent=srcName+" / "+src.width+" × "+src.height;$("dimensions").textContent=src.width+" × "+src.height+" px";$("statAlgorithm").textContent=labels[s.algorithm];$("statPalette").textContent=pal[s.palette].name;$("statScale").textContent="×"+s.scale}
 function render(){if(!src)return;let c=original?src:(s.algorithm==="ascii"?makeAscii(src,s):raster(src,s));out.width=c.width;out.height=c.height;let x=out.getContext("2d");x.clearRect(0,0,out.width,out.height);x.drawImage(c,0,0);out.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(s.algorithm)?"pixelated":"auto";$("asciiText").textContent=ascii;$("asciiDetails").classList.toggle("hidden",s.algorithm!=="ascii");$("shapeControl").classList.toggle("hidden",s.algorithm!=="shape"&&mode!=="shape");$("asciiControl").classList.toggle("hidden",s.algorithm!=="ascii"&&mode!=="ascii");refresh();zoom()}
 function zoom(){if($("zoom").value==="fit"){out.style.width="auto";out.style.height="auto";out.style.maxWidth="100%";out.style.maxHeight="100%"}else{let z=Number($("zoom").value)/100;out.style.maxWidth="none";out.style.maxHeight="none";out.style.width=Math.round(out.width*z)+"px";out.style.height=Math.round(out.height*z)+"px"}}
-function controls(){const binds=[["scale","scale"," px"],["levels","levels",""],["threshold","threshold",""],["contrast","contrast","%"],["brightness","brightness",""],["midtones","midtones","%"],["highlights","highlights","%"],["shapeRotation","shapeRotation","°"],["blur","blur"," px"],["jitter","jitter","%"],["asciiWidth","asciiWidth",""],["asciiDepth","asciiDepth",""],["asciiCellSize","asciiCellSize"," px"],["asciiOffset","asciiOffset",""],["neoGlowLength","neoGlowLength","%"],["neoGlowBrightness","neoGlowBrightness","%"],["neoGlowVisibility","neoGlowVisibility","%"]];for(const [id,key,suffix] of binds)$(id).addEventListener("input",()=>{s[key]=Number($(id).value);$(id+"V").textContent=$(id).value+suffix;render()});$("algorithm").onchange=()=>{s.algorithm=$("algorithm").value;sync();render()};$("invert").onchange=()=>{s.invert=$("invert").checked;render()};$("colorMode").onchange=()=>{s.colorMode=$("colorMode").value;render()};$("shape").onchange=()=>{s.shape=$("shape").value;render()};$("asciiSet").onchange=()=>{s.asciiSet=$("asciiSet").value;updateGlyphPreview();render()};$("asciiCustomChars").addEventListener("input",()=>{s.asciiCustomChars=Array.from($("asciiCustomChars").value).slice(0,10).join("");$("asciiCustomCount").textContent=Array.from(s.asciiCustomChars).length+" / 10";render()});["asciiColorMode","asciiBgMode","neoGlowDirection"].forEach(id=>$(id).onchange=()=>{s[id]=$(id).value;render()});["asciiBgColor","asciiTextColor","neoGlowColor"].forEach(id=>$(id).oninput=()=>{s[id]=$(id).value;render()});$("neoGlowEnabled").onchange=()=>{s.neoGlowEnabled=$("neoGlowEnabled").checked;render()};$("shapeDistribution").onchange=()=>{s.shapeDistribution=$("shapeDistribution").value;render()};for(let i=0;i<4;i++)for(const [cap,key] of [["Shape","shape"],["Size","size"],["Color","color"]]){const el=$("band"+cap+i);el.addEventListener(key==="size"?"input":"change",()=>{s.shapeBands=s.shapeBands||def.shapeBands.map(b=>({...b}));s.shapeBands[i][key]=key==="size"?Number(el.value):el.value;render()})}for(let i=0;i<4;i++)$("customColor"+(i+1)).oninput=()=>{s.customColors=Array.from({length:4},(_,j)=>$("customColor"+(j+1)).value);pal.custom.c=s.customColors;store("ditherlab-colors",s.customColors);const pb=document.querySelector('.palette[data-palette="custom"]');if(pb)pb.querySelectorAll(".swatches i").forEach((el,j)=>el.style.background=s.customColors[j]);render()};$("useCustomPalette").onclick=()=>{s.customColors=[1,2,3,4].map(i=>$("customColor"+i).value);pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);sync();render();say("Собственная палитра включена")};$("extractPalette").onclick=extractPalette;$("exportPalette").onclick=exportPalette;$("importPalette").onclick=()=>$("paletteInput").click();$("paletteInput").onchange=async e=>{const f=e.target.files[0];if(f)try{const j=JSON.parse(await f.text()),raw=Array.isArray(j)?j:(j.colors||j.palette||[]),cc=raw.map(v=>typeof v==="string"?v:(v.hex||v.color||"")).filter(v=>/^#[0-9a-f]{6}$/i.test(v));if(cc.length<2)throw Error("palette");s.customColors=cc.length===4?cc:[0,1,2,3].map(i=>cc[Math.round(i*(cc.length-1)/3)]);pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);sync();render();say("Палитра импортирована")}catch(err){say("Файл палитры не распознан")}e.target.value=""};for(const el of document.querySelectorAll("[data-effect]"))el.onchange=()=>{s.effects=Array.from(document.querySelectorAll("[data-effect]:checked")).map(e=>e.dataset.effect);s.effectOrder=s.effectOrder||[];for(const k of s.effects)if(!s.effectOrder.includes(k))s.effectOrder.push(k);render()};document.querySelectorAll(".effect-control").forEach(row=>{const key=row.querySelector("[data-effect]").dataset.effect,actions=document.createElement("span");actions.className="effect-order-actions";for(const [caption,delta] of [["↑",-1],["↓",1]]){const b=document.createElement("button");b.type="button";b.textContent=caption;b.title=delta<0?"Выше в стеке":"Ниже в стеке";b.onclick=()=>{const order=s.effectOrder||[],i=order.indexOf(key),j=i+delta;if(i<0||j<0||j>=order.length)return;[order[i],order[j]]=[order[j],order[i]];s.effectOrder=order;render();say("Порядок эффектов обновлён")};actions.append(b)}row.insertBefore(actions,row.querySelector(".effect-intensity"))});for(const el of document.querySelectorAll("[data-effect-strength]"))el.oninput=()=>{let key=el.dataset.effectStrength;s.effectStrength=s.effectStrength||{};s.effectStrength[key]=Number(el.value);$("strength-"+key).textContent=el.value+"%";render()}}
+function controls(){const binds=[["scale","scale"," px"],["levels","levels",""],["threshold","threshold",""],["contrast","contrast","%"],["brightness","brightness",""],["midtones","midtones","%"],["highlights","highlights","%"],["shapeRotation","shapeRotation","°"],["blur","blur"," px"],["jitter","jitter","%"],["asciiWidth","asciiWidth",""],["asciiDepth","asciiDepth",""],["asciiCellSize","asciiCellSize"," px"],["asciiOffset","asciiOffset",""],["neoGlowLength","neoGlowLength","%"],["neoGlowBrightness","neoGlowBrightness","%"],["neoGlowVisibility","neoGlowVisibility","%"]];for(const [id,key,suffix] of binds)$(id).addEventListener("input",()=>{s[key]=Number($(id).value);$(id+"V").textContent=$(id).value+suffix;render()});$("algorithm").onchange=()=>{s.algorithm=$("algorithm").value;sync();render()};$("invert").onchange=()=>{s.invert=$("invert").checked;render()};$("colorMode").onchange=()=>{s.colorMode=$("colorMode").value;render()};$("shape").onchange=()=>{s.shape=$("shape").value;render()};$("asciiSet").onchange=()=>{s.asciiSet=$("asciiSet").value;updateGlyphPreview();render()};$("asciiCustomChars").addEventListener("input",()=>{s.asciiCustomChars=Array.from($("asciiCustomChars").value).slice(0,10).join("");$("asciiCustomCount").textContent=Array.from(s.asciiCustomChars).length+" / 10";render()});["asciiColorMode","asciiBgMode","neoGlowDirection"].forEach(id=>$(id).onchange=()=>{s[id]=$(id).value;render()});["asciiBgColor","asciiTextColor","neoGlowColor"].forEach(id=>$(id).oninput=()=>{s[id]=$(id).value;render()});$("neoGlowEnabled").onchange=()=>{s.neoGlowEnabled=$("neoGlowEnabled").checked;render()};$("shapeDistribution").onchange=()=>{s.shapeDistribution=$("shapeDistribution").value;render()};for(let i=0;i<4;i++)for(const [cap,key] of [["Shape","shape"],["Size","size"],["Color","color"]]){const el=$("band"+cap+i);el.addEventListener(key==="size"?"input":"change",()=>{s.shapeBands=s.shapeBands||def.shapeBands.map(b=>({...b}));s.shapeBands[i][key]=key==="size"?Number(el.value):el.value;render()})}for(let i=0;i<4;i++)$("customColor"+(i+1)).oninput=()=>{s.customColors=Array.from({length:4},(_,j)=>$("customColor"+(j+1)).value);pal.custom.c=s.customColors;store("ditherlab-colors",s.customColors);const pb=document.querySelector('.palette[data-palette="custom"]');if(pb)pb.querySelectorAll(".swatches i").forEach((el,j)=>el.style.background=s.customColors[j]);render()};$("useCustomPalette").onclick=()=>{s.customColors=[1,2,3,4].map(i=>$("customColor"+i).value);pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);sync();render();say("Собственная палитра включена")};$("extractPalette").onclick=extractPalette;$("exportPalette").onclick=exportPalette;$("importPalette").onclick=()=>$("paletteInput").click();$("paletteInput").onchange=async e=>{const f=e.target.files[0];if(f)try{const j=JSON.parse(await f.text()),raw=Array.isArray(j)?j:(j.colors||j.palette||[]),cc=raw.map(v=>typeof v==="string"?v:(v.hex||v.color||"")).filter(v=>/^#[0-9a-f]{6}$/i.test(v));if(cc.length<2)throw Error("palette");s.customColors=cc.length===4?cc:[0,1,2,3].map(i=>cc[Math.round(i*(cc.length-1)/3)]);pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);sync();render();say("Палитра импортирована")}catch(err){say("Файл палитры не распознан")}e.target.value=""};for(const el of document.querySelectorAll('.effect-control input[type="checkbox"][data-effect]')){const toggleEffect=()=>{const key=el.dataset.effect,active=new Set(s.effects||[]);if(el.checked)active.add(key);else active.delete(key);s.effects=[...active];s.effectOrder=s.effectOrder||[];for(const k of s.effects)if(!s.effectOrder.includes(k))s.effectOrder.push(k);el.closest(".effect-control")?.classList.toggle("is-active",el.checked);render()};el.addEventListener("change",toggleEffect)}document.querySelectorAll(".effect-control").forEach(row=>{const key=row.querySelector("[data-effect]").dataset.effect,actions=document.createElement("span");actions.className="effect-order-actions";for(const [caption,delta] of [["↑",-1],["↓",1]]){const b=document.createElement("button");b.type="button";b.textContent=caption;b.title=delta<0?"Выше в стеке":"Ниже в стеке";b.onclick=()=>{const order=s.effectOrder||[],i=order.indexOf(key),j=i+delta;if(i<0||j<0||j>=order.length)return;[order[i],order[j]]=[order[j],order[i]];s.effectOrder=order;render();say("Порядок эффектов обновлён")};actions.append(b)}row.insertBefore(actions,row.querySelector(".effect-intensity"))});for(const el of document.querySelectorAll("[data-effect-strength]"))el.oninput=()=>{let key=el.dataset.effectStrength;s.effectStrength=s.effectStrength||{};s.effectStrength[key]=Number(el.value);$("strength-"+key).textContent=el.value+"%";render()}}
 function sync(){for(const k of ["algorithm","scale","levels","threshold","contrast","brightness","midtones","highlights","blur","invert","colorMode","shape","jitter","shapeDistribution","shapeRotation","asciiWidth","asciiSet","asciiDepth","asciiCellSize","asciiOffset","asciiCustomChars","asciiColorMode","asciiBgMode","asciiBgColor","asciiTextColor","neoGlowDirection","neoGlowColor"])if($(k))$(k).value=s[k]??def[k];$("scaleV").textContent=s.scale+" px";$("levelsV").textContent=s.levels;$("thresholdV").textContent=s.threshold;$("contrastV").textContent=s.contrast+"%";$("brightnessV").textContent=s.brightness;$("midtonesV").textContent=s.midtones+"%";$("highlightsV").textContent=s.highlights+"%";$("shapeRotationV").textContent=s.shapeRotation+"°";$("blurV").textContent=s.blur+" px";$("jitterV").textContent=s.jitter+"%";$("asciiWidthV").textContent=s.asciiWidth;$("asciiDepthV").textContent=s.asciiDepth;$("asciiCellSizeV").textContent=s.asciiCellSize+" px";$("asciiOffsetV").textContent=s.asciiOffset;$("asciiCustomCount").textContent=Array.from(s.asciiCustomChars||"").length+" / 10";$("neoGlowLengthV").textContent=s.neoGlowLength+"%";$("neoGlowBrightnessV").textContent=s.neoGlowBrightness+"%";$("neoGlowVisibilityV").textContent=s.neoGlowVisibility+"%";$("neoGlowEnabled").checked=!!s.neoGlowEnabled;document.querySelectorAll("[data-effect]").forEach(e=>e.checked=s.effects.includes(e.dataset.effect));document.querySelectorAll("[data-effect-strength]").forEach(e=>{const key=e.dataset.effectStrength;e.value=(s.effectStrength||{})[key]??50;$("strength-"+key).textContent=e.value+"%"});document.querySelectorAll(".palette").forEach(e=>e.classList.toggle("active",e.dataset.palette===s.palette));(s.customColors||pal.custom.c).forEach((c,i)=>{const el=$("customColor"+(i+1));if(el)el.value=c});pal.custom.c=s.customColors||pal.custom.c;for(let i=0;i<4;i++)if($("bandShape"+i)){const b=(s.shapeBands||def.shapeBands)[i];$("bandShape"+i).value=b.shape;$("bandSize"+i).value=b.size;$("bandColor"+i).value=b.color}}
 function initPalettes(){for(const [key,p] of Object.entries(pal)){let b=document.createElement("button");b.className="palette";b.dataset.palette=key;b.title=p.name;let sw=document.createElement("span");sw.className="swatches";p.c.forEach(c=>{let i=document.createElement("i");i.style.background=c;sw.append(i)});let nm=document.createElement("span");nm.className="pname";nm.textContent=p.name;b.append(sw,nm);b.onclick=()=>{s.palette=key;sync();render()};$("palettes").append(b)}}
 function extractPalette(){if(!src){say("Сначала откройте изображение");return}const c=document.createElement("canvas");c.width=72;c.height=72;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0,72,72);const d=x.getImageData(0,0,72,72).data,p=[];for(let i=0;i<d.length;i+=4)if(d[i+3]>16)p.push([d[i],d[i+1],d[i+2]]);let centers=[0,1,2,3].map(k=>p[Math.floor((k+.5)*p.length/4)]||[0,0,0]);for(let pass=0;pass<7;pass++){const sum=centers.map(()=>[0,0,0,0]);for(const v of p){let win=0,dist=Infinity;centers.forEach((cc,i)=>{const q=(v[0]-cc[0])**2+(v[1]-cc[1])**2+(v[2]-cc[2])**2;if(q<dist){dist=q;win=i}});for(let k=0;k<3;k++)sum[win][k]+=v[k];sum[win][3]++}centers=centers.map((cc,i)=>sum[i][3]?sum[i].slice(0,3).map(v=>Math.round(v/sum[i][3])):cc)}s.customColors=centers.map(v=>"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""));pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);sync();render();say("Палитра извлечена из фото")}
