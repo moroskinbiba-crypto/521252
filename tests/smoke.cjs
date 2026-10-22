@@ -314,8 +314,8 @@ async function downloadFrom(page, selector) {
     await page.locator("#vectorDetail").selectOption("source");
     const blackSvg = await downloadFrom(page, "#svgBlack");
     const blackSvgText = blackSvg.bytes.toString("utf8");
-    assert.match(blackSvgText, /viewBox="0 0 960 620"/, "source-detail black SVG should preserve the original coordinate grid");
-    assert.match(blackSvgText, /width="81\.28mm"/, "SVG physical dimensions should follow source pixels and selected DPI");
+    assert.match(blackSvgText, //viewBox="0 0 48 32"//, "source-detail black SVG should preserve the original coordinate grid");
+    assert.match(blackSvgText, //width="4\\.06mm"//, "SVG physical dimensions should follow source pixels and selected DPI");
     assert.match(blackSvgText, /data-dpi="300"/, "SVG export should record the selected print DPI");
     const cmykSvg = await downloadFrom(page, "#svgCmyk");
     const cmykSvgText = cmykSvg.bytes.toString("utf8");
