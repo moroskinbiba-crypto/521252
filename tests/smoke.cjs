@@ -38,7 +38,7 @@ async function downloadFrom(page, selector) {
       bodyFont: getComputedStyle(document.body).fontFamily,
       headingFont: getComputedStyle(document.querySelector("#pageTitle")).fontFamily,
       background: getComputedStyle(document.body).backgroundColor,
-      fontStylesheet: document.querySelector('link[href*="fonts.googleapis.com"]')?.href || ""
+      fontStylesheet: document.querySelector('link[rel="stylesheet"][href*="fonts.googleapis.com"]')?.href || ""
     }));
     assert.match(theme.bodyFont, /Onest/, "Cyrillic-friendly Onest should be used by the interface");
     assert.match(theme.headingFont, /Onest/, "headings should use readable Onest instead of a Latin-only pixel font");
