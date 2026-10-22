@@ -128,17 +128,17 @@ async function downloadFrom(page, selector) {
     await page.locator("#algorithm").selectOption("floyd");
 
     // Exercise each post-processing effect independently.
-    for (const effect of await page.locator("[data-effect]").evaluateAll(els => els.map(el => el.dataset.effect))) {
-      const input = page.locator('[data-effect="' + effect + '"]');
-      await input.evaluate(el => {
-        el.checked = true;
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-      });
+    for (const effect of await page.locator(".effect-control input[type=checkbox][data-effect]").evaluateAll(els => els.map(el => el.dataset.effect))) {
+      const input = page.locator('#effect-' + effect);
+      assert.equal(await input.isChecked(), false, "effect should start unchecked: " + effect);
+      // Use real pointer clicks rather than assigning .checked / dispatching a synthetic event.
+      await input.click();
+      assert.equal(await input.isChecked(), true, "checkbox must respond to a real click: " + effect);
+      assert.equal(await input.locator("xpath=..").evaluate(el => el.closest(".effect-control").classList.contains("is-active")), true,
+        "active state should be reflected in the effect card: " + effect);
       assert.ok(await page.locator("#output").evaluate(c => c.width > 0 && c.height > 0), "effect failed to render: " + effect);
-      await input.evaluate(el => {
-        el.checked = false;
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-      });
+      await input.click();
+      assert.equal(await input.isChecked(), false, "checkbox must turn off on a second click: " + effect);
     }
 
     const png = await downloadFrom(page, "#png");
