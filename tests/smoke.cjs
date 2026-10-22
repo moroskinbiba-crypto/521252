@@ -157,7 +157,15 @@ async function downloadFrom(page, selector) {
       const input = page.locator('#effect-' + effect);
       assert.equal(await input.isChecked(), false, "effect should start unchecked: " + effect);
       // Use real pointer clicks rather than assigning .checked / dispatching a synthetic event.
-      await input.evaluate(el => { window.__lastEffectClick = { changes: 0 }; el.addEventListener("change", () => window.__lastEffectClick.changes++); });
+      await input.evaluate(el => {
+        window.__lastEffectClick = { changes: 0 };
+        window.__effectTrace = [];
+        el.addEventListener("change", () => window.__lastEffectClick.changes++);
+        el.addEventListener("click", event => window.__effectTrace.push({phase:"click-target",checked:el.checked,defaultPrevented:event.defaultPrevented}));
+        document.addEventListener("click", event => {
+          if (event.target === el) window.__effectTrace.push({phase:"document-bubble",checked:el.checked,defaultPrevented:event.defaultPrevented});
+        }, { once: true });
+      });
       await input.click();
       const clickState = await input.evaluate(el => {
         const r = el.getBoundingClientRect();
@@ -165,7 +173,7 @@ async function downloadFrom(page, selector) {
         return {
           checked: el.checked, disabled: el.disabled, pointerEvents: getComputedStyle(el).pointerEvents,
           rect: {x:r.x,y:r.y,width:r.width,height:r.height}, hit: hit?.outerHTML?.slice(0,180),
-          changeEvents: window.__lastEffectClick?.changes, mode: document.body.dataset.mode,
+          changeEvents: window.__lastEffectClick?.changes, mode: document.body.dataset.mode, trace: window.__effectTrace,
           parent: el.parentElement?.outerHTML?.slice(0,220)
         };
       });
