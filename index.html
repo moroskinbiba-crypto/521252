@@ -672,13 +672,17 @@ for(const el of document.querySelectorAll("[data-effect-strength]")){
 }
 function sync(){for(const k of ["algorithm","scale","levels","threshold","depth","contrast","brightness","midtones","highlights","blur","invert","colorMode","shape","jitter","shapeDistribution","shapeRotation","asciiWidth","asciiSet","asciiDepth","asciiCellSize","asciiOffset","asciiCustomChars","asciiColorMode","asciiBgMode","asciiBgColor","asciiTextColor","neoGlowDirection","neoGlowColor"])if($(k))$(k).value=s[k]??def[k];if(["shape","ascii"].includes(s.algorithm))$("algorithm").value="bayer4";$("scaleV").textContent=s.scale+" px";$("levelsV").textContent=s.levels;$("thresholdV").textContent=s.threshold;$("depthV").textContent=(s.depth??70)+"%";$("contrastV").textContent=s.contrast+"%";$("brightnessV").textContent=s.brightness;$("midtonesV").textContent=s.midtones+"%";$("highlightsV").textContent=s.highlights+"%";$("shapeRotationV").textContent=s.shapeRotation+"°";$("blurV").textContent=s.blur+" px";$("jitterV").textContent=s.jitter+"%";$("asciiWidthV").textContent=s.asciiWidth;$("asciiDepthV").textContent=s.asciiDepth;$("asciiCellSizeV").textContent=s.asciiCellSize+" px";$("asciiOffsetV").textContent=s.asciiOffset;$("asciiCustomCount").textContent=Array.from(s.asciiCustomChars||"").length+" / 10";$("neoGlowLengthV").textContent=s.neoGlowLength+"%";$("neoGlowBrightnessV").textContent=s.neoGlowBrightness+"%";$("neoGlowVisibilityV").textContent=s.neoGlowVisibility+"%";$("neoGlowEnabled").checked=!!s.neoGlowEnabled;const activeScope=effectScopeForMode();
 document.querySelectorAll(".effect-control .effect-toggle[role=\\\"checkbox\\\"][data-effect]").forEach(e=>{
- if(e.closest("[data-effect-scope]")?.dataset.effectScope!==activeScope)return;
- const checked=(s.effects||[]).includes(e.dataset.effect);
+ const scope=e.closest("[data-effect-scope]")?.dataset.effectScope;
+ if(!WORKSPACE_NAMES.includes(scope))return;
+ const profile=scope===activeScope?s:(workspaceSettings[scope]||def);
+ const checked=(profile.effects||[]).includes(e.dataset.effect);
  e.setAttribute("aria-checked",String(checked));e.closest(".effect-control")?.classList.toggle("is-active",checked);
 });
 document.querySelectorAll("[data-effect-strength]").forEach(e=>{
- if(e.closest("[data-effect-scope]")?.dataset.effectScope!==activeScope)return;
- const key=e.dataset.effectStrength;e.value=(s.effectStrength||{})[key]??50;
+ const scope=e.closest("[data-effect-scope]")?.dataset.effectScope;
+ if(!WORKSPACE_NAMES.includes(scope))return;
+ const profile=scope===activeScope?s:(workspaceSettings[scope]||def);
+ const key=e.dataset.effectStrength;e.value=(profile.effectStrength||{})[key]??50;
  const output=e.closest(".effect-intensity")?.querySelector("output");if(output)output.textContent=e.value+"%";
 });document.querySelectorAll(".palette").forEach(e=>e.classList.toggle("active",e.dataset.palette===s.palette));(s.customColors||pal.custom.c).forEach((c,i)=>{const el=$("customColor"+(i+1));if(el)el.value=c});pal.custom.c=s.customColors||pal.custom.c;for(let i=0;i<4;i++)if($("bandShape"+i)){const b=(s.shapeBands||def.shapeBands)[i];$("bandShape"+i).value=b.shape;$("bandSize"+i).value=b.size;$("bandColor"+i).value=b.color}}
 function initPalettes(){for(const [key,p] of Object.entries(pal)){let b=document.createElement("button");b.className="palette";b.dataset.palette=key;b.title=p.name;let sw=document.createElement("span");sw.className="swatches";p.c.forEach(c=>{let i=document.createElement("i");i.style.background=c;sw.append(i)});let nm=document.createElement("span");nm.className="pname";nm.textContent=p.name;b.append(sw,nm);b.onclick=()=>{s.palette=key;sync();render()};$("palettes").append(b)}}
