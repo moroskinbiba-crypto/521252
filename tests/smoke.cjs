@@ -154,7 +154,7 @@ async function downloadFrom(page, selector) {
           header: header && { x: header.x, right: header.right, bottom: header.bottom, height: header.height },
           layout: layout && { x: layout.x, right: layout.right, top: layout.top, bottom: layout.bottom, height: layout.height },
           canvas: canvas && { x: canvas.x, right: canvas.right, width: canvas.width, height: canvas.height },
-          main: main && { x: main.x, right: main.right, height: main.height, bottom: main.bottom },
+          main: main && { x: main.x, y: main.y, right: main.right, height: main.height, bottom: main.bottom },
           settings: settings && { x: settings.x, right: settings.right, height: settings.height, top: settings.top },
           nav: nav && { x: nav.x, right: nav.right, height: nav.height, scrollWidth: nav.scrollWidth, clientWidth: nav.clientWidth },
           leftDisplay: (() => { const left = document.querySelector(".layout > .left"); return left ? getComputedStyle(left).display : "none"; })(),
