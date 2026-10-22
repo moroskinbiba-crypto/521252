@@ -45,3 +45,5 @@ MIT. See [LICENSE](LICENSE).
 - Algorithm compositing: up to four added algorithm layers, per-layer opacity, blend modes, reordering and removal. Layers are saved with workspace settings and project files.
 - Print output: choose SVG detail (compact, 1024 px, 2048 px or source resolution), black-vector threshold and DPI. CMYK export creates four labelled vector plates.
 - Pattern dithering: eight pattern modes including Spiral Dither, adjustable screen angle and halftone mark shape.
+- Palette library: save and name up to 100 four-colour palettes, apply or delete them, and import/export a collection as one JSON file.
+- Workflow helpers: paste images directly from the clipboard and toggle the editor into browser full-screen mode.
