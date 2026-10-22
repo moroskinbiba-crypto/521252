@@ -56,8 +56,18 @@ async function downloadFrom(page, selector) {
     // Mode navigation, glyph controls, and preset application.
     await page.locator('.topnav [data-mode="shape"]').click();
     assert.equal(await page.locator("body").getAttribute("data-mode"), "shape");
-    assert.equal(await page.locator("#algorithm").inputValue(), "shape");
+    assert.equal(await page.locator("#algorithmPickerField").isVisible(), false, "Shape Lab uses its own workspace, not the standard algorithm picker");
     assert.equal(await page.locator("#shapeControl").isVisible(), true, "Shape Lab settings should only appear in Shape Lab");
+    assert.equal(await page.locator("#shapeEffectsControl").isVisible(), true, "Shape Lab has an independent effect stack");
+    assert.equal(await page.locator("#scriptEffectsControl").isVisible(), false, "Script Slayer effects must stay hidden in Shape Lab");
+    assert.equal(await page.locator("#batchEffectsControl").isVisible(), false);
+    assert.equal(await page.locator("#videoEffectsControl").isVisible(), false);
+    assert.equal(await page.locator("#shape-effect-scanlines").getAttribute("aria-checked"), "false");
+    const beforeShapeEffect = await page.locator("#output").evaluate(c => c.toDataURL("image/png"));
+    await page.locator("#shape-effect-scanlines").click();
+    assert.equal(await page.locator("#shape-effect-scanlines").getAttribute("aria-checked"), "true");
+    assert.notEqual(await page.locator("#output").evaluate(c => c.toDataURL("image/png")), beforeShapeEffect,
+      "Shape Lab effects must affect the rendered pixels");
     assert.equal(await page.locator("#randomize").isVisible(), false, "Editor randomizer should not leak into Shape Lab");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "standard effect stack must not appear in Shape Lab");
     assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer settings must not appear in Shape Lab");
@@ -69,7 +79,17 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("body").getAttribute("data-mode"), "script");
     assert.equal(await page.locator("#asciiControl").isVisible(), true, "Script Slayer controls should be visible in Script Slayer");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "standard effect stack must not appear in Script Slayer");
-    assert.equal(await page.locator("#shapeControl").isVisible(), false, "Shape Lab settings must not appear in Script Slayer");
+    assert.equal(await page.locator("#scriptEffectsControl").isVisible(), true, "Script Slayer has its own effect stack");
+    assert.equal(await page.locator("#shapeEffectsControl").isVisible(), false, "Shape Lab effects must stay hidden in Script Slayer");
+    assert.equal(await page.locator("#batchEffectsControl").isVisible(), false);
+    assert.equal(await page.locator("#videoEffectsControl").isVisible(), false);
+    assert.equal(await page.locator("#algorithmPickerField").isVisible(), false, "Script Slayer must not duplicate the standard algorithm picker");
+    assert.equal(await page.locator("#script-effect-scanlines").getAttribute("aria-checked"), "false",
+      "Script Slayer should not inherit Shape Lab's active effect");
+    await page.locator("#script-effect-scanlines").click();
+    assert.equal(await page.locator("#script-effect-scanlines").getAttribute("aria-checked"), "true");
+    assert.notEqual(await page.locator("#output").evaluate(c => c.toDataURL("image/png")), "",
+      "Script Slayer should keep a rendered canvas after its own effect is enabled");
     await page.locator("#asciiSet").selectOption("binary");
     await page.locator("#asciiCustomChars").fill("01#X");
     assert.equal((await page.locator("#asciiCustomCount").textContent()).trim(), "4 / 10");
@@ -77,6 +97,15 @@ async function downloadFrom(page, selector) {
     assert.ok(await page.locator("#presetGrid .preset").count() > 0, "built-in presets should render");
     await page.locator("#presetGrid .preset").first().click();
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
+    assert.equal(await page.locator("#effect-scanlines").getAttribute("aria-checked"), "false",
+      "Editor should start with its own effects, independent of the other workspaces");
+    await page.locator("#homeLogo").click();
+    assert.equal(await page.locator("#shape-effect-scanlines").getAttribute("aria-checked"), "true",
+      "switching away and back must restore Shape Lab's own effect profile");
+    await page.locator('.topnav [data-mode="script"]').click();
+    assert.equal(await page.locator("#script-effect-scanlines").getAttribute("aria-checked"), "true",
+      "switching away and back must restore Script Slayer's own effect profile");
+    await page.locator("#homeLogo").click();
 
     // Independent scroll areas: settings must scroll without moving the page/canvas.
     const beforeScroll = await page.locator("#output").evaluate(el => {
@@ -153,7 +182,7 @@ async function downloadFrom(page, selector) {
     await page.locator("#algorithm").selectOption("floyd");
 
     // Exercise each post-processing effect independently.
-    for (const effect of await page.locator(".effect-control .effect-toggle[role=checkbox][data-effect]").evaluateAll(els => els.map(el => el.dataset.effect))) {
+    for (const effect of await page.locator("#generalEffectsControl .effect-control .effect-toggle[role=checkbox][data-effect]").evaluateAll(els => els.map(el => el.dataset.effect))) {
       const toggle = page.locator('#effect-' + effect);
       assert.equal(await toggle.getAttribute("aria-checked"), "false", "effect should start unchecked: " + effect);
       await toggle.click();
@@ -215,7 +244,8 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("body").getAttribute("data-mode"), "video");
     assert.equal(await page.locator("#videoView").isVisible(), true);
     assert.equal(await page.locator("#videoTimeline").isVisible(), true);
-    assert.equal(await page.locator("#generalEffectsControl").isVisible(), true);
+    assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "Video Lab should not reuse Editor's effect stack");
+    assert.equal(await page.locator("#videoEffectsControl").isVisible(), true, "Video Lab has an independent effect stack");
     assert.equal(await page.locator("#asciiControl").isVisible(), false);
     assert.equal(await page.locator("#shapeControl").isVisible(), false);
     assert.equal(await page.locator("#algorithm").isVisible(), true, "video workspace should retain algorithm selection");
