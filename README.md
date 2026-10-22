@@ -4,9 +4,13 @@
 
 ## Запуск в браузере
 
-Откройте **[DitherLab Web](https://moroskinbiba-crypto.github.io/521252/)**. Никакая установка не нужна.
+После однократного включения GitHub Pages откройте **[DitherLab Web](https://moroskinbiba-crypto.github.io/521252/)**. Никакая установка не нужна.
 
-GitHub Actions публикует сайт из ветки `main` с помощью workflow `.github/workflows/pages.yml`.
+### Однократная настройка GitHub Pages
+
+Открыть [Settings → Pages](https://github.com/moroskinbiba-crypto/521252/settings/pages) и в разделе **Build and deployment → Source** выбрать **GitHub Actions**. После этого workflow автоматически проверяет JavaScript и публикует сайт при каждом обновлении ветки `main`.
+
+Сейчас автоматическая активация Pages через подключение GitHub заблокирована правами GitHub App («Resource not accessible by integration»), поэтому этот переключатель нужно включить один раз вручную. Сборка сама сообщит о проблемах, если появятся.
 
 ## Возможности
 
