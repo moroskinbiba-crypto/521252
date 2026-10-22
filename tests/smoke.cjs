@@ -337,8 +337,18 @@ async function downloadFrom(page, selector) {
 
     await page.locator("#batch-effect-scanlines").click();
     assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true");
+    const batchProfileAfterClick = await page.evaluate(() => {
+      try { return JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.batch?.effects || []; }
+      catch { return ["<invalid-json>"]; }
+    });
+    assert.ok(batchProfileAfterClick.includes("scanlines"), "effect click should persist to the batch profile: " + JSON.stringify(batchProfileAfterClick));
     await page.locator("#homeLogo").click();
     assert.equal(await page.locator("#effect-scanlines").getAttribute("aria-checked"), "false", "batch effects must not leak into Editor");
+    const batchProfileAfterSwitch = await page.evaluate(() => {
+      try { return JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.batch?.effects || []; }
+      catch { return ["<invalid-json>"]; }
+    });
+    assert.ok(batchProfileAfterSwitch.includes("scanlines"), "leaving Batch should not overwrite its profile: " + JSON.stringify(batchProfileAfterSwitch));
     await page.reload({ waitUntil: "load" });
     await page.waitForFunction(() => document.querySelector("#output")?.width > 0);
     await page.locator('.topnav [data-mode="batch"]').click();
