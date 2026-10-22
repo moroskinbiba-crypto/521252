@@ -54,8 +54,14 @@ async function downloadFrom(page, selector) {
     await page.locator('.topnav [data-mode="shape"]').click();
     assert.equal(await page.locator("body").getAttribute("data-mode"), "shape");
     assert.equal(await page.locator("#algorithm").inputValue(), "shape");
+    assert.equal(await page.locator("#shapeControl").isVisible(), true, "Shape Lab settings should only appear in Shape Lab");
+    assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "standard effect stack must not appear in Shape Lab");
+    assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer settings must not appear in Shape Lab");
     await page.locator('.topnav [data-mode="script"]').click();
     assert.equal(await page.locator("body").getAttribute("data-mode"), "script");
+    assert.equal(await page.locator("#asciiControl").isVisible(), true, "Script Slayer controls should be visible in Script Slayer");
+    assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "standard effect stack must not appear in Script Slayer");
+    assert.equal(await page.locator("#shapeControl").isVisible(), false, "Shape Lab settings must not appear in Script Slayer");
     await page.locator("#asciiSet").selectOption("binary");
     await page.locator("#asciiCustomChars").fill("01#X");
     assert.equal((await page.locator("#asciiCustomCount").textContent()).trim(), "4 / 10");
@@ -81,11 +87,13 @@ async function downloadFrom(page, selector) {
     // Switch between desktop, tablet, and mobile layout.
     await page.setViewportSize({ width: 820, height: 900 });
     const tablet = await page.evaluate(() => ({
-      leftDisplay: getComputedStyle(document.querySelector(".layout > .left")).display,
+      leftCount: document.querySelectorAll(".layout > .left").length,
+      topNavCount: document.querySelectorAll(".topnav [data-mode]").length,
       inspectorWidth: document.querySelector("#inspector").getBoundingClientRect().width,
       canvasWidth: document.querySelector("#output").getBoundingClientRect().width
     }));
-    assert.equal(tablet.leftDisplay, "none");
+    assert.equal(tablet.leftCount, 0, "duplicate side workspace navigation must not exist");
+    assert.equal(tablet.topNavCount, 5, "all alternate workspaces must be available in the top navigation");
     assert.ok(tablet.inspectorWidth > 200 && tablet.canvasWidth > 0, "tablet layout should show controls and preview");
     await page.setViewportSize({ width: 390, height: 844 });
     const mobile = await page.evaluate(() => ({
@@ -178,8 +186,17 @@ async function downloadFrom(page, selector) {
     assert.match(offline.download.suggestedFilename(), /TGRMLithering-offline\.html$/);
     assert.ok(offline.bytes.toString("utf8").includes("TGRMLithering — Browser Image Studio"));
 
+    // Video workspace should have a separate visible timeline and standard post-processing controls.
+    await page.locator('.topnav [data-mode="video"]').click();
+    assert.equal(await page.locator("body").getAttribute("data-mode"), "video");
+    assert.equal(await page.locator("#videoView").isVisible(), true);
+    assert.equal(await page.locator("#videoTimeline").isVisible(), true);
+    assert.equal(await page.locator("#generalEffectsControl").isVisible(), true);
+    assert.equal(await page.locator("#asciiControl").isVisible(), false);
+    assert.equal(await page.locator("#shapeControl").isVisible(), false);
+
     // Batch processing should accept and produce a real PNG.
-    await page.locator('.left [data-mode="batch"]').click();
+    await page.locator('.topnav [data-mode="batch"]').click();
     await page.locator("#batchInput").setInputFiles({
       name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer
     });
