@@ -1,0 +1,76 @@
+name: Build TGRMLither portable release
+
+on:
+  push:
+    branches:
+      - "release/v1.2.0"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without the v prefix (for example 1.2.0)"
+        required: true
+        default: "1.2.0"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "tgrmlither-release"
+  cancel-in-progress: false
+
+jobs:
+  portable-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the main release source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Prepare portable folder
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version || '1.2.0' }}
+        run: |
+          set -euo pipefail
+          mkdir -p "dist/TGRMLither-Portable"
+          cp index.html manifest.webmanifest icon.svg sw.js LICENSE "dist/TGRMLither-Portable/"
+          cp portable/README-PORTABLE.txt portable/Launch-TGRMLither.bat portable/Launch-TGRMLither.sh "dist/TGRMLither-Portable/"
+          cd dist
+          zip -qr "TGRMLither-Portable-v${VERSION}.zip" "TGRMLither-Portable"
+          sha256sum "TGRMLither-Portable-v${VERSION}.zip" > "TGRMLither-Portable-v${VERSION}.zip.sha256"
+
+      - name: Validate portable package contents
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version || '1.2.0' }}
+        run: |
+          set -euo pipefail
+          unzip -l "dist/TGRMLither-Portable-v${VERSION}.zip"
+          unzip -p "dist/TGRMLither-Portable-v${VERSION}.zip" TGRMLither-Portable/index.html | grep -q '<title>TGRMLither'
+          unzip -p "dist/TGRMLither-Portable-v${VERSION}.zip" TGRMLither-Portable/Launch-TGRMLither.bat | grep -q 'http.server 8765'
+
+      - name: Create GitHub Release with portable archive
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version || '1.2.0' }}
+          target_commitish: main
+          name: TGRMLither v${{ inputs.version || '1.2.0' }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/TGRMLither-Portable-v${{ inputs.version || '1.2.0' }}.zip
+            dist/TGRMLither-Portable-v${{ inputs.version || '1.2.0' }}.zip.sha256
+          body: |
+            ## TGRMLither Portable
+
+            - **Windows:** extract the ZIP and run `Launch-TGRMLither.bat`.
+            - **macOS/Linux:** extract the ZIP and run `./Launch-TGRMLither.sh`.
+            - Requires Python 3 for the local launcher; no app installer or Python packages are needed.
+            - The editor processes images locally in your browser. It does not upload images to a TGRMLither server.
+            - If Python is unavailable, open `index.html` directly; some browser storage and offline features may be limited.
+
+            The SHA-256 checksum is included alongside the ZIP archive.

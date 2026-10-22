@@ -2,7 +2,7 @@
   "name": "tgrmlither",
   "version": "1.2.0",
   "private": false,
-  "description": "A local-first browser graphics studio for dithering, halftone, glitch and symbol-based art",
+  "description": "Portable local-first browser graphics studio for dithering, pixel art, halftone, glitch and ASCII effects",
   "license": "MIT",
   "scripts": {
     "serve": "python -m http.server 8080"
