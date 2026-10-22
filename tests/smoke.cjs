@@ -30,6 +30,9 @@ async function downloadFrom(page, selector) {
 
     assert.match(await page.title(), /^TGRMLithering/);
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
+    assert.equal(await page.locator("#generalEffectsControl").isVisible(), true, "regular effects should be visible in Editor");
+    assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer panel should be isolated from Editor");
+    assert.equal(await page.locator("#shapeControl").isVisible(), false, "Shape Lab panel should be isolated from Editor");
     const theme = await page.evaluate(() => ({
       bodyFont: getComputedStyle(document.body).fontFamily,
       headingFont: getComputedStyle(document.querySelector("#pageTitle")).fontFamily,
@@ -55,6 +58,7 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("body").getAttribute("data-mode"), "shape");
     assert.equal(await page.locator("#algorithm").inputValue(), "shape");
     assert.equal(await page.locator("#shapeControl").isVisible(), true, "Shape Lab settings should only appear in Shape Lab");
+    assert.equal(await page.locator("#randomize").isVisible(), false, "Editor randomizer should not leak into Shape Lab");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "standard effect stack must not appear in Shape Lab");
     assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer settings must not appear in Shape Lab");
     await page.locator('.topnav [data-mode="script"]').click();
@@ -167,6 +171,7 @@ async function downloadFrom(page, selector) {
     const project = await downloadFrom(page, "#saveProject");
     const projectData = JSON.parse(project.bytes.toString("utf8"));
     assert.equal(projectData.format, "tgrmlithering-project");
+    assert.equal(projectData.workspace, "editor", "project files should remember their originating workspace");
     assert.ok(projectData.source.startsWith("data:image/png;base64,"));
     await page.locator("#projectInput").setInputFiles({
       name: "roundtrip.tgrmlithering.json",
@@ -194,6 +199,60 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), true);
     assert.equal(await page.locator("#asciiControl").isVisible(), false);
     assert.equal(await page.locator("#shapeControl").isVisible(), false);
+    assert.equal(await page.locator("#algorithm").isVisible(), true, "video workspace should retain algorithm selection");
+
+    // Generate a tiny, valid WebM in-browser and test video input, scrubbing and rendered-video export.
+    const videoDataURL = await page.evaluate(async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 48; canvas.height = 32;
+      const ctx = canvas.getContext("2d");
+      const mime = ["video/webm;codecs=vp8", "video/webm"].find(type => MediaRecorder.isTypeSupported(type));
+      if (!mime || !canvas.captureStream) throw new Error("WebM recording is unsupported in test browser");
+      const stream = canvas.captureStream(12);
+      const recorder = new MediaRecorder(stream, { mimeType: mime });
+      const chunks = [];
+      let resolveBlob;
+      const stopped = new Promise(resolve => { resolveBlob = resolve; });
+      recorder.ondataavailable = event => { if (event.data && event.data.size) chunks.push(event.data); };
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: mime });
+        const reader = new FileReader();
+        reader.onload = () => resolveBlob(reader.result);
+        reader.readAsDataURL(blob);
+      };
+      recorder.start();
+      for (let i = 0; i < 16; i++) {
+        ctx.fillStyle = "#172b46";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "rgb(" + (i * 13 % 255) + ",120,210)";
+        ctx.fillRect(i * 2, 8, 12, 12);
+        await new Promise(resolve => setTimeout(resolve, 80));
+      }
+      recorder.stop();
+      stream.getTracks().forEach(track => track.stop());
+      return await stopped;
+    });
+    const videoBuffer = Buffer.from(videoDataURL.split(",")[1], "base64");
+    assert.ok(videoBuffer.length > 500, "test video should contain encoded frames");
+    await page.locator("#videoInput").setInputFiles({ name: "qa-video.webm", mimeType: "video/webm", buffer: videoBuffer });
+    await page.waitForFunction(() => {
+      const video = document.querySelector("#videoSource");
+      return video && Number.isFinite(video.duration) && video.duration > 0;
+    }, null, { timeout: 20000 });
+    assert.match(await page.locator("#videoFilename").textContent(), /qa-video\.webm/);
+    assert.ok(Number(await page.locator("#videoTimeline").getAttribute("max")) > 0, "video timeline should have a duration");
+    await page.locator("#videoTimeline").evaluate(el => {
+      el.value = String(Math.min(0.3, Number(el.max)));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    assert.ok(await page.locator("#videoOutput").evaluate(canvas => canvas.width > 0 && canvas.height > 0),
+      "video frame should be processed onto the output canvas");
+    const [videoDownload] = await Promise.all([
+      page.waitForEvent("download", { timeout: 20000 }),
+      page.locator("#videoExport").click()
+    ]);
+    assert.match(videoDownload.suggestedFilename(), /TGRMLithering\.webm$/);
+    assert.ok(fs.statSync(await videoDownload.path()).size > 500, "exported video should contain data");
 
     // Batch processing should accept and produce a real PNG.
     await page.locator('.topnav [data-mode="batch"]').click();
@@ -206,7 +265,7 @@ async function downloadFrom(page, selector) {
     assert.match(await page.locator("#batchResults a[download]").getAttribute("download"), /TGRMLithering\.png$/);
 
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
-    console.log("TGRMLithering smoke tests passed: startup, controls, modes, responsive layout, settings scroll, image import, PNG/JPEG/project/palette/standalone export, and batch processing.");
+    console.log("TGRMLithering smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {
     await browser.close();
   }
