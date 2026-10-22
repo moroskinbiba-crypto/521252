@@ -112,6 +112,35 @@ async function downloadFrom(page, selector) {
     await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
     assert.deepEqual(await page.locator("#output").evaluate(c => [c.width, c.height]), [48, 32]);
 
+    // Exercise every algorithm option so a broken branch cannot hide behind a valid default.
+    const algorithms = await page.locator("#algorithm option").evaluateAll(options => options.map(option => option.value));
+    assert.ok(algorithms.length >= 60, "all advertised processing algorithms should be present");
+    for (const algorithm of algorithms) {
+      await page.locator("#algorithm").selectOption(algorithm);
+      const rendered = await page.locator("#output").evaluate(canvas => ({
+        width: canvas.width,
+        height: canvas.height,
+        label: document.querySelector("#statAlgorithm")?.textContent.trim()
+      }));
+      assert.ok(rendered.width > 0 && rendered.height > 0, "algorithm failed to render: " + algorithm);
+      assert.ok(rendered.label, "algorithm label missing for: " + algorithm);
+    }
+    await page.locator("#algorithm").selectOption("floyd");
+
+    // Exercise each post-processing effect independently.
+    for (const effect of await page.locator("[data-effect]").evaluateAll(els => els.map(el => el.dataset.effect))) {
+      const input = page.locator('[data-effect="' + effect + '"]');
+      await input.evaluate(el => {
+        el.checked = true;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      assert.ok(await page.locator("#output").evaluate(c => c.width > 0 && c.height > 0), "effect failed to render: " + effect);
+      await input.evaluate(el => {
+        el.checked = false;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    }
+
     const png = await downloadFrom(page, "#png");
     assert.deepEqual([...png.bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
     assert.match(png.download.suggestedFilename(), /TGRMLithering.*\.png$/);
