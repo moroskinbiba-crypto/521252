@@ -4,27 +4,27 @@ DitherLab — локальная браузерная мастерская дл�
 
 **[Открыть редактор](https://moroskinbiba-crypto.github.io/521252/)** · [Исходный код](https://github.com/moroskinbiba-crypto/521252)
 
-## Движок
+## Engine
 
-- 15 матриц распространения ошибки: Floyd–Steinberg, Atkinson, Jarvis–Judice–Ninke, Stucki, Burkes, Sierra и варианты, Fan, Shiau, Stevenson–Arce и другие.
-- Ordered dithering: Bayer и Clustered Dot.
-- 8 паттернов: halftone, Shape Shifter, crosshatch, diagonal hatch, waves, concentric rings, modulation bars и lines.
-- 17 творческих glitch-режимов и 16 специальных визуальных режимов, включая threshold/posterize/edges/thermal/X-Ray/woodcut и RGB/data-mosh стили.
-- Контраст, яркость, midtones/highlights, размер ячейки, порог, число тонов, blur и инверсия.
-- Встроенные палитры, собственные цвета, извлечение четырёх цветов из фото и JSON import/export палитр.
-- Shape Shifter с четырьмя диапазонами яркости: форма, размер и цвет для каждого диапазона, распределение и поворот.
-- Эффекты с индивидуальной интенсивностью и изменяемым порядком: Glow, Epsilon Glow, Chromatic Shift, Scanlines, Vignette, Film Grain, JPEG Glitch, Lick, Stress Relief и Modulation Lines.
-- Script Slayer: дополнительные наборы символов, глубина, размер ячейки, offset, custom glyphs, палитра/цвет источника/монохром, прозрачный фон, TXT и WebM.
-- Пресеты, проект JSON, пакетная обработка, PNG/JPEG, автономный HTML-экспорт и PWA/offline cache.
+- 15 diffusion kernels: Floyd–Steinberg, Atkinson, Jarvis–Judice–Ninke, Stucki, Burkes, Sierra variants, Fan, Shiau variants, Stevenson–Arce and more.
+- Bayer and clustered-dot ordered dithering; 8 pattern dither modes.
+- 17 glitch styles and 16 special modes, including threshold, posterize, CMYK halftone, edge/contour, thermal map, X-Ray, woodcut, pixel sort, tearing, VHS and bitcrush.
+- Contrast, brightness, midtones/highlights, levels, threshold, blur, scale and inversion.
+- Built-in palettes, custom colours, image palette extraction and JSON palette import/export.
+- Shape Shifter with four luminance bands, per-band geometry, size and colour, placement distribution and rotation.
+- Individually adjustable reorderable effects: Glow, Epsilon Glow, Chromatic Shift, Scanlines, Vignette, Film Grain, JPEG Glitch, Lick, Stress Relief and Modulation Lines.
+- Script Slayer with 48 character families, live glyph preview, editable glyphs, depth/cell sizing, offset, palette/source/mono colour, transparent backgrounds, TXT export and animation.
+- Preset JSON import/export, project JSON, batch processing, PNG/JPEG, vector-like SVG pixel-run export, and WebM motion export.
+- Standalone HTML and PWA/offline cache.
 
-## Запуск
+## Run locally
 
-Откройте `index.html` или запустите `python -m http.server 8080`, затем откройте `http://localhost:8080`. Кнопка **↓ HTML** создаёт автономную HTML-версию.
+Open `index.html` or run `python -m http.server 8080`, then open `http://localhost:8080`. **↓ HTML** exports a standalone version.
 
-## Совместимость и ограничения
+## Compatibility note
 
-Это независимая реализация, ориентированная на публично описанные возможности Dither Boy, а не пиксель-в-пиксель копия его закрытого исходного кода. Некоторые glitch/special режимы — собственные реализации похожих визуальных приёмов и могут отличаться от оригинала. Полная видеомонтажная шкала с ключевыми кадрами и точная трассировка произвольных SVG-контуров остаются будущими этапами.
+DitherLab is an independent implementation inspired by the public feature set of Dither Boy, not a pixel-identical copy of its proprietary implementation. Some creative modes are approximations and can produce different results. SVG export traces the rendered pixel grid rather than reconstructing arbitrary smooth contours. The editor still lacks a full video timeline and keyframe graph.
 
-## Лицензия
+## License
 
 MIT.
