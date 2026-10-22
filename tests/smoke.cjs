@@ -153,36 +153,16 @@ async function downloadFrom(page, selector) {
     await page.locator("#algorithm").selectOption("floyd");
 
     // Exercise each post-processing effect independently.
-    for (const effect of await page.locator(".effect-control input[type=checkbox][data-effect]").evaluateAll(els => els.map(el => el.dataset.effect))) {
-      const input = page.locator('#effect-' + effect);
-      assert.equal(await input.isChecked(), false, "effect should start unchecked: " + effect);
-      // Use real pointer clicks rather than assigning .checked / dispatching a synthetic event.
-      await input.evaluate(el => {
-        window.__lastEffectClick = { changes: 0 };
-        window.__effectTrace = [];
-        el.addEventListener("change", () => window.__lastEffectClick.changes++);
-        el.addEventListener("click", event => window.__effectTrace.push({phase:"click-target",checked:el.checked,defaultPrevented:event.defaultPrevented}));
-        document.addEventListener("click", event => {
-          if (event.target === el) window.__effectTrace.push({phase:"document-bubble",checked:el.checked,defaultPrevented:event.defaultPrevented});
-        }, { once: true });
-      });
-      await input.click();
-      const clickState = await input.evaluate(el => {
-        const r = el.getBoundingClientRect();
-        const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
-        return {
-          checked: el.checked, disabled: el.disabled, pointerEvents: getComputedStyle(el).pointerEvents,
-          rect: {x:r.x,y:r.y,width:r.width,height:r.height}, hit: hit?.outerHTML?.slice(0,180),
-          changeEvents: window.__lastEffectClick?.changes, mode: document.body.dataset.mode, trace: window.__effectTrace,
-          parent: el.parentElement?.outerHTML?.slice(0,220)
-        };
-      });
-      assert.equal(clickState.checked, true, "checkbox must respond to a real click: " + effect + " · " + JSON.stringify(clickState));
-      assert.equal(await input.locator("xpath=..").evaluate(el => el.closest(".effect-control").classList.contains("is-active")), true,
+    for (const effect of await page.locator(".effect-control .effect-toggle[role=checkbox][data-effect]").evaluateAll(els => els.map(el => el.dataset.effect))) {
+      const toggle = page.locator('#effect-' + effect);
+      assert.equal(await toggle.getAttribute("aria-checked"), "false", "effect should start unchecked: " + effect);
+      await toggle.click();
+      assert.equal(await toggle.getAttribute("aria-checked"), "true", "checkbox-role control must respond to a real click: " + effect);
+      assert.equal(await toggle.locator("xpath=..").evaluate(el => el.closest(".effect-control").classList.contains("is-active")), true,
         "active state should be reflected in the effect card: " + effect);
       assert.ok(await page.locator("#output").evaluate(c => c.width > 0 && c.height > 0), "effect failed to render: " + effect);
-      await input.click();
-      assert.equal(await input.isChecked(), false, "checkbox must turn off on a second click: " + effect);
+      await toggle.click();
+      assert.equal(await toggle.getAttribute("aria-checked"), "false", "effect must turn off on a second click: " + effect);
     }
 
     const png = await downloadFrom(page, "#png");
