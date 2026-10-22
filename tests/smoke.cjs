@@ -226,6 +226,18 @@ async function downloadFrom(page, selector) {
     });
     await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
     assert.deepEqual(await page.locator("#output").evaluate(c => [c.width, c.height]), [48, 32]);
+    const pasteWasHandled = await page.evaluate(async dataURL => {
+      const blob = await (await fetch(dataURL)).blob();
+      const file = new File([blob], "clipboard-source.png", { type: "image/png" });
+      const event = new Event("paste", { bubbles: true, cancelable: true });
+      Object.defineProperty(event, "clipboardData", { value: { items: [{ type: "image/png", getAsFile: () => file }] } });
+      return !window.dispatchEvent(event);
+    }, dataURL);
+    assert.equal(pasteWasHandled, true, "pasting an image should be intercepted by the local editor");
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("clipboard-image.png"));
+    assert.deepEqual(await page.locator("#output").evaluate(c => [c.width, c.height]), [48, 32], "pasted image should load into the editor");
+    await page.locator("#imageInput").setInputFiles({ name: "qa-fixture.png", mimeType: "image/png", buffer: imageBuffer });
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
 
     // Exercise every algorithm option so a broken branch cannot hide behind a valid default.
     const algorithms = await page.locator("#algorithm option").evaluateAll(options => options.map(option => option.value));
@@ -342,6 +354,18 @@ async function downloadFrom(page, selector) {
     const offline = await downloadFrom(page, "#offlineBtn");
     assert.match(offline.download.suggestedFilename(), /TGRMLither-offline\.html$/);
     assert.ok(offline.bytes.toString("utf8").includes("TGRMLither — Browser Image Studio"));
+    assert.equal(await page.locator("#fullscreenBtn").count(), 1, "editor should provide an explicit full-screen control");
+    assert.match(await page.locator("#fullscreenBtn").getAttribute("aria-label"), /весь экран/i);
+    if (await page.evaluate(() => !!document.fullscreenEnabled && typeof document.documentElement.requestFullscreen === "function")) {
+      await page.locator("#fullscreenBtn").click();
+      await page.waitForFunction(() => !!document.fullscreenElement, null, { timeout: 3000 }).catch(() => {});
+      const enteredFullscreen = await page.evaluate(() => !!document.fullscreenElement);
+      if (enteredFullscreen) {
+        assert.match(await page.locator("#fullscreenBtn").getAttribute("aria-label"), /выйти/i);
+        await page.locator("#fullscreenBtn").click();
+        await page.waitForFunction(() => !document.fullscreenElement, null, { timeout: 3000 });
+      }
+    }
 
     // Video workspace should have a separate visible timeline and standard post-processing controls.
     await page.locator('.topnav [data-mode="video"]').click();
