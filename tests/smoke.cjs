@@ -52,6 +52,18 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(markupAudit.modeButtons, ["presets", "shape", "script", "batch", "video"]);
     const initialSize = await page.locator("#output").evaluate(c => ({ width: c.width, height: c.height }));
     assert.ok(initialSize.width >= 1 && initialSize.height >= 1, "demo image should render");
+    assert.equal(await page.locator("#algorithmStackControl").isVisible(), true, "algorithm stack is available in the image workspace");
+    assert.ok(await page.locator('#layerAlgorithmSelect option[value="spiral"]').count() === 1, "Spiral Dither must be selectable as a stack layer");
+    const beforeAlgorithmStack = await page.locator("#output").evaluate(c => c.toDataURL("image/png"));
+    await page.locator("#layerAlgorithmSelect").selectOption("spiral");
+    await page.locator("#addAlgorithmLayer").click();
+    assert.equal(await page.locator("#algorithmLayerList .algorithm-layer").count(), 1, "adding a layer should add a configurable algorithm");
+    assert.notEqual(await page.locator("#output").evaluate(c => c.toDataURL("image/png")), beforeAlgorithmStack, "an algorithm layer must composite into the preview");
+    const persistedLayers = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.algorithmLayers);
+    assert.equal(persistedLayers.length, 1, "algorithm layers should persist in workspace settings");
+    assert.equal(persistedLayers[0].algorithm, "spiral");
+    await page.locator('#algorithmLayerList [data-layer-action="remove"]').click();
+    assert.equal(await page.locator("#algorithmLayerList .algorithm-layer").count(), 0, "algorithm layers can be removed");
 
     // Core image processing and input controls.
     await page.locator("#algorithm").selectOption("floyd");
@@ -298,6 +310,18 @@ async function downloadFrom(page, selector) {
       name: "palette.json", mimeType: "application/json", buffer: palette.bytes
     });
 
+    // Vector export supports print sizing and layered CMYK plates.
+    await page.locator("#vectorDetail").selectOption("source");
+    const blackSvg = await downloadFrom(page, "#svgBlack");
+    const blackSvgText = blackSvg.bytes.toString("utf8");
+    assert.match(blackSvgText, /viewBox="0 0 960 620"/, "source-detail black SVG should preserve the original coordinate grid");
+    assert.match(blackSvgText, /width="81\.28mm"/, "SVG physical dimensions should follow source pixels and selected DPI");
+    assert.match(blackSvgText, /data-dpi="300"/, "SVG export should record the selected print DPI");
+    const cmykSvg = await downloadFrom(page, "#svgCmyk");
+    const cmykSvgText = cmykSvg.bytes.toString("utf8");
+    for (const plate of ["Cyan Plate", "Magenta Plate", "Yellow Plate", "Black Plate"]) assert.ok(cmykSvgText.includes(plate), "CMYK export should contain " + plate);
+    assert.equal((cmykSvgText.match(/inkscape:groupmode="layer"/g) || []).length, 4, "CMYK export should create four named vector layers");
+
     const offline = await downloadFrom(page, "#offlineBtn");
     assert.match(offline.download.suggestedFilename(), /TGRMLither-offline\.html$/);
     assert.ok(offline.bytes.toString("utf8").includes("TGRMLither — Browser Image Studio"));
@@ -307,6 +331,7 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("body").getAttribute("data-mode"), "video");
     assert.equal(await page.locator("#videoView").isVisible(), true);
     assert.equal(await page.locator("#videoTimeline").isVisible(), true);
+    assert.equal(await page.locator("#algorithmStackControl").isVisible(), false, "video controls remain outside the still-image algorithm stack");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "Video Lab should not reuse Editor's effect stack");
     assert.equal(await page.locator("#videoEffectsControl").isVisible(), true, "Video Lab has an independent effect stack");
     assert.equal(await page.locator("#asciiControl").isVisible(), false);

@@ -38,3 +38,10 @@ TGRMLither is an independent implementation inspired by the publicly described f
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+
+## Advanced still-image workflow
+
+- Algorithm compositing: up to four added algorithm layers, per-layer opacity, blend modes, reordering and removal. Layers are saved with workspace settings and project files.
+- Print output: choose SVG detail (compact, 1024 px, 2048 px or source resolution), black-vector threshold and DPI. CMYK export creates four labelled vector plates.
+- Pattern dithering: eight pattern modes including Spiral Dither, adjustable screen angle and halftone mark shape.
