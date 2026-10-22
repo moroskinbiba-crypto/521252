@@ -157,8 +157,19 @@ async function downloadFrom(page, selector) {
       const input = page.locator('#effect-' + effect);
       assert.equal(await input.isChecked(), false, "effect should start unchecked: " + effect);
       // Use real pointer clicks rather than assigning .checked / dispatching a synthetic event.
+      await input.evaluate(el => { window.__lastEffectClick = { changes: 0 }; el.addEventListener("change", () => window.__lastEffectClick.changes++); });
       await input.click();
-      assert.equal(await input.isChecked(), true, "checkbox must respond to a real click: " + effect);
+      const clickState = await input.evaluate(el => {
+        const r = el.getBoundingClientRect();
+        const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        return {
+          checked: el.checked, disabled: el.disabled, pointerEvents: getComputedStyle(el).pointerEvents,
+          rect: {x:r.x,y:r.y,width:r.width,height:r.height}, hit: hit?.outerHTML?.slice(0,180),
+          changeEvents: window.__lastEffectClick?.changes, mode: document.body.dataset.mode,
+          parent: el.parentElement?.outerHTML?.slice(0,220)
+        };
+      });
+      assert.equal(clickState.checked, true, "checkbox must respond to a real click: " + effect + " · " + JSON.stringify(clickState));
       assert.equal(await input.locator("xpath=..").evaluate(el => el.closest(".effect-control").classList.contains("is-active")), true,
         "active state should be reflected in the effect card: " + effect);
       assert.ok(await page.locator("#output").evaluate(c => c.width > 0 && c.height > 0), "effect failed to render: " + effect);
