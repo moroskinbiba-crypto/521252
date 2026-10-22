@@ -351,8 +351,18 @@ async function downloadFrom(page, selector) {
     assert.ok(batchProfileAfterSwitch.includes("scanlines"), "leaving Batch should not overwrite its profile: " + JSON.stringify(batchProfileAfterSwitch));
     await page.reload({ waitUntil: "load" });
     await page.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const batchProfileAfterReload = await page.evaluate(() => {
+      try { return JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.batch?.effects || []; }
+      catch { return ["<invalid-json>"]; }
+    });
+    assert.ok(batchProfileAfterReload.includes("scanlines"), "browser storage should retain Batch after reload: " + JSON.stringify(batchProfileAfterReload));
     await page.locator('.topnav [data-mode="batch"]').click();
-    assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true", "workspace settings should persist after reload");
+    const restoredBatch = await page.evaluate(() => ({
+      mode: document.body.dataset.mode,
+      checked: document.querySelector("#batch-effect-scanlines")?.getAttribute("aria-checked"),
+      stored: (() => { try { return JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.batch?.effects || []; } catch { return ["<invalid-json>"]; } })()
+    }));
+    assert.equal(restoredBatch.checked, "true", "workspace settings should persist after reload: " + JSON.stringify(restoredBatch));
     await page.locator('.topnav [data-mode="shape"]').click();
     assert.equal(await page.locator("#shape-effect-scanlines").getAttribute("aria-checked"), "true", "Shape Lab effects should persist independently");
     await page.locator("#shape-effect-scanlines").evaluate(el => el.setAttribute("aria-checked", "false"));
