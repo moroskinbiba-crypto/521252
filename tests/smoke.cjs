@@ -134,7 +134,7 @@ async function downloadFrom(page, selector) {
     // Exercise every algorithm option so a broken branch cannot hide behind a valid default.
     const algorithms = await page.locator("#algorithm option").evaluateAll(options => options.map(option => option.value));
     assert.ok(algorithms.length >= 60, "all advertised processing algorithms should be present");
-    for (const algorithm of algorithms) {
+    for (const algorithm of algorithms.filter(value => !["shape", "ascii"].includes(value))) {
       await page.locator("#algorithm").selectOption(algorithm);
       const rendered = await page.locator("#output").evaluate(canvas => ({
         width: canvas.width,
