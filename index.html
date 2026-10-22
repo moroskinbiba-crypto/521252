@@ -529,7 +529,7 @@ function openImage(){ $("imageInput").click() }
 function setMode(m){
  if(!["editor","presets","shape","script","batch","video"].includes(m))m="editor";
  if(m!=="script"&&asciiAnimRaf)stopAsciiAnimation();
- if(m!=="video"&&$("videoSource"))$("videoSource").pause();
+ if(m!=="video"&&$("videoSource")){$("videoSource").pause();if(videoRaf)cancelAnimationFrame(videoRaf);videoRaf=0}
  mode=m;document.body.dataset.mode=m;
  document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("active",b.dataset.mode===m));
  $("editorView").classList.toggle("hidden",["presets","batch","video"].includes(m));
