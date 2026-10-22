@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "/tmp/tgrmlithering-qa/node_modules/playwright");
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "/tmp/tgrmlither-qa/node_modules/playwright");
 
 const baseURL = process.env.TGRM_BASE_URL || "http://127.0.0.1:4173/";
 
@@ -28,18 +28,28 @@ async function downloadFrom(page, selector) {
         document.querySelector("#statAlgorithm")?.textContent.trim();
     }, null, { timeout: 15000 });
 
-    assert.match(await page.title(), /^TGRMLithering/);
+    assert.match(await page.title(), /^TGRMLither/);
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
+    assert.match(await page.locator("#homeLogo").innerText(), /TGRMLither/, "new product name must be visible in the app header");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), true, "regular effects should be visible in Editor");
     assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer panel should be isolated from Editor");
     assert.equal(await page.locator("#shapeControl").isVisible(), false, "Shape Lab panel should be isolated from Editor");
     const theme = await page.evaluate(() => ({
       bodyFont: getComputedStyle(document.body).fontFamily,
       headingFont: getComputedStyle(document.querySelector("#pageTitle")).fontFamily,
-      background: getComputedStyle(document.body).backgroundColor
+      background: getComputedStyle(document.body).backgroundColor,
+      fontStylesheet: document.querySelector('link[href*="fonts.googleapis.com"]')?.href || ""
     }));
-    assert.match(theme.bodyFont, /VT323/, "pixel body font stack should be applied");
-    assert.match(theme.headingFont, /Press Start 2P/, "pixel heading font stack should be applied");
+    assert.match(theme.bodyFont, /Onest/, "Cyrillic-friendly Onest should be used by the interface");
+    assert.match(theme.headingFont, /Onest/, "headings should use readable Onest instead of a Latin-only pixel font");
+    assert.ok(theme.fontStylesheet.includes("family=Onest"), "Onest web font must be included");
+    assert.ok(theme.fontStylesheet.includes("IBM+Plex+Mono"), "IBM Plex Mono must be included for technical labels");
+    const markupAudit = await page.evaluate(() => {
+      const ids = [...document.querySelectorAll("[id]")].map(el => el.id);
+      return { duplicates: ids.filter((id, i) => ids.indexOf(id) !== i), modeButtons: [...document.querySelectorAll(".topnav [data-mode]")].map(el => el.dataset.mode) };
+    });
+    assert.deepEqual(markupAudit.duplicates, [], "runtime-generated workspace panels must not create duplicate IDs");
+    assert.deepEqual(markupAudit.modeButtons, ["presets", "shape", "script", "batch", "video"]);
     const initialSize = await page.locator("#output").evaluate(c => ({ width: c.width, height: c.height }));
     assert.ok(initialSize.width >= 1 && initialSize.height >= 1, "demo image should render");
 
@@ -196,7 +206,7 @@ async function downloadFrom(page, selector) {
 
     const png = await downloadFrom(page, "#png");
     assert.deepEqual([...png.bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
-    assert.match(png.download.suggestedFilename(), /TGRMLithering.*\.png$/);
+    assert.match(png.download.suggestedFilename(), /TGRMLither.*\.png$/);
 
     const jpg = await downloadFrom(page, "#jpg");
     assert.equal(jpg.bytes[0], 0xff);
@@ -204,15 +214,27 @@ async function downloadFrom(page, selector) {
 
     const project = await downloadFrom(page, "#saveProject");
     const projectData = JSON.parse(project.bytes.toString("utf8"));
-    assert.equal(projectData.format, "tgrmlithering-project");
+    assert.equal(projectData.format, "tgrmlither-project");
     assert.equal(projectData.workspace, "editor", "project files should remember their originating workspace");
+    assert.ok(projectData.workspaces.shape.effects.includes("scanlines"), "projects should preserve Shape Lab settings");
+    assert.ok(projectData.workspaces.script.effects.includes("scanlines"), "projects should preserve Script Slayer settings");
     assert.ok(projectData.source.startsWith("data:image/png;base64,"));
     await page.locator("#projectInput").setInputFiles({
-      name: "roundtrip.tgrmlithering.json",
+      name: "roundtrip.tgrmlither.json",
       mimeType: "application/json",
       buffer: project.bytes
     });
     await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
+    assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
+
+    // Legacy projects created before the rename must remain readable.
+    const legacyProject = { ...projectData, format: "tgrmlithering-project", version: 1 };
+    delete legacyProject.workspaces;
+    await page.locator("#projectInput").setInputFiles({
+      name: "legacy-project.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(legacyProject))
+    });
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
+    assert.equal(await page.locator("body").getAttribute("data-mode"), "editor", "old project format should remain supported");
 
     // Project files must preserve and restore the exclusive Script Slayer workspace.
     await page.locator('.topnav [data-mode="script"]').click();
@@ -220,7 +242,7 @@ async function downloadFrom(page, selector) {
     const scriptProjectData = JSON.parse(scriptProject.bytes.toString("utf8"));
     assert.equal(scriptProjectData.workspace, "script");
     await page.locator("#projectInput").setInputFiles({
-      name: "script-roundtrip.tgrmlithering.json",
+      name: "script-roundtrip.tgrmlither.json",
       mimeType: "application/json",
       buffer: scriptProject.bytes
     });
@@ -236,8 +258,8 @@ async function downloadFrom(page, selector) {
     });
 
     const offline = await downloadFrom(page, "#offlineBtn");
-    assert.match(offline.download.suggestedFilename(), /TGRMLithering-offline\.html$/);
-    assert.ok(offline.bytes.toString("utf8").includes("TGRMLithering — Browser Image Studio"));
+    assert.match(offline.download.suggestedFilename(), /TGRMLither-offline\.html$/);
+    assert.ok(offline.bytes.toString("utf8").includes("TGRMLither — Browser Image Studio"));
 
     // Video workspace should have a separate visible timeline and standard post-processing controls.
     await page.locator('.topnav [data-mode="video"]').click();
@@ -300,7 +322,7 @@ async function downloadFrom(page, selector) {
       page.waitForEvent("download", { timeout: 20000 }),
       page.locator("#videoExport").click()
     ]);
-    assert.match(videoDownload.suggestedFilename(), /TGRMLithering\.webm$/);
+    assert.match(videoDownload.suggestedFilename(), /TGRMLither\.webm$/);
     assert.ok(fs.statSync(await videoDownload.path()).size > 500, "exported video should contain data");
 
     // Batch processing should accept and produce a real PNG.
@@ -311,10 +333,28 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#batchList .fileitem").count(), 1);
     await page.locator("#runBatch").click();
     await page.waitForFunction(() => document.querySelectorAll("#batchResults a[download]").length === 1, null, { timeout: 15000 });
-    assert.match(await page.locator("#batchResults a[download]").getAttribute("download"), /TGRMLithering\.png$/);
+    assert.match(await page.locator("#batchResults a[download]").getAttribute("download"), /TGRMLither\.png$/);
+
+    await page.locator("#batch-effect-scanlines").click();
+    assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true");
+    await page.locator("#homeLogo").click();
+    assert.equal(await page.locator("#effect-scanlines").getAttribute("aria-checked"), "false", "batch effects must not leak into Editor");
+    await page.reload({ waitUntil: "load" });
+    await page.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    await page.locator('.topnav [data-mode="batch"]').click();
+    assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true", "workspace settings should persist after reload");
+    await page.locator('.topnav [data-mode="shape"]').click();
+    assert.equal(await page.locator("#shape-effect-scanlines").getAttribute("aria-checked"), "true", "Shape Lab effects should persist independently");
+    await page.locator("#shape-effect-scanlines").evaluate(el => el.setAttribute("aria-checked", "false"));
+    await page.locator("#homeLogo").click();
+    await page.locator('.topnav [data-mode="shape"]').click();
+    assert.equal(await page.locator("#shape-effect-scanlines").getAttribute("aria-checked"), "true", "workspace activation should resync stale hidden controls from saved state");
+    await page.locator("#homeLogo").click();
+    await page.locator('.topnav [data-mode="script"]').click();
+    assert.equal(await page.locator("#script-effect-scanlines").getAttribute("aria-checked"), "true", "Script Slayer effects should survive reload");
 
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
-    console.log("TGRMLithering smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
+    console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {
     await browser.close();
   }

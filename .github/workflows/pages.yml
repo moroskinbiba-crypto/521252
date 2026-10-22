@@ -1,4 +1,4 @@
-name: Deploy TGRMLithering to GitHub Pages
+name: Deploy TGRMLither to GitHub Pages
 
 on:
   push:
@@ -30,26 +30,26 @@ jobs:
           scripts = re.findall(r'<script>(.*?)</script>', html, flags=re.S)
           if not scripts:
               raise SystemExit('No inline JavaScript found in index.html')
-          Path('/tmp/tgrmlithering-inline.js').write_text(scripts[-1], encoding='utf-8')
+          Path('/tmp/tgrmlither-inline.js').write_text(scripts[-1], encoding='utf-8')
           PY
-          node --check /tmp/tgrmlithering-inline.js
+          node --check /tmp/tgrmlither-inline.js
       - name: Validate browser smoke-test JavaScript
         run: node --check tests/smoke.cjs
       - name: Install Chromium smoke-test dependencies
         run: |
-          npm install --prefix /tmp/tgrmlithering-qa playwright@1.55.0
+          npm install --prefix /tmp/tgrmlither-qa playwright@1.55.0
           npx --yes playwright@1.55.0 install chromium
       - name: Run browser smoke tests
         shell: bash
         run: |
-          python -m http.server 4173 --bind 127.0.0.1 >/tmp/tgrmlithering-http.log 2>&1 &
+          python -m http.server 4173 --bind 127.0.0.1 >/tmp/tgrmlither-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           for attempt in {1..30}; do
             if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then break; fi
             sleep 1
           done
-          PLAYWRIGHT_MODULE=/tmp/tgrmlithering-qa/node_modules/playwright node tests/smoke.cjs
+          PLAYWRIGHT_MODULE=/tmp/tgrmlither-qa/node_modules/playwright node tests/smoke.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:

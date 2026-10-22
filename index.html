@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#245edb">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-<meta name="description" content="TGRMLithering — локальная мастерская дизеринга, пиксель-арта, полутонов, глитча и символьной графики.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&amp;family=Onest:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<meta name="description" content="TGRMLither — локальная мастерская дизеринга, пиксель-арта, полутонов, глитча и символьной графики.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
-<title>TGRMLithering — Browser Image Studio</title>
+<title>TGRMLither — Browser Image Studio</title>
 <style>
 :root{color-scheme:dark;--bg:#11130f;--panel:#191c17;--panel2:#20241e;--line:#30372c;--text:#eff3e9;--muted:#9aa393;--acid:#cafa6a;--purple:#b5a3ff;--r:14px}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 78% -20%,#cafa6a0b,transparent 45%),var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acid);outline-offset:2px}button:disabled{opacity:.5;cursor:not-allowed}.hidden{display:none!important}
@@ -36,7 +36,7 @@ header{height:56px;padding:0 16px;gap:18px}.brand small{display:none}.brand{min-
 @media(max-width:1140px){.layout{grid-template-columns:160px minmax(260px,1fr)}.stage{height:480px}main{padding:16px}.inspectorhead{grid-column:1/-1}}
 @media(max-width:740px){header{min-height:56px;padding:9px}.brand{min-width:0}.topnav{display:flex;overflow-x:auto}.topnav .navbtn{white-space:nowrap;padding:7px}.topright .local,.topright #offlineBtn{display:none}.layout{display:flex;flex-direction:column}.left{padding:7px!important}.left .sectionlabel,.left>div:nth-child(2),.privacy{display:none}.menu button{padding:7px 9px}.heading h1{font-size:18px}.stage{height:50vh;min-height:300px}.stagebar{padding:7px}.stageactions .btn{padding:6px}.stageactions .select{max-width:80px}.canvaswrap{padding:8px}.stagefoot{font-size:8px}aside.right{display:block;padding:14px}main{padding:15px 10px 20px}.presetgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .effect-order-actions{display:inline-flex;gap:3px;margin-left:auto}.effect-order-actions button{border:1px solid var(--line);background:#171b13;color:var(--muted);border-radius:4px;padding:1px 4px;font-size:9px;cursor:pointer}.shape-bands{display:grid;gap:7px;margin:10px 0}.shape-band{background:#11140f;border:1px solid var(--line);border-radius:7px;padding:7px}.shape-band>b{display:block;font-size:9px;margin-bottom:6px;color:var(--muted)}.shape-band-row{display:grid;grid-template-columns:1fr 1fr 28px;gap:5px;align-items:center}.shape-band-row .select{min-width:0;padding:5px}.shape-band-row input[type=color]{width:28px;height:25px;padding:2px;background:#111;border:1px solid var(--line);border-radius:5px}.glyph-preview{margin-top:5px;border:1px solid var(--line);border-radius:6px;background:#0a0c09;color:var(--acid);font:12px/1.6 ui-monospace,monospace;letter-spacing:1px;overflow:hidden;white-space:nowrap;padding:5px 7px}.shape-bands{max-height:400px;overflow:auto}.effect-order-actions{display:inline-flex;gap:3px;margin-left:auto}.effect-order-actions button{border:1px solid var(--line);background:#171b13;color:var(--muted);border-radius:4px;padding:1px 4px;font-size:9px;cursor:pointer}.ascii-neoglow{margin-top:9px;padding:8px;border:1px solid var(--line);border-radius:7px;background:#10130e}.ascii-neoglow .switchrow{font-size:10px}.ascii-neoglow .field{margin-top:8px}
-/* TGRMLithering workstation layout: keep the canvas visible while controls scroll independently. */
+/* TGRMLither workstation layout: keep the canvas visible while controls scroll independently. */
 html,body{height:100%;overflow:hidden}
 body{height:100vh;height:100dvh;overflow:hidden}
 .layout{height:calc(100vh - 56px);height:calc(100dvh - 56px);min-height:0;overflow:hidden;align-items:stretch}
@@ -104,9 +104,9 @@ body{height:100vh;height:100dvh;overflow:hidden}
  --xp-blue:#0054e3;--xp-blue-dark:#003c9d;--xp-blue-light:#78b4ff;
  --xp-face:#ece9d8;--xp-shadow:#7a7a7a;--xp-highlight:#ffffff;
 }
-html,body{background:#3a6ea5!important;color:#202020!important;font-family:"VT323","Lucida Console","Courier New",monospace!important;font-size:18px;line-height:1.12}
+html,body{background:#3a6ea5!important;color:#202020!important;font-family:"IBM Plex Mono","Lucida Console","Courier New",monospace!important;font-size:18px;line-height:1.12}
 body{background-color:#3a6ea5!important;background-image:linear-gradient(135deg,#4f87bb 0%,#2e5f95 55%,#245185 100%)!important}
-button,input,select,textarea{font-family:"VT323","Lucida Console","Courier New",monospace!important;font-size:18px!important;letter-spacing:0!important}
+button,input,select,textarea{font-family:"IBM Plex Mono","Lucida Console","Courier New",monospace!important;font-size:18px!important;letter-spacing:0!important}
 a{color:#003c9d}
 header{
  background:linear-gradient(180deg,#3c8cf5 0%,#1767e9 12%,#0054e3 50%,#0050d5 51%,#0344ad 100%)!important;
@@ -115,7 +115,7 @@ header{
  backdrop-filter:none;z-index:10
 }
 .brand{min-width:165px;gap:8px;color:#fff;text-decoration:none}
-.brand b{font-family:"Press Start 2P","Lucida Console",monospace!important;font-size:10px;line-height:1.8;letter-spacing:0;color:#fff;text-shadow:1px 1px #003b95}
+.brand b{font-family:"Onest","Lucida Console",monospace!important;font-size:10px;line-height:1.8;letter-spacing:0;color:#fff;text-shadow:1px 1px #003b95}
 .brand small{display:none}
 .mark{border:2px outset #c4ddff;border-radius:0;padding:3px;gap:2px;background:#0d4bb5}
 .mark i{border-radius:0;background:#fff}
@@ -145,21 +145,21 @@ header{
 .layout>main{border-left:0;border-right:0;background:#f6f4eb!important}
 .layout>aside.right{border-left:0}
 .sectionlabel,.controltitle,.inspectorhead strong,.card h2,.custom-colors-head{
- color:#003c9d;font-family:"Press Start 2P","Lucida Console",monospace!important;
+ color:#003c9d;font-family:"Onest","Lucida Console",monospace!important;
  font-size:8px!important;letter-spacing:0;line-height:1.8
 }
 .menu{gap:2px}
 .menu button{border:1px solid transparent;border-radius:0;background:transparent;color:#202020;padding:6px 7px;font-size:18px!important}
 .menu button:hover{background:#dcecff;border-color:#7aa7e2;color:#001e62}
 .menu button.active{background:linear-gradient(#d9eaff,#a9ceff);color:#002e7d;border:1px solid #316ac5;box-shadow:inset 1px 1px #fff}
-.menu button .mi{font-family:"VT323",monospace;font-size:23px}
+.menu button .mi{font-family:"IBM Plex Mono",monospace;font-size:23px}
 .menu button .tag{font-size:14px!important;color:#31598f}
 .privacy{border:2px inset #fff;border-radius:0;background:#e1e8f4;padding:9px}
 .privacy strong{color:#003c9d;font-size:16px}
 .privacy p{font-size:16px;color:#36495d}
 .privacy span{font-size:14px;color:#003c9d}
 .heading h1,.card h2{
- font-family:"Press Start 2P","Lucida Console",monospace!important;color:#003c9d;
+ font-family:"Onest","Lucida Console",monospace!important;color:#003c9d;
  font-size:12px!important;line-height:2;margin:4px 0
 }
 .heading p,.card p{font-size:18px!important;color:#34465a}
@@ -180,7 +180,7 @@ header{
 .pill.green{background:#d5e7ff;color:#003c9d;border-color:#6495d1}
 .control{border-bottom:1px solid #c2c0b5}
 .controltitle{margin-bottom:7px}
-.controltitle small{color:#5b6573;font-family:"VT323",monospace!important;font-size:15px!important}
+.controltitle small{color:#5b6573;font-family:"IBM Plex Mono",monospace!important;font-size:15px!important}
 .field label,.switchrow{color:#202020;font-size:18px!important}
 .val{color:#003c9d;font-size:16px!important}
 .select,.select.full{border:2px inset #fff;border-radius:0;background:#fff;color:#202020;max-width:100%;padding:4px 6px}
@@ -196,7 +196,7 @@ header{
 .palette:hover{background:#dcecff;border-color:#8ab5ed}
 .palette.active{background:#c7ddff;border:2px inset #fff;box-shadow:none}
 .swatches{border:1px solid #888;border-radius:0}
-.pname{font-family:"VT323",monospace!important;font-size:14px!important;color:#202020}
+.pname{font-family:"IBM Plex Mono",monospace!important;font-size:14px!important;color:#202020}
 .effect-control{
  position:relative;display:block;border:2px outset #fff;border-radius:0;
  background:#f6f4eb;padding:5px 6px;isolation:isolate;overflow:visible
@@ -215,7 +215,7 @@ header{
 }
 .effect-control .effect-toggle[role="checkbox"][aria-checked="true"]{background:#c5dbff;border-color:#5c81b6}
 .effect-control .effect-toggle[role="checkbox"][aria-checked="true"]::after{
- content:"✓";font:14px/1 "VT323","Lucida Console",monospace;color:#003c9d;
+ content:"✓";font:14px/1 "IBM Plex Mono","Lucida Console",monospace;color:#003c9d;
  position:absolute;left:0;top:-2px
 }
 .effect-control .effect-toggle:focus-visible{outline:2px solid #0754c9;outline-offset:2px}
@@ -240,7 +240,7 @@ header{
 .previewart{border-bottom:2px solid #a6a397;background:#c8c8c8}
 .presetinfo{padding:8px}
 .ptag{color:#003c9d;font-size:14px!important}
-.presetname{font-family:"Press Start 2P","Lucida Console",monospace!important;font-size:8px;line-height:2}
+.presetname{font-family:"Onest","Lucida Console",monospace!important;font-size:8px;line-height:2}
 .presetdesc{font-size:16px!important;color:#34465a}
 .drop{background:#e4efff;border:2px dashed #4e80bf}
 .fileicon{border:1px solid #7f9db9;border-radius:0;background:#d8e6fa}
@@ -250,11 +250,11 @@ header{
 .progress i{background:linear-gradient(#66a9ff,#0754c9);border-right:1px solid #003c9d}
 .ascii{background:#fff}
 .ascii summary{font-size:18px;color:#003c9d}
-.ascii pre{font:16px/1.1 "VT323","Lucida Console",monospace!important;color:#003c9d}
+.ascii pre{font:16px/1.1 "IBM Plex Mono","Lucida Console",monospace!important;color:#003c9d}
 .toast{border:2px outset #fff;border-radius:0;background:#ece9d8;color:#202020;font-size:18px;box-shadow:2px 2px 0 #333}
 .modalbg{background:#15396699}
 .modal{border:2px outset #fff;border-radius:0;background:#ece9d8;box-shadow:3px 3px 0 #1d3a5d}
-.modal h2{font-family:"Press Start 2P","Lucida Console",monospace!important;color:#003c9d;font-size:10px;line-height:2}
+.modal h2{font-family:"Onest","Lucida Console",monospace!important;color:#003c9d;font-size:10px;line-height:2}
 .modal p{color:#34465a;font-size:18px!important}
 .modal input{border:2px inset #fff;border-radius:0;background:#fff;color:#202020;font-size:18px!important}
 .hidden{display:none!important}
@@ -309,7 +309,7 @@ main,.layout>main{min-width:0}
 .stage{height:calc(100dvh - 190px);min-height:260px;max-height:none}
 .stagefoot{font-size:14px}
 .control{padding-bottom:10px;margin-bottom:10px}
-#inspectorTitle{font-family:"Press Start 2P","Lucida Console",monospace!important;font-size:8px!important;line-height:1.8;color:#003c9d}
+#inspectorTitle{font-family:"Onest","Lucida Console",monospace!important;font-size:8px!important;line-height:1.8;color:#003c9d}
 #videoView{min-height:100%}
 .video-stage{height:calc(100dvh - 240px);min-height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}#videoEmpty{display:block;position:absolute;max-width:340px}
 #videoOutput{display:block;max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated;background:#c8c8c8;border:2px solid #fff;box-shadow:2px 2px #555}
@@ -365,11 +365,34 @@ body[data-mode="batch"] .layout>main,body[data-mode="video"] .layout>main{paddin
 .effect-control .effect-toggle[role="checkbox"]{-webkit-appearance:none!important;appearance:none!important}
 .effect-control .effect-toggle[role="checkbox"]:active{border-style:inset}
 
+
+/* Cyrillic-first typography refresh: keep Luna chrome, use a contemporary readable Cyrillic family. */
+:root{--ui-font:"Onest",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;--mono-font:"IBM Plex Mono",ui-monospace,"Cascadia Code",monospace}
+html,body,button,input,select,textarea{font-family:var(--ui-font)!important;font-size:14px!important;line-height:1.4!important;letter-spacing:normal!important}
+html,body{font-size:14px!important;line-height:1.42!important}
+header .brand b,.brand b{font-family:var(--ui-font)!important;font-weight:800!important;font-size:13px!important;line-height:1.35!important;letter-spacing:.025em!important}
+.brand small,.sectionlabel,.eyebrow,.controltitle small,.fieldtop .val,.pill,.stats,.stagefoot #dimensions,.topright .local{font-family:var(--mono-font)!important;font-size:10px!important;letter-spacing:.015em!important;line-height:1.5!important}
+.topnav .navbtn{font-family:var(--ui-font)!important;font-size:13px!important;font-weight:600!important;letter-spacing:0!important;padding:7px 10px}
+.btn,.menu button,.field label,.switchrow,.stagebar .filename,.stagefoot,.effect-control .effect,.effect-intensity output,.filetext b,.filetext small,.pname,.presetdesc,.presetname,.ptag,.drop,.toast,.modal p,.modal input{font-family:var(--ui-font)!important;font-size:13px!important;line-height:1.4!important;letter-spacing:0!important}
+.btn{font-weight:650!important}.menu button{font-weight:550!important}
+.menu button .mi,.controltitle small,.effect-control .effect small,.pname,.ptag,.pill,.val,.stats b,.stagefoot #dimensions{font-family:var(--mono-font)!important}
+.sectionlabel,.controltitle,.inspectorhead strong,.custom-colors-head,.shape-band>b{font-family:var(--ui-font)!important;font-size:10px!important;font-weight:800!important;letter-spacing:.045em!important;line-height:1.5!important}
+.heading h1{font-family:var(--ui-font)!important;font-size:19px!important;font-weight:800!important;line-height:1.25!important;letter-spacing:-.025em!important}
+.card h2,.modal h2{font-family:var(--ui-font)!important;font-size:14px!important;font-weight:800!important;line-height:1.45!important;letter-spacing:-.01em!important}
+#inspectorTitle{font-family:var(--ui-font)!important;font-size:13px!important;font-weight:800!important;line-height:1.4!important;letter-spacing:-.01em!important}
+.heading p,.card p,.privacy p,.modal p{font-family:var(--ui-font)!important;font-size:13px!important;line-height:1.5!important}
+.field label,.switchrow{font-size:13px!important;font-weight:550!important}.val,.fieldtop .val,.stats b{font-size:11px!important;font-weight:650!important}
+.presetname{font-size:12px!important;font-weight:750!important;line-height:1.45!important}.presetdesc{font-size:12px!important;line-height:1.45!important}.pname{font-size:11px!important}
+.effect-control .effect small{font-size:9px!important}.effect-intensity output{font-family:var(--mono-font)!important;font-size:10px!important}
+.menu button .mi{font-size:17px!important}.ascii pre{font:13px/1.35 var(--mono-font)!important;letter-spacing:0!important}
+.modal h2{font-size:15px!important}.toast{font-size:13px!important}
+@media(max-width:740px){.heading h1{font-size:17px!important;line-height:1.3!important}.topnav .navbtn{font-size:12px!important}.brand b{font-size:12px!important}.stagefoot .stats span{font-size:10px!important}}
+
 </style>
 </head>
 <body data-mode="editor">
 <header>
-<a class="brand" href="#" id="homeLogo" aria-label="TGRML.dither"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span><b>TGRML.dither</b><small>PIXEL IMAGE STUDIO</small></span></a>
+<a class="brand" href="#" id="homeLogo" aria-label="TGRMLither"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span><b>TGRMLither</b><small>PIXEL IMAGE STUDIO</small></span></a>
 <button class="btn" id="openImage" title="Загрузить изображение" aria-label="Загрузить изображение">▣ Загрузить</button>
 <nav class="topnav" aria-label="Рабочие пространства"><button class="navbtn" data-mode="presets">Пресеты</button><button class="navbtn" data-mode="shape">Shape Lab</button><button class="navbtn" data-mode="script">Script Slayer</button><button class="navbtn" data-mode="batch">Пакетно</button><button class="navbtn" data-mode="video">Видео</button></nav>
 <div class="topright"><span class="local"><i class="live"></i>локально</span><button class="btn" id="offlineBtn" title="Скачать автономную HTML-версию">↓ HTML</button><button class="btn primary" id="topExport">↓ Экспорт</button></div>
@@ -660,12 +683,12 @@ document.querySelectorAll("[data-effect-strength]").forEach(e=>{
 });document.querySelectorAll(".palette").forEach(e=>e.classList.toggle("active",e.dataset.palette===s.palette));(s.customColors||pal.custom.c).forEach((c,i)=>{const el=$("customColor"+(i+1));if(el)el.value=c});pal.custom.c=s.customColors||pal.custom.c;for(let i=0;i<4;i++)if($("bandShape"+i)){const b=(s.shapeBands||def.shapeBands)[i];$("bandShape"+i).value=b.shape;$("bandSize"+i).value=b.size;$("bandColor"+i).value=b.color}}
 function initPalettes(){for(const [key,p] of Object.entries(pal)){let b=document.createElement("button");b.className="palette";b.dataset.palette=key;b.title=p.name;let sw=document.createElement("span");sw.className="swatches";p.c.forEach(c=>{let i=document.createElement("i");i.style.background=c;sw.append(i)});let nm=document.createElement("span");nm.className="pname";nm.textContent=p.name;b.append(sw,nm);b.onclick=()=>{s.palette=key;sync();render()};$("palettes").append(b)}}
 function extractPalette(){if(!src){say("Сначала откройте изображение");return}const c=document.createElement("canvas");c.width=72;c.height=72;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0,72,72);const d=x.getImageData(0,0,72,72).data,p=[];for(let i=0;i<d.length;i+=4)if(d[i+3]>16)p.push([d[i],d[i+1],d[i+2]]);let centers=[0,1,2,3].map(k=>p[Math.floor((k+.5)*p.length/4)]||[0,0,0]);for(let pass=0;pass<7;pass++){const sum=centers.map(()=>[0,0,0,0]);for(const v of p){let win=0,dist=Infinity;centers.forEach((cc,i)=>{const q=(v[0]-cc[0])**2+(v[1]-cc[1])**2+(v[2]-cc[2])**2;if(q<dist){dist=q;win=i}});for(let k=0;k<3;k++)sum[win][k]+=v[k];sum[win][3]++}centers=centers.map((cc,i)=>sum[i][3]?sum[i].slice(0,3).map(v=>Math.round(v/sum[i][3])):cc)}s.customColors=centers.map(v=>"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""));pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);sync();render();say("Палитра извлечена из фото")}
-function exportPalette(){download(new Blob([JSON.stringify({format:"tgrmlithering-palette",version:1,name:"My Colors",colors:s.customColors||pal.custom.c},null,2)],{type:"application/json"}),"TGRMLithering-palette.json")}
-function slug(t){return(t||"TGRMLithering").replace(/[^a-z0-9а-яё_-]+/gi,"-").replace(/^-+|-+$/g,"").slice(0,60)||"TGRMLithering"}
+function exportPalette(){download(new Blob([JSON.stringify({format:"tgrmlither-palette",version:1,name:"My Colors",colors:s.customColors||pal.custom.c},null,2)],{type:"application/json"}),"TGRMLither-palette.json")}
+function slug(t){return(t||"TGRMLither").replace(/[^a-z0-9а-яё_-]+/gi,"-").replace(/^-+|-+$/g,"").slice(0,60)||"TGRMLither"}
 function download(blob,name){let url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
-function exportImage(type="png"){if(!src)return;if(original){original=false;render()}out.toBlob(b=>b?download(b,slug(srcName)+"-TGRMLithering."+(type==="jpeg"?"jpg":type)):say("Экспорт не удался"),type==="jpeg"?"image/jpeg":"image/png",.94)}
-function project(){if(!src)return;if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);let c=document.createElement("canvas");c.width=src.width;c.height=src.height;c.getContext("2d").drawImage(src,0,0);let p={format:"tgrmlithering-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source:c.toDataURL("image/png"),settings:cloneSettings(s),workspaces:workspaceSettings};download(new Blob([JSON.stringify(p)],{type:"application/json"}),slug(srcName)+".tgrmlithering.json");say("Проект сохранён") }
-function saveStandalone(){let html="<!doctype html>\n"+document.documentElement.outerHTML;download(new Blob([html],{type:"text/html;charset=utf-8"}),"TGRMLithering-offline.html");say("Автономная HTML-версия скачана")}
+function exportImage(type="png"){if(!src)return;if(original){original=false;render()}out.toBlob(b=>b?download(b,slug(srcName)+"-TGRMLither."+(type==="jpeg"?"jpg":type)):say("Экспорт не удался"),type==="jpeg"?"image/jpeg":"image/png",.94)}
+function project(){if(!src)return;if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);let c=document.createElement("canvas");c.width=src.width;c.height=src.height;c.getContext("2d").drawImage(src,0,0);let p={format:"tgrmlither-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source:c.toDataURL("image/png"),settings:cloneSettings(s),workspaces:workspaceSettings};download(new Blob([JSON.stringify(p)],{type:"application/json"}),slug(srcName)+".tgrmlither.json");say("Проект сохранён") }
+function saveStandalone(){let html="<!doctype html>\n"+document.documentElement.outerHTML;download(new Blob([html],{type:"text/html;charset=utf-8"}),"TGRMLither-offline.html");say("Автономная HTML-версия скачана")}
 function openImage(){ $("imageInput").click() }
 function setMode(m){
  if(!["editor","presets","shape","script","batch","video"].includes(m))m="editor";
@@ -727,13 +750,13 @@ function savePreset(){ $("modalTitle").textContent="Сохранить прес�
 function renderBatch(){let box=$("batchList");box.innerHTML="";if(!batch.length){box.textContent="Выбранные файлы появятся здесь.";box.style.color="var(--muted)";box.style.fontSize="10px";return}batch.forEach((f,i)=>{let row=document.createElement("div");row.className="fileitem";let icon=document.createElement("div");icon.className="fileicon";icon.textContent="▧";let txt=document.createElement("div");txt.className="filetext";txt.innerHTML="<b></b><small></small>";txt.querySelector("b").textContent=f.name;txt.querySelector("small").textContent=(f.size/1048576).toFixed(2)+" MB";let rm=document.createElement("button");rm.className="btn sm";rm.textContent="×";rm.onclick=()=>{batch.splice(i,1);renderBatch()};row.append(icon,txt,rm);box.append(row)})}
 function addBatch(files){batch.push(...Array.from(files).filter(f=>f.type.startsWith("image/")));renderBatch();say("Добавлено файлов: "+files.length)}
 function fileCanvas(f){return new Promise((resolve,reject)=>{let u=URL.createObjectURL(f),im=new Image();im.onload=()=>{let c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext("2d").drawImage(im,0,0);URL.revokeObjectURL(u);resolve(c)};im.onerror=()=>{URL.revokeObjectURL(u);reject(Error("Не удалось открыть файл"))};im.src=u})}
-async function runBatch(){if(!batch.length){say("Сначала добавьте файлы");return}$("runBatch").disabled=true;$("batchResults").innerHTML="";let cfg={...s};for(let i=0;i<batch.length;i++){let f=batch[i];try{let image=await fileCanvas(f),c=cfg.algorithm==="ascii"?makeAscii(image,cfg):raster(image,cfg),blob=await new Promise(r=>c.toBlob(r,"image/png")),url=URL.createObjectURL(blob),row=document.createElement("div");row.className="fileitem";let a=document.createElement("a");a.className="btn sm";a.textContent="↓ PNG";a.href=url;a.download=slug(f.name.replace(/\.[^.]+$/,"") )+"-TGRMLithering.png";let text=document.createElement("div");text.className="filetext";text.innerHTML="<b></b><small>Готово · "+c.width+" × "+c.height+"</small>";text.querySelector("b").textContent=f.name;row.append(text,a);$("batchResults").append(row)}catch(e){say("Ошибка: "+f.name)}$("batchProgress").style.width=Math.round((i+1)/batch.length*100)+"%";await new Promise(r=>setTimeout(r,10))}$("runBatch").disabled=false;say("Пакетная обработка завершена")}
+async function runBatch(){if(!batch.length){say("Сначала добавьте файлы");return}$("runBatch").disabled=true;$("batchResults").innerHTML="";let cfg={...s};for(let i=0;i<batch.length;i++){let f=batch[i];try{let image=await fileCanvas(f),c=cfg.algorithm==="ascii"?makeAscii(image,cfg):raster(image,cfg),blob=await new Promise(r=>c.toBlob(r,"image/png")),url=URL.createObjectURL(blob),row=document.createElement("div");row.className="fileitem";let a=document.createElement("a");a.className="btn sm";a.textContent="↓ PNG";a.href=url;a.download=slug(f.name.replace(/\.[^.]+$/,"") )+"-TGRMLither.png";let text=document.createElement("div");text.className="filetext";text.innerHTML="<b></b><small>Готово · "+c.width+" × "+c.height+"</small>";text.querySelector("b").textContent=f.name;row.append(text,a);$("batchResults").append(row)}catch(e){say("Ошибка: "+f.name)}$("batchProgress").style.width=Math.round((i+1)/batch.length*100)+"%";await new Promise(r=>setTimeout(r,10))}$("runBatch").disabled=false;say("Пакетная обработка завершена")}
 function loadProject(f){
  const r=new FileReader();
  r.onload=()=>{
   try{
    const p=JSON.parse(r.result);
-   if(!["tgrmlithering-project","ditherlab-project"].includes(p.format)||!p.source)throw Error("project");
+   if(!["tgrmlither-project","tgrmlithering-project","ditherlab-project"].includes(p.format)||!p.source)throw Error("project");
    const target=WORKSPACE_NAMES.includes(p.workspace)?p.workspace:p.settings?.algorithm==="ascii"?"script":p.settings?.algorithm==="shape"?"shape":"editor";
    const loadedSettings=cloneSettings(p.settings||def);
    const im=new Image();
@@ -774,7 +797,7 @@ function formatTime(seconds){if(!Number.isFinite(seconds)||seconds<0)seconds=0;c
 function renderVideoFrame(){const video=$("videoSource"),canvas=$("videoOutput");if(!video||!canvas||video.readyState<2||!video.videoWidth||!video.videoHeight)return;const frame=document.createElement("canvas");frame.width=video.videoWidth;frame.height=video.videoHeight;frame.getContext("2d",{willReadFrequently:true}).drawImage(video,0,0);const cfg={...s,effects:s.effects||[]};const result=raster(frame,cfg);canvas.width=result.width;canvas.height=result.height;const ctx=canvas.getContext("2d");ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(result,0,0);canvas.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(s.algorithm)?"pixelated":"auto";$("videoTimeLabel").textContent=formatTime(video.currentTime);$("videoTimeline").value=String(video.currentTime)}
 function videoLoop(){if(mode!=="video")return;renderVideoFrame();if(!$("videoSource").paused&&!$("videoSource").ended)videoRaf=requestAnimationFrame(videoLoop);else videoRaf=0}
 function loadVideo(file){if(!file||!file.type.startsWith("video/")){say("Выберите видеофайл");return}const video=$("videoSource");if(videoObjectURL)URL.revokeObjectURL(videoObjectURL);video.pause();videoObjectURL=URL.createObjectURL(file);$("videoEmpty").style.display="none";$("videoFilename").textContent=file.name;video.src=videoObjectURL;video.onloadedmetadata=()=>{$("videoTimeline").max=String(video.duration||0);$("videoTimeline").value="0";$("videoDurationLabel").textContent=formatTime(video.duration);$("videoPlay").disabled=false;$("videoExport").disabled=false;renderVideoFrame();say("Видео загружено · "+Math.round(video.videoWidth)+" × "+Math.round(video.videoHeight))};video.onerror=()=>say("Не удалось открыть видео. Попробуйте MP4 или WebM.");video.load()}
-async function exportProcessedVideo(){const video=$("videoSource"),canvas=$("videoOutput");if(!video.src||!video.videoWidth){say("Сначала загрузите видео");return}if(!canvas.captureStream||typeof MediaRecorder==="undefined"){say("Запись WebM не поддерживается этим браузером");return}try{video.pause();if(video.currentTime>=video.duration-.05)video.currentTime=0;renderVideoFrame();const stream=canvas.captureStream(30);let audioStream=null;try{if(video.captureStream)audioStream=video.captureStream();else if(video.mozCaptureStream)audioStream=video.mozCaptureStream()}catch(e){}if(audioStream)audioStream.getAudioTracks().forEach(t=>stream.addTrack(t));const mime=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(t=>MediaRecorder.isTypeSupported(t))||"";videoChunks=[];videoRecorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);videoRecorder.ondataavailable=e=>{if(e.data&&e.data.size)videoChunks.push(e.data)};videoRecorder.onerror=()=>say("Ошибка записи WebM");videoRecorder.onstop=()=>{const blob=new Blob(videoChunks,{type:videoRecorder?.mimeType||"video/webm"});if(blob.size)download(blob,slug(videoName())+"-TGRMLithering.webm");stream.getTracks().forEach(t=>t.stop());if(audioStream)audioStream.getTracks().forEach(t=>t.stop());videoRecorder=null;videoChunks=[];say("Обработанное видео экспортировано")};videoRecorder.start(250);video.currentTime=0;await video.play();videoRaf=requestAnimationFrame(videoLoop);video.onended=()=>{if(videoRecorder&&videoRecorder.state!=="inactive")videoRecorder.stop();$("videoPlay").textContent="▶ Воспроизвести"};$("videoPlay").textContent="Ⅱ Пауза";say("Записываю обработанное видео…")}catch(e){if(videoRecorder&&videoRecorder.state!=="inactive")videoRecorder.stop();videoRecorder=null;say("Не удалось начать экспорт WebM")}}
+async function exportProcessedVideo(){const video=$("videoSource"),canvas=$("videoOutput");if(!video.src||!video.videoWidth){say("Сначала загрузите видео");return}if(!canvas.captureStream||typeof MediaRecorder==="undefined"){say("Запись WebM не поддерживается этим браузером");return}try{video.pause();if(video.currentTime>=video.duration-.05)video.currentTime=0;renderVideoFrame();const stream=canvas.captureStream(30);let audioStream=null;try{if(video.captureStream)audioStream=video.captureStream();else if(video.mozCaptureStream)audioStream=video.mozCaptureStream()}catch(e){}if(audioStream)audioStream.getAudioTracks().forEach(t=>stream.addTrack(t));const mime=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(t=>MediaRecorder.isTypeSupported(t))||"";videoChunks=[];videoRecorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);videoRecorder.ondataavailable=e=>{if(e.data&&e.data.size)videoChunks.push(e.data)};videoRecorder.onerror=()=>say("Ошибка записи WebM");videoRecorder.onstop=()=>{const blob=new Blob(videoChunks,{type:videoRecorder?.mimeType||"video/webm"});if(blob.size)download(blob,slug(videoName())+"-TGRMLither.webm");stream.getTracks().forEach(t=>t.stop());if(audioStream)audioStream.getTracks().forEach(t=>t.stop());videoRecorder=null;videoChunks=[];say("Обработанное видео экспортировано")};videoRecorder.start(250);video.currentTime=0;await video.play();videoRaf=requestAnimationFrame(videoLoop);video.onended=()=>{if(videoRecorder&&videoRecorder.state!=="inactive")videoRecorder.stop();$("videoPlay").textContent="▶ Воспроизвести"};$("videoPlay").textContent="Ⅱ Пауза";say("Записываю обработанное видео…")}catch(e){if(videoRecorder&&videoRecorder.state!=="inactive")videoRecorder.stop();videoRecorder=null;say("Не удалось начать экспорт WebM")}}
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
 function init(){buildWorkflowEffectsPanels();initPalettes();controls();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);presets.forEach(p=>{});renderPresets();renderBatch();
 $("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await file.text();if(text.length>500000)throw Error("SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");s.customShapePath=path.getAttribute("d").slice(0,20000);s.customShapeViewBox=raw; s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===0?({...b,shape:"custom"}):({...b}));$("shapeSvgStatus").textContent=file.name+" · SVG path загружен";sync();render();say("Пользовательская SVG-форма загружена")}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(!v.src){$("videoInput").click();return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{let f=e.target.files[0];if(f)try{loadImage(await fileCanvas(f),f.name)}catch(err){say("Не удалось открыть изображение")}e.target.value=""};
@@ -782,7 +805,7 @@ $("reset").onclick=()=>{const algo=mode==="shape"?"shape":mode==="script"?"ascii
 $("randomize").onclick=()=>{let a=Object.keys(labels).filter(k=>k!=="ascii"&&k!=="shape"),p=Object.keys(pal);s.algorithm=a[Math.floor(Math.random()*a.length)];s.palette=p[Math.floor(Math.random()*p.length)];s.scale=2+Math.floor(Math.random()*15);s.contrast=80+Math.floor(Math.random()*70);s.threshold=-25+Math.floor(Math.random()*51);s.effects=["scanlines","glow","chromatic","vignette","noise"].filter(()=>Math.random()>.68);sync();render();say("Случайная комбинация готова")};
 $("toggleOriginal").onclick=()=>{original=!original;$("toggleOriginal").textContent=original?"◉ Показать результат":"◉ Показать оригинал";render()};$("zoom").onchange=zoom;
 $("png").onclick=$("topExport").onclick=()=>exportImage("png");$("jpg").onclick=()=>exportImage("jpeg");$("copy").onclick=copyResult;$("svgColor").onclick=()=>exportSvg(false);$("svgBlack").onclick=()=>exportSvg(true);$("temporalPlay").onclick=()=>startTemporal(false);$("temporalStop").onclick=stopTemporal;$("temporalRecord").onclick=()=>startTemporal(true);$("saveProject").onclick=$("saveProjectMenu").onclick=project;$("openProjectMenu").onclick=()=>$("projectInput").click();$("projectInput").onchange=e=>{if(e.target.files[0])loadProject(e.target.files[0]);e.target.value=""};
-$("offlineBtn").onclick=saveStandalone;$("savePresetMenu").onclick=$("savePresetLibrary").onclick=savePreset;$("exportPresets").onclick=()=>download(new Blob([JSON.stringify({format:"tgrmlithering-presets",version:1,presets:loadStore("ditherlab-presets",[])},null,2)],{type:"application/json"}),"TGRMLithering-presets.json");$("importPresets").onclick=()=>$("presetInput").click();$("presetInput").onchange=async e=>{const f=e.target.files[0];if(f)try{const j=JSON.parse(await f.text()),items=Array.isArray(j)?j:(j.presets||[]);if(!items.length)throw Error("presets");const valid=items.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,100);custom=[...valid,...loadStore("ditherlab-presets",[])];store("ditherlab-presets",custom);renderPresets();say("Пресеты импортированы")}catch(err){say("Файл пресетов не распознан")}e.target.value=""};$("downloadTxt").onclick=()=>{if(!src)return;makeAscii(src,s);download(new Blob([ascii],{type:"text/plain;charset=utf-8"}),slug(srcName)+"-script-slayer.txt")};
+$("offlineBtn").onclick=saveStandalone;$("savePresetMenu").onclick=$("savePresetLibrary").onclick=savePreset;$("exportPresets").onclick=()=>download(new Blob([JSON.stringify({format:"tgrmlithering-presets",version:1,presets:loadStore("ditherlab-presets",[])},null,2)],{type:"application/json"}),"TGRMLither-presets.json");$("importPresets").onclick=()=>$("presetInput").click();$("presetInput").onchange=async e=>{const f=e.target.files[0];if(f)try{const j=JSON.parse(await f.text()),items=Array.isArray(j)?j:(j.presets||[]);if(!items.length)throw Error("presets");const valid=items.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,100);custom=[...valid,...loadStore("ditherlab-presets",[])];store("ditherlab-presets",custom);renderPresets();say("Пресеты импортированы")}catch(err){say("Файл пресетов не распознан")}e.target.value=""};$("downloadTxt").onclick=()=>{if(!src)return;makeAscii(src,s);download(new Blob([ascii],{type:"text/plain;charset=utf-8"}),slug(srcName)+"-script-slayer.txt")};
 $("asciiPlay").onclick=()=>startAsciiAnimation(false);$("asciiStop").onclick=stopAsciiAnimation;$("asciiExportWebm").onclick=()=>startAsciiAnimation(true);
 document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));$("homeLogo").onclick=e=>{e.preventDefault();setMode("editor")};$("randomize").classList.toggle("hidden",mode!=="editor");
 $("batchBrowse").onclick=()=>$("batchInput").click();$("batchInput").onchange=e=>{addBatch(e.target.files);e.target.value=""};$("batchDrop").ondragover=e=>{e.preventDefault();$("batchDrop").style.borderColor="var(--acid)"};$("batchDrop").ondragleave=()=>$("batchDrop").style.borderColor="";$("batchDrop").ondrop=e=>{e.preventDefault();$("batchDrop").style.borderColor="";addBatch(e.dataTransfer.files)};$("runBatch").onclick=runBatch;$("clearBatch").onclick=()=>{batch=[];renderBatch();$("batchResults").innerHTML="";$("batchProgress").style.width="0%"};

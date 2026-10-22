@@ -1,6 +1,6 @@
 {
-  "name": "tgrmlithering",
-  "version": "1.1.0",
+  "name": "tgrmlither",
+  "version": "1.2.0",
   "private": false,
   "description": "A local-first browser graphics studio for dithering, halftone, glitch and symbol-based art",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
-  "name": "TGRMLithering — Browser Graphics Studio",
-  "short_name": "TGRMLithering",
+  "name": "TGRMLither — Browser Graphics Studio",
+  "short_name": "TGRMLither",
   "description": "Локальный браузерный редактор дизеринга, пиксель-арта, глитча и символьной графики",
   "start_url": "./",
   "scope": "./",
