@@ -61,6 +61,10 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#randomize").isVisible(), false, "Editor randomizer should not leak into Shape Lab");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "standard effect stack must not appear in Shape Lab");
     assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer settings must not appear in Shape Lab");
+    const svgShape = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M5 0 L10 10 L0 10 Z"/></svg>';
+    await page.locator("#shapeSvgInput").setInputFiles({ name: "custom-triangle.svg", mimeType: "image/svg+xml", buffer: Buffer.from(svgShape) });
+    assert.equal(await page.locator("#bandShape0").inputValue(), "custom", "imported SVG should become an available custom band shape");
+    assert.match(await page.locator("#shapeSvgStatus").textContent(), /custom-triangle\.svg/);
     await page.locator('.topnav [data-mode="script"]').click();
     assert.equal(await page.locator("body").getAttribute("data-mode"), "script");
     assert.equal(await page.locator("#asciiControl").isVisible(), true, "Script Slayer controls should be visible in Script Slayer");
@@ -179,6 +183,20 @@ async function downloadFrom(page, selector) {
       buffer: project.bytes
     });
     await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
+
+    // Project files must preserve and restore the exclusive Script Slayer workspace.
+    await page.locator('.topnav [data-mode="script"]').click();
+    const scriptProject = await downloadFrom(page, "#saveProject");
+    const scriptProjectData = JSON.parse(scriptProject.bytes.toString("utf8"));
+    assert.equal(scriptProjectData.workspace, "script");
+    await page.locator("#projectInput").setInputFiles({
+      name: "script-roundtrip.tgrmlithering.json",
+      mimeType: "application/json",
+      buffer: scriptProject.bytes
+    });
+    await page.waitForFunction(() => document.body.dataset.mode === "script" && !document.querySelector("#asciiControl").classList.contains("hidden"));
+    await page.locator("#homeLogo").click();
+    assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
 
     const palette = await downloadFrom(page, "#exportPalette");
     const paletteData = JSON.parse(palette.bytes.toString("utf8"));
