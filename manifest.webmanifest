@@ -1,0 +1,13 @@
+{
+  "name": "DitherLab — Browser Image Studio",
+  "short_name": "DitherLab",
+  "description": "Локальный браузерный редактор дизеринга и ретро-графики",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#11130f",
+  "theme_color": "#11130f",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

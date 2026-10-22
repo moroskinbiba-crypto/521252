@@ -1,35 +1,54 @@
-# Vote Button Diagnostics (local/test only)
+# DitherLab
 
-This utility records browser diagnostics for a manually triggered button on a local or test deployment. It does not automate voting, replay requests, alter cookies, clear storage, or bypass vote limits.
+**DitherLab** — браузерный редактор для дизеринга, полутонов, пиксельных текстур, геометрических паттернов и ASCII-графики. Приложение работает локально в браузере: выбранные изображения не отправляются на сервер.
 
-## Safety guard
+## Запуск в браузере
 
-The script refuses URLs outside:
-- localhost / 127.0.0.1 / ::1
-- domains ending in .localhost or .test
+Откройте **[DitherLab Web](https://moroskinbiba-crypto.github.io/521252/)**. Никакая установка не нужна.
 
-Do not weaken this guard to point it at a live public contest.
+GitHub Pages публикует сайт из ветки \`main\` через GitHub Actions workflow в \`.github/workflows/pages.yml\`.
 
-## Run
+## Возможности
 
-Requires Node.js 20+.
+- Floyd–Steinberg и Atkinson error diffusion.
+- Ordered dithering: Bayer 2×2, 4×4 и 8×8.
+- Halftone, pixel poster и геометрические Shape Lab-формы.
+- Палитры и монохромный / двухцветный режим.
+- Контраст, яркость, порог, размер ячейки, уровни, предварительное размытие и инверсия.
+- Постэффекты: CRT scanlines, glow, chromatic shift, vignette и noise.
+- ASCII Studio с несколькими наборами символов и экспортом TXT/PNG.
+- Восемь стартовых пресетов, пользовательские пресеты в браузере.
+- Пакетная обработка изображений.
+- Экспорт PNG/JPEG, копирование PNG, сохранение/открытие проекта JSON.
+- Кнопка **↓ HTML** скачивает автономную версию приложения: её можно открыть локально без установки.
+- PWA / офлайн-кэш для поддерживаемых браузеров.
 
-```bash
-npm install
-npx playwright install chromium
-TEST_URL=http://localhost:3000 npm run diagnose
-```
+## Скачать приложение
 
-A browser opens. Navigate to the test page if needed, then manually click the test vote button once. Return to the terminal and press Enter to finish.
+1. Откройте веб-приложение.
+2. Нажмите **↓ HTML**.
+3. Сохраните \`ditherlab-offline.html\` и открывайте его в современном браузере. Интернет не требуется для основного редактора.
 
-The report records same-origin request method/path/status, failed requests, browser console errors and page errors. Query strings, request bodies, cookies and authorization headers are never printed.
+Исходный код также доступен в этом репозитории. Для загрузки архива используйте **Code → Download ZIP** на GitHub.
 
-## What this can establish
+## Запуск локально
 
-- Whether a click triggers same-origin network traffic.
-- Whether a request fails at the network layer or returns an HTTP error.
-- Whether the browser reports JavaScript errors during the test.
+Можно просто открыть \`index.html\`. Для проверки PWA и service worker лучше использовать локальный статический сервер, например:
 
-It cannot prove that a vote was committed in the database. Confirm that separately in test-server logs / test database.
+\`\`\`bash
+python -m http.server 8080
+\`\`\`
 
-Use only against an environment you control or are explicitly authorized to test.
+Затем открыть \`http://localhost:8080\`.
+
+## Архитектура
+
+Проект намеренно не требует сборщика и внешних библиотек: интерфейс, CSS и алгоритмы находятся в одном \`index.html\`. Это упрощает GitHub Pages, автономное скачивание и дальнейшее расширение. PWA-манифест, иконка и service worker — отдельные файлы.
+
+## Важные ограничения текущей версии
+
+Это самостоятельная реализация, вдохновлённая описанными классами художественных инструментов, а не копия закрытых алгоритмов Dither Boy. Видео-таймлайн, полный набор из 63 алгоритмов, произвольная импортируемая система форм и SVG-экспорт пока не реализованы. Обработка производится на стороне клиента; очень большие изображения могут временно потреблять много оперативной памяти.
+
+## Лицензия
+
+MIT. См. [LICENSE](./LICENSE).
