@@ -147,6 +147,8 @@ async function downloadFrom(page, selector) {
       }));
       assert.ok(rendered.width > 0 && rendered.height > 0, "algorithm failed to render: " + algorithm);
       assert.ok(rendered.label, "algorithm label missing for: " + algorithm);
+      assert.equal(await page.locator("#glitchDepthControl").isVisible(), algorithm.startsWith("glitch_"),
+        "Glitch-specific depth control should only appear for Glitch algorithms: " + algorithm);
     }
     await page.locator("#algorithm").selectOption("floyd");
 
