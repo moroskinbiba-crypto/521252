@@ -1,8 +1,8 @@
 {
-  "name": "ditherlab",
-  "version": "1.0.0",
+  "name": "tgrmlithering",
+  "version": "1.1.0",
   "private": false,
-  "description": "A local-first browser image studio for dithering, halftone, patterns and ASCII art",
+  "description": "A local-first browser graphics studio for dithering, halftone, glitch and symbol-based art",
   "license": "MIT",
   "scripts": {
     "serve": "python -m http.server 8080"

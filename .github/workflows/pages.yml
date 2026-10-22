@@ -1,4 +1,4 @@
-name: Deploy DitherLab to GitHub Pages
+name: Deploy TGRMLithering to GitHub Pages
 
 on:
   push:
@@ -30,9 +30,9 @@ jobs:
           scripts = re.findall(r'<script>(.*?)</script>', html, flags=re.S)
           if not scripts:
               raise SystemExit('No inline JavaScript found in index.html')
-          Path('/tmp/ditherlab-inline.js').write_text(scripts[-1], encoding='utf-8')
+          Path('/tmp/tgrmlithering-inline.js').write_text(scripts[-1], encoding='utf-8')
           PY
-          node --check /tmp/ditherlab-inline.js
+          node --check /tmp/tgrmlithering-inline.js
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:

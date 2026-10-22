@@ -1,6 +1,6 @@
-# DitherLab
+# TGRMLithering
 
-DitherLab — локальная браузерная мастерская для дизеринга, ретро-растра, глитча, полутонов и символьной графики. Изображения обрабатываются в браузере и не загружаются на сервер.
+TGRMLithering — локальная браузерная мастерская для дизеринга, ретро-растра, глитча, полутонов и символьной графики. Изображения обрабатываются в браузере и не загружаются на сервер.
 
 **[Открыть редактор](https://moroskinbiba-crypto.github.io/521252/)** · [Исходный код](https://github.com/moroskinbiba-crypto/521252)
 
@@ -23,7 +23,7 @@ Open `index.html` or run `python -m http.server 8080`, then open `http://localho
 
 ## Compatibility note
 
-DitherLab is an independent implementation inspired by the public feature set of Dither Boy, not a pixel-identical copy of its proprietary implementation. Some creative modes are approximations and can produce different results. SVG export traces the rendered pixel grid rather than reconstructing arbitrary smooth contours. The editor still lacks a full video timeline and keyframe graph.
+TGRMLithering is an independent implementation inspired by the public feature set of Dither Boy, not a pixel-identical copy of its proprietary implementation. Some creative modes are approximations and can produce different results. SVG export traces the rendered pixel grid rather than reconstructing arbitrary smooth contours. The editor still lacks a full video timeline and keyframe graph.
 
 ## License
 
