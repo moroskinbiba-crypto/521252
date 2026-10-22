@@ -33,6 +33,21 @@ jobs:
           Path('/tmp/tgrmlithering-inline.js').write_text(scripts[-1], encoding='utf-8')
           PY
           node --check /tmp/tgrmlithering-inline.js
+      - name: Install Chromium smoke-test dependencies
+        run: |
+          npm install --prefix /tmp/tgrmlithering-qa playwright@1.55.0
+          npx --yes playwright@1.55.0 install --with-deps chromium
+      - name: Run browser smoke tests
+        shell: bash
+        run: |
+          python -m http.server 4173 --bind 127.0.0.1 >/tmp/tgrmlithering-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          PLAYWRIGHT_MODULE=/tmp/tgrmlithering-qa/node_modules/playwright node tests/smoke.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
