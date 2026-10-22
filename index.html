@@ -701,6 +701,10 @@ function setMode(m){
  if(WORKSPACE_NAMES.includes(previousMode))saveWorkspaceSettings(previousMode);
  mode=m;
  if(WORKSPACE_NAMES.includes(m)){
+  // Re-read persisted profiles after saving the outgoing workspace. This keeps the UI
+  // and localStorage authoritative if another panel or a restored project changed profiles.
+  const persistedProfiles=loadStore("tgrmlithering-workspaces",null);
+  if(persistedProfiles&&typeof persistedProfiles==="object")workspaceSettings=normaliseWorkspaceSettings(persistedProfiles);
   s=cloneSettings(workspaceSettings[m]);
   if(m==="shape")s.algorithm="shape";
   else if(m==="script")s.algorithm="ascii";
