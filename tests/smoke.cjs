@@ -30,6 +30,13 @@ async function downloadFrom(page, selector) {
 
     assert.match(await page.title(), /^TGRMLithering/);
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
+    const theme = await page.evaluate(() => ({
+      bodyFont: getComputedStyle(document.body).fontFamily,
+      headingFont: getComputedStyle(document.querySelector("#pageTitle")).fontFamily,
+      background: getComputedStyle(document.body).backgroundColor
+    }));
+    assert.match(theme.bodyFont, /VT323/, "pixel body font stack should be applied");
+    assert.match(theme.headingFont, /Press Start 2P/, "pixel heading font stack should be applied");
     const initialSize = await page.locator("#output").evaluate(c => ({ width: c.width, height: c.height }));
     assert.ok(initialSize.width >= 1 && initialSize.height >= 1, "demo image should render");
 
