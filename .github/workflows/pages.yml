@@ -33,6 +33,8 @@ jobs:
           Path('/tmp/tgrmlithering-inline.js').write_text(scripts[-1], encoding='utf-8')
           PY
           node --check /tmp/tgrmlithering-inline.js
+      - name: Validate browser smoke-test JavaScript
+        run: node --check tests/smoke.cjs
       - name: Install Chromium smoke-test dependencies
         run: |
           npm install --prefix /tmp/tgrmlithering-qa playwright@1.55.0
