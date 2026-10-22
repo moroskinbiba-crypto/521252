@@ -309,6 +309,23 @@ async function downloadFrom(page, selector) {
     await page.locator("#paletteInput").setInputFiles({
       name: "palette.json", mimeType: "application/json", buffer: palette.bytes
     });
+    await page.locator("#paletteLibraryName").fill("QA palette");
+    await page.locator("#savePaletteToLibrary").click();
+    assert.equal(await page.locator("#paletteLibraryCount").textContent(), "1 / 100 сохранено");
+    assert.equal(await page.locator("#paletteLibrarySelect").inputValue() && await page.locator("#paletteLibrarySelect option:checked").textContent(), "QA palette");
+    const libraryState = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")));
+    assert.equal(libraryState.length, 1, "named palettes should persist locally");
+    assert.equal(libraryState[0].name, "QA palette");
+    await page.locator("#applyLibraryPalette").click();
+    const libraryPack = await downloadFrom(page, "#exportPaletteLibrary");
+    const libraryPackData = JSON.parse(libraryPack.bytes.toString("utf8"));
+    assert.equal(libraryPackData.format, "tgrmlither-palette-library");
+    assert.equal(libraryPackData.palettes.length, 1, "exported palette pack should contain the saved palette");
+    await page.locator("#deleteLibraryPalette").click();
+    assert.equal(await page.locator("#paletteLibraryCount").textContent(), "0 / 100 сохранено");
+    await page.locator("#paletteLibraryInput").setInputFiles({name:"palette-library.json",mimeType:"application/json",buffer:libraryPack.bytes});
+    await page.waitForFunction(() => document.querySelector("#paletteLibraryCount")?.textContent === "1 / 100 сохранено");
+    assert.equal(await page.locator("#paletteLibrarySelect option:checked").textContent(), "QA palette", "palette pack import should restore named palettes");
 
     // Vector export supports print sizing and layered CMYK plates.
     await page.locator("#vectorDetail").selectOption("source");
