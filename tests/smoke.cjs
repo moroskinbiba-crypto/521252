@@ -64,6 +64,19 @@ async function downloadFrom(page, selector) {
     await page.locator("#applyThemeCode").click();
     assert.equal(await page.locator("body").getAttribute("data-theme"), "terminal",
       "a shared theme code should restore the selected palette of UI colours");
+    await page.locator("#themePicker").selectOption("custom");
+    await page.locator("#themeColorAcid").evaluate(el => { el.value = "#12abef"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await page.locator("#applyCustomTheme").click();
+    assert.equal(await page.locator("body").getAttribute("data-theme"), "custom", "custom theme colours should be applicable");
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-theme")).vars["--acid"]), "#12abef",
+      "custom UI colours should be stored safely as hex values");
+    await page.locator("#makeThemeCode").click();
+    const customThemeCode = await page.locator("#themeCodeInput").inputValue();
+    await page.locator("#themePicker").selectOption("terminal");
+    await page.locator("#themeCodeInput").fill(customThemeCode);
+    await page.locator("#applyThemeCode").click();
+    assert.equal(await page.locator("body").getAttribute("data-theme"), "custom", "sharing should preserve a custom theme identity");
+    assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--acid").trim()), "#12abef");
     await page.locator("#themePicker").selectOption("night");
     assert.equal(await page.locator("body").getAttribute("data-theme"), "night");
 
