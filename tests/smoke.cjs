@@ -318,7 +318,8 @@ async function downloadFrom(page, selector) {
 
     // Exercise every algorithm option so a broken branch cannot hide behind a valid default.
     const algorithms = await page.locator("#algorithm option").evaluateAll(options => options.map(option => option.value));
-    assert.ok(algorithms.length >= 60, "all advertised processing algorithms should be present");
+    assert.ok(algorithms.length >= 64, "all advertised processing algorithms, including new ordered modes, should be present");
+    assert.ok(algorithms.includes("bayer16") && algorithms.includes("blueNoise"), "Bayer 16×16 and Blue Noise must be registered as real algorithms");
     for (const algorithm of algorithms.filter(value => !["shape", "ascii"].includes(value))) {
       await page.locator("#algorithm").selectOption(algorithm);
       const rendered = await page.locator("#output").evaluate(canvas => ({
@@ -331,6 +332,21 @@ async function downloadFrom(page, selector) {
       assert.equal(await page.locator("#glitchDepthControl").isVisible(), algorithm.startsWith("glitch_"),
         "Glitch-specific depth control should only appear for Glitch algorithms: " + algorithm);
     }
+    await page.locator("#scale").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await page.locator("#levels").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await page.locator("#algorithm").selectOption("bayer16");
+    const bayer16Output = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await page.locator("#algorithm").selectOption("blueNoise");
+    const blueNoiseOutput = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.notEqual(blueNoiseOutput, bayer16Output, "Blue Noise must produce a distinct, real threshold pattern");
+    await page.locator("#algorithm").selectOption("bayer16");
+    assert.equal(await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png")), bayer16Output,
+      "Bayer 16×16 output should be deterministic");
+    const gameboyPalette = page.locator("#palettes .palette[data-palette=\"gameboy\"]");
+    assert.equal(await gameboyPalette.count(), 1, "the Game Boy retro palette must be available");
+    await gameboyPalette.click();
+    assert.ok(await gameboyPalette.evaluate(el => el.classList.contains("active")), "built-in palette should become active on click");
+    await page.locator("#palettes .palette[data-palette=\"moss\"]").click();
     await page.locator("#algorithm").selectOption("floyd");
 
     // Exercise each post-processing effect independently.
