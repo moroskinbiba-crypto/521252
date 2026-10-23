@@ -404,6 +404,13 @@ async function downloadFrom(page, selector) {
     await page.waitForFunction(() => document.querySelector("#paletteLibraryCount")?.textContent === "1 / 100 сохранено");
     assert.equal(await page.locator("#paletteLibrarySelect option:checked").textContent(), "QA palette", "palette pack import should restore named palettes");
 
+    // Extract exactly the requested number of palette colours from the loaded image.
+    await page.locator("#levels").evaluate(el => { el.value = "8"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await page.locator("#extractPalette").click();
+    assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("ditherlab-colors")))).length, 8,
+      "palette extraction should follow the selected colour depth");
+    await page.locator("#levels").evaluate(el => { el.value = "4"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+
     // Multi-colour palettes should remain intact beyond the original four-colour editor.
     const richPalette = { format: "tgrmlither-palette", version: 1, name: "Eight Tone QA",
       colors: ["#080a18", "#20284a", "#374c85", "#4b76b0", "#72a8c3", "#a4d0ce", "#d8e6c5", "#fff5dd"] };
