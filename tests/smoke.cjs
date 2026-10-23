@@ -404,6 +404,24 @@ async function downloadFrom(page, selector) {
     const richPaletteStored = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")));
     const importedEightTone = richPaletteStored.find(p => p.name === "Eight Tone QA");
     assert.equal(importedEightTone.colors.length, 8, "importing a rich palette should preserve all eight colours");
+    assert.equal(await page.locator("#activePaletteEditor input[type=type]").count(), 0,
+      "palette editor should not introduce arbitrary text inputs");
+    assert.equal(await page.locator("#activePaletteEditor input[type=color]").count(), 8,
+      "the active palette editor should show one colour control per palette colour");
+    await page.locator("#activePaletteEditor input[type=color]").nth(1).evaluate(el => {
+      el.value = "#2a4566"; el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    let editedPalette = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")));
+    assert.equal(editedPalette.find(p => p.name === "Eight Tone QA").colors[1], "#2a4566",
+      "editing an imported palette colour should persist the new value");
+    await page.locator("#addPaletteColor").click();
+    await page.waitForFunction(() => document.querySelector("#activePaletteMeta")?.textContent === "9 / 16 цветов");
+    assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")))
+      .find(p => p.name === "Eight Tone QA").colors.length), 9, "adding a colour should persist a ninth palette stop");
+    await page.locator("#activePaletteEditor button[aria-label^='Удалить цвет']").last().click();
+    await page.waitForFunction(() => document.querySelector("#activePaletteMeta")?.textContent === "8 / 16 цветов");
+    assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")))
+      .find(p => p.name === "Eight Tone QA").colors.length), 8, "deleting a colour should restore the original palette size");
     await page.locator("#levels").evaluate(el => { el.value = "16"; el.dispatchEvent(new Event("input", { bubbles: true })); });
     assert.equal(await page.locator("#levels").inputValue(), "16", "the editor should expose up to 16 palette levels");
     await page.locator("#levels").evaluate(el => { el.value = "4"; el.dispatchEvent(new Event("input", { bubbles: true })); });
