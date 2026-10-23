@@ -482,12 +482,10 @@ async function downloadFrom(page, selector) {
       "editing an imported palette colour should persist the new value");
     await page.locator("#addPaletteColor").click();
     await page.waitForFunction(() => document.querySelector("#activePaletteMeta")?.textContent === "9 / 16 цветов");
-    assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")))
-      .find(p => p.name === "Eight Tone QA").colors.length), 9, "adding a colour should persist a ninth palette stop");
+    assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")))).find(p => p.name === "Eight Tone QA").colors.length, 9, "adding a colour should persist a ninth palette stop");
     await page.locator("#activePaletteEditor button[aria-label^='Удалить цвет']").last().click();
     await page.waitForFunction(() => document.querySelector("#activePaletteMeta")?.textContent === "8 / 16 цветов");
-    assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")))
-      .find(p => p.name === "Eight Tone QA").colors.length), 8, "deleting a colour should restore the original palette size");
+    assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")))).find(p => p.name === "Eight Tone QA").colors.length, 8, "deleting a colour should restore the original palette size");
     await page.locator("#levels").evaluate(el => { el.value = "16"; el.dispatchEvent(new Event("input", { bubbles: true })); });
     assert.equal(await page.locator("#levels").inputValue(), "16", "the editor should expose up to 16 palette levels");
     await page.locator("#levels").evaluate(el => { el.value = "4"; el.dispatchEvent(new Event("input", { bubbles: true })); });
