@@ -711,6 +711,8 @@ sunset:{name:"Sunset Screenprint",c:["#21133e","#7e2f83","#e85b52","#ffd166"]},
 arcade:{name:"Arcade RGB",c:["#080a1b","#2541b2","#ff2d75","#f8f7ee"]},
 verdigris:{name:"Verdigris",c:["#153b3b","#377d70","#8bbf9f","#f0e7c8"]},
 risograph:{name:"Risograph Duo",c:["#1c2c59","#e34c54","#f5d7b2","#fdf8e7"]},
+pico8:{name:"PICO-8",c:["#000000","#1d2b53","#7e2553","#008751","#ab5236","#5f574f","#c2c3c7","#fff1e8","#ff004d","#ffa300","#ffec27","#00e436","#29adff","#83769c","#ff77a8","#ffccaa"]},
+db16:{name:"DawnBringer 16",c:["#140c1c","#442434","#30346d","#4e4a4e","#854c30","#346524","#d04648","#757161","#597dce","#d27d2c","#8595a1","#6daa2c","#d2aa99","#6dc2ca","#dad45e","#deeed6"]},
 custom:{name:"My Colors",c:loadStore("ditherlab-colors",["#10160f","#334b2b","#7a9a47","#d9efad"])}
 };
 const paletteLibrary=(()=>{const saved=loadStore("tgrmlither-palette-library",[]);if(!Array.isArray(saved))return[];return saved.filter(p=>p&&/^lib_[a-z0-9_-]{1,40}$/i.test(p.id||"")&&typeof p.name==="string"&&Array.isArray(p.colors)&&p.colors.length>=2&&p.colors.length<=16&&p.colors.every(c=>/^#[0-9a-f]{6}$/i.test(c))).map(p=>({id:p.id,name:p.name.slice(0,48),colors:p.colors.map(c=>c.toLowerCase())})).slice(0,100)})();
