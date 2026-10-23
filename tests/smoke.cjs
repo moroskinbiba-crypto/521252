@@ -411,6 +411,15 @@ async function downloadFrom(page, selector) {
     const jpg = await downloadFrom(page, "#jpg");
     assert.equal(jpg.bytes[0], 0xff);
     assert.equal(jpg.bytes[1], 0xd8);
+    assert.equal(await page.locator("#jpegQuality").inputValue(), "94", "JPEG export quality should default to a high-quality setting");
+    await page.locator("#jpegQuality").evaluate(el => { el.value = "70"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.jpegQuality), 70,
+      "selected JPEG quality should persist with the workspace");
+    const lowQualityJpg = await downloadFrom(page, "#jpg");
+    await page.locator("#jpegQuality").evaluate(el => { el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    const maxQualityJpg = await downloadFrom(page, "#jpg");
+    assert.ok(lowQualityJpg.bytes.length < maxQualityJpg.bytes.length, "JPEG compression quality should affect the encoded export");
+    await page.locator("#jpegQuality").evaluate(el => { el.value = "94"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
 
     const project = await downloadFrom(page, "#saveProject");
     const projectData = JSON.parse(project.bytes.toString("utf8"));
