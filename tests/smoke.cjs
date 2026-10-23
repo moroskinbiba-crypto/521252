@@ -50,6 +50,35 @@ async function downloadFrom(page, selector) {
     });
     assert.deepEqual(markupAudit.duplicates, [], "runtime-generated workspace panels must not create duplicate IDs");
     assert.deepEqual(markupAudit.modeButtons, ["presets", "shape", "script", "batch", "video"]);
+
+    // Theme picker, local persistence and safe, shareable theme codes.
+    await page.locator("#themePicker").selectOption("terminal");
+    assert.equal(await page.locator("body").getAttribute("data-theme"), "terminal");
+    assert.ok(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-theme")).vars["--acid"] === "#72ffa0"),
+      "theme choice should persist locally");
+    await page.locator("#makeThemeCode").click();
+    const themeCode = await page.locator("#themeCodeInput").inputValue();
+    assert.ok(themeCode.startsWith("TGRMTHEME1:"), "theme sharing should generate a portable code");
+    await page.locator("#themePicker").selectOption("paper");
+    await page.locator("#themeCodeInput").fill(themeCode);
+    await page.locator("#applyThemeCode").click();
+    assert.equal(await page.locator("body").getAttribute("data-theme"), "terminal",
+      "a shared theme code should restore the selected palette of UI colours");
+    await page.locator("#themePicker").selectOption("night");
+    assert.equal(await page.locator("body").getAttribute("data-theme"), "night");
+
+    // Shuffle should randomize adjustments while preserving valid control ranges.
+    await page.locator("#shuffle").click();
+    const shuffled = await page.evaluate(() => ({
+      scale: Number(document.querySelector("#scale").value),
+      levels: Number(document.querySelector("#levels").value),
+      threshold: Number(document.querySelector("#threshold").value),
+      contrast: Number(document.querySelector("#contrast").value)
+    }));
+    assert.ok(shuffled.scale >= 2 && shuffled.scale <= 16, "Shuffle keeps scale in range");
+    assert.ok(shuffled.levels >= 2 && shuffled.levels <= 16, "Shuffle supports the expanded 16-tone range");
+    assert.ok(shuffled.threshold >= -80 && shuffled.threshold <= 80, "Shuffle keeps threshold in range");
+    assert.ok(shuffled.contrast >= 50 && shuffled.contrast <= 180, "Shuffle keeps contrast in range");
     const initialSize = await page.locator("#output").evaluate(c => ({ width: c.width, height: c.height }));
     assert.ok(initialSize.width >= 1 && initialSize.height >= 1, "demo image should render");
     assert.equal(await page.locator("#algorithmStackControl").isVisible(), true, "algorithm stack is available in the image workspace");
@@ -97,6 +126,29 @@ async function downloadFrom(page, selector) {
     await page.locator("#shapeSvgInput").setInputFiles({ name: "custom-triangle.svg", mimeType: "image/svg+xml", buffer: Buffer.from(svgShape) });
     assert.equal(await page.locator("#bandShape0").inputValue(), "custom", "imported SVG should become an available custom band shape");
     assert.match(await page.locator("#shapeSvgStatus").textContent(), /custom-triangle\.svg/);
+    assert.equal(await page.locator("#shapePresetSelect option").count() >= 7, true, "Shape Lab should include built-in shape presets");
+    assert.equal(await page.locator("#bandShape0 option[value=\"star\"]").count(), 1, "bands should expose the expanded shape library");
+    await page.locator("#shapePresetSelect").selectOption("starfield");
+    await page.locator("#applyShapePreset").click();
+    assert.equal(await page.locator("#bandShape0").inputValue(), "star", "Shape Shifter presets should update each band's assigned shape");
+    assert.equal(await page.locator("#shapeThreshold1").inputValue(), "48", "shape presets should configure luminance thresholds");
+    const beforeShapeCode = await page.locator("#bandRotation0").inputValue();
+    await page.locator("#makeShapeCode").click();
+    const shapeCode = await page.locator("#shapeShareCode").inputValue();
+    assert.ok(shapeCode.startsWith("TGRMSHAPE1:"), "Shape Shifter should generate a shareable settings code");
+    await page.locator("#bandRotation0").evaluate(el => { el.value = "67"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    assert.equal(await page.locator("#bandRotation0").inputValue(), "67", "per-band rotation should respond to the slider");
+    await page.locator("#applyShapeCode").click();
+    assert.equal(await page.locator("#bandRotation0").inputValue(), beforeShapeCode, "share code should restore the prior band rotation");
+    await page.locator("#shapePresetName").fill("QA Shape");
+    await page.locator("#saveShapePreset").click();
+    const shapeStorage = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-shape-presets")));
+    assert.equal(shapeStorage.length, 1, "user Shape Shifter presets should persist locally");
+    assert.equal(shapeStorage[0].name, "QA Shape");
+    assert.ok(await page.locator("#shapePresetSelect option").evaluateAll(opts => opts.some(o => o.value === shapeStorageId())));
+    await page.locator("#deleteShapePreset").click();
+    assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-shape-presets"))), [],
+      "user Shape Shifter presets should be removable");
     await page.locator('.topnav [data-mode="script"]').click();
     assert.equal(await page.locator("body").getAttribute("data-mode"), "script");
     assert.equal(await page.locator("#asciiControl").isVisible(), true, "Script Slayer controls should be visible in Script Slayer");
@@ -338,6 +390,24 @@ async function downloadFrom(page, selector) {
     await page.locator("#paletteLibraryInput").setInputFiles({name:"palette-library.json",mimeType:"application/json",buffer:libraryPack.bytes});
     await page.waitForFunction(() => document.querySelector("#paletteLibraryCount")?.textContent === "1 / 100 сохранено");
     assert.equal(await page.locator("#paletteLibrarySelect option:checked").textContent(), "QA palette", "palette pack import should restore named palettes");
+
+    // Multi-colour palettes should remain intact beyond the original four-colour editor.
+    const richPalette = { format: "tgrmlither-palette", version: 1, name: "Eight Tone QA",
+      colors: ["#080a18", "#20284a", "#374c85", "#4b76b0", "#72a8c3", "#a4d0ce", "#d8e6c5", "#fff5dd"] };
+    await page.locator("#paletteInput").setInputFiles({
+      name: "eight-tone.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(richPalette))
+    });
+    await page.waitForFunction(() => {
+      const data = JSON.parse(localStorage.getItem("tgrmlither-palette-library") || "[]");
+      return data.some(p => p.name === "Eight Tone QA");
+    });
+    const richPaletteStored = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")));
+    const importedEightTone = richPaletteStored.find(p => p.name === "Eight Tone QA");
+    assert.equal(importedEightTone.colors.length, 8, "importing a rich palette should preserve all eight colours");
+    await page.locator("#levels").fill("16");
+    assert.equal(await page.locator("#levels").inputValue(), "16", "the editor should expose up to 16 palette levels");
+    await page.locator("#levels").fill("4");
+    await page.locator("#homeLogo").click();
 
     // Vector export supports print sizing and layered CMYK plates.
     await page.locator("#vectorDetail").selectOption("source");
