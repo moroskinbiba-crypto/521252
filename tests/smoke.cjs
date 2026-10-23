@@ -52,6 +52,7 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(markupAudit.modeButtons, ["presets", "shape", "script", "batch", "video"]);
 
     // Theme picker, local persistence and safe, shareable theme codes.
+    await page.locator("#themeMenu > summary").click();
     await page.locator("#themePicker").selectOption("terminal");
     assert.equal(await page.locator("body").getAttribute("data-theme"), "terminal");
     assert.ok(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-theme")).vars["--acid"] === "#72ffa0"),
