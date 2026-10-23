@@ -170,6 +170,7 @@ async function downloadFrom(page, selector) {
     assert.equal(shapeStorage.length, 1, "user Shape Shifter presets should persist locally");
     assert.equal(shapeStorage[0].name, "QA Shape");
     assert.ok(await page.locator("#shapePresetSelect option").evaluateAll(opts => opts.some(o => o.value.startsWith("user_"))), "saved Shape Shifter preset should appear in the preset selector");
+    assert.equal(await page.locator("#deleteShapePreset").isEnabled(), true, "saving a custom preset should enable the delete button");
     await page.locator("#deleteShapePreset").click();
     assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-shape-presets"))), [],
       "user Shape Shifter presets should be removable");
@@ -435,6 +436,20 @@ async function downloadFrom(page, selector) {
     const richPaletteStored = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")));
     const importedEightTone = richPaletteStored.find(p => p.name === "Eight Tone QA");
     assert.equal(importedEightTone.colors.length, 8, "importing a rich palette should preserve all eight colours");
+
+    // Two- and three-colour files remain exactly as authored, not forced into four stops.
+    const triplePalette = { format: "tgrmlither-palette", version: 1, name: "Three Tone QA",
+      colors: ["#101020", "#6e5ca6", "#f6e8c3"] };
+    await page.locator("#paletteInput").setInputFiles({
+      name: "three-tone.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(triplePalette))
+    });
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library") || "[]")
+      .some(p => p.name === "Three Tone QA"));
+    const tripleSaved = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library"))
+      .find(p => p.name === "Three Tone QA"));
+    assert.deepEqual(tripleSaved.colors, triplePalette.colors, "three-colour palettes should keep every authored colour");
+    assert.equal(await page.locator("#activePaletteEditor input[type=color]").count(), 3,
+      "the editor should expose exactly three controls for a three-colour palette");
     assert.equal(await page.locator("#activePaletteEditor input[type=type]").count(), 0,
       "palette editor should not introduce arbitrary text inputs");
     assert.equal(await page.locator("#activePaletteEditor input[type=color]").count(), 8,
