@@ -16,7 +16,7 @@ No installer, account, or backend is required. Image processing takes place in t
 - 7 ordered-dither modes: Bayer 2×2, 4×4, 8×8 and 16×16, Blue Noise rank dithering, and clustered-dot 4×4/8×8; plus 8 pattern dither modes.
 - 17 glitch styles and 16 special modes, including threshold, posterize, CMYK halftone, edge/contour, thermal map, X-Ray, woodcut, pixel sort, tearing, VHS and bitcrush.
 - Contrast, brightness, midtones/highlights, levels, threshold, blur, scale and inversion.
-- 24+ built-in retro/print palettes, including Game Boy, Commodore 64, CGA, Risograph and screenprint sets; custom colours, image palette extraction, 2–16-colour palette editing, and JSON palette/library import/export.
+- 23 built-in retro/print palettes plus a user palette and saved library, including Game Boy, Commodore 64, CGA, Risograph and screenprint sets; custom colours, image palette extraction, 2–16-colour palette editing, and JSON palette/library import/export.
 - Shape Lab with four luminance bands, per-band geometry, size and colour, placement distribution and rotation.
 - Independent, adjustable and reorderable effect stacks for Editor, Shape Lab, Script Slayer, Batch and Video Lab.
 - Script Slayer with 48 character families, live glyph preview, editable glyphs, depth/cell sizing, offset, palette/source/mono colour, transparent backgrounds, TXT export and animation.
