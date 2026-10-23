@@ -326,9 +326,18 @@ async function downloadFrom(page, selector) {
 
     // Exercise every algorithm option so a broken branch cannot hide behind a valid default.
     const algorithms = await page.locator("#algorithm option").evaluateAll(options => options.map(option => option.value));
-    assert.ok(algorithms.length >= 64, "all advertised processing algorithms, including new ordered modes, should be present");
+    const coreAlgorithms = algorithms.filter(value => !["shape", "ascii"].includes(value));
+    assert.equal(coreAlgorithms.length, 64, "expected 64 still-image algorithm choices across the five Dither Boy-style families plus Pixel Poster");
     assert.ok(algorithms.includes("bayer16") && algorithms.includes("blueNoise"), "Bayer 16×16 and Blue Noise must be registered as real algorithms");
     const diffusionAlgorithms = ["floyd", "atkinson", "jarvis", "stucki", "burkes", "sierra", "sierra2", "sierraLite", "fan", "shiau2", "shiau3", "stevenson", "falseFloyd", "twoRow", "simpleDiff"];
+    const orderedAlgorithms = ["bayer2", "bayer4", "bayer8", "bayer16", "blueNoise", "clustered4", "clustered8"];
+    const patternDithers = ["halftone", "crosshatch", "diagonal", "waves", "concentric", "lines", "modulation", "spiral"];
+    assert.ok(diffusionAlgorithms.every(algorithm => coreAlgorithms.includes(algorithm)), "all 15 error-diffusion kernels must be selectable");
+    assert.ok(orderedAlgorithms.every(algorithm => coreAlgorithms.includes(algorithm)), "all ordered dithering matrices must be selectable");
+    assert.ok(patternDithers.every(algorithm => coreAlgorithms.includes(algorithm)), "all eight pattern modes must be selectable");
+    assert.equal(coreAlgorithms.filter(algorithm => algorithm.startsWith("glitch_")).length, 17, "the Glitch family should contain 17 choices");
+    assert.equal(coreAlgorithms.filter(algorithm => algorithm.startsWith("special_")).length, 16, "the Special family should contain 16 choices");
+    assert.ok(coreAlgorithms.includes("pixel"), "Pixel Poster must be present as a basic mode");
     for (const algorithm of algorithms.filter(value => !["shape", "ascii"].includes(value))) {
       await page.locator("#algorithm").selectOption(algorithm);
       const rendered = await page.locator("#output").evaluate(canvas => ({
