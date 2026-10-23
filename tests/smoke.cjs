@@ -144,7 +144,17 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#bandShape0 option[value=\"star\"]").count(), 1, "bands should expose the expanded shape library");
     await page.locator("#shapePresetSelect").selectOption("starfield");
     await page.locator("#applyShapePreset").click();
-    assert.equal(await page.locator("#bandShape0").inputValue(), "star", "Shape Shifter presets should update each band's assigned shape");
+    const shapePresetDebug = await page.evaluate(() => {
+      const state = JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}");
+      return { selected: document.querySelector("#shapePresetSelect")?.value,
+        visibleShape: document.querySelector("#bandShape0")?.value,
+        storedShape: state.shape?.shapeBands?.[0]?.shape,
+        storedThresholds: state.shape?.shapeThresholds,
+        mode: document.body.dataset.mode,
+        status: document.querySelector("#toast")?.textContent };
+    });
+    assert.equal(await page.locator("#bandShape0").inputValue(), "star",
+      "Shape Shifter presets should update each band's assigned shape: " + JSON.stringify(shapePresetDebug));
     assert.equal(await page.locator("#shapeThreshold1").inputValue(), "48", "shape presets should configure luminance thresholds");
     const beforeShapeCode = await page.locator("#bandRotation0").inputValue();
     await page.locator("#makeShapeCode").click();
