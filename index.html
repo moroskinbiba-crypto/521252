@@ -1039,7 +1039,7 @@ function renderActivePaletteEditor(){
    const latest=(pal[key]?.c||values).map(v=>typeof v==="string"?v:"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""));
    latest[index]=input.value.toLowerCase();
    if(!persistActivePaletteColors(key,latest)){say("Палитра должна содержать 2–16 корректных цветов");return}
-   code.textContent=input.value.toLowerCase();initPalettes();renderPaletteLibrary();render();
+   code.textContent=input.value.toLowerCase();const swatch=Array.from(document.querySelectorAll(".palette")).find(el=>el.dataset.palette===key)?.querySelectorAll(".swatches i")[index];if(swatch)swatch.style.background=input.value;renderPaletteLibrary();render();
   });
   remove.addEventListener("click",()=>{
    const latest=(pal[key]?.c||values).map(v=>typeof v==="string"?v:"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""));
