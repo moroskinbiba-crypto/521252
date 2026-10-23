@@ -358,6 +358,22 @@ async function downloadFrom(page, selector) {
     await gameboyPalette.click();
     assert.ok(await gameboyPalette.evaluate(el => el.classList.contains("active")), "built-in palette should become active on click");
     await page.locator("#palettes .palette[data-palette=\"moss\"]").click();
+    const paletteBeforeWheel = await page.locator("#palettes .palette.active").getAttribute("data-palette");
+    await page.locator("#palettes").hover();
+    await page.mouse.wheel(0, 80);
+    const wheelPreview = await page.locator("#palettes .palette.active").getAttribute("data-palette");
+    assert.notEqual(wheelPreview, paletteBeforeWheel, "mouse wheel should temporarily preview the next palette");
+    await page.locator("#paletteControl .controltitle").hover();
+    assert.equal(await page.locator("#palettes .palette.active").getAttribute("data-palette"), paletteBeforeWheel,
+      "leaving the palette grid should restore the previously committed selection");
+    await page.locator("#palettes").hover();
+    await page.mouse.wheel(0, 80);
+    const paletteToCommit = await page.locator("#palettes .palette.active").getAttribute("data-palette");
+    await page.locator(`#palettes .palette[data-palette="${paletteToCommit}"]`).click();
+    await page.locator("#paletteControl .controltitle").hover();
+    assert.equal(await page.locator("#palettes .palette.active").getAttribute("data-palette"), paletteToCommit,
+      "clicking a wheel-previewed palette should commit it");
+    await page.locator("#palettes .palette[data-palette=\"moss\"]").click();
     await page.locator("#algorithm").selectOption("floyd");
     assert.equal(await page.locator("#scale").getAttribute("min"), "1", "dither cell size should support full-resolution one-pixel detail");
     await page.locator("#scale").evaluate(el => { el.value = "1"; el.dispatchEvent(new Event("input", { bubbles: true })); });
