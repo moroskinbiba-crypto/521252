@@ -468,8 +468,12 @@ async function downloadFrom(page, selector) {
       "the editor should expose exactly three controls for a three-colour palette");
     assert.equal(await page.locator("#activePaletteEditor input[type=type]").count(), 0,
       "palette editor should not introduce arbitrary text inputs");
+    const eightToneId = await page.locator("#paletteLibrarySelect option").evaluateAll(options => options.find(option => option.textContent.trim() === "Eight Tone QA")?.value);
+    assert.ok(eightToneId, "the imported eight-colour palette should remain selectable after importing another palette");
+    await page.locator("#paletteLibrarySelect").selectOption(eightToneId);
+    await page.locator("#applyLibraryPalette").click();
     assert.equal(await page.locator("#activePaletteEditor input[type=color]").count(), 8,
-      "the active palette editor should show one colour control per palette colour");
+      "the active palette editor should show one colour control per selected palette colour");
     await page.locator("#activePaletteEditor input[type=color]").nth(1).evaluate(el => {
       el.value = "#2a4566"; el.dispatchEvent(new Event("input", { bubbles: true }));
     });
