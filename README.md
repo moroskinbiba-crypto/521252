@@ -13,10 +13,10 @@ No installer, account, or backend is required. Image processing takes place in t
 ## Engine
 
 - 15 error-diffusion kernels, including Floyd–Steinberg, Atkinson, Jarvis–Judice–Ninke, Stucki, Burkes, Sierra variants, Fan and Stevenson–Arce.
-- Bayer and clustered-dot ordered dithering; 8 pattern dither modes.
+- 7 ordered-dither modes: Bayer 2×2, 4×4, 8×8 and 16×16, Blue Noise rank dithering, and clustered-dot 4×4/8×8; plus 8 pattern dither modes.
 - 17 glitch styles and 16 special modes, including threshold, posterize, CMYK halftone, edge/contour, thermal map, X-Ray, woodcut, pixel sort, tearing, VHS and bitcrush.
 - Contrast, brightness, midtones/highlights, levels, threshold, blur, scale and inversion.
-- Built-in palettes, custom colours, image palette extraction and JSON palette import/export.
+- 24+ built-in retro/print palettes, including Game Boy, Commodore 64, CGA, Risograph and screenprint sets; custom colours, image palette extraction, 2–16-colour palette editing, and JSON palette/library import/export.
 - Shape Lab with four luminance bands, per-band geometry, size and colour, placement distribution and rotation.
 - Independent, adjustable and reorderable effect stacks for Editor, Shape Lab, Script Slayer, Batch and Video Lab.
 - Script Slayer with 48 character families, live glyph preview, editable glyphs, depth/cell sizing, offset, palette/source/mono colour, transparent backgrounds, TXT export and animation.
@@ -42,6 +42,7 @@ MIT. See [LICENSE](LICENSE).
 
 ## Advanced still-image workflow
 
+- Algorithm coverage: 63 modes across the five core families plus Pixel Poster, including extended Bayer 16×16 and a deterministic blue-noise-style ranked threshold matrix. These are independent implementations, not bit-identical recreations of Dither Boy internals.
 - Algorithm compositing: up to four added algorithm layers, per-layer opacity, blend modes, reordering and removal. Layers are saved with workspace settings and project files.
 - Print output: choose SVG detail (compact, 1024 px, 2048 px or source resolution), black-vector threshold and DPI. CMYK export creates four labelled vector plates.
 - Pattern dithering: eight pattern modes including Spiral Dither, adjustable screen angle and halftone mark shape.
