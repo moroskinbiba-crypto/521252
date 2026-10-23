@@ -366,12 +366,14 @@ async function downloadFrom(page, selector) {
     await page.locator("#levels").evaluate(el => { el.value = "4"; el.dispatchEvent(new Event("input", { bubbles: true })); });
     await page.locator("#serpentine").uncheck();
     const standardScan = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
-    await page.locator("#serpentine").check();
+    await page.locator("#serpentineControl").click();
+    assert.equal(await page.locator("#serpentine").isChecked(), true, "clicking the visible serpentine setting should enable it");
     const serpentineScan = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     assert.notEqual(serpentineScan, standardScan, "serpentine scan should change error-diffusion pixels, not merely toggle UI state");
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.serpentine), true,
       "serpentine scan preference should persist in the editor workspace");
-    await page.locator("#serpentine").uncheck();
+    await page.locator("#serpentineControl").click();
+    assert.equal(await page.locator("#serpentine").isChecked(), false, "clicking the visible serpentine setting should disable it");
 
     // Exercise each post-processing effect independently.
     for (const effect of await page.locator("#generalEffectsControl .effect-control .effect-toggle[role=checkbox][data-effect]").evaluateAll(els => els.map(el => el.dataset.effect))) {
