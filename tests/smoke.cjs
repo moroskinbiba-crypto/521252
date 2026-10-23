@@ -357,6 +357,14 @@ async function downloadFrom(page, selector) {
     assert.equal(await gameboyPalette.count(), 1, "the Game Boy retro palette must be available");
     await gameboyPalette.click();
     assert.ok(await gameboyPalette.evaluate(el => el.classList.contains("active")), "built-in palette should become active on click");
+    const pico8Palette = page.locator("#palettes .palette[data-palette=\"pico8\"]");
+    const db16Palette = page.locator("#palettes .palette[data-palette=\"db16\"]");
+    assert.equal(await pico8Palette.locator(".swatches i").count(), 16, "PICO-8 should expose its full 16-colour palette");
+    assert.equal(await db16Palette.locator(".swatches i").count(), 16, "DawnBringer 16 should expose all 16 colours");
+    await pico8Palette.click();
+    assert.ok(await pico8Palette.evaluate(el => el.classList.contains("active")), "PICO-8 palette should be selectable");
+    await db16Palette.click();
+    assert.ok(await db16Palette.evaluate(el => el.classList.contains("active")), "DawnBringer palette should be selectable");
     await page.locator("#palettes .palette[data-palette=\"moss\"]").click();
     const paletteBeforeWheel = await page.locator("#palettes .palette.active").getAttribute("data-palette");
     await page.locator("#palettes").hover();
