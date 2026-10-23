@@ -15,7 +15,7 @@ No installer, account, or backend is required. Image processing takes place in t
 - 15 error-diffusion kernels, including Floyd–Steinberg, Atkinson, Jarvis–Judice–Ninke, Stucki, Burkes, Sierra variants, Fan and Stevenson–Arce; optional serpentine row scanning reduces the left-to-right directional bias.
 - 7 ordered-dither modes: Bayer 2×2, 4×4, 8×8 and 16×16, Blue Noise rank dithering, and clustered-dot 4×4/8×8; plus 8 pattern dither modes.
 - 17 glitch styles and 16 special modes, including threshold, posterize, CMYK halftone, edge/contour, thermal map, X-Ray, woodcut, pixel sort, tearing, VHS and bitcrush.
-- Contrast, brightness, midtones/highlights, levels, threshold, blur, 1–24 px dither cells and inversion. Choose a processing budget of up to 480k, 1.2M, or 2.4M internal cells to balance live-preview speed against fine detail on large images.
+- Contrast, brightness, midtones/highlights, levels, threshold, blur, 1–24 px dither cells and inversion. Choose a processing budget of 480k, 1.2M, 2.4M, or UHD 8.3M internal cells to balance live-preview speed against fine detail on large images. Adaptive sampling uses fractional downscaling to avoid unnecessarily discarding detail.
 - 25 built-in retro/print palettes plus a user palette and saved library, including Game Boy, PICO-8, DawnBringer 16, Commodore 64, CGA, Risograph and screenprint sets; mouse-wheel preview before confirming a palette, custom colours, image palette extraction, 2–16-colour palette editing, and JSON palette/library import/export.
 - Shape Lab with four luminance bands, per-band geometry, size and colour, placement distribution and rotation.
 - Independent, adjustable and reorderable effect stacks for Editor, Shape Lab, Script Slayer, Batch and Video Lab.
