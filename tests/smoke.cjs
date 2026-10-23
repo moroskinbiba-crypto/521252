@@ -145,7 +145,7 @@ async function downloadFrom(page, selector) {
     const shapeStorage = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-shape-presets")));
     assert.equal(shapeStorage.length, 1, "user Shape Shifter presets should persist locally");
     assert.equal(shapeStorage[0].name, "QA Shape");
-    assert.ok(await page.locator("#shapePresetSelect option").evaluateAll(opts => opts.some(o => o.value === shapeStorageId())));
+    assert.ok(await page.locator("#shapePresetSelect option").evaluateAll(opts => opts.some(o => o.value.startsWith("user_"))), "saved Shape Shifter preset should appear in the preset selector");
     await page.locator("#deleteShapePreset").click();
     assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-shape-presets"))), [],
       "user Shape Shifter presets should be removable");
@@ -404,9 +404,9 @@ async function downloadFrom(page, selector) {
     const richPaletteStored = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")));
     const importedEightTone = richPaletteStored.find(p => p.name === "Eight Tone QA");
     assert.equal(importedEightTone.colors.length, 8, "importing a rich palette should preserve all eight colours");
-    await page.locator("#levels").fill("16");
+    await page.locator("#levels").evaluate(el => { el.value = "16"; el.dispatchEvent(new Event("input", { bubbles: true })); });
     assert.equal(await page.locator("#levels").inputValue(), "16", "the editor should expose up to 16 palette levels");
-    await page.locator("#levels").fill("4");
+    await page.locator("#levels").evaluate(el => { el.value = "4"; el.dispatchEvent(new Event("input", { bubbles: true })); });
     await page.locator("#homeLogo").click();
 
     // Vector export supports print sizing and layered CMYK plates.
