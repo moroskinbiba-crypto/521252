@@ -118,7 +118,10 @@ async function downloadFrom(page, selector) {
     });
     assert.equal((await page.locator("#scaleV").textContent()).trim(), "9 px");
     const qualityOptions = await page.locator("#qualityMode option").evaluateAll(options => options.map(o => o.value));
-    assert.deepEqual(qualityOptions, ["balanced", "detail", "max"], "still-image detail budget options should be available");
+    assert.deepEqual(qualityOptions, ["balanced", "detail", "max", "ultra"], "still-image detail budget options should include UHD processing");
+    await page.locator("#qualityMode").selectOption("ultra");
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.qualityMode), "ultra",
+      "UHD processing mode should persist with the workspace");
     await page.locator("#qualityMode").selectOption("detail");
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.qualityMode), "detail",
       "the quality setting should persist with the current workspace");
