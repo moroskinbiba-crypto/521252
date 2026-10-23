@@ -117,6 +117,14 @@ async function downloadFrom(page, selector) {
       el.dispatchEvent(new Event("input", { bubbles: true }));
     });
     assert.equal((await page.locator("#scaleV").textContent()).trim(), "9 px");
+    const qualityOptions = await page.locator("#qualityMode option").evaluateAll(options => options.map(o => o.value));
+    assert.deepEqual(qualityOptions, ["balanced", "detail", "max"], "still-image detail budget options should be available");
+    await page.locator("#qualityMode").selectOption("detail");
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.qualityMode), "detail",
+      "the quality setting should persist with the current workspace");
+    await page.locator("#qualityMode").selectOption("max");
+    assert.equal(await page.locator("#qualityMode").inputValue(), "max");
+    await page.locator("#qualityMode").selectOption("balanced");
 
     // Mode navigation, glyph controls, and preset application.
     await page.locator('.topnav [data-mode="shape"]').click();
