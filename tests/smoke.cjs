@@ -328,6 +328,7 @@ async function downloadFrom(page, selector) {
     const algorithms = await page.locator("#algorithm option").evaluateAll(options => options.map(option => option.value));
     assert.ok(algorithms.length >= 64, "all advertised processing algorithms, including new ordered modes, should be present");
     assert.ok(algorithms.includes("bayer16") && algorithms.includes("blueNoise"), "Bayer 16×16 and Blue Noise must be registered as real algorithms");
+    const diffusionAlgorithms = ["floyd", "atkinson", "jarvis", "stucki", "burkes", "sierra", "sierra2", "sierraLite", "fan", "shiau2", "shiau3", "stevenson", "falseFloyd", "twoRow", "simpleDiff"];
     for (const algorithm of algorithms.filter(value => !["shape", "ascii"].includes(value))) {
       await page.locator("#algorithm").selectOption(algorithm);
       const rendered = await page.locator("#output").evaluate(canvas => ({
@@ -339,6 +340,8 @@ async function downloadFrom(page, selector) {
       assert.ok(rendered.label, "algorithm label missing for: " + algorithm);
       assert.equal(await page.locator("#glitchDepthControl").isVisible(), algorithm.startsWith("glitch_"),
         "Glitch-specific depth control should only appear for Glitch algorithms: " + algorithm);
+      assert.equal(await page.locator("#serpentineControl").isVisible(), diffusionAlgorithms.includes(algorithm),
+        "serpentine scan mode should appear only for error-diffusion kernels: " + algorithm);
     }
     await page.locator("#scale").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
     await page.locator("#levels").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
@@ -356,6 +359,19 @@ async function downloadFrom(page, selector) {
     assert.ok(await gameboyPalette.evaluate(el => el.classList.contains("active")), "built-in palette should become active on click");
     await page.locator("#palettes .palette[data-palette=\"moss\"]").click();
     await page.locator("#algorithm").selectOption("floyd");
+    assert.equal(await page.locator("#scale").getAttribute("min"), "1", "dither cell size should support full-resolution one-pixel detail");
+    await page.locator("#scale").evaluate(el => { el.value = "1"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    assert.equal(await page.locator("#scale").inputValue(), "1", "the smallest detail size should be usable");
+    await page.locator("#scale").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await page.locator("#levels").evaluate(el => { el.value = "4"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await page.locator("#serpentine").uncheck();
+    const standardScan = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await page.locator("#serpentine").check();
+    const serpentineScan = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.notEqual(serpentineScan, standardScan, "serpentine scan should change error-diffusion pixels, not merely toggle UI state");
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.serpentine), true,
+      "serpentine scan preference should persist in the editor workspace");
+    await page.locator("#serpentine").uncheck();
 
     // Exercise each post-processing effect independently.
     for (const effect of await page.locator("#generalEffectsControl .effect-control .effect-toggle[role=checkbox][data-effect]").evaluateAll(els => els.map(el => el.dataset.effect))) {
