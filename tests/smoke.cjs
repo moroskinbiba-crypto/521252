@@ -705,13 +705,14 @@ async function downloadFrom(page, selector) {
     });
     assert.ok(await page.locator("#videoOutput").evaluate(canvas => canvas.width > 0 && canvas.height > 0),
       "video frame should be processed onto the output canvas");
-    const [videoDownload] = await Promise.all([
-      page.waitForEvent("download", { timeout: 20000 }),
-      page.locator("#videoExport").click()
-    ]);
+    const videoDownloadPromise = page.waitForEvent("download", { timeout: 20000 });
+    await page.locator("#videoExport").click();
+    assert.equal(await page.locator("#videoTimeline").isDisabled(), true, "video timeline must be locked during export");
+    const videoDownload = await videoDownloadPromise;
     assert.match(videoDownload.suggestedFilename(), /TGRMLither\.webm$/);
     assert.ok(fs.statSync(await videoDownload.path()).size > 500, "exported video should contain data");
     assert.equal(await page.locator("#videoExport").isEnabled(), true, "video export control must be re-enabled after recording finishes");
+    assert.equal(await page.locator("#videoTimeline").isDisabled(), false, "video timeline must unlock after recording finishes");
 
     // Batch processing should accept and produce a real PNG.
     await page.locator('.topnav [data-mode="batch"]').click();
