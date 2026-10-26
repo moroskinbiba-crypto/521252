@@ -54,6 +54,6 @@ MIT. See [LICENSE](LICENSE).
 ## Performance and format limits
 
 - Video Lab processes up to 2.4 megapixels per frame to keep preview and WebM recording responsive. Full HD frames are processed at their original size; larger frames are scaled down.
-- The built-in batch ZIP writer uses the classic ZIP format and limits each archive to 512 MB and 65,535 files. Split larger batches into smaller exports.
+- The built-in batch ZIP writer uses the classic ZIP format and limits each archive to 128 MB and 65,535 files. Split larger batches into smaller exports.
 - The browser-based editor keeps image processing local. Imported project files must contain a self-contained PNG, JPEG, or WebP data URL; remote image URLs are not loaded from project files.
 - The offline service worker only clears old caches whose names use the `tgrmlither-` prefix. It does not remove caches belonging to other apps on the same origin.
