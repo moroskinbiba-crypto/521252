@@ -49,6 +49,21 @@ jobs:
           set -euo pipefail
           test -x portable/Launch-TGRMLither.sh
           sh -n portable/Launch-TGRMLither.sh
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/tgrmlither-port-test.log 2>&1 &
+          port_test_pid=$!
+          cleanup_port_test() { kill "$port_test_pid" 2>/dev/null || true; }
+          trap cleanup_port_test EXIT
+          for attempt in {1..20}; do
+            if python3 -c 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:8765/", timeout=.5).read(1)' >/dev/null 2>&1; then break; fi
+            sleep 0.1
+          done
+          if ./portable/Launch-TGRMLither.sh >/tmp/tgrmlither-launch-test.log 2>&1; then
+            echo "Launcher unexpectedly succeeded while port 8765 was occupied." >&2
+            exit 1
+          fi
+          grep -qi 'already in use' /tmp/tgrmlither-launch-test.log
+          cleanup_port_test
+          trap - EXIT
           unzip -l "dist/TGRMLither-Portable-v${VERSION}.zip"
           unzip -p "dist/TGRMLither-Portable-v${VERSION}.zip" TGRMLither-Portable/index.html | grep -q '<title>TGRMLither'
           unzip -p "dist/TGRMLither-Portable-v${VERSION}.zip" TGRMLither-Portable/Launch-TGRMLither.bat | grep -q 'http.server 8765'
