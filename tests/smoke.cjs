@@ -326,6 +326,14 @@ async function downloadFrom(page, selector) {
     });
     await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
     assert.deepEqual(await page.locator("#output").evaluate(c => [c.width, c.height]), [48, 32]);
+    const oversizedSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="40000" height="1" viewBox="0 0 40000 1"><rect width="40000" height="1" fill="#246"/></svg>`);
+    await page.locator("#imageInput").setInputFiles({ name: "oversized-source.svg", mimeType: "image/svg+xml", buffer: oversizedSvg });
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("oversized-source.svg"));
+    const safeSourceSize = await page.locator("#output").evaluate(c => [c.width, c.height]);
+    assert.ok(safeSourceSize[0] <= 32767 && safeSourceSize[1] <= 32767, "source canvas dimensions must remain below the browser-safe edge limit");
+    assert.match(await page.locator("#toast").textContent(), /уменьшено для стабильной обработки/, "oversized images should get a clear downscale warning");
+    await page.locator("#imageInput").setInputFiles({ name: "qa-fixture.png", mimeType: "image/png", buffer: imageBuffer });
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
     const pasteWasHandled = await page.evaluate(async dataURL => {
       const blob = await (await fetch(dataURL)).blob();
       const file = new File([blob], "clipboard-source.png", { type: "image/png" });
