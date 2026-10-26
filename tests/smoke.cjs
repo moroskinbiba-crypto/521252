@@ -357,6 +357,13 @@ async function downloadFrom(page, selector) {
     }
     await page.locator("#scale").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
     await page.locator("#levels").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await page.locator("#algorithm").selectOption("halftone");
+    await page.locator("#patternShape").selectOption("circle");
+    await page.locator("#patternAngle").evaluate(el => { el.value = "0"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    const halftoneAngle0 = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await page.locator("#patternAngle").evaluate(el => { el.value = "45"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    const halftoneAngle45 = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.notEqual(halftoneAngle0, halftoneAngle45, "Halftone screen angle should rotate the dot grid even when dots are circular");
     await page.locator("#algorithm").selectOption("bayer16");
     const bayer16Output = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     await page.locator("#algorithm").selectOption("blueNoise");
