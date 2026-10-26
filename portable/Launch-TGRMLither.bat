@@ -4,10 +4,16 @@ cd /d "%~dp0"
 
 set "PYTHON_CMD="
 where py >nul 2>&1
-if not errorlevel 1 set "PYTHON_CMD=py -3"
+if not errorlevel 1 (
+  py -3 --version >nul 2>&1
+  if not errorlevel 1 set "PYTHON_CMD=py -3"
+)
 if not defined PYTHON_CMD (
   where python >nul 2>&1
-  if not errorlevel 1 set "PYTHON_CMD=python"
+  if not errorlevel 1 (
+    python --version >nul 2>&1
+    if not errorlevel 1 set "PYTHON_CMD=python"
+  )
 )
 if not defined PYTHON_CMD goto :fallback
 
