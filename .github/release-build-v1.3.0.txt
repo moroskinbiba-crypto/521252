@@ -1,0 +1,1 @@
+This branch update triggers the portable package build. The release workflow checks out main as its source.
