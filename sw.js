@@ -34,7 +34,8 @@ self.addEventListener("fetch", event => {
 
   if (navigation) {
     event.respondWith(fetch(request).catch(async () => {
-      const cached = await caches.match(new URL("./index.html", self.registration.scope).href);
+      const cache = await caches.open(CACHE);
+      const cached = await cache.match(new URL("./index.html", self.registration.scope).href);
       if (cached) return cached;
       return new Response("TGRMLither is offline and no cached app copy is available.", {
         status: 503,
@@ -45,12 +46,12 @@ self.addEventListener("fetch", event => {
   }
 
   event.respondWith((async () => {
-    const cached = await caches.match(request);
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(request);
     if (cached) return cached;
     const response = await fetch(request);
     if (response.ok && response.type === "basic") {
-      const copy = response.clone();
-      caches.open(CACHE).then(cache => cache.put(request, copy)).catch(() => {});
+      try { await cache.put(request, response.clone()); } catch (error) { /* A cache failure must not block the app. */ }
     }
     return response;
   })());
