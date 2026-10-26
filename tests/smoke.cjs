@@ -720,8 +720,19 @@ async function downloadFrom(page, selector) {
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer }
     ]);
     assert.equal(await page.locator("#batchList .fileitem").count(), 2);
+    await page.evaluate(() => {
+      window.__tgrmOriginalToBlob = HTMLCanvasElement.prototype.toBlob;
+      HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
+        const canvas = this;
+        setTimeout(() => window.__tgrmOriginalToBlob.call(canvas, callback, type, quality), 250);
+      };
+    });
     await page.locator("#runBatch").click();
+    assert.equal(await page.locator("#clearBatch").isDisabled(), true, "batch items must not be removed while processing is running");
+    assert.equal(await page.locator("#batchInput").isDisabled(), true, "new files must not be added while processing is running");
     await page.waitForFunction(() => document.querySelectorAll("#batchResults a[download]").length === 2, null, { timeout: 15000 });
+    await page.waitForFunction(() => !document.querySelector("#clearBatch")?.disabled, null, { timeout: 15000 });
+    await page.evaluate(() => { HTMLCanvasElement.prototype.toBlob = window.__tgrmOriginalToBlob; delete window.__tgrmOriginalToBlob; });
     const batchNames = await page.locator("#batchResults a[download]").evaluateAll(links => links.map(link => link.download));
     assert.equal(new Set(batchNames).size, 2, "duplicate source filenames must not overwrite each other in the batch ZIP");
     assert.match(batchNames[0], /TGRMLither\.png$/);
