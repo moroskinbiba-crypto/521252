@@ -49,8 +49,9 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"), "#11130f");
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
     assert.match(await page.locator("#homeLogo").innerText(), /TGRMLither/, "new product name must be visible in the app header");
-    await page.evaluate(() => loadProject({ size: 160 * 1024 * 1024 + 1 }));
-    assert.match(await page.locator("#toast").textContent(), /лимит 160 МБ/, "oversized project files should be rejected before reading their content");
+    await page.locator("#projectInput").setInputFiles({ name: "invalid-project.json", mimeType: "application/json", buffer: Buffer.from("{ invalid") });
+    await page.waitForFunction(() => document.querySelector("#toast")?.textContent === "Неверный файл проекта");
+    assert.equal(await page.locator("#projectInput").inputValue(), "", "project input should remain reusable after a bad file");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), true, "regular effects should be visible in Editor");
     assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer panel should be isolated from Editor");
     assert.equal(await page.locator("#shapeControl").isVisible(), false, "Shape Lab panel should be isolated from Editor");
