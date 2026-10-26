@@ -684,6 +684,15 @@ async function downloadFrom(page, selector) {
     await page.locator("#runBatch").click();
     await page.waitForFunction(() => document.querySelectorAll("#batchResults a[download]").length === 1, null, { timeout: 15000 });
     assert.match(await page.locator("#batchResults a[download]").getAttribute("download"), /TGRMLither\.png$/);
+    assert.equal(await page.locator("#downloadBatchZip").isEnabled(), true, "ZIP download should enable after batch processing");
+    const [batchZipDownload] = await Promise.all([
+      page.waitForEvent("download", { timeout: 10000 }),
+      page.locator("#downloadBatchZip").click()
+    ]);
+    assert.equal(batchZipDownload.suggestedFilename(), "TGRMLither-batch.zip");
+    const batchZipBytes = fs.readFileSync(await batchZipDownload.path());
+    assert.deepEqual([...batchZipBytes.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04], "batch archive should have a valid ZIP local-file signature");
+    assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither.png")), "batch ZIP should contain the processed PNG filename");
 
     await page.locator("#batch-effect-scanlines").click();
     assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true");

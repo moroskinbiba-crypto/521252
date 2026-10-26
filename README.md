@@ -20,7 +20,7 @@ No installer, account, or backend is required. Image processing takes place in t
 - Shape Lab with four luminance bands, per-band geometry, size and colour, placement distribution and rotation.
 - Independent, adjustable and reorderable effect stacks for Editor, Shape Lab, Script Slayer, Batch and Video Lab.
 - Script Slayer with 48 character families, live glyph preview, editable glyphs, depth/cell sizing, offset, palette/source/mono colour, transparent backgrounds, TXT export and animation.
-- User presets, project JSON, batch processing, PNG/JPEG, SVG pixel-grid export, WebM motion export, standalone HTML and PWA/offline cache.
+- User presets, project JSON, batch processing with individual PNGs or a one-click ZIP bundle, PNG/JPEG, SVG pixel-grid export, WebM motion export, standalone HTML and PWA/offline cache.
 
 
 ## Mobile and tablet support

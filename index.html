@@ -576,7 +576,7 @@ body[data-theme="paper"] .btn,body[data-theme="paper"] .select,body[data-theme="
 <details class="ascii hidden" id="asciiDetails"><summary>Открыть ASCII-текст · TXT</summary><pre id="asciiText"></pre></details>
 </section>
 <section id="presetsView" class="hidden"><div class="heading"><div><div class="eyebrow">LIBRARY / STARTING POINTS</div><h1>Preset library<span style="color:var(--acid)">.</span></h1><p>Выберите стиль и продолжайте редактировать настройки.</p></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn sm" id="savePresetLibrary">＋ Мой пресет</button><button class="btn sm" id="exportPresets">↓ JSON</button><button class="btn sm" id="importPresets">↑ Import</button></div></div><div class="presetgrid" id="presetGrid"></div><div class="card" style="margin-top:17px"><h2>Мои пресеты</h2><p>Ваши конфигурации сохраняются в этом браузере.</p><div class="filelist" id="customPresets"></div></div></section>
-<section id="batchView" class="hidden"><div class="heading"><div><div class="eyebrow">WORKSPACE / BATCH</div><h1>Batch processing<span style="color:var(--acid)">.</span></h1><p>Одна конфигурация — несколько файлов. Локальная обработка.</p></div></div><div class="card"><h2>01 / Добавьте изображения</h2><p>Текущие параметры будут применены к каждому выбранному файлу.</p><div class="drop" id="batchDrop"><div style="font-size:25px;color:var(--acid)">⇧</div><strong>Перетащите файлы сюда</strong><p>PNG · JPG · WEBP · несколько изображений</p><button class="btn" id="batchBrowse">Выбрать файлы</button></div><div class="filelist" id="batchList"></div><div class="progress"><i id="batchProgress"></i></div><div style="display:flex;gap:7px;margin-top:12px"><button class="btn primary" id="runBatch">▶ Обработать всё</button><button class="btn" id="clearBatch">Очистить</button></div></div><div class="card"><h2>02 / Результаты</h2><p>Каждый результат можно скачать отдельно в PNG.</p><div class="filelist" id="batchResults"><span style="font-size:10px;color:var(--muted)">Пока нет результатов.</span></div></div></section>
+<section id="batchView" class="hidden"><div class="heading"><div><div class="eyebrow">WORKSPACE / BATCH</div><h1>Batch processing<span style="color:var(--acid)">.</span></h1><p>Одна конфигурация — несколько файлов. Локальная обработка.</p></div></div><div class="card"><h2>01 / Добавьте изображения</h2><p>Текущие параметры будут применены к каждому выбранному файлу.</p><div class="drop" id="batchDrop"><div style="font-size:25px;color:var(--acid)">⇧</div><strong>Перетащите файлы сюда</strong><p>PNG · JPG · WEBP · несколько изображений</p><button class="btn" id="batchBrowse">Выбрать файлы</button></div><div class="filelist" id="batchList"></div><div class="progress"><i id="batchProgress"></i></div><div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" id="runBatch">▶ Обработать всё</button><button class="btn" id="downloadBatchZip" disabled>↓ Скачать всё ZIP</button><button class="btn" id="clearBatch">Очистить</button></div></div><div class="card"><h2>02 / Результаты</h2><p>Скачивайте PNG по отдельности или соберите все готовые изображения в один ZIP-архив.</p><div class="filelist" id="batchResults"><span style="font-size:10px;color:var(--muted)">Пока нет результатов.</span></div></div></section>
 <section id="videoView" class="hidden">
   <div class="heading"><div><div class="eyebrow">WORKSPACE / VIDEO</div><h1>Video Lab<span style="color:var(--acid)">.</span></h1><p>Обработка видеокадров на лету, перемотка и экспорт результата.</p></div></div>
   <div class="stagebar"><span class="filename" id="videoFilename">Видео не загружено</span><div class="stageactions"><button class="btn sm" id="videoOpen">▣ Открыть видео</button><button class="btn sm" id="videoPlay">▶ Воспроизвести</button><button class="btn sm" id="videoExport">↓ WebM</button></div></div>
@@ -724,7 +724,7 @@ const savedPaletteOverrides=loadStore("tgrmlither-built-in-palette-overrides",{}
 for(const [key,values] of Object.entries(savedPaletteOverrides||{}))if(pal[key]&&key!=="custom"&&Array.isArray(values)&&values.length>=2&&values.length<=16&&values.every(c=>/^#[0-9a-f]{6}$/i.test(c)))pal[key].c=[...values.map(c=>c.toLowerCase())];
 const def={algorithm:"bayer4",scale:5,markScale:100,blend:100,smoothing:0,qualityMode:"balanced",serpentine:false,jpegQuality:94,levels:4,threshold:0,patternAngle:45,patternShape:"circle",algorithmLayers:[],depth:70,contrast:100,brightness:0,midtones:50,highlights:50,blur:0,invert:false,palette:"moss",colorMode:"color",effects:[],effectOrder:["scanlines","glow","chromatic","vignette","noise","epsilon","jpeg","lick","stress","modlines"],effectStrength:{scanlines:50,glow:50,chromatic:50,vignette:50,noise:50,epsilon:50,jpeg:50,lick:50,stress:50,modlines:50},customColors:loadStore("ditherlab-colors",["#10160f","#334b2b","#7a9a47","#d9efad"]),shape:"circle",jitter:20,shapeDistribution:"uniform",shapeRotation:0,shapeThresholds:[25,50,75],shapeBands:[{shape:"circle",size:55,color:"#334b2b",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:70,color:"#7a9a47",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:85,color:"#b8d785",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:100,color:"#d9efad",rotation:0,customPath:"",customViewBox:[0,0,100,100]}],asciiWidth:100,asciiSet:"classic",asciiDepth:10,asciiCellSize:8,asciiOffset:0,asciiCustomChars:"",asciiColorMode:"palette",asciiBgMode:"transparent",asciiBgColor:"#07110a",asciiTextColor:"#cafa6a",neoGlowEnabled:false,neoGlowDirection:"horizontal",neoGlowLength:18,neoGlowBrightness:90,neoGlowVisibility:12,neoGlowPhase:0,neoGlowColor:"#cafa6a"};
 pal.custom.c=def.customColors;
-let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0;
+let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],batchResultsData=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0;
 const WORKSPACE_NAMES=["editor","shape","script","batch","video"];
 const LAYER_ALGORITHMS=new Set([...Array.from($("algorithm").options).map(o=>o.value),"shape"].filter(v=>v&&v!=="ascii"));
 const LAYER_BLEND_MODES=["normal","multiply","screen","overlay","darken","lighten","difference"];
@@ -857,21 +857,30 @@ function bindShapePresetControls(){renderShapePresetOptions();$("shapePresetSele
 
 function colors(){let base=(pal[s.palette]||pal.moss).c.map(hex).sort((a,b)=>lumin(...a)-lumin(...b));if(s.colorMode==="mono")base=[[0,0,0],[255,255,255]];if(s.colorMode==="duo")base=[base[0],base[base.length-1]];const count=s.colorMode==="duo"?2:clamp(Number(s.levels)||4,2,16);if(count===base.length)return base;const result=[];for(let i=0;i<count;i++){const pos=i*(base.length-1)/(count-1),lo=Math.floor(pos),hi=Math.min(base.length-1,Math.ceil(pos)),t=pos-lo;result.push(base[lo].map((v,k)=>Math.round(v*(1-t)+base[hi][k]*t)))}return result}
 function nearest(r,g,b,cs){let best=cs[0],dist=Infinity;for(const c of cs){let d=(r-c[0])**2+(g-c[1])**2+(b-c[2])**2;if(d<dist){dist=d;best=c}}return best}
-function getBayer(n,x,y){let m=[[0]];while(m.length<n){const a=m,nn=a.length,next=Array.from({length:nn*2},()=>Array(nn*2).fill(0));for(let yy=0;yy<nn;yy++)for(let xx=0;xx<nn;xx++){const v=a[yy][xx]*4;next[yy][xx]=v;next[yy][xx+nn]=v+2;next[yy+nn][xx]=v+3;next[yy+nn][xx+nn]=v+1}m=next}return (m[((y%n)+n)%n][((x%n)+n)%n]+.5)/(n*n)}
+const bayerMatrixCache=new Map();
+function getBayer(n,x,y){let m=bayerMatrixCache.get(n);if(!m){m=[[0]];while(m.length<n){const a=m,nn=a.length,next=Array.from({length:nn*2},()=>Array(nn*2).fill(0));for(let yy=0;yy<nn;yy++)for(let xx=0;xx<nn;xx++){const v=a[yy][xx]*4;next[yy][xx]=v;next[yy][xx+nn]=v+2;next[yy+nn][xx]=v+3;next[yy+nn][xx+nn]=v+1}m=next}bayerMatrixCache.set(n,m)}return (m[((y%n)+n)%n][((x%n)+n)%n]+.5)/(n*n)}
 let blueNoiseRankTable=null;
+let beehiveThresholdTable=null;
 function getBeehive(x,y){
- // Deterministic threshold field sampled from a staggered hexagonal lattice.
- const size=16,px=((Math.floor(x)%size)+size)%size,py=((Math.floor(y)%size)+size)%size;
- let nearest=Infinity;
- for(let row=-2;row<=2;row++){
-  const cy=4+row*8,cxOffset=(Math.abs(row)%2)*4;
-  for(let col=-2;col<=2;col++){
-   const cx=4+col*8+cxOffset,dx=(px-cx)*.8660254038,dy=py-cy;
-   const distance=Math.max(Math.abs(dx),Math.abs(dy),Math.abs(dx+dy)*.5,Math.abs(dx-dy)*.5);
-   if(distance<nearest)nearest=distance;
+ // Precompute the deterministic 16x16 hexagonal threshold tile only once.
+ if(!beehiveThresholdTable){
+  const size=16,table=new Float32Array(size*size);
+  for(let py=0;py<size;py++)for(let px=0;px<size;px++){
+   let nearest=Infinity;
+   for(let row=-2;row<=2;row++){
+    const cy=4+row*8,cxOffset=(Math.abs(row)%2)*4;
+    for(let col=-2;col<=2;col++){
+     const cx=4+col*8+cxOffset,dx=(px-cx)*.8660254038,dy=py-cy;
+     const distance=Math.max(Math.abs(dx),Math.abs(dy),Math.abs(dx+dy)*.5,Math.abs(dx-dy)*.5);
+     if(distance<nearest)nearest=distance;
+    }
+   }
+   table[py*size+px]=clamp(nearest/7.5,0,1);
   }
+  beehiveThresholdTable=table;
  }
- return clamp(nearest/7.5,0,1);
+ const size=16,px=((Math.floor(x)%size)+size)%size,py=((Math.floor(y)%size)+size)%size;
+ return beehiveThresholdTable[py*size+px];
 }
 function getBlueNoise(x,y){
  if(!blueNoiseRankTable){
@@ -1241,7 +1250,55 @@ function savePreset(){ $("modalTitle").textContent="Сохранить прес�
 function renderBatch(){let box=$("batchList");box.innerHTML="";if(!batch.length){box.textContent="Выбранные файлы появятся здесь.";box.style.color="var(--muted)";box.style.fontSize="10px";return}batch.forEach((f,i)=>{let row=document.createElement("div");row.className="fileitem";let icon=document.createElement("div");icon.className="fileicon";icon.textContent="▧";let txt=document.createElement("div");txt.className="filetext";txt.innerHTML="<b></b><small></small>";txt.querySelector("b").textContent=f.name;txt.querySelector("small").textContent=(f.size/1048576).toFixed(2)+" MB";let rm=document.createElement("button");rm.className="btn sm";rm.textContent="×";rm.onclick=()=>{batch.splice(i,1);renderBatch()};row.append(icon,txt,rm);box.append(row)})}
 function addBatch(files){batch.push(...Array.from(files).filter(f=>f.type.startsWith("image/")));renderBatch();say("Добавлено файлов: "+files.length)}
 function fileCanvas(f){return new Promise((resolve,reject)=>{let u=URL.createObjectURL(f),im=new Image();im.onload=()=>{let c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext("2d").drawImage(im,0,0);URL.revokeObjectURL(u);resolve(c)};im.onerror=()=>{URL.revokeObjectURL(u);reject(Error("Не удалось открыть файл"))};im.src=u})}
-async function runBatch(){if(!batch.length){say("Сначала добавьте файлы");return}$("runBatch").disabled=true;$("batchResults").innerHTML="";let cfg={...s};for(let i=0;i<batch.length;i++){let f=batch[i];try{let image=await fileCanvas(f),c=cfg.algorithm==="ascii"?makeAscii(image,cfg):rasterPipeline(image,cfg),blob=await new Promise(r=>c.toBlob(r,"image/png")),url=URL.createObjectURL(blob),row=document.createElement("div");row.className="fileitem";let a=document.createElement("a");a.className="btn sm";a.textContent="↓ PNG";a.href=url;a.download=slug(f.name.replace(/\.[^.]+$/,"") )+"-TGRMLither.png";let text=document.createElement("div");text.className="filetext";text.innerHTML="<b></b><small>Готово · "+c.width+" × "+c.height+"</small>";text.querySelector("b").textContent=f.name;row.append(text,a);$("batchResults").append(row)}catch(e){say("Ошибка: "+f.name)}$("batchProgress").style.width=Math.round((i+1)/batch.length*100)+"%";await new Promise(r=>setTimeout(r,10))}$("runBatch").disabled=false;say("Пакетная обработка завершена")}
+function zipCrc32(bytes){
+ let table=zipCrc32.table;
+ if(!table){table=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);table[n]=c>>>0}zipCrc32.table=table}
+ let crc=0xffffffff;for(const byte of bytes)crc=table[(crc^byte)&255]^(crc>>>8);return (crc^0xffffffff)>>>0;
+}
+async function buildZipArchive(entries){
+ const encoder=new TextEncoder(),localParts=[],centralParts=[];let offset=0;
+ const now=new Date(),dosTime=(now.getHours()<<11)|(now.getMinutes()<<5)|Math.floor(now.getSeconds()/2),dosDate=((Math.max(1980,now.getFullYear())-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
+ for(const entry of entries){
+  const name=encoder.encode(entry.name),data=new Uint8Array(await entry.blob.arrayBuffer()),crc=zipCrc32(data);
+  const local=new Uint8Array(30+name.length),lv=new DataView(local.buffer);
+  lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0x0800,true);lv.setUint16(8,0,true);lv.setUint16(10,dosTime,true);lv.setUint16(12,dosDate,true);
+  lv.setUint32(14,crc,true);lv.setUint32(18,data.length,true);lv.setUint32(22,data.length,true);lv.setUint16(26,name.length,true);lv.setUint16(28,0,true);local.set(name,30);
+  const central=new Uint8Array(46+name.length),cv=new DataView(central.buffer);
+  cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0x0800,true);cv.setUint16(10,0,true);
+  cv.setUint16(12,dosTime,true);cv.setUint16(14,dosDate,true);cv.setUint32(16,crc,true);cv.setUint32(20,data.length,true);cv.setUint32(24,data.length,true);
+  cv.setUint16(28,name.length,true);cv.setUint16(30,0,true);cv.setUint16(32,0,true);cv.setUint16(34,0,true);cv.setUint16(36,0,true);cv.setUint32(38,0,true);cv.setUint32(42,offset,true);central.set(name,46);
+  localParts.push(local,data);centralParts.push(central);offset+=local.length+data.length;
+ }
+ const centralOffset=offset,centralSize=centralParts.reduce((sum,part)=>sum+part.length,0),end=new Uint8Array(22),ev=new DataView(end.buffer),count=entries.length;
+ ev.setUint32(0,0x06054b50,true);ev.setUint16(4,0,true);ev.setUint16(6,0,true);ev.setUint16(8,count,true);ev.setUint16(10,count,true);ev.setUint32(12,centralSize,true);ev.setUint32(16,centralOffset,true);ev.setUint16(20,0,true);
+ return new Blob([...localParts,...centralParts,end],{type:"application/zip"});
+}
+async function downloadBatchArchive(){
+ if(!batchResultsData.length){say("Сначала обработайте изображения");return}
+ const button=$("downloadBatchZip");button.disabled=true;
+ try{const blob=await buildZipArchive(batchResultsData);download(blob,"TGRMLither-batch.zip");say("ZIP готов · "+batchResultsData.length+" файлов")}
+ catch(err){say("Не удалось создать ZIP-архив")}
+ finally{button.disabled=batchResultsData.length===0}
+}
+async function runBatch(){
+ if(!batch.length){say("Сначала добавьте файлы");return}
+ $("runBatch").disabled=true;$("downloadBatchZip").disabled=true;$("batchResults").innerHTML="";batchResultsData=[];
+ const cfg={...s};
+ for(let i=0;i<batch.length;i++){
+  const f=batch[i];
+  try{
+   const image=await fileCanvas(f),c=cfg.algorithm==="ascii"?makeAscii(image,cfg):rasterPipeline(image,cfg);
+   const blob=await new Promise(resolve=>c.toBlob(resolve,"image/png"));if(!blob)throw Error("PNG export failed");
+   const name=slug(f.name.replace(/\.[^.]+$/,""))+"-TGRMLither.png",url=URL.createObjectURL(blob),row=document.createElement("div");
+   batchResultsData.push({name,blob});row.className="fileitem";
+   const a=document.createElement("a");a.className="btn sm";a.textContent="↓ PNG";a.href=url;a.download=name;
+   const text=document.createElement("div");text.className="filetext";text.innerHTML="<b></b><small>Готово · "+c.width+" × "+c.height+"</small>";text.querySelector("b").textContent=f.name;
+   row.append(text,a);$("batchResults").append(row);
+  }catch(e){say("Ошибка: "+f.name)}
+  $("batchProgress").style.width=Math.round((i+1)/batch.length*100)+"%";await new Promise(r=>setTimeout(r,10))
+ }
+ $("runBatch").disabled=false;$("downloadBatchZip").disabled=batchResultsData.length===0;say("Пакетная обработка завершена");
+}
 function loadProject(f){
  const r=new FileReader();
  r.onload=()=>{
@@ -1370,7 +1427,7 @@ $("cmykCell").oninput=()=>{$("cmykCellV").textContent=$("cmykCell").value+" px"}
 $("offlineBtn").onclick=saveStandalone;$("savePresetMenu").onclick=$("savePresetLibrary").onclick=savePreset;$("exportPresets").onclick=()=>download(new Blob([JSON.stringify({format:"tgrmlithering-presets",version:1,presets:loadStore("ditherlab-presets",[])},null,2)],{type:"application/json"}),"TGRMLither-presets.json");$("importPresets").onclick=()=>$("presetInput").click();$("presetInput").onchange=async e=>{const f=e.target.files[0];if(f)try{const j=JSON.parse(await f.text()),items=Array.isArray(j)?j:(j.presets||[]);if(!items.length)throw Error("presets");const valid=items.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,100);custom=[...valid,...loadStore("ditherlab-presets",[])];store("ditherlab-presets",custom);renderPresets();say("Пресеты импортированы")}catch(err){say("Файл пресетов не распознан")}e.target.value=""};$("downloadTxt").onclick=()=>{if(!src)return;makeAscii(src,s);download(new Blob([ascii],{type:"text/plain;charset=utf-8"}),slug(srcName)+"-script-slayer.txt")};
 $("asciiPlay").onclick=()=>startAsciiAnimation(false);$("asciiStop").onclick=stopAsciiAnimation;$("asciiExportWebm").onclick=()=>startAsciiAnimation(true);
 document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));$("homeLogo").onclick=e=>{e.preventDefault();setMode("editor")};$("randomize").classList.toggle("hidden",mode!=="editor");$("shuffle").classList.toggle("hidden",mode!=="editor");
-$("batchBrowse").onclick=()=>$("batchInput").click();$("batchInput").onchange=e=>{addBatch(e.target.files);e.target.value=""};$("batchDrop").ondragover=e=>{e.preventDefault();$("batchDrop").style.borderColor="var(--acid)"};$("batchDrop").ondragleave=()=>$("batchDrop").style.borderColor="";$("batchDrop").ondrop=e=>{e.preventDefault();$("batchDrop").style.borderColor="";addBatch(e.dataTransfer.files)};$("runBatch").onclick=runBatch;$("clearBatch").onclick=()=>{batch=[];renderBatch();$("batchResults").innerHTML="";$("batchProgress").style.width="0%"};
+$("batchBrowse").onclick=()=>$("batchInput").click();$("batchInput").onchange=e=>{addBatch(e.target.files);e.target.value=""};$("batchDrop").ondragover=e=>{e.preventDefault();$("batchDrop").style.borderColor="var(--acid)"};$("batchDrop").ondragleave=()=>$("batchDrop").style.borderColor="";$("batchDrop").ondrop=e=>{e.preventDefault();$("batchDrop").style.borderColor="";addBatch(e.dataTransfer.files)};$("runBatch").onclick=runBatch;$("downloadBatchZip").onclick=downloadBatchArchive;$("clearBatch").onclick=()=>{batch=[];batchResultsData=[];renderBatch();$("batchResults").innerHTML="";$("batchProgress").style.width="0%";$("downloadBatchZip").disabled=true};
 let stage=$("stage");stage.ondragover=e=>{e.preventDefault();stage.classList.add("drag")};stage.ondragleave=()=>stage.classList.remove("drag");stage.ondrop=async e=>{e.preventDefault();stage.classList.remove("drag");let f=e.dataTransfer.files[0];if(f&&f.type.startsWith("image/"))try{loadImage(await fileCanvas(f),f.name)}catch(err){say("Не удалось открыть файл")}};
 $("modalCancel").onclick=()=>$("modal").classList.add("hidden");$("modal").onclick=e=>{if(e.target===$("modal"))$("modal").classList.add("hidden")};document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="o"){e.preventDefault();openImage()}if(e.key==="Escape")$("modal").classList.add("hidden")});
 if("serviceWorker"in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register("./sw.js").catch(()=>{});
