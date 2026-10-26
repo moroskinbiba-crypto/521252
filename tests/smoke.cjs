@@ -717,9 +717,10 @@ async function downloadFrom(page, selector) {
     await page.locator('.topnav [data-mode="batch"]').click();
     await page.locator("#batchInput").setInputFiles([
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
-      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer }
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
+      { name: "broken-image.png", mimeType: "image/png", buffer: Buffer.from("not a valid PNG") }
     ]);
-    assert.equal(await page.locator("#batchList .fileitem").count(), 2);
+    assert.equal(await page.locator("#batchList .fileitem").count(), 3);
     await page.evaluate(() => {
       window.__tgrmOriginalToBlob = HTMLCanvasElement.prototype.toBlob;
       HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
@@ -731,7 +732,9 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#clearBatch").isDisabled(), true, "batch items must not be removed while processing is running");
     assert.equal(await page.locator("#batchInput").isDisabled(), true, "new files must not be added while processing is running");
     await page.waitForFunction(() => document.querySelectorAll("#batchResults a[download]").length === 2, null, { timeout: 15000 });
-    await page.waitForFunction(() => !document.querySelector("#clearBatch")?.disabled, null, { timeout: 15000 });
+    await page.waitForFunction(() => document.querySelectorAll("#batchResults .fileitem").length === 3 && !document.querySelector("#clearBatch")?.disabled, null, { timeout: 15000 });
+    assert.match(await page.locator("#batchResults").innerText(), /broken-image\.png[\s\S]*Ошибка:/, "failed batch files should remain visible with an error reason");
+    assert.match(await page.locator("#toast").textContent(), /2 успешно, 1 с ошибкой/, "batch summary should distinguish successes from failures");
     await page.evaluate(() => { HTMLCanvasElement.prototype.toBlob = window.__tgrmOriginalToBlob; delete window.__tgrmOriginalToBlob; });
     const batchNames = await page.locator("#batchResults a[download]").evaluateAll(links => links.map(link => link.download));
     assert.equal(new Set(batchNames).size, 2, "duplicate source filenames must not overwrite each other in the batch ZIP");
