@@ -41,8 +41,16 @@ async function downloadFrom(page, selector) {
     assert.equal(unrelatedCachePreserved, true, "the app must not delete caches owned by other apps on the same origin");
 
     assert.match(await page.title(), /^TGRMLither/);
+    const manifestResponse = await page.request.get(new URL("./manifest.webmanifest", baseURL).href);
+    assert.equal(manifestResponse.status(), 200, "PWA manifest should be reachable");
+    const manifest = await manifestResponse.json();
+    assert.equal(manifest.theme_color, "#11130f", "installed PWA theme should match the default app theme");
+    assert.equal(manifest.background_color, "#11130f", "installed PWA background should match the default app theme");
+    assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"), "#11130f");
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
     assert.match(await page.locator("#homeLogo").innerText(), /TGRMLither/, "new product name must be visible in the app header");
+    await page.evaluate(() => loadProject({ size: 160 * 1024 * 1024 + 1 }));
+    assert.match(await page.locator("#toast").textContent(), /лимит 160 МБ/, "oversized project files should be rejected before reading their content");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), true, "regular effects should be visible in Editor");
     assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer panel should be isolated from Editor");
     assert.equal(await page.locator("#shapeControl").isVisible(), false, "Shape Lab panel should be isolated from Editor");
@@ -67,6 +75,7 @@ async function downloadFrom(page, selector) {
     await page.locator("#themeMenu > summary").click();
     await page.locator("#themePicker").selectOption("terminal");
     assert.equal(await page.locator("body").getAttribute("data-theme"), "terminal");
+    assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"), "#07140c", "browser chrome color should follow the selected theme");
     assert.ok(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-theme")).vars["--acid"] === "#72ffa0"),
       "theme choice should persist locally");
     await page.locator("#makeThemeCode").click();
