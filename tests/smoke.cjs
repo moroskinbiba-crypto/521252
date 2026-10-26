@@ -20,6 +20,12 @@ async function downloadFrom(page, selector) {
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
     page.on("pageerror", error => errors.push(error.stack || error.message));
+    await page.addInitScript(async () => {
+      if ("caches" in window && /^https?:/.test(location.protocol)) {
+        const cache = await caches.open("unrelated-test-cache");
+        await cache.put(new URL("./unrelated-test-entry", location.href).href, new Response("keep"));
+      }
+    });
 
     await page.goto(baseURL, { waitUntil: "load", timeout: 30000 });
     await page.waitForFunction(() => {
@@ -27,6 +33,12 @@ async function downloadFrom(page, selector) {
       return canvas && canvas.width > 0 && canvas.height > 0 &&
         document.querySelector("#statAlgorithm")?.textContent.trim();
     }, null, { timeout: 15000 });
+    const unrelatedCachePreserved = await page.evaluate(async () => {
+      if (!("serviceWorker" in navigator) || !("caches" in window)) return true;
+      await navigator.serviceWorker.ready;
+      return (await caches.keys()).includes("unrelated-test-cache");
+    });
+    assert.equal(unrelatedCachePreserved, true, "the app must not delete caches owned by other apps on the same origin");
 
     assert.match(await page.title(), /^TGRMLither/);
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
@@ -681,16 +693,21 @@ async function downloadFrom(page, selector) {
     ]);
     assert.match(videoDownload.suggestedFilename(), /TGRMLither\.webm$/);
     assert.ok(fs.statSync(await videoDownload.path()).size > 500, "exported video should contain data");
+    assert.equal(await page.locator("#videoExport").isEnabled(), true, "video export control must be re-enabled after recording finishes");
 
     // Batch processing should accept and produce a real PNG.
     await page.locator('.topnav [data-mode="batch"]').click();
-    await page.locator("#batchInput").setInputFiles({
-      name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer
-    });
-    assert.equal(await page.locator("#batchList .fileitem").count(), 1);
+    await page.locator("#batchInput").setInputFiles([
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer }
+    ]);
+    assert.equal(await page.locator("#batchList .fileitem").count(), 2);
     await page.locator("#runBatch").click();
-    await page.waitForFunction(() => document.querySelectorAll("#batchResults a[download]").length === 1, null, { timeout: 15000 });
-    assert.match(await page.locator("#batchResults a[download]").getAttribute("download"), /TGRMLither\.png$/);
+    await page.waitForFunction(() => document.querySelectorAll("#batchResults a[download]").length === 2, null, { timeout: 15000 });
+    const batchNames = await page.locator("#batchResults a[download]").evaluateAll(links => links.map(link => link.download));
+    assert.equal(new Set(batchNames).size, 2, "duplicate source filenames must not overwrite each other in the batch ZIP");
+    assert.match(batchNames[0], /TGRMLither\.png$/);
+    assert.match(batchNames[1], /TGRMLither-2\.png$/);
     assert.equal(await page.locator("#downloadBatchZip").isEnabled(), true, "ZIP download should enable after batch processing");
     const [batchZipDownload] = await Promise.all([
       page.waitForEvent("download", { timeout: 10000 }),
@@ -699,7 +716,8 @@ async function downloadFrom(page, selector) {
     assert.equal(batchZipDownload.suggestedFilename(), "TGRMLither-batch.zip");
     const batchZipBytes = fs.readFileSync(await batchZipDownload.path());
     assert.deepEqual([...batchZipBytes.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04], "batch archive should have a valid ZIP local-file signature");
-    assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither.png")), "batch ZIP should contain the processed PNG filename");
+    assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither.png")), "batch ZIP should contain the first processed PNG filename");
+    assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither-2.png")), "batch ZIP should contain a collision-free second PNG filename");
 
     await page.locator("#batch-effect-scanlines").click();
     assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true");
