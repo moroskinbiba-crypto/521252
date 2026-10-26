@@ -40,11 +40,11 @@ if [ "$READY" -ne 1 ]; then
 fi
 
 if command -v open >/dev/null 2>&1; then
-  open "$URL"
+  open "$URL" || printf 'Could not open the browser automatically. Open: %s\n' "$URL"
 elif command -v xdg-open >/dev/null 2>&1; then
-  xdg-open "$URL"
+  xdg-open "$URL" || printf 'Could not open the browser automatically. Open: %s\n' "$URL"
 elif command -v gio >/dev/null 2>&1; then
-  gio open "$URL"
+  gio open "$URL" || printf 'Could not open the browser automatically. Open: %s\n' "$URL"
 else
   printf 'Open this URL in your browser: %s\n' "$URL"
 fi
