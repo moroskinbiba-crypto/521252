@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#245edb">
+<meta name="theme-color" content="#11130f">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&amp;family=Onest:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
@@ -726,7 +726,7 @@ for(const [key,values] of Object.entries(savedPaletteOverrides||{}))if(pal[key]&
 const def={algorithm:"bayer4",scale:5,markScale:100,blend:100,smoothing:0,qualityMode:"balanced",serpentine:false,jpegQuality:94,levels:4,threshold:0,patternAngle:45,patternShape:"circle",algorithmLayers:[],depth:70,contrast:100,brightness:0,midtones:50,highlights:50,blur:0,invert:false,palette:"moss",colorMode:"color",effects:[],effectOrder:["scanlines","glow","chromatic","vignette","noise","epsilon","jpeg","lick","stress","modlines"],effectStrength:{scanlines:50,glow:50,chromatic:50,vignette:50,noise:50,epsilon:50,jpeg:50,lick:50,stress:50,modlines:50},customColors:loadStore("ditherlab-colors",["#10160f","#334b2b","#7a9a47","#d9efad"]),shape:"circle",jitter:20,shapeDistribution:"uniform",shapeRotation:0,shapeThresholds:[25,50,75],shapeBands:[{shape:"circle",size:55,color:"#334b2b",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:70,color:"#7a9a47",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:85,color:"#b8d785",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:100,color:"#d9efad",rotation:0,customPath:"",customViewBox:[0,0,100,100]}],asciiWidth:100,asciiSet:"classic",asciiDepth:10,asciiCellSize:8,asciiOffset:0,asciiCustomChars:"",asciiColorMode:"palette",asciiBgMode:"transparent",asciiBgColor:"#07110a",asciiTextColor:"#cafa6a",neoGlowEnabled:false,neoGlowDirection:"horizontal",neoGlowLength:18,neoGlowBrightness:90,neoGlowVisibility:12,neoGlowPhase:0,neoGlowColor:"#cafa6a"};
 pal.custom.c=def.customColors;
 let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],batchResultsData=[],batchDownloadUrls=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0;
-const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767;
+const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_PROJECT_FILE_BYTES=160*1024*1024;
 const WORKSPACE_NAMES=["editor","shape","script","batch","video"];
 const LAYER_ALGORITHMS=new Set([...Array.from($("algorithm").options).map(o=>o.value),"shape"].filter(v=>v&&v!=="ascii"));
 const LAYER_BLEND_MODES=["normal","multiply","screen","overlay","darken","lighten","difference"];
@@ -1198,7 +1198,7 @@ async function importPaletteLibrary(file){
 function slug(t){return(t||"TGRMLither").replace(/[^a-z0-9а-яё_-]+/gi,"-").replace(/^-+|-+$/g,"").slice(0,60)||"TGRMLither"}
 function download(blob,name){let url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function exportImage(type="png"){if(!src)return;if(original){original=false;render()}const quality=clamp(Number($("jpegQuality")?.value??s.jpegQuality??94)/100,.7,1);out.toBlob(b=>b?download(b,slug(srcName)+"-TGRMLither."+(type==="jpeg"?"jpg":type)):say("Экспорт не удался"),type==="jpeg"?"image/jpeg":"image/png",type==="jpeg"?quality:undefined)}
-function project(){if(!src)return;if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);let c=document.createElement("canvas");c.width=src.width;c.height=src.height;c.getContext("2d").drawImage(src,0,0);let p={format:"tgrmlither-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source:c.toDataURL("image/png"),settings:cloneSettings(s),workspaces:workspaceSettings};download(new Blob([JSON.stringify(p)],{type:"application/json"}),slug(srcName)+".tgrmlither.json");say("Проект сохранён") }
+function project(){if(!src){say("Сначала загрузите изображение");return}try{if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);const source=src.toDataURL("image/png");if(source.length>MAX_PROJECT_FILE_BYTES){say("Проект слишком велик для сохранения. Уменьшите изображение и повторите экспорт.");return}const p={format:"tgrmlither-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source,settings:cloneSettings(s),workspaces:workspaceSettings},json=JSON.stringify(p);if(json.length>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ. Уменьшите изображение и повторите экспорт.");return}download(new Blob([json],{type:"application/json"}),slug(srcName)+".tgrmlither.json");say("Проект сохранён")}catch(error){say("Не удалось сохранить проект. Попробуйте уменьшить изображение и повторить экспорт.")}}
 function saveStandalone(){let html="<!doctype html>\n"+document.documentElement.outerHTML;download(new Blob([html],{type:"text/html;charset=utf-8"}),"TGRMLither-offline.html");say("Автономная HTML-версия скачана")}
 function openImage(){ $("imageInput").click() }
 function setMode(m){
@@ -1323,9 +1323,14 @@ async function runBatch(){
  $("runBatch").disabled=false;$("downloadBatchZip").disabled=batchResultsData.length===0;say("Пакетная обработка завершена");
 }
 function loadProject(f){
+ if(!f)return;
+ if(!Number.isFinite(Number(f.size))||f.size>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ");return}
  const r=new FileReader();
+ r.onerror=()=>say("Не удалось прочитать файл проекта");
+ r.onabort=()=>say("Чтение файла проекта отменено");
  r.onload=()=>{
   try{
+   if(typeof r.result!=="string")throw Error("read");
    const p=JSON.parse(r.result);
    if(!["tgrmlither-project","tgrmlithering-project","ditherlab-project"].includes(p.format)||typeof p.source!=="string"||!/^data:image\/(?:png|jpeg|webp);base64,/i.test(p.source))throw Error("project");
    const target=WORKSPACE_NAMES.includes(p.workspace)?p.workspace:p.settings?.algorithm==="ascii"?"script":p.settings?.algorithm==="shape"?"shape":"editor";
@@ -1333,7 +1338,6 @@ function loadProject(f){
    const im=new Image();
    im.onload=()=>{
     let c;try{c=canvasFromImage(im)}catch(error){say("Изображение проекта слишком велико или не поддерживается");return}
-    // Save the currently edited workspace before replacing profiles from the project.
     if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
     setMode("presets");
     if(p.workspaces&&typeof p.workspaces==="object")workspaceSettings=normaliseWorkspaceSettings(p.workspaces);
@@ -1341,14 +1345,15 @@ function loadProject(f){
     if(target==="shape")workspaceSettings[target].algorithm="shape";
     if(target==="script")workspaceSettings[target].algorithm="ascii";
     store("tgrmlithering-workspaces",workspaceSettings);
-    loadImage(c,p.sourceName||"project",false);
+    const projectName=typeof p.sourceName==="string"&&p.sourceName.trim()?p.sourceName.slice(0,160):"project";
+    loadImage(c,projectName,false);
     setMode(target);sync();render();say(imageResizeMessage(c)||"Проект открыт");
    };
    im.onerror=()=>say("Не удалось открыть изображение проекта");
    im.src=p.source;
-  }catch(e){say("Неверный файл проекта")}
+  }catch(error){say("Неверный файл проекта")}
  };
- r.readAsText(f);
+ try{r.readAsText(f)}catch(error){say("Не удалось прочитать файл проекта")}
 }
 async function copyResult(){try{let blob=await new Promise(r=>out.toBlob(r,"image/png"));await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);say("Изображение скопировано")}catch(e){say("Копирование недоступно. Скачайте PNG.")}}
 
@@ -1411,7 +1416,34 @@ function exportCmykSvg(){
  download(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}),slug(srcName)+"-CMYK-plates.svg");say("CMYK-экспорт готов · 4 подписанные векторные пластины");
 }
 let temporalRaf=0,temporalStart=0,temporalBase=null,temporalRecorder=null,temporalChunks=[],temporalTimer=0;
-function startTemporal(recording){if(!src){say("Сначала откройте изображение");return}if(temporalRaf)stopTemporal();temporalBase={threshold:s.threshold,brightness:s.brightness,asciiOffset:s.asciiOffset,mode};temporalStart=performance.now();if(recording){if(!out.captureStream||typeof MediaRecorder==="undefined"){say("Запись WebM не поддерживается этим браузером");return}try{const stream=out.captureStream(24),mime=MediaRecorder.isTypeSupported("video/webm;codecs=vp9")?"video/webm;codecs=vp9":"video/webm";temporalChunks=[];temporalRecorder=new MediaRecorder(stream,{mimeType:mime});temporalRecorder.ondataavailable=e=>{if(e.data&&e.data.size)temporalChunks.push(e.data)};temporalRecorder.onstop=()=>{const blob=new Blob(temporalChunks,{type:"video/webm"});if(blob.size)download(blob,slug(srcName)+"-motion.webm");stream.getTracks().forEach(t=>t.stop());temporalRecorder=null;temporalChunks=[];say("Motion экспортирован в WebM")};temporalRecorder.start();temporalTimer=setTimeout(stopTemporal,6000)}catch(e){say("Не удалось запустить запись");return}}function frame(now){if(!temporalRaf)return;const phase=(now-temporalStart)/1700,wave=Math.sin(phase*Math.PI*2);if(mode==="script"){s.asciiOffset=clamp(Math.round(temporalBase.asciiOffset+wave*35),-100,100);$("asciiOffset").value=s.asciiOffset;$("asciiOffsetV").textContent=s.asciiOffset}else{s.threshold=clamp(Math.round(temporalBase.threshold+wave*20),-64,64);s.brightness=clamp(Math.round(temporalBase.brightness+wave*10),-80,80);$("threshold").value=s.threshold;$("thresholdV").textContent=s.threshold;$("brightness").value=s.brightness;$("brightnessV").textContent=s.brightness}render();temporalRaf=requestAnimationFrame(frame)}temporalRaf=requestAnimationFrame(frame);$("temporalPlay").disabled=true;$("temporalStop").disabled=false;say(recording?"Запись Motion · 6 секунд":"Motion запущен")}
+function startTemporal(recording){
+ if(!src){say("Сначала откройте изображение");return}
+ if(recording&&(!out.captureStream||typeof MediaRecorder==="undefined")){say("Запись WebM не поддерживается этим браузером");return}
+ if(temporalRecorder&&temporalRecorder.state!=="inactive"){say("Запись Motion уже выполняется");return}
+ if(temporalRaf)stopTemporal();
+ temporalBase={threshold:s.threshold,brightness:s.brightness,asciiOffset:s.asciiOffset,mode};temporalStart=performance.now();
+ let stream=null;
+ if(recording){
+  try{
+   stream=out.captureStream(24);
+   const mime=MediaRecorder.isTypeSupported("video/webm;codecs=vp9")?"video/webm;codecs=vp9":MediaRecorder.isTypeSupported("video/webm")?"video/webm":"";
+   temporalChunks=[];temporalRecorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+   const recorder=temporalRecorder;
+   recorder.ondataavailable=e=>{if(e.data&&e.data.size)temporalChunks.push(e.data)};
+   recorder.onstop=()=>{const blob=new Blob(temporalChunks,{type:recorder.mimeType||"video/webm"});if(blob.size)download(blob,slug(srcName)+"-motion.webm");stream.getTracks().forEach(t=>t.stop());if(temporalRecorder===recorder)temporalRecorder=null;temporalChunks=[];say(blob.size?"Motion экспортирован в WebM":"Запись Motion не содержит данных")};
+   recorder.onerror=()=>{say("Ошибка записи Motion");try{if(recorder.state!=="inactive")recorder.stop()}catch(error){}};
+   recorder.start();temporalTimer=setTimeout(stopTemporal,6000);
+  }catch(error){clearTimeout(temporalTimer);temporalTimer=0;if(stream)stream.getTracks().forEach(t=>t.stop());if(temporalRecorder&&temporalRecorder.state!=="inactive")try{temporalRecorder.stop()}catch(stopError){}temporalRecorder=null;temporalChunks=[];temporalBase=null;say("Не удалось запустить запись Motion");return}
+ }
+ function frame(now){
+  if(!temporalRaf)return;
+  const phase=(now-temporalStart)/1700,wave=Math.sin(phase*Math.PI*2);
+  if(mode==="script"){s.asciiOffset=clamp(Math.round(temporalBase.asciiOffset+wave*35),-100,100);$("asciiOffset").value=s.asciiOffset;$("asciiOffsetV").textContent=s.asciiOffset}
+  else{s.threshold=clamp(Math.round(temporalBase.threshold+wave*20),-64,64);s.brightness=clamp(Math.round(temporalBase.brightness+wave*10),-80,80);$("threshold").value=s.threshold;$("thresholdV").textContent=s.threshold;$("brightness").value=s.brightness}
+  render();temporalRaf=requestAnimationFrame(frame);
+ }
+ temporalRaf=requestAnimationFrame(frame);$("temporalPlay").disabled=true;$("temporalStop").disabled=false;say(recording?"Запись Motion · 6 секунд":"Motion запущен");
+}
 function stopTemporal(){if(temporalRaf)cancelAnimationFrame(temporalRaf);temporalRaf=0;clearTimeout(temporalTimer);temporalTimer=0;if(temporalBase){s.threshold=temporalBase.threshold;s.brightness=temporalBase.brightness;s.asciiOffset=temporalBase.asciiOffset;temporalBase=null;sync();render()}$("temporalPlay").disabled=false;$("temporalStop").disabled=true;if(temporalRecorder&&temporalRecorder.state!=="inactive")temporalRecorder.stop()}
 let videoObjectURL="",videoRaf=0,videoRecorder=null,videoChunks=[],videoExportStream=null,videoAudioStream=null,videoExportInterrupted=false;
 function formatTime(seconds){if(!Number.isFinite(seconds)||seconds<0)seconds=0;const mm=Math.floor(seconds/60),ss=seconds%60;return String(mm).padStart(2,"0")+":"+ss.toFixed(1).padStart(4,"0")}
@@ -1422,12 +1454,12 @@ function stopVideoExport(interrupted=true){if(videoRecorder&&videoRecorder.state
 async function exportProcessedVideo(){const video=$("videoSource"),canvas=$("videoOutput");if(!video.src||!video.videoWidth){say("Сначала загрузите видео");return}if(videoRecorder&&videoRecorder.state!=="inactive"){say("Запись уже выполняется");return}if(!canvas.captureStream||typeof MediaRecorder==="undefined"){say("Запись WebM не поддерживается этим браузером");return}let stream=null,audioStream=null;try{video.pause();if(video.currentTime>.05){await new Promise((resolve,reject)=>{let done=false;const finish=()=>{if(done)return;done=true;clearTimeout(timer);video.removeEventListener("seeked",finish);video.removeEventListener("error",fail);resolve()};const fail=()=>{if(done)return;done=true;clearTimeout(timer);video.removeEventListener("seeked",finish);reject(Error("Не удалось перемотать видео"))};const timer=setTimeout(finish,1500);video.addEventListener("seeked",finish,{once:true});video.addEventListener("error",fail,{once:true});video.currentTime=0})}renderVideoFrame();stream=canvas.captureStream(30);try{if(video.captureStream)audioStream=video.captureStream();else if(video.mozCaptureStream)audioStream=video.mozCaptureStream()}catch(e){}if(audioStream)audioStream.getAudioTracks().forEach(t=>stream.addTrack(t));const mime=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(t=>MediaRecorder.isTypeSupported(t))||"",recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);videoRecorder=recorder;videoExportStream=stream;videoAudioStream=audioStream;videoChunks=[];videoExportInterrupted=false;$("videoExport").disabled=true;recorder.ondataavailable=e=>{if(e.data&&e.data.size)videoChunks.push(e.data)};recorder.onerror=()=>{say("Ошибка записи WebM");stopVideoExport(true)};recorder.onstop=()=>{const blob=new Blob(videoChunks,{type:recorder.mimeType||"video/webm"});if(blob.size)download(blob,slug(videoName())+"-TGRMLither.webm");stream.getTracks().forEach(t=>t.stop());if(audioStream)audioStream.getTracks().forEach(t=>t.stop());videoExportStream=null;videoAudioStream=null;videoRecorder=null;videoChunks=[];$("videoExport").disabled=false;$("videoPlay").textContent="▶ Воспроизвести";say(!blob.size?"Не удалось получить данные видео":videoExportInterrupted?"Запись остановлена · частичный WebM сохранён":"Обработанное видео экспортировано")};recorder.start(250);video.currentTime=0;await video.play();if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);video.onended=()=>{if(videoRecorder===recorder)stopVideoExport(false);$("videoPlay").textContent="▶ Воспроизвести"};$("videoPlay").textContent="Ⅱ Пауза";say("Записываю обработанное видео…")}catch(e){if(videoRecorder&&videoRecorder.state!=="inactive")stopVideoExport(true);else{if(stream)stream.getTracks().forEach(t=>t.stop());if(audioStream)audioStream.getTracks().forEach(t=>t.stop());videoRecorder=null;videoExportStream=null;videoAudioStream=null;$("videoExport").disabled=false}$("videoPlay").textContent="▶ Воспроизвести";say("Не удалось начать экспорт WebM")}}
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
 function init(){buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);presets.forEach(p=>{});renderPresets();renderBatch();
-$("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await file.text();if(text.length>500000)throw Error("SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");const index=clamp(Number($("shapeImportBand").value)||0,0,3),customPath=path.getAttribute("d").slice(0,20000);s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===index?({...b,shape:"custom",customPath,customViewBox:raw}):({...b}));s.customShapePath=customPath;s.customShapeViewBox=raw;$("shapeSvgStatus").textContent=file.name+" · SVG → диапазон "+(index+1);sync();render();say("SVG назначен диапазону "+(index+1))}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(!v.src){$("videoInput").click();return}if(videoRecorder&&videoRecorder.state!=="inactive"){v.pause();stopVideoExport(true);$("videoPlay").textContent="▶ Воспроизвести";return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{let f=e.target.files[0];if(f)try{loadImage(await fileCanvas(f),f.name)}catch(err){say("Не удалось открыть изображение")}e.target.value=""};
+$("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await file.text();if(text.length>500000)throw Error("SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");const index=clamp(Number($("shapeImportBand").value)||0,0,3),customPath=path.getAttribute("d").slice(0,20000);s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===index?({...b,shape:"custom",customPath,customViewBox:raw}):({...b}));s.customShapePath=customPath;s.customShapeViewBox=raw;$("shapeSvgStatus").textContent=file.name+" · SVG → диапазон "+(index+1);sync();render();say("SVG назначен диапазону "+(index+1))}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(!v.src){$("videoInput").click();return}if(videoRecorder&&videoRecorder.state!=="inactive"){v.pause();stopVideoExport(true);$("videoPlay").textContent="▶ Воспроизвести";return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{let f=e.target.files[0];if(f)try{loadImage(await fileCanvas(f),f.name)}catch(err){say(err&&err.message&&err.message.length<120?err.message:"Не удалось открыть изображение. Файл может быть повреждён или слишком велик.")}e.target.value=""};
 window.addEventListener("paste",async e=>{
  const items=Array.from(e.clipboardData?.items||[]),item=items.find(entry=>String(entry.type||"").startsWith("image/"));
  if(!item)return;const file=item.getAsFile?.();if(!file)return;e.preventDefault();
  try{const type=file.type||"image/png",extension=type==="image/jpeg"?"jpg":type==="image/webp"?"webp":type==="image/gif"?"gif":"png",named=new File([file],"clipboard-image."+extension,{type});loadImage(await fileCanvas(named),named.name);say("Изображение вставлено из буфера обмена")}
- catch(err){say("Не удалось вставить изображение из буфера обмена")}
+ catch(err){say(err&&err.message&&err.message.length<120?err.message:"Не удалось вставить изображение из буфера обмена")}
 });
 function updateFullscreenButton(){
  const active=!!document.fullscreenElement,button=$("fullscreenBtn");
