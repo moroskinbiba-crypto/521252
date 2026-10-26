@@ -58,3 +58,11 @@ MIT. See [LICENSE](LICENSE).
 - The built-in batch ZIP writer uses the classic ZIP format and limits each archive to 128 MB and 65,535 files. Split larger batches into smaller exports.
 - The browser-based editor keeps image processing local. Imported project files must contain a self-contained PNG, JPEG, or WebP data URL; remote image URLs are not loaded from project files.
 - The offline service worker only clears old caches whose names use the `tgrmlither-` prefix. It does not remove caches belonging to other apps on the same origin.
+
+
+## Additional hardening in v1.3.2
+
+- PWA launch/background colours follow the default dark theme; browser chrome colour updates with the selected theme.
+- Project import refuses files above 160 MB before reading them and handles FileReader failures; project export avoids an unnecessary full-resolution canvas copy and reports failures.
+- Motion WebM recording validates browser support before changing the UI and cleans up recorder streams if setup fails.
+- CI validates the Portable shell launcher's syntax and checks that its executable permission survives packaging.
