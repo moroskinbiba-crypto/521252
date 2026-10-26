@@ -330,10 +330,10 @@ async function downloadFrom(page, selector) {
     // Exercise every algorithm option so a broken branch cannot hide behind a valid default.
     const algorithms = await page.locator("#algorithm option").evaluateAll(options => options.map(option => option.value));
     const coreAlgorithms = algorithms.filter(value => !["shape", "ascii"].includes(value));
-    assert.equal(coreAlgorithms.length, 64, "expected 64 still-image algorithm choices across the five Dither Boy-style families plus Pixel Poster");
-    assert.ok(algorithms.includes("bayer16") && algorithms.includes("blueNoise"), "Bayer 16×16 and Blue Noise must be registered as real algorithms");
+    assert.equal(coreAlgorithms.length, 65, "expected 65 still-image algorithm choices including the Beehive hexagonal mode");
+    assert.ok(algorithms.includes("bayer16") && algorithms.includes("blueNoise") && algorithms.includes("beehive"), "Bayer 16×16, Blue Noise and Beehive must be registered as real algorithms");
     const diffusionAlgorithms = ["floyd", "atkinson", "jarvis", "stucki", "burkes", "sierra", "sierra2", "sierraLite", "fan", "shiau2", "shiau3", "stevenson", "falseFloyd", "twoRow", "simpleDiff"];
-    const orderedAlgorithms = ["bayer2", "bayer4", "bayer8", "bayer16", "blueNoise", "clustered4", "clustered8"];
+    const orderedAlgorithms = ["bayer2", "bayer4", "bayer8", "bayer16", "blueNoise", "clustered4", "clustered8", "beehive"];
     const patternDithers = ["halftone", "crosshatch", "diagonal", "waves", "concentric", "lines", "modulation", "spiral"];
     assert.ok(diffusionAlgorithms.every(algorithm => coreAlgorithms.includes(algorithm)), "all 15 error-diffusion kernels must be selectable");
     assert.ok(orderedAlgorithms.every(algorithm => coreAlgorithms.includes(algorithm)), "all ordered dithering matrices must be selectable");
@@ -365,6 +365,26 @@ async function downloadFrom(page, selector) {
     await page.locator("#algorithm").selectOption("bayer16");
     assert.equal(await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png")), bayer16Output,
       "Bayer 16×16 output should be deterministic");
+    await page.locator("#algorithm").selectOption("beehive");
+    assert.equal(await page.locator("#markScaleControl").isVisible(), true, "pattern mark scale should appear for Beehive");
+    await page.locator("#markScale").evaluate(el => { el.value = "40"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    const beehiveSmall = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await page.locator("#markScale").evaluate(el => { el.value = "165"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    const beehiveLarge = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.notEqual(beehiveSmall, beehiveLarge, "mark scale should resize hexagonal marks independently of cell size");
+    await page.locator("#markScale").evaluate(el => { el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await page.locator("#algorithm").selectOption("floyd");
+    const fullStrengthOutput = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await page.locator("#blend").evaluate(el => { el.value = "0"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    const originalBlendOutput = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.notEqual(fullStrengthOutput, originalBlendOutput, "zero blend should return the original image, not the processed pixels");
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.blend), 0, "blend amount should persist in workspace settings");
+    await page.locator("#blend").evaluate(el => { el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    const crispOutput = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await page.locator("#smoothing").evaluate(el => { el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    const softenedOutput = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.notEqual(crispOutput, softenedOutput, "smoothing should visibly blend a blurred pass into the processed image");
+    await page.locator("#smoothing").evaluate(el => { el.value = "0"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
     const gameboyPalette = page.locator("#palettes .palette[data-palette=\"gameboy\"]");
     assert.equal(await gameboyPalette.count(), 1, "the Game Boy retro palette must be available");
     await gameboyPalette.click();

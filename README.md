@@ -13,9 +13,9 @@ No installer, account, or backend is required. Image processing takes place in t
 ## Engine
 
 - 15 error-diffusion kernels, including Floyd–Steinberg, Atkinson, Jarvis–Judice–Ninke, Stucki, Burkes, Sierra variants, Fan and Stevenson–Arce; optional serpentine row scanning reduces the left-to-right directional bias.
-- 7 ordered-dither modes: Bayer 2×2, 4×4, 8×8 and 16×16, Blue Noise rank dithering, and clustered-dot 4×4/8×8; plus 8 pattern dither modes.
+- 8 ordered-dither modes: Bayer 2×2, 4×4, 8×8 and 16×16, Blue Noise rank dithering, clustered-dot 4×4/8×8, and a Beehive hexagonal hybrid; plus 8 pattern dither modes.
 - 17 glitch styles and 16 special modes, including threshold, posterize, CMYK halftone, edge/contour, thermal map, X-Ray, woodcut, pixel sort, tearing, VHS and bitcrush.
-- Contrast, brightness, midtones/highlights, levels, threshold, blur, 1–24 px dither cells and inversion. Choose a processing budget of 480k, 1.2M, 2.4M, or UHD 8.3M internal cells to balance live-preview speed against fine detail on large images. Adaptive sampling uses fractional downscaling to avoid unnecessarily discarding detail.
+- Contrast, brightness, midtones/highlights, levels, threshold, blur, 1–24 px dither cells, separate pattern-mark scale, post-processing smoothing, original/result blending and inversion. Choose a processing budget of 480k, 1.2M, 2.4M, or UHD 8.3M internal cells to balance live-preview speed against fine detail on large images. Adaptive sampling uses fractional downscaling to avoid unnecessarily discarding detail.
 - 25 built-in retro/print palettes plus a user palette and saved library, including Game Boy, PICO-8, DawnBringer 16, Commodore 64, CGA, Risograph and screenprint sets; mouse-wheel preview before confirming a palette, custom colours, image palette extraction, 2–16-colour palette editing, and JSON palette/library import/export.
 - Shape Lab with four luminance bands, per-band geometry, size and colour, placement distribution and rotation.
 - Independent, adjustable and reorderable effect stacks for Editor, Shape Lab, Script Slayer, Batch and Video Lab.
@@ -42,8 +42,9 @@ MIT. See [LICENSE](LICENSE).
 
 ## Advanced still-image workflow
 
-- Algorithm coverage: 63 modes across the five core families plus Pixel Poster, including extended Bayer 16×16 and a deterministic blue-noise-style ranked threshold matrix. These are independent implementations, not bit-identical recreations of Dither Boy internals.
+- Algorithm coverage: 65 still-image choices, including 15 error-diffusion kernels, 8 ordered modes, 8 pattern modes, 17 glitch modes, 16 special modes, Pixel Poster and the Beehive hexagonal hybrid; plus extended Bayer 16×16 and a deterministic blue-noise-style ranked threshold matrix. These are independent implementations, not bit-identical recreations of Dither Boy internals.
 - Algorithm compositing: up to four added algorithm layers, per-layer opacity, blend modes, reordering and removal. Layers are saved with workspace settings and project files.
+- Independent dot/mark scale for pattern modes, adjustable blend between the original image and the processed result, and a separate post-processing smoothing control.
 - Print output: choose SVG detail (compact, 1024 px, 2048 px or source resolution), black-vector threshold and DPI. CMYK export creates four labelled vector plates.
 - Pattern dithering: eight pattern modes including Spiral Dither, adjustable screen angle and halftone mark shape.
 - Palette library: save and name up to 100 four-colour palettes, apply or delete them, and import/export a collection as one JSON file.
