@@ -1101,7 +1101,7 @@ function updateExportFormatUI(){
   project:"Проект JSON · исходное изображение и настройки для продолжения редактирования.",
   copy:"Буфер обмена · копируется обработанное изображение."
  };
- $("exportSummary").textContent=summaries[format]||"Экспорт выполняется локально, без загрузки изображения на сервер.";
+ $("exportSummary").textContent=(src?srcName+" · "+src.width+" × "+src.height+" px. ":"")+(summaries[format]||"Экспорт выполняется локально, без загрузки изображения на сервер.");
 }
 
 function historySnapshot(){return {mode,settings:cloneSettings(s)}}
@@ -1211,7 +1211,7 @@ function openExportModal(){
  if(!src){say("Сначала загрузите изображение");return}
  $("exportJpegQuality").value=$("jpegQuality").value;$("exportJpegQualityValue").textContent=$("jpegQuality").value+"%";
  updateExportFormatUI();
- $("exportSummary").textContent=srcName+" · "+src.width+" × "+src.height+" px. Обработка локальная; файл не загружается на сервер. "+$("exportSummary").textContent;
+ 
  $("exportModal").classList.remove("hidden");$("exportFormat").focus();
 }
 function closeExportModal(){$("exportModal").classList.add("hidden")}
