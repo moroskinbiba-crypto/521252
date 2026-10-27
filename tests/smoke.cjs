@@ -532,7 +532,7 @@ async function downloadFrom(page, selector) {
       levels: "not-a-number",
       patternShape: "not-a-shape",
       effectStrength: { scanlines: 9999, glow: "broken" },
-      customColors: ["javascript:alert(1)", "#112233"],
+      customColors: ["javascript:alert(1)", "#112233", "#334455"],
       shapeBands: [{ shape: "invalid", size: 999999, color: "not-a-colour", customViewBox: [0, 0, 0, 1] }],
       unknownInjectedProperty: "ignored"
     };
@@ -550,6 +550,7 @@ async function downloadFrom(page, selector) {
     const safeSettings = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")));
     assert.equal(safeSettings.editor.algorithm, "bayer4", "invalid algorithms should fall back to a supported algorithm");
     assert.equal(safeSettings.editor.scale, 24, "numeric settings should be clamped to supported limits");
+    assert.equal(safeSettings.batch.scale, 24, "every workspace profile should be normalized during project import");
     assert.equal(safeSettings.editor.levels, 4, "invalid numeric values should use defaults");
     assert.equal(safeSettings.editor.effectStrength.scanlines, 100, "effect strength should be clamped");
     assert.equal(safeSettings.editor.effectStrength.glow, 50, "invalid effect strength should use the default");
