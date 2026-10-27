@@ -1481,27 +1481,27 @@ let asciiAnimRaf=0,asciiAnimBase=0,asciiAnimGlowBase=0,asciiAnimStart=0,asciiRec
 function startAsciiAnimation(recording){
  if(!src){say("Сначала загрузите изображение");return}
  if(recording&&(!out.captureStream||typeof MediaRecorder==="undefined")){say("Запись WebM не поддерживается этим браузером");return}
- if(asciiRecorder&&asciiRecorder.state!=="inactive"){say("Запись анимации уже выполняется");return}
+ if(recording&&asciiRecorder){say("Предыдущая запись анимации ещё завершается");return}
  if(asciiAnimRaf)stopAsciiAnimation();
  if(mode!=="script")setMode("script");
  s.algorithm="ascii";$("algorithm").value="ascii";
  asciiAnimBase=Number(s.asciiOffset)||0;asciiAnimGlowBase=Number(s.neoGlowPhase)||0;asciiAnimStart=performance.now();
- let stream=null,recorder=null;
+ let stream=null,recorder=null,recordingFailed=false;
  if(recording){
   try{
    stream=out.captureStream(24);
    const mime=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type=>MediaRecorder.isTypeSupported(type))||"";
    asciiChunks=[];recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);asciiRecorder=recorder;
    recorder.ondataavailable=e=>{if(e.data&&e.data.size)asciiChunks.push(e.data)};
-   recorder.onerror=()=>{say("Ошибка записи ASCII-анимации");try{if(recorder.state!=="inactive")recorder.stop()}catch(error){}};
+   recorder.onerror=()=>{recordingFailed=true;say("Ошибка записи ASCII-анимации");stopAsciiAnimation()};
    recorder.onstop=()=>{
     const blob=new Blob(asciiChunks,{type:recorder.mimeType||"video/webm"});
-    if(blob.size)download(blob,slug(srcName)+"-script-slayer.webm");
+    if(blob.size&&!recordingFailed)download(blob,slug(srcName)+"-script-slayer.webm");
     stream.getTracks().forEach(track=>track.stop());
-    if(asciiRecorder===recorder)asciiRecorder=null;asciiChunks=[];
-    say(blob.size?"Анимация экспортирована в WebM":"Не удалось получить данные ASCII-анимации");
+    if(asciiRecorder===recorder)asciiRecorder=null;asciiChunks=[];$("asciiExportWebm").disabled=false;
+    say(recordingFailed?"Ошибка записи ASCII-анимации":blob.size?"Анимация экспортирована в WebM":"Не удалось получить данные ASCII-анимации");
    };
-   recorder.start(250);
+   recorder.start(250);$("asciiExportWebm").disabled=true;
    asciiAnimTimer=setTimeout(()=>stopAsciiAnimation(),4000);
   }catch(error){
    clearTimeout(asciiAnimTimer);asciiAnimTimer=0;
@@ -1509,7 +1509,7 @@ function startAsciiAnimation(recording){
    if(recorder&&recorder.state!=="inactive")try{recorder.stop()}catch(stopError){}
    asciiRecorder=null;asciiChunks=[];asciiAnimRaf=0;
    s.asciiOffset=asciiAnimBase;s.neoGlowPhase=asciiAnimGlowBase;sync();render();
-   $("asciiPlay").disabled=false;$("asciiStop").disabled=true;
+   $("asciiPlay").disabled=false;$("asciiStop").disabled=true;$("asciiExportWebm").disabled=false;
    say("Не удалось начать запись WebM");return;
   }
  }
@@ -1685,7 +1685,7 @@ async function exportProcessedVideo(){
 }
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
 function init(){buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);presets.forEach(p=>{});renderPresets();renderBatch();
-$("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await readLimitedText(file,MAX_SHAPE_SVG_BYTES,"SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");const index=clamp(Number($("shapeImportBand").value)||0,0,3),customPath=path.getAttribute("d").slice(0,20000);s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===index?({...b,shape:"custom",customPath,customViewBox:raw}):({...b}));s.customShapePath=customPath;s.customShapeViewBox=raw;$("shapeSvgStatus").textContent=file.name+" · SVG → диапазон "+(index+1);sync();render();say("SVG назначен диапазону "+(index+1))}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(!v.src){$("videoInput").click();return}if(videoRecorder&&videoRecorder.state!=="inactive"){v.pause();stopVideoExport(true);$("videoPlay").textContent="▶ Воспроизвести";return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{let f=e.target.files[0];if(f)try{loadImage(await fileCanvas(f),f.name)}catch(err){say(err&&err.message&&err.message.length<120?err.message:"Не удалось открыть изображение. Файл может быть повреждён или слишком велик.")}e.target.value=""};
+$("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await readLimitedText(file,MAX_SHAPE_SVG_BYTES,"SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");const index=clamp(Number($("shapeImportBand").value)||0,0,3),customPath=path.getAttribute("d").slice(0,20000);s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===index?({...b,shape:"custom",customPath,customViewBox:raw}):({...b}));s.customShapePath=customPath;s.customShapeViewBox=raw;$("shapeSvgStatus").textContent=file.name+" · SVG → диапазон "+(index+1);sync();render();say("SVG назначен диапазону "+(index+1))}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(videoExportStarting){v.pause();stopVideoExport(true);return}if(!v.src){$("videoInput").click();return}if(videoRecorder&&videoRecorder.state!=="inactive"){v.pause();stopVideoExport(true);$("videoPlay").textContent="▶ Воспроизвести";return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{let f=e.target.files[0];if(f)try{loadImage(await fileCanvas(f),f.name)}catch(err){say(err&&err.message&&err.message.length<120?err.message:"Не удалось открыть изображение. Файл может быть повреждён или слишком велик.")}e.target.value=""};
 window.addEventListener("paste",async e=>{
  const items=Array.from(e.clipboardData?.items||[]),item=items.find(entry=>String(entry.type||"").startsWith("image/"));
  if(!item)return;const file=item.getAsFile?.();if(!file)return;e.preventDefault();
