@@ -83,6 +83,7 @@ async function downloadFrom(page, selector) {
     const themeCode = await page.locator("#themeCodeInput").inputValue();
     assert.ok(themeCode.startsWith("TGRMTHEME1:"), "theme sharing should generate a portable code");
     await page.locator("#themePicker").selectOption("paper");
+    assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light", "Paper theme should switch native controls to a light color scheme");
     await page.locator("#themeCodeInput").fill(themeCode);
     await page.locator("#applyThemeCode").click();
     assert.equal(await page.locator("body").getAttribute("data-theme"), "terminal",
