@@ -61,7 +61,7 @@ async function downloadFrom(page, selector) {
       background: getComputedStyle(document.body).backgroundColor,
       fontStylesheet: document.querySelector('link[rel="stylesheet"][href*="fonts.googleapis.com"]')?.href || ""
     }));
-    assert.match(theme.bodyFont, /Onest/, "Cyrillic-friendly Onest should be used by the interface");
+    assert.match(theme.bodyFont, /IBM Plex Mono/, "Windows XP Luna should activate its retro font stack");
     assert.match(theme.headingFont, /Onest/, "headings should use readable Onest instead of a Latin-only pixel font");
     assert.ok(theme.fontStylesheet.includes("family=Onest"), "Onest web font must be included");
     assert.ok(theme.fontStylesheet.includes("IBM+Plex+Mono"), "IBM Plex Mono must be included for technical labels");
@@ -71,8 +71,8 @@ async function downloadFrom(page, selector) {
     });
     assert.deepEqual(markupAudit.duplicates, [], "runtime-generated workspace panels must not create duplicate IDs");
     assert.deepEqual(markupAudit.modeButtons, ["editor", "presets", "shape", "script", "batch", "video"]);
-    assert.equal(await page.locator("body").getAttribute("data-shell"), "studio", "modern studio is the default shell");
-    assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "not all", "retro shell styles must stay opt-in by default");
+    assert.equal(await page.locator("body").getAttribute("data-shell"), "xp", "Windows XP Luna is the default shell");
+    assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "all", "XP shell styles should be active on startup");
     assert.equal(await page.locator("#smoothingControl").isVisible(), false, "advanced processing controls should be tucked away in basic mode");
     await page.locator("#advancedToggle").click();
     assert.equal(await page.locator("#smoothingControl").isVisible(), true, "advanced controls should expand from the inspector");

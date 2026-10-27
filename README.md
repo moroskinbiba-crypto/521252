@@ -29,7 +29,7 @@ The web editor adapts to phones and tablets. On narrow screens, the workspace sw
 
 ## Workstation interface
 
-The editor opens in a clean studio layout with the preview as the main focus and contextual controls in the inspector. Use **Дополнительно** to reveal technical parameters, search algorithms by name, or keep frequently used algorithms in favourites. **До / после** overlays the original image with an adjustable comparison divider. Undo and redo are available through the toolbar and Ctrl/Cmd+Z or Ctrl/Cmd+Shift+Z. The export dialog brings PNG, JPEG, SVG, CMYK plates, project JSON and copy-to-clipboard actions together. The visual shell is independent from the color theme: choose the modern studio or Windows XP Luna in the appearance menu. The preset catalogue includes search across built-in and saved presets.
+The editor opens in a clean studio layout with the preview as the main focus and contextual controls in the inspector. Use **Дополнительно** to reveal technical parameters, search algorithms by name, or keep frequently used algorithms in favourites. **До / после** overlays the original image with an adjustable comparison divider. Undo and redo are available through the toolbar and Ctrl/Cmd+Z or Ctrl/Cmd+Shift+Z. The export dialog brings PNG, JPEG, SVG, CMYK plates, project JSON and copy-to-clipboard actions together. The editor now opens in the Windows XP Luna shell by default; the modern studio remains available in the appearance menu. The visual shell is independent from the color theme. The preset catalogue includes search across built-in and saved presets.
 
 ## Run from source
 
