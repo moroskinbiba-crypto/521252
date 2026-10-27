@@ -27,6 +27,10 @@ No installer, account, or backend is required. Image processing takes place in t
 
 The web editor adapts to phones and tablets. On narrow screens, the workspace switcher becomes a horizontally scrollable touch bar; the preview and contextual controls use separate vertical scroll panes. The desktop layout keeps the preview and settings side by side. Use the latest version of a mobile browser for the best Canvas and WebM support.
 
+## Workstation interface
+
+The editor opens in a clean studio layout with the preview as the main focus and contextual controls in the inspector. Use **Дополнительно** to reveal technical parameters, search algorithms by name, or keep frequently used algorithms in favourites. **До / после** overlays the original image with an adjustable comparison divider. Undo and redo are available through the toolbar and Ctrl/Cmd+Z or Ctrl/Cmd+Shift+Z. The export dialog brings PNG, JPEG, SVG, CMYK plates, project JSON and copy-to-clipboard actions together. The visual shell is independent from the color theme: choose the modern studio or Windows XP Luna in the appearance menu. The preset catalogue includes search across built-in and saved presets.
+
 ## Run from source
 
 Open `index.html`, or run `python -m http.server 8080` in the repository folder and open `http://localhost:8080`.
