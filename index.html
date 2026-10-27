@@ -1583,7 +1583,7 @@ let temporalRaf=0,temporalStart=0,temporalBase=null,temporalRecorder=null,tempor
 function startTemporal(recording){
  if(!src){say("Сначала откройте изображение");return}
  if(recording&&(!out.captureStream||typeof MediaRecorder==="undefined")){say("Запись WebM не поддерживается этим браузером");return}
- if(temporalRecorder&&temporalRecorder.state!=="inactive"){say("Запись Motion уже выполняется");return}
+ if(recording&&temporalRecorder){say("Предыдущая запись Motion ещё завершается");return}if(temporalRecorder&&temporalRecorder.state!=="inactive"){say("Запись Motion уже выполняется");return}
  if(temporalRaf)stopTemporal();
  temporalBase={threshold:s.threshold,brightness:s.brightness,asciiOffset:s.asciiOffset,mode};temporalStart=performance.now();
  let stream=null;
@@ -1592,10 +1592,10 @@ function startTemporal(recording){
    stream=out.captureStream(24);
    const mime=MediaRecorder.isTypeSupported("video/webm;codecs=vp9")?"video/webm;codecs=vp9":MediaRecorder.isTypeSupported("video/webm")?"video/webm":"";
    temporalChunks=[];temporalRecorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
-   const recorder=temporalRecorder;
+   const recorder=temporalRecorder;let recordingFailed=false;
    recorder.ondataavailable=e=>{if(e.data&&e.data.size)temporalChunks.push(e.data)};
-   recorder.onstop=()=>{const blob=new Blob(temporalChunks,{type:recorder.mimeType||"video/webm"});if(blob.size)download(blob,slug(srcName)+"-motion.webm");stream.getTracks().forEach(t=>t.stop());if(temporalRecorder===recorder)temporalRecorder=null;temporalChunks=[];say(blob.size?"Motion экспортирован в WebM":"Запись Motion не содержит данных")};
-   recorder.onerror=()=>{say("Ошибка записи Motion");try{if(recorder.state!=="inactive")recorder.stop()}catch(error){}};
+   recorder.onstop=()=>{const blob=new Blob(temporalChunks,{type:recorder.mimeType||"video/webm"});if(blob.size&&!recordingFailed)download(blob,slug(srcName)+"-motion.webm");stream.getTracks().forEach(t=>t.stop());if(temporalRecorder===recorder)temporalRecorder=null;temporalChunks=[];say(recordingFailed?"Ошибка записи Motion":blob.size?"Motion экспортирован в WebM":"Запись Motion не содержит данных")};
+   recorder.onerror=()=>{recordingFailed=true;say("Ошибка записи Motion");stopTemporal()};
    recorder.start();temporalTimer=setTimeout(stopTemporal,6000);
   }catch(error){clearTimeout(temporalTimer);temporalTimer=0;if(stream)stream.getTracks().forEach(t=>t.stop());if(temporalRecorder&&temporalRecorder.state!=="inactive")try{temporalRecorder.stop()}catch(stopError){}temporalRecorder=null;temporalChunks=[];temporalBase=null;say("Не удалось запустить запись Motion");return}
  }
