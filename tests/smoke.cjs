@@ -581,6 +581,24 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(safeSettings.editor.shapeBands[0].customViewBox, [0, 0, 100, 100], "invalid viewBoxes should be replaced");
     assert.equal("unknownInjectedProperty" in safeSettings.editor, false, "unknown project settings should not persist");
 
+    // Shape preset import has a separate validation path; validate the global viewBox there too.
+    const unsafeShapeProfile = {
+      shape: "custom", jitter: 20, shapeDistribution: "uniform", shapeRotation: 0,
+      shapeThresholds: [25, 50, 75],
+      shapeBands: Array.from({ length: 4 }, () => ({ shape: "circle", size: 70, color: "#334b2b", rotation: 0 })),
+      customShapePath: "M 0 0 L 1 1",
+      customShapeViewBox: [0, 0, 0, 1]
+    };
+    await page.locator("#shapePresetInput").setInputFiles({
+      name: "unsafe-shape.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify({ name: "Unsafe QA Shape", profile: unsafeShapeProfile }))
+    });
+    await page.waitForFunction(() => document.querySelector("#toast")?.textContent.includes("Пресет Shape Shifter импортирован"));
+    const cleanedShapeProfile = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.shape);
+    assert.deepEqual(cleanedShapeProfile.customShapeViewBox, [0, 0, 100, 100],
+      "global custom shape viewBox should be validated in the direct shape-preset import path");
+
     // Project files must preserve and restore the exclusive Script Slayer workspace.
     await page.locator('.topnav [data-mode="script"]').click();
     const scriptProject = await downloadFrom(page, "#saveProject");
