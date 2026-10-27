@@ -70,10 +70,35 @@ async function downloadFrom(page, selector) {
       return { duplicates: ids.filter((id, i) => ids.indexOf(id) !== i), modeButtons: [...document.querySelectorAll(".topnav [data-mode]")].map(el => el.dataset.mode) };
     });
     assert.deepEqual(markupAudit.duplicates, [], "runtime-generated workspace panels must not create duplicate IDs");
-    assert.deepEqual(markupAudit.modeButtons, ["presets", "shape", "script", "batch", "video"]);
+    assert.deepEqual(markupAudit.modeButtons, ["editor", "presets", "shape", "script", "batch", "video"]);
+    assert.equal(await page.locator("body").getAttribute("data-shell"), "studio", "modern studio is the default shell");
+    assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "not all", "retro shell styles must stay opt-in by default");
+    assert.equal(await page.locator("#smoothingControl").isVisible(), false, "advanced processing controls should be tucked away in basic mode");
+    await page.locator("#advancedToggle").click();
+    assert.equal(await page.locator("#smoothingControl").isVisible(), true, "advanced controls should expand from the inspector");
+    await page.locator("#advancedToggle").click();
+    assert.equal(await page.locator("#smoothingControl").isVisible(), false, "advanced controls should collapse again");
+    await page.locator("#algorithmSearch").fill("Floyd");
+    assert.equal(await page.locator('#algorithm option[value="floyd"]').count(), 1, "algorithm search should leave matching choices selectable");
+    await page.locator("#algorithmSearch").fill("");
+    await page.locator("#favoriteAlgorithm").click();
+    assert.equal(await page.locator("#favoriteAlgorithm").getAttribute("aria-pressed"), "true");
+    await page.locator("#algorithmFavoritesOnly").click();
+    assert.deepEqual(await page.locator("#algorithm option").evaluateAll(options => options.filter(o => !o.disabled).map(o => o.value)), ["bayer4"],
+      "favourites-only mode should filter to pinned algorithms");
+    await page.locator("#algorithmFavoritesOnly").click();
+    await page.locator("#favoriteAlgorithm").click();
+    assert.equal(await page.locator("#favoriteAlgorithm").getAttribute("aria-pressed"), "false",
+      "algorithm favourite should be removable");
 
     // Theme picker, local persistence and safe, shareable theme codes.
     await page.locator("#themeMenu > summary").click();
+    await page.locator("#shellPicker").selectOption("xp");
+    assert.equal(await page.locator("body").getAttribute("data-shell"), "xp", "XP shell should be independently selectable");
+    assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "all");
+    await page.locator("#shellPicker").selectOption("studio");
+    assert.equal(await page.locator("body").getAttribute("data-shell"), "studio");
+    assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "not all");
     await page.locator("#themePicker").selectOption("terminal");
     assert.equal(await page.locator("body").getAttribute("data-theme"), "terminal");
     assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"), "#07140c", "browser chrome color should follow the selected theme");
@@ -146,10 +171,21 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#algorithm").inputValue(), "floyd");
     assert.ok((await page.locator("#statAlgorithm").textContent()).trim().length > 0);
     await page.locator("#scale").evaluate(el => {
+      el.value = "7";
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await page.waitForTimeout(300);
+    await page.locator("#scale").evaluate(el => {
       el.value = "9";
       el.dispatchEvent(new Event("input", { bubbles: true }));
     });
     assert.equal((await page.locator("#scaleV").textContent()).trim(), "9 px");
+    await page.waitForTimeout(300);
+    await page.locator("#undo").click();
+    await page.waitForFunction(() => document.querySelector("#scale")?.value === "7");
+    await page.locator("#redo").click();
+    await page.waitForFunction(() => document.querySelector("#scale")?.value === "9");
+    assert.equal((await page.locator("#scaleV").textContent()).trim(), "9 px", "redo should restore the edited scale");
     const qualityOptions = await page.locator("#qualityMode option").evaluateAll(options => options.map(o => o.value));
     assert.deepEqual(qualityOptions, ["balanced", "detail", "max", "ultra"], "still-image detail budget options should include UHD processing");
     await page.locator("#qualityMode").selectOption("ultra");
@@ -273,7 +309,7 @@ async function downloadFrom(page, selector) {
       canvasWidth: document.querySelector("#output").getBoundingClientRect().width
     }));
     assert.equal(tablet.leftCount, 0, "duplicate side workspace navigation must not exist");
-    assert.equal(tablet.topNavCount, 5, "all alternate workspaces must be available in the top navigation");
+    assert.equal(tablet.topNavCount, 6, "Editor and every workspace must be available in the top navigation");
     assert.ok(tablet.inspectorWidth > 200 && tablet.canvasWidth > 0, "tablet layout should show controls and preview");
     for (const viewport of [{ width: 390, height: 844 }, { width: 360, height: 740 }, { width: 320, height: 640 }, { width: 700, height: 390 }, { width: 844, height: 390 }]) {
       await page.setViewportSize(viewport);
@@ -299,7 +335,7 @@ async function downloadFrom(page, selector) {
       assert.equal(mobile.pageY, 0, "page must not scroll vertically at " + viewport.width + "x" + viewport.height);
       assert.equal(mobile.horizontalPageOverflow, false, "mobile viewport must not have horizontal page overflow: " + JSON.stringify(mobile));
       assert.equal(mobile.leftDisplay, "none", "the duplicate sidebar workspace navigation must stay hidden");
-      assert.equal(mobile.workspaceNavCount, 5, "all workspaces must remain reachable from the touch navigation");
+      assert.equal(mobile.workspaceNavCount, 6, "Editor and every workspace must remain reachable from the touch navigation");
       assert.ok(mobile.layout.height > 180, "work area must have usable height: " + JSON.stringify(mobile));
       assert.ok(mobile.canvas.width > 0 && mobile.canvas.height > 0, "preview should remain visible at " + viewport.width + "x" + viewport.height);
       assert.ok(mobile.main.height > 100 && mobile.settings.height > 100, "preview and settings panes should both be usable");
@@ -324,6 +360,10 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#videoView").isVisible(), true, "Video Lab should open on mobile");
     await page.locator(".topnav [data-mode=\"presets\"]").click();
     assert.ok(await page.locator("#presetGrid .preset").first().isVisible(), "presets should render in the mobile layout");
+    await page.locator("#presetSearch").fill("tgrm-no-match-qa");
+    assert.equal(await page.locator("#presetGrid .preset").count(), 0, "preset search should filter unmatched built-in presets");
+    await page.locator("#presetSearch").fill("");
+    assert.ok(await page.locator("#presetGrid .preset").count() > 0, "clearing preset search should restore the catalogue");
     await page.locator("#homeLogo").click();
     assert.equal(await page.locator("#editorView").isVisible(), true, "brand should return to Editor on mobile");
 
@@ -491,6 +531,26 @@ async function downloadFrom(page, selector) {
       await toggle.click();
       assert.equal(await toggle.getAttribute("aria-checked"), "false", "effect must turn off on a second click: " + effect);
     }
+
+    await page.locator("#compareToggle").click();
+    assert.equal(await page.locator("#beforeOutput").isVisible(), true, "before/after comparison should overlay the original");
+    assert.equal(await page.locator("#compareDivider").isVisible(), true, "comparison should show a draggable divider");
+    await page.locator("#compareRange").evaluate(el => { el.value = "73"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    assert.equal(await page.locator("#compareValue").textContent(), "73%");
+    await page.locator("#compareToggle").click();
+    assert.equal(await page.locator("#beforeOutput").isVisible(), false, "comparison overlay should close cleanly");
+
+    await page.locator("#topExport").click();
+    assert.equal(await page.locator("#exportModal").isVisible(), true, "top-level export should open the unified export dialog");
+    await page.locator("#exportFormat").selectOption("jpeg");
+    await page.locator("#exportJpegQuality").evaluate(el => { el.value = "83"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    const [unifiedJpeg] = await Promise.all([
+      page.waitForEvent("download", { timeout: 15000 }),
+      page.locator("#exportConfirm").click()
+    ]);
+    assert.match(unifiedJpeg.suggestedFilename(), /TGRMLither.*\.jpg$/);
+    assert.equal(await page.locator("#jpegQuality").inputValue(), "83", "export dialog quality should feed the JPEG encoder");
+    await page.locator("#jpegQuality").evaluate(el => { el.value = "94"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
 
     const png = await downloadFrom(page, "#png");
     assert.deepEqual([...png.bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
