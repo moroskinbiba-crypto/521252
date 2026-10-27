@@ -1375,7 +1375,7 @@ async function runBatch(){
  const files=batch.slice();
  $("runBatch").disabled=true;$("clearBatch").disabled=true;$("batchBrowse").disabled=true;$("batchInput").disabled=true;
  $("downloadBatchZip").disabled=true;revokeBatchDownloadUrls();$("batchResults").innerHTML="";batchResultsData=[];
- const cfg={...s},usedNames=new Set();let succeeded=0,failed=0;
+ const cfg=cloneSettings(s),usedNames=new Set();let succeeded=0,failed=0;
  try{
   for(let i=0;i<files.length;i++){
    const f=files[i];
