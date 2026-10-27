@@ -730,21 +730,86 @@ const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_PROJECT_FILE_BYTES=16
 const WORKSPACE_NAMES=["editor","shape","script","batch","video"];
 const LAYER_ALGORITHMS=new Set([...Array.from($("algorithm").options).map(o=>o.value),"shape"].filter(v=>v&&v!=="ascii"));
 const LAYER_BLEND_MODES=["normal","multiply","screen","overlay","darken","lighten","difference"];
+const SHAPE_VALUES=new Set(Array.from($("shape").options).map(o=>o.value));
+const ASCII_SET_VALUES=new Set(Array.from($("asciiSet").options).map(o=>o.value));
+const ALGORITHM_VALUES=new Set([...LAYER_ALGORITHMS,"ascii"]);
 const EFFECT_KEYS=["scanlines","glow","chromatic","vignette","noise","epsilon","jpeg","lick","stress","modlines"];
 function cloneSettings(input){
- const raw=input&&typeof input==="object"?input:{},next={...def,...raw};
- next.markScale=clamp(Number.isFinite(Number(raw.markScale))?Number(raw.markScale):100,20,180);
- next.blend=clamp(Number.isFinite(Number(raw.blend))?Number(raw.blend):100,0,100);
- next.smoothing=clamp(Number.isFinite(Number(raw.smoothing))?Number(raw.smoothing):0,0,100);
- next.qualityMode=["balanced","detail","max","ultra"].includes(raw.qualityMode)?raw.qualityMode:"balanced";
+ const raw=input&&typeof input==="object"?input:{},next={...def};
+ for(const key of Object.keys(def))if(Object.prototype.hasOwnProperty.call(raw,key))next[key]=raw[key];
+ const safeNumber=(value,fallback,min,max,integer=true)=>{
+  const n=Number(value);if(!Number.isFinite(n))return fallback;
+  const bounded=clamp(n,min,max);return integer?Math.round(bounded):bounded;
+ };
+ const safeColor=(value,fallback)=>typeof value==="string"&&/^#[0-9a-f]{6}$/i.test(value)?value.toLowerCase():fallback;
+ next.algorithm=ALGORITHM_VALUES.has(raw.algorithm)?raw.algorithm:def.algorithm;
+ next.scale=safeNumber(raw.scale,def.scale,1,24);
+ next.markScale=safeNumber(raw.markScale,def.markScale,20,180);
+ next.blend=safeNumber(raw.blend,def.blend,0,100);
+ next.smoothing=safeNumber(raw.smoothing,def.smoothing,0,100);
+ next.qualityMode=["balanced","detail","max","ultra"].includes(raw.qualityMode)?raw.qualityMode:def.qualityMode;
  next.serpentine=raw.serpentine===true;
- next.jpegQuality=clamp(Math.round(Number(raw.jpegQuality??94)||94),70,100);
- next.effects=Array.isArray(raw.effects)?raw.effects.filter(k=>EFFECT_KEYS.includes(k)):[];
- next.effectOrder=[...new Set([...(Array.isArray(raw.effectOrder)?raw.effectOrder:[]),...def.effectOrder])].filter(k=>EFFECT_KEYS.includes(k));
- next.effectStrength={...def.effectStrength,...(raw.effectStrength&&typeof raw.effectStrength==="object"?raw.effectStrength:{})};
- next.algorithmLayers=(Array.isArray(raw.algorithmLayers)?raw.algorithmLayers:[]).slice(0,4).filter(layer=>layer&&LAYER_ALGORITHMS.has(layer.algorithm)).map(layer=>({algorithm:layer.algorithm,opacity:clamp(Number(layer.opacity??55),0,100),blend:LAYER_BLEND_MODES.includes(layer.blend)?layer.blend:"normal",enabled:layer.enabled!==false}));
- next.customColors=Array.isArray(raw.customColors)?raw.customColors.filter(c=>/^#[0-9a-f]{6}$/i.test(c)).slice(0,16):[...def.customColors];if(next.customColors.length<2)next.customColors=[...def.customColors];
- next.shapeThresholds=(Array.isArray(raw.shapeThresholds)?raw.shapeThresholds:def.shapeThresholds).slice(0,3).map((v,i)=>clamp(Number(v)||def.shapeThresholds[i],0,100));while(next.shapeThresholds.length<3)next.shapeThresholds.push(def.shapeThresholds[next.shapeThresholds.length]);next.shapeThresholds.sort((a,b)=>a-b);next.shapeBands=(Array.isArray(raw.shapeBands)?raw.shapeBands:def.shapeBands).slice(0,4).map((b,i)=>({...def.shapeBands[i],...(b&&typeof b==="object"?b:{})}));while(next.shapeBands.length<4)next.shapeBands.push({...def.shapeBands[next.shapeBands.length]});next.shapeBands=next.shapeBands.map(b=>({...b,customPath:typeof b.customPath==="string"?b.customPath.slice(0,20000):"",customViewBox:Array.isArray(b.customViewBox)&&b.customViewBox.length===4?b.customViewBox:[0,0,100,100],rotation:clamp(Number(b.rotation)||0,-180,180)}));
+ next.jpegQuality=safeNumber(raw.jpegQuality,def.jpegQuality,70,100);
+ next.levels=safeNumber(raw.levels,def.levels,2,16);
+ next.threshold=safeNumber(raw.threshold,def.threshold,-80,80);
+ next.patternAngle=safeNumber(raw.patternAngle,def.patternAngle,0,180);
+ next.patternShape=["circle","square","diamond","triangle","line","cross"].includes(raw.patternShape)?raw.patternShape:def.patternShape;
+ next.depth=safeNumber(raw.depth,def.depth,0,100);
+ next.contrast=safeNumber(raw.contrast,def.contrast,50,180);
+ next.brightness=safeNumber(raw.brightness,def.brightness,-80,80);
+ next.midtones=safeNumber(raw.midtones,def.midtones,0,100);
+ next.highlights=safeNumber(raw.highlights,def.highlights,0,100);
+ next.blur=safeNumber(raw.blur,def.blur,0,5);
+ next.invert=raw.invert===true;
+ next.palette=typeof raw.palette==="string"&&Object.prototype.hasOwnProperty.call(pal,raw.palette)?raw.palette:def.palette;
+ next.colorMode=["color","mono","duo"].includes(raw.colorMode)?raw.colorMode:def.colorMode;
+ next.effects=Array.isArray(raw.effects)?[...new Set(raw.effects.filter(k=>EFFECT_KEYS.includes(k)))]:[];
+ next.effectOrder=[...new Set([...(Array.isArray(raw.effectOrder)?raw.effectOrder:[]),...def.effectOrder].filter(k=>EFFECT_KEYS.includes(k)))];
+ const strengths=raw.effectStrength&&typeof raw.effectStrength==="object"&&!Array.isArray(raw.effectStrength)?raw.effectStrength:{};
+ next.effectStrength=Object.fromEntries(EFFECT_KEYS.map(k=>[k,safeNumber(strengths[k],def.effectStrength[k],0,100)]));
+ next.algorithmLayers=(Array.isArray(raw.algorithmLayers)?raw.algorithmLayers:[]).slice(0,4).filter(layer=>layer&&typeof layer==="object"&&LAYER_ALGORITHMS.has(layer.algorithm)).map(layer=>({algorithm:layer.algorithm,opacity:safeNumber(layer.opacity,55,0,100),blend:LAYER_BLEND_MODES.includes(layer.blend)?layer.blend:"normal",enabled:layer.enabled!==false}));
+ const colors=Array.isArray(raw.customColors)?raw.customColors:def.customColors;
+ next.customColors=(Array.isArray(colors)?colors.filter(c=>typeof c==="string"&&/^#[0-9a-f]{6}$/i.test(c)).slice(0,16):[]).map(c=>c.toLowerCase());
+ if(next.customColors.length<2)next.customColors=["#10160f","#334b2b","#7a9a47","#d9efad"];
+ next.shape=SHAPE_VALUES.has(raw.shape)?raw.shape:def.shape;
+ next.jitter=safeNumber(raw.jitter,def.jitter,0,80);
+ next.shapeDistribution=["uniform","radial","horizontal","vertical","random","wave","edge"].includes(raw.shapeDistribution)?raw.shapeDistribution:def.shapeDistribution;
+ next.shapeRotation=safeNumber(raw.shapeRotation,def.shapeRotation,-180,180);
+ const thresholds=Array.isArray(raw.shapeThresholds)?raw.shapeThresholds:def.shapeThresholds;
+ next.shapeThresholds=[0,1,2].map(i=>safeNumber(thresholds[i],def.shapeThresholds[i],[5,15,25][i],[85,90,95][i]));
+ next.shapeThresholds.sort((a,b)=>a-b);
+ const bands=Array.isArray(raw.shapeBands)?raw.shapeBands:def.shapeBands;
+ next.shapeBands=Array.from({length:4},(_,i)=>{
+  const source=bands[i]&&typeof bands[i]==="object"&&!Array.isArray(bands[i])?bands[i]:{};
+  const fallback=def.shapeBands[i];
+  const rawBox=Array.isArray(source.customViewBox)&&source.customViewBox.length===4?source.customViewBox.map(Number):fallback.customViewBox;
+  const customViewBox=rawBox.every(Number.isFinite)&&rawBox[2]>0&&rawBox[3]>0?rawBox:fallback.customViewBox;
+  return {
+   shape:SHAPE_VALUES.has(source.shape)?source.shape:fallback.shape,
+   size:safeNumber(source.size,fallback.size,20,180),
+   color:safeColor(source.color,fallback.color),
+   rotation:safeNumber(source.rotation,fallback.rotation,-180,180),
+   customPath:typeof source.customPath==="string"?source.customPath.slice(0,20000):"",
+   customViewBox
+  };
+ });
+ next.asciiWidth=safeNumber(raw.asciiWidth,def.asciiWidth,32,220);
+ next.asciiSet=ASCII_SET_VALUES.has(raw.asciiSet)?raw.asciiSet:def.asciiSet;
+ next.asciiDepth=safeNumber(raw.asciiDepth,def.asciiDepth,2,16);
+ next.asciiCellSize=safeNumber(raw.asciiCellSize,def.asciiCellSize,4,20);
+ next.asciiOffset=safeNumber(raw.asciiOffset,def.asciiOffset,-100,100);
+ next.asciiCustomChars=typeof raw.asciiCustomChars==="string"?raw.asciiCustomChars.slice(0,512):"";
+ next.asciiColorMode=["palette","source","mono"].includes(raw.asciiColorMode)?raw.asciiColorMode:def.asciiColorMode;
+ next.asciiBgMode=["transparent","solid"].includes(raw.asciiBgMode)?raw.asciiBgMode:def.asciiBgMode;
+ next.asciiBgColor=safeColor(raw.asciiBgColor,def.asciiBgColor);
+ next.asciiTextColor=safeColor(raw.asciiTextColor,def.asciiTextColor);
+ next.neoGlowEnabled=raw.neoGlowEnabled===true;
+ next.neoGlowDirection=["horizontal","reverse","vertical","radial"].includes(raw.neoGlowDirection)?raw.neoGlowDirection:def.neoGlowDirection;
+ next.neoGlowLength=safeNumber(raw.neoGlowLength,def.neoGlowLength,2,60);
+ next.neoGlowBrightness=safeNumber(raw.neoGlowBrightness,def.neoGlowBrightness,0,100);
+ next.neoGlowVisibility=safeNumber(raw.neoGlowVisibility,def.neoGlowVisibility,0,100);
+ next.neoGlowPhase=safeNumber(raw.neoGlowPhase,def.neoGlowPhase,0,360);
+ next.neoGlowColor=safeColor(raw.neoGlowColor,def.neoGlowColor);
  return next;
 }
 function defaultWorkspaceSettings(){
