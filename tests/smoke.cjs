@@ -754,7 +754,7 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#videoExport").isEnabled(), true, "video export control must be re-enabled after recording finishes");
     assert.equal(await page.locator("#videoTimeline").isDisabled(), false, "video timeline must unlock after recording finishes");
 
-    // Batch processing should accept and produce a real PNG.
+    // Batch processing should use a stable settings snapshot even if controls change while files are being encoded.
     await page.locator('.topnav [data-mode="batch"]').click();
     await page.locator("#batchInput").setInputFiles([
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
@@ -762,21 +762,37 @@ async function downloadFrom(page, selector) {
       { name: "broken-image.png", mimeType: "image/png", buffer: Buffer.from("not a valid PNG") }
     ]);
     assert.equal(await page.locator("#batchList .fileitem").count(), 3);
+    await page.locator("#algorithm").selectOption("bayer4");
+    const batchScanlines = page.locator("#batch-effect-scanlines");
+    if (await batchScanlines.getAttribute("aria-checked") !== "true") await batchScanlines.click();
+    const batchScanlinesStrength = page.locator('#batchEffectsControl [data-effect-strength="scanlines"]');
+    await batchScanlinesStrength.evaluate(el => { el.value = "10"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
     await page.evaluate(() => {
       window.__tgrmOriginalToBlob = HTMLCanvasElement.prototype.toBlob;
+      window.__tgrmToBlobCalls = 0;
       HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
         const canvas = this;
+        window.__tgrmToBlobCalls++;
         setTimeout(() => window.__tgrmOriginalToBlob.call(canvas, callback, type, quality), 250);
       };
     });
     await page.locator("#runBatch").click();
     assert.equal(await page.locator("#clearBatch").isDisabled(), true, "batch items must not be removed while processing is running");
     assert.equal(await page.locator("#batchInput").isDisabled(), true, "new files must not be added while processing is running");
+    await page.waitForFunction(() => window.__tgrmToBlobCalls >= 1, null, { timeout: 10000 });
+    await batchScanlinesStrength.evaluate(el => { el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
     await page.waitForFunction(() => document.querySelectorAll("#batchResults a[download]").length === 2, null, { timeout: 15000 });
     await page.waitForFunction(() => document.querySelectorAll("#batchResults .fileitem").length === 3 && !document.querySelector("#clearBatch")?.disabled, null, { timeout: 15000 });
     assert.match(await page.locator("#batchResults").innerText(), /broken-image\.png[\s\S]*Ошибка:/, "failed batch files should remain visible with an error reason");
     assert.match(await page.locator("#toast").textContent(), /2 успешно, 1 с ошибкой/, "batch summary should distinguish successes from failures");
-    await page.evaluate(() => { HTMLCanvasElement.prototype.toBlob = window.__tgrmOriginalToBlob; delete window.__tgrmOriginalToBlob; });
+    const outputHashes = await page.locator("#batchResults a[download]").evaluateAll(async links => Promise.all(links.map(async link => {
+      const bytes = await (await fetch(link.href)).arrayBuffer();
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+    })));
+    assert.equal(outputHashes[0], outputHashes[1], "all batch outputs should use the starting settings snapshot even if a control changes mid-run");
+    await batchScanlinesStrength.evaluate(el => { el.value = "50"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await page.evaluate(() => { HTMLCanvasElement.prototype.toBlob = window.__tgrmOriginalToBlob; delete window.__tgrmOriginalToBlob; delete window.__tgrmToBlobCalls; });
     const batchNames = await page.locator("#batchResults a[download]").evaluateAll(links => links.map(link => link.download));
     assert.equal(new Set(batchNames).size, 2, "duplicate source filenames must not overwrite each other in the batch ZIP");
     assert.match(batchNames[0], /TGRMLither\.png$/);
