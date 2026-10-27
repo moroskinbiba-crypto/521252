@@ -853,6 +853,32 @@ async function downloadFrom(page, selector) {
 
     // Extremely tall sources must not produce a multi-billion-pixel ASCII output canvas.
     await page.locator('.topnav [data-mode="script"]').click();
+
+    // Oversized JSON imports must be rejected before their contents are read.
+    const oversizedJson = Buffer.alloc(5 * 1024 * 1024 + 1, 0x20);
+    await page.locator("#presetInput").setInputFiles({
+      name: "oversized-presets.json",
+      mimeType: "application/json",
+      buffer: oversizedJson
+    });
+    await page.waitForFunction(() => document.querySelector("#toast")?.textContent.includes("Файл пресетов слишком большой"));
+    oversizedJson.fill(0);
+
+    // ASCII animation export should either create a real WebM or leave controls usable when unsupported.
+    const asciiRecordingSupported = await page.evaluate(() => !!document.querySelector("#output")?.captureStream && typeof MediaRecorder !== "undefined");
+    if (asciiRecordingSupported) {
+      const asciiDownloadPromise = page.waitForEvent("download", { timeout: 20000 });
+      await page.locator("#asciiExportWebm").click();
+      assert.equal(await page.locator("#asciiPlay").isDisabled(), true, "ASCII playback control should lock during recording");
+      const asciiDownload = await asciiDownloadPromise;
+      assert.match(asciiDownload.suggestedFilename(), /script-slayer\.webm$/);
+      assert.ok(fs.statSync(await asciiDownload.path()).size > 300, "ASCII WebM export should contain encoded frames");
+      await page.waitForFunction(() => !document.querySelector("#asciiPlay")?.disabled && document.querySelector("#asciiStop")?.disabled);
+    } else {
+      await page.locator("#asciiExportWebm").click();
+      assert.equal(await page.locator("#asciiPlay").isEnabled(), true, "unsupported ASCII recording should leave the controls usable");
+    }
+
     const tallImageDataUrl = await page.evaluate(() => {
       const canvas = document.createElement("canvas");
       canvas.width = 1;
