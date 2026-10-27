@@ -1375,10 +1375,12 @@ function zipCrc32(bytes){
 }
 async function buildZipArchive(entries){
  if(entries.length>65535)throw Error("ZIP ограничен 65 535 файлами");
+ const encoder=new TextEncoder(),limit=64*1024*1024;
  const totalBytes=entries.reduce((sum,entry)=>sum+(entry&&entry.blob?entry.blob.size:0),0);
- if(totalBytes>64*1024*1024)throw Error("ZIP больше 64 МБ. Разделите пакет на несколько частей");
+ const projectedSize=22+entries.reduce((sum,entry)=>sum+76+encoder.encode(String(entry.name)).length*2,0)+totalBytes;
+ if(projectedSize>limit)throw Error("ZIP с учётом заголовков будет больше 64 МБ. Разделите пакет на несколько частей");
  const seenNames=new Set();for(const entry of entries){const key=String(entry.name).toLowerCase();if(seenNames.has(key))throw Error("В пакете повторяются имена файлов: "+entry.name);seenNames.add(key)}
- const encoder=new TextEncoder(),localParts=[],centralParts=[];let offset=0;
+ const localParts=[],centralParts=[];let offset=0;
  const now=new Date(),dosTime=(now.getHours()<<11)|(now.getMinutes()<<5)|Math.floor(now.getSeconds()/2),dosDate=((Math.max(1980,now.getFullYear())-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
  for(const entry of entries){
   const name=encoder.encode(entry.name),data=new Uint8Array(await entry.blob.arrayBuffer()),crc=zipCrc32(data);
