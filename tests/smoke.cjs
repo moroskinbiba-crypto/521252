@@ -71,8 +71,8 @@ async function downloadFrom(page, selector) {
     });
     assert.deepEqual(markupAudit.duplicates, [], "runtime-generated workspace panels must not create duplicate IDs");
     assert.deepEqual(markupAudit.modeButtons, ["editor", "presets", "shape", "script", "batch", "video"]);
-    assert.equal(await page.locator("body").getAttribute("data-shell"), "studio", "modern studio is the default shell");
-    assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "not all", "retro shell styles must stay opt-in by default");
+    assert.equal(await page.locator("body").getAttribute("data-shell"), "xp", "Windows XP Luna is the default shell");
+    assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "all", "XP shell styles should be active on startup");
     assert.equal(await page.locator("#smoothingControl").isVisible(), false, "advanced processing controls should be tucked away in basic mode");
     await page.locator("#advancedToggle").click();
     assert.equal(await page.locator("#smoothingControl").isVisible(), true, "advanced controls should expand from the inspector");
