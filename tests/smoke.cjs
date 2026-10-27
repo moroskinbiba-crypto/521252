@@ -103,6 +103,16 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--acid").trim()), "#12abef");
     await page.locator("#themePicker").selectOption("night");
     assert.equal(await page.locator("body").getAttribute("data-theme"), "night");
+    const inheritedThemeCode = "TGRMTHEME1:" + Buffer.from(JSON.stringify({
+      format: "tgrmlither-theme", version: 1, id: "constructor",
+      vars: { "--bg": "#11130f", "--panel": "#191c17", "--panel2": "#20241e", "--line": "#30372c",
+        "--text": "#eff3e9", "--muted": "#9aa393", "--acid": "#cafa6a", "--purple": "#b5a3ff" }
+    })).toString("base64url");
+    await page.locator("#themeCodeInput").fill(inheritedThemeCode);
+    await page.locator("#applyThemeCode").click();
+    assert.equal(await page.locator("body").getAttribute("data-theme"), "custom",
+      "inherited object properties must not be treated as built-in themes");
+    await page.locator("#themePicker").selectOption("night");
 
     // Shuffle should randomize adjustments while preserving valid control ranges.
     await page.locator("#shuffle").click();
@@ -854,6 +864,20 @@ async function downloadFrom(page, selector) {
     // Extremely tall sources must not produce a multi-billion-pixel ASCII output canvas.
     await page.locator('.topnav [data-mode="script"]').click();
 
+    // A malformed palette item should be skipped without corrupting the library.
+    const previousPaletteCount = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library") || "[]").length);
+    await page.locator("#paletteLibraryInput").setInputFiles({
+      name: "mixed-palettes.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify({ palettes: [
+        { name: "Valid QA palette", colors: ["#112233", "#445566"] },
+        { name: "Invalid QA palette", colors: "not-an-array" }
+      ] }))
+    });
+    await page.waitForFunction(() => document.querySelector("#toast")?.textContent.includes("Импортировано палитр: 1"));
+    const importedPaletteState = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library") || "[]"));
+    assert.equal(importedPaletteState.length, previousPaletteCount + 1, "only valid palette records should be saved");
+    assert.ok(importedPaletteState.some(palette => palette.name === "Valid QA palette"));
     // Oversized JSON imports must be rejected before their contents are read.
     const oversizedJson = Buffer.alloc(5 * 1024 * 1024 + 1, 0x20);
     await page.locator("#presetInput").setInputFiles({
@@ -870,10 +894,12 @@ async function downloadFrom(page, selector) {
       const asciiDownloadPromise = page.waitForEvent("download", { timeout: 20000 });
       await page.locator("#asciiExportWebm").click();
       assert.equal(await page.locator("#asciiPlay").isDisabled(), true, "ASCII playback control should lock during recording");
+      assert.equal(await page.locator("#asciiExportWebm").isDisabled(), true, "ASCII export button should lock during recording");
       const asciiDownload = await asciiDownloadPromise;
       assert.match(asciiDownload.suggestedFilename(), /script-slayer\.webm$/);
       assert.ok(fs.statSync(await asciiDownload.path()).size > 300, "ASCII WebM export should contain encoded frames");
       await page.waitForFunction(() => !document.querySelector("#asciiPlay")?.disabled && document.querySelector("#asciiStop")?.disabled);
+      assert.equal(await page.locator("#asciiExportWebm").isEnabled(), true, "ASCII export button should unlock after recording");
     } else {
       await page.locator("#asciiExportWebm").click();
       assert.equal(await page.locator("#asciiPlay").isEnabled(), true, "unsupported ASCII recording should leave the controls usable");
