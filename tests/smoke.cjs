@@ -813,7 +813,7 @@ async function downloadFrom(page, selector) {
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither.png")), "batch ZIP should contain the first processed PNG filename");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither-2.png")), "batch ZIP should contain a collision-free second PNG filename");
 
-    await page.locator("#batch-effect-scanlines").click();
+    if (await page.locator("#batch-effect-scanlines").getAttribute("aria-checked") !== "true") await page.locator("#batch-effect-scanlines").click();
     assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true");
     const batchProfileAfterClick = await page.evaluate(() => {
       try { return JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.batch?.effects || []; }
@@ -851,6 +851,29 @@ async function downloadFrom(page, selector) {
     await page.locator('.topnav [data-mode="script"]').click();
     assert.equal(await page.locator("#script-effect-scanlines").getAttribute("aria-checked"), "true", "Script Slayer effects should survive reload");
 
+    // Extremely tall sources must not produce a multi-billion-pixel ASCII output canvas.
+    await page.locator('.topnav [data-mode="script"]').click();
+    const tallImageDataUrl = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1;
+      canvas.height = 32767;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#234567";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/png");
+    });
+    await page.locator("#imageInput").setInputFiles({
+      name: "extreme-tall.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(tallImageDataUrl.split(",")[1], "base64")
+    });
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("extreme-tall.png"));
+    await page.waitForFunction(() => !document.querySelector("#asciiLimitWarning")?.classList.contains("hidden"));
+    const asciiOutputSize = await page.locator("#output").evaluate(canvas => ({ width: canvas.width, height: canvas.height }));
+    assert.ok(asciiOutputSize.width * asciiOutputSize.height <= 4000000,
+      "extreme-ratio ASCII output must stay below the configured pixel budget");
+    assert.equal(await page.locator("#asciiLimitWarning").isVisible(), true,
+      "the UI should tell the user when the ASCII grid was limited");
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
     console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {
