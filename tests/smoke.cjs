@@ -61,8 +61,8 @@ async function downloadFrom(page, selector) {
       background: getComputedStyle(document.body).backgroundColor,
       fontStylesheet: document.querySelector('link[rel="stylesheet"][href*="fonts.googleapis.com"]')?.href || ""
     }));
-    assert.match(theme.bodyFont, /IBM Plex Mono/, "Windows XP Luna should activate its retro font stack");
-    assert.match(theme.headingFont, /Onest/, "headings should use readable Onest instead of a Latin-only pixel font");
+    assert.match(theme.bodyFont, /Tahoma/, "Windows XP Luna should use the native-style Tahoma interface font");
+    assert.match(theme.headingFont, /Tahoma/, "XP headings should use the same native-style font family");
     assert.ok(theme.fontStylesheet.includes("family=Onest"), "Onest web font must be included");
     assert.ok(theme.fontStylesheet.includes("IBM+Plex+Mono"), "IBM Plex Mono must be included for technical labels");
     const markupAudit = await page.evaluate(() => {
@@ -73,6 +73,18 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(markupAudit.modeButtons, ["editor", "presets", "shape", "script", "batch", "video"]);
     assert.equal(await page.locator("body").getAttribute("data-shell"), "xp", "Windows XP Luna is the default shell");
     assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "all", "XP shell styles should be active on startup");
+    const xpVisual = await page.evaluate(() => ({
+      panel: getComputedStyle(document.body).getPropertyValue("--panel").trim(),
+      titleBlue: getComputedStyle(document.body).getPropertyValue("--xp-title").trim(),
+      buttonRadius: getComputedStyle(document.querySelector(".btn")).borderRadius,
+      inputBackground: getComputedStyle(document.querySelector("#algorithm")).backgroundColor,
+      titlebar: getComputedStyle(document.querySelector("header")).backgroundImage
+    }));
+    assert.equal(xpVisual.panel, "#ece9d8", "XP shell should use the classic light-gray window chrome");
+    assert.equal(xpVisual.titleBlue, "#0054e3", "XP shell should use the saturated Luna blue title-bar palette");
+    assert.equal(xpVisual.buttonRadius, "0px", "XP controls should use crisp square geometry");
+    assert.equal(xpVisual.inputBackground, "rgb(255, 255, 255)", "XP inputs should use classic white inset controls");
+    assert.match(xpVisual.titlebar, /linear-gradient/, "XP header should use a full Luna blue title-bar gradient");
     assert.equal(await page.locator("#smoothingControl").isVisible(), false, "advanced processing controls should be tucked away in basic mode");
     await page.locator("#advancedToggle").click();
     assert.equal(await page.locator("#smoothingControl").isVisible(), true, "advanced controls should expand from the inspector");
