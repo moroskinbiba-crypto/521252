@@ -542,6 +542,11 @@ async function downloadFrom(page, selector) {
       scale: 999999,
       asciiWidth: -100
     };
+    unsafeProject.workspaces.batch = {
+      ...unsafeProject.workspaces.batch,
+      scale: 999999,
+      asciiWidth: -100
+    };
     await page.locator("#projectInput").setInputFiles({
       name: "unsafe-settings.tgrmlither.json",
       mimeType: "application/json",
