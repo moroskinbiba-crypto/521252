@@ -61,7 +61,7 @@ async function downloadFrom(page, selector) {
       background: getComputedStyle(document.body).backgroundColor,
       fontStylesheet: document.querySelector('link[rel="stylesheet"][href*="fonts.googleapis.com"]')?.href || ""
     }));
-    assert.match(theme.bodyFont, /Onest/, "Cyrillic-friendly Onest should be used by the interface");
+    assert.match(theme.bodyFont, /IBM Plex Mono/, "Windows XP Luna should activate its retro font stack");
     assert.match(theme.headingFont, /Onest/, "headings should use readable Onest instead of a Latin-only pixel font");
     assert.ok(theme.fontStylesheet.includes("family=Onest"), "Onest web font must be included");
     assert.ok(theme.fontStylesheet.includes("IBM+Plex+Mono"), "IBM Plex Mono must be included for technical labels");
