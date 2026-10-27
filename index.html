@@ -1472,9 +1472,53 @@ function loadProject(f){
 async function copyResult(){try{let blob=await new Promise(r=>out.toBlob(r,"image/png"));await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);say("Изображение скопировано")}catch(e){say("Копирование недоступно. Скачайте PNG.")}}
 
 let asciiAnimRaf=0,asciiAnimBase=0,asciiAnimGlowBase=0,asciiAnimStart=0,asciiRecorder=null,asciiChunks=[],asciiAnimTimer=0;
-function startAsciiAnimation(recording){if(!src){say("Сначала загрузите изображение");return}if(asciiAnimRaf)stopAsciiAnimation();if(mode!=="script")setMode("script");s.algorithm="ascii";$("algorithm").value="ascii";asciiAnimBase=Number(s.asciiOffset)||0;asciiAnimGlowBase=Number(s.neoGlowPhase)||0;asciiAnimStart=performance.now();$("asciiPlay").disabled=true;$("asciiStop").disabled=false;if(recording){if(!out.captureStream||typeof MediaRecorder==="undefined"){say("Запись WebM не поддерживается этим браузером");$("asciiPlay").disabled=false;$("asciiStop").disabled=true;return}try{const stream=out.captureStream(24),mime=MediaRecorder.isTypeSupported("video/webm;codecs=vp9")?"video/webm;codecs=vp9":"video/webm";asciiChunks=[];asciiRecorder=new MediaRecorder(stream,{mimeType:mime});asciiRecorder.ondataavailable=e=>{if(e.data&&e.data.size)asciiChunks.push(e.data)};asciiRecorder.onstop=()=>{const blob=new Blob(asciiChunks,{type:"video/webm"});download(blob,slug(srcName)+"-script-slayer.webm");stream.getTracks().forEach(t=>t.stop());asciiRecorder=null;asciiChunks=[];say("Анимация экспортирована в WebM")};asciiRecorder.start();asciiAnimTimer=setTimeout(()=>stopAsciiAnimation(),4000);say("Запись анимации · 4 секунды")}catch(e){say("Не удалось начать запись WebM");$("asciiPlay").disabled=false;$("asciiStop").disabled=true;return}}else say("Анимация запущена · нажмите «Стоп», чтобы завершить");
-function frame(now){if(!asciiAnimRaf)return;const phase=(now-asciiAnimStart)/750;s.neoGlowPhase=(asciiAnimGlowBase+(now-asciiAnimStart)/35)%100;s.asciiOffset=clamp(Math.round(asciiAnimBase+Math.sin(phase*Math.PI*2)*35),-100,100);$("asciiOffset").value=s.asciiOffset;$("asciiOffsetV").textContent=s.asciiOffset;render();asciiAnimRaf=requestAnimationFrame(frame)}
-asciiAnimRaf=requestAnimationFrame(frame)}
+function startAsciiAnimation(recording){
+ if(!src){say("Сначала загрузите изображение");return}
+ if(recording&&(!out.captureStream||typeof MediaRecorder==="undefined")){say("Запись WebM не поддерживается этим браузером");return}
+ if(asciiRecorder&&asciiRecorder.state!=="inactive"){say("Запись анимации уже выполняется");return}
+ if(asciiAnimRaf)stopAsciiAnimation();
+ if(mode!=="script")setMode("script");
+ s.algorithm="ascii";$("algorithm").value="ascii";
+ asciiAnimBase=Number(s.asciiOffset)||0;asciiAnimGlowBase=Number(s.neoGlowPhase)||0;asciiAnimStart=performance.now();
+ let stream=null,recorder=null;
+ if(recording){
+  try{
+   stream=out.captureStream(24);
+   const mime=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type=>MediaRecorder.isTypeSupported(type))||"";
+   asciiChunks=[];recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);asciiRecorder=recorder;
+   recorder.ondataavailable=e=>{if(e.data&&e.data.size)asciiChunks.push(e.data)};
+   recorder.onerror=()=>{say("Ошибка записи ASCII-анимации");try{if(recorder.state!=="inactive")recorder.stop()}catch(error){}};
+   recorder.onstop=()=>{
+    const blob=new Blob(asciiChunks,{type:recorder.mimeType||"video/webm"});
+    if(blob.size)download(blob,slug(srcName)+"-script-slayer.webm");
+    stream.getTracks().forEach(track=>track.stop());
+    if(asciiRecorder===recorder)asciiRecorder=null;asciiChunks=[];
+    say(blob.size?"Анимация экспортирована в WebM":"Не удалось получить данные ASCII-анимации");
+   };
+   recorder.start(250);
+   asciiAnimTimer=setTimeout(()=>stopAsciiAnimation(),4000);
+  }catch(error){
+   clearTimeout(asciiAnimTimer);asciiAnimTimer=0;
+   if(stream)stream.getTracks().forEach(track=>track.stop());
+   if(recorder&&recorder.state!=="inactive")try{recorder.stop()}catch(stopError){}
+   asciiRecorder=null;asciiChunks=[];asciiAnimRaf=0;
+   s.asciiOffset=asciiAnimBase;s.neoGlowPhase=asciiAnimGlowBase;sync();render();
+   $("asciiPlay").disabled=false;$("asciiStop").disabled=true;
+   say("Не удалось начать запись WebM");return;
+  }
+ }
+ $("asciiPlay").disabled=true;$("asciiStop").disabled=false;
+ if(!recording)say("Анимация запущена · нажмите «Стоп», чтобы завершить");
+ function frame(now){
+  if(!asciiAnimRaf)return;
+  const phase=(now-asciiAnimStart)/750;
+  s.neoGlowPhase=(asciiAnimGlowBase+(now-asciiAnimStart)/35)%100;
+  s.asciiOffset=clamp(Math.round(asciiAnimBase+Math.sin(phase*Math.PI*2)*35),-100,100);
+  $("asciiOffset").value=s.asciiOffset;$("asciiOffsetV").textContent=s.asciiOffset;
+  render();asciiAnimRaf=requestAnimationFrame(frame);
+ }
+ asciiAnimRaf=requestAnimationFrame(frame);
+}
 function stopAsciiAnimation(){if(asciiAnimRaf)cancelAnimationFrame(asciiAnimRaf);asciiAnimRaf=0;clearTimeout(asciiAnimTimer);asciiAnimTimer=0;s.asciiOffset=asciiAnimBase;s.neoGlowPhase=asciiAnimGlowBase;$("asciiOffset").value=s.asciiOffset;$("asciiOffsetV").textContent=s.asciiOffset;if($("asciiPlay"))$("asciiPlay").disabled=false;if($("asciiStop"))$("asciiStop").disabled=true;if(asciiRecorder&&asciiRecorder.state!=="inactive")asciiRecorder.stop();sync();render()}
 
 function vectorDimensions(){
