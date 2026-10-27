@@ -522,6 +522,44 @@ async function downloadFrom(page, selector) {
     await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor", "old project format should remain supported");
 
+    // Imported projects are data, not trusted code: unknown settings, bad ranges,
+    // malformed colours and invalid viewBoxes must be normalized before rendering.
+    const unsafeProject = JSON.parse(JSON.stringify(projectData));
+    unsafeProject.settings = {
+      ...unsafeProject.settings,
+      algorithm: "not-an-algorithm",
+      scale: 999999,
+      levels: "not-a-number",
+      patternShape: "not-a-shape",
+      effectStrength: { scanlines: 9999, glow: "broken" },
+      customColors: ["javascript:alert(1)", "#112233"],
+      shapeBands: [{ shape: "invalid", size: 999999, color: "not-a-colour", customViewBox: [0, 0, 0, 1] }],
+      unknownInjectedProperty: "ignored"
+    };
+    unsafeProject.workspaces.editor = {
+      ...unsafeProject.workspaces.editor,
+      scale: 999999,
+      asciiWidth: -100
+    };
+    await page.locator("#projectInput").setInputFiles({
+      name: "unsafe-settings.tgrmlither.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(unsafeProject))
+    });
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
+    const safeSettings = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")));
+    assert.equal(safeSettings.editor.algorithm, "bayer4", "invalid algorithms should fall back to a supported algorithm");
+    assert.equal(safeSettings.editor.scale, 24, "numeric settings should be clamped to supported limits");
+    assert.equal(safeSettings.editor.levels, 4, "invalid numeric values should use defaults");
+    assert.equal(safeSettings.editor.effectStrength.scanlines, 100, "effect strength should be clamped");
+    assert.equal(safeSettings.editor.effectStrength.glow, 50, "invalid effect strength should use the default");
+    assert.equal(safeSettings.editor.customColors.length, 2, "invalid custom colours should be dropped");
+    assert.equal(safeSettings.editor.shapeBands[0].shape, "circle", "invalid shape values should use the default");
+    assert.equal(safeSettings.editor.shapeBands[0].size, 180, "shape sizes should be bounded");
+    assert.equal(safeSettings.editor.shapeBands[0].color, "#334b2b", "invalid shape colours should use a safe default");
+    assert.deepEqual(safeSettings.editor.shapeBands[0].customViewBox, [0, 0, 100, 100], "invalid viewBoxes should be replaced");
+    assert.equal("unknownInjectedProperty" in safeSettings.editor, false, "unknown project settings should not persist");
+
     // Project files must preserve and restore the exclusive Script Slayer workspace.
     await page.locator('.topnav [data-mode="script"]').click();
     const scriptProject = await downloadFrom(page, "#saveProject");
