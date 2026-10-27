@@ -335,6 +335,74 @@ body[data-theme="paper"] .btn,body[data-theme="paper"] .select,body[data-theme="
 .fieldtop label{flex:1;min-width:0}
 .fieldtop .val{flex:0 0 auto}
 .export-modal input[type=range]{width:100%;accent-color:var(--acid)}
+
+/* Restored shared component styling, now themed independently from the optional XP shell. */
+.effect-control{position:relative;display:block;border:1px solid var(--line);border-radius:9px;background:var(--panel2);padding:7px;isolation:isolate;overflow:visible}
+.effect-control.is-active{background:color-mix(in srgb,var(--acid) 10%,var(--panel2));border-color:color-mix(in srgb,var(--acid) 55%,var(--line))}
+.effect-control .effect{position:relative;z-index:2;display:flex;align-items:center;gap:7px;width:100%;min-height:29px;border:0;border-radius:6px;padding:2px 1px 6px;color:var(--text);cursor:pointer;user-select:none;pointer-events:auto;font:500 12px/1.35 var(--ui-font)}
+.effect-control .effect-toggle[role="checkbox"]{position:relative;z-index:3;display:inline-flex;align-items:center;justify-content:center;flex:0 0 18px;width:18px;height:18px;min-width:18px;margin:0 3px 0 0;padding:0;border:1px solid var(--line);border-radius:4px;appearance:none;background:var(--bg);color:var(--acid);box-shadow:inset 0 1px 2px #0002;cursor:pointer;pointer-events:auto}
+.effect-control .effect-toggle[role="checkbox"][aria-checked="true"]{background:color-mix(in srgb,var(--acid) 20%,var(--panel));border-color:var(--acid)}
+.effect-control .effect-toggle[role="checkbox"][aria-checked="true"]::after{content:"✓";font:700 13px/1 var(--ui-font);color:var(--acid);position:absolute;left:2px;top:1px}
+.effect-control .effect-toggle:focus-visible{outline:2px solid var(--acid);outline-offset:2px}
+.effect-control .effect small{margin-left:auto;color:var(--muted);font:500 9px/1.3 var(--mono-font)}
+.effect-control .effect-order-actions{position:relative;z-index:4;display:inline-flex;margin:0 0 5px auto;gap:3px}
+.effect-order-actions button{background:var(--panel);border:1px solid var(--line);border-radius:5px;color:var(--text);padding:2px 6px;font:500 10px/1.2 var(--ui-font);cursor:pointer}
+.effect-order-actions button:active{transform:translateY(1px)}
+.effect-intensity{position:relative;z-index:1;display:flex;align-items:center;gap:7px}
+.effect-intensity input[type="range"]{pointer-events:auto;cursor:pointer;min-width:0;flex:1;accent-color:var(--acid)}
+.effect-intensity output{color:var(--acid);font:600 10px/1.3 var(--mono-font);min-width:30px;text-align:right}
+.custom-colors,.ascii-neoglow,.shape-band,.card,.drop,.fileitem,.ascii{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text)}
+.custom-colors,.ascii-neoglow{padding:9px}
+.custom-colors-head,.shape-band>b{color:var(--text)}
+.color-pick{font-size:10px;color:var(--muted)}
+.color-pick input,.shape-band-row input[type=color],.color-select-row input[type=color]{border:1px solid var(--line);border-radius:6px;background:var(--panel2);padding:2px}
+.color-grid{gap:6px}
+.effects{gap:7px}
+.effect{color:var(--text)}
+.shape-bands{display:grid;gap:7px;margin:10px 0;max-height:400px;overflow:auto}
+.shape-band{padding:8px}
+.shape-band>b{display:block;font-size:10px;margin-bottom:6px}
+.shape-band-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 28px;gap:5px;align-items:center}
+.shape-band-row .select{min-width:0;padding:5px}
+.shape-band-row input[type=color]{width:28px;height:25px}
+.glyph-preview{margin-top:5px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--acid);font:12px/1.6 var(--mono-font);letter-spacing:1px;overflow:hidden;white-space:nowrap;padding:5px 7px}
+.ascii-neoglow{margin-top:9px}
+.ascii-neoglow .switchrow{font-size:11px}
+.ascii-neoglow .field{margin-top:8px}
+.drop{background:color-mix(in srgb,var(--acid) 5%,var(--panel2));border-style:dashed;border-color:color-mix(in srgb,var(--acid) 40%,var(--line))}
+.fileitem{background:var(--panel2)}
+.fileicon{border:1px solid var(--line);border-radius:7px;background:color-mix(in srgb,var(--acid) 10%,var(--panel2))}
+.progress{height:5px;border:1px solid var(--line);border-radius:99px;background:var(--panel2)}
+.progress i{background:var(--acid);border-right:1px solid color-mix(in srgb,var(--acid) 60%,var(--line))}
+.ascii{background:var(--bg)}
+.ascii summary{font-size:11px;color:var(--acid)}
+.ascii pre{font:12px/1.2 var(--mono-font);color:var(--acid)}
+.toast{border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font:500 12px/1.4 var(--ui-font);box-shadow:0 8px 30px #0003}
+.modalbg{background:#0008;backdrop-filter:blur(3px)}
+.modal{border:1px solid var(--line);border-radius:13px;background:var(--panel);color:var(--text);box-shadow:0 18px 70px #0005}
+.modal h2{font:800 16px/1.35 var(--ui-font);color:var(--text)}
+.modal p{color:var(--muted);font-size:12px}
+.modal input{border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:12px/1.4 var(--ui-font)}
+#videoView{min-height:100%}
+.video-stage{height:clamp(240px,calc(100dvh - 240px),700px);min-height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+#videoEmpty{display:block;position:absolute;max-width:340px}
+#videoOutput{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated;background:var(--panel2);border:1px solid var(--line);box-shadow:0 8px 30px #0003}
+.video-timeline{margin-top:8px;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}
+.video-time-row{display:flex;align-items:center;gap:9px}
+.video-time-row span{min-width:60px;text-align:center;color:var(--acid);font:600 10px/1.3 var(--mono-font)}
+#videoTimeline{flex:1;min-width:0;accent-color:var(--acid)}
+.video-hint{margin-top:6px;color:var(--muted);font-size:11px;line-height:1.45}
+@media(max-width:740px){
+ .effect-control{padding:7px}
+ .shape-band-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 28px}
+ .shape-bands{max-height:320px}
+ .video-stage{height:clamp(135px,21dvh,220px);min-height:130px}
+ #videoOutput{max-width:100%;max-height:100%}
+ .video-time-row{gap:5px;flex-wrap:wrap}
+ .video-time-row span{min-width:50px;font-size:11px}
+ .video-hint{font-size:11px}
+}
+
 </style>
 <style id="xpShellStyles" media="not all">
 /* Luna-inspired shell. Uses the active theme tokens instead of imposing a second palette. */
