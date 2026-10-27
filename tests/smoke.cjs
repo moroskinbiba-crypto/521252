@@ -544,6 +544,8 @@ async function downloadFrom(page, selector) {
       patternShape: "not-a-shape",
       effectStrength: { scanlines: 9999, glow: "broken" },
       customColors: ["javascript:alert(1)", "#112233", "#334455"],
+      customShapePath: "M 0 0 ".repeat(5000),
+      customShapeViewBox: [0, 0, 0, 1],
       shapeBands: [{ shape: "invalid", size: 999999, color: "not-a-colour", customViewBox: [0, 0, 0, 1] }],
       unknownInjectedProperty: "ignored"
     };
@@ -574,6 +576,8 @@ async function downloadFrom(page, selector) {
     assert.equal(safeSettings.editor.shapeBands[0].shape, "circle", "invalid shape values should use the default");
     assert.equal(safeSettings.editor.shapeBands[0].size, 180, "shape sizes should be bounded");
     assert.equal(safeSettings.editor.shapeBands[0].color, "#334b2b", "invalid shape colours should use a safe default");
+    assert.equal(safeSettings.editor.customShapePath.length, 20000, "global custom paths should be capped before rendering");
+    assert.deepEqual(safeSettings.editor.customShapeViewBox, [0, 0, 100, 100], "invalid global viewBoxes should be replaced");
     assert.deepEqual(safeSettings.editor.shapeBands[0].customViewBox, [0, 0, 100, 100], "invalid viewBoxes should be replaced");
     assert.equal("unknownInjectedProperty" in safeSettings.editor, false, "unknown project settings should not persist");
 
