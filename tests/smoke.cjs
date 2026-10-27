@@ -407,6 +407,8 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(await page.locator("#output").evaluate(c => [c.width, c.height]), [48, 32], "pasted image should load into the editor");
     await page.locator("#imageInput").setInputFiles({ name: "qa-fixture.png", mimeType: "image/png", buffer: imageBuffer });
     await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
+    await page.locator("#advancedToggle").click();
+    assert.equal(await page.locator("#advancedToggle").getAttribute("aria-pressed"), "true", "advanced options should be available for the full algorithm QA sweep");
 
     // Exercise every algorithm option so a broken branch cannot hide behind a valid default.
     const algorithms = await page.locator("#algorithm option").evaluateAll(options => options.map(option => option.value));
