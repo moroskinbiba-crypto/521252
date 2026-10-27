@@ -460,12 +460,12 @@ header{background:linear-gradient(180deg,color-mix(in srgb,var(--acid) 35%,white
 }
 </style>
 </head>
-<body data-mode="editor" data-shell="studio" data-inspector-level="basic">
+<body data-mode="editor" data-shell="xp" data-inspector-level="basic">
 <header>
 <a class="brand" href="#" id="homeLogo" aria-label="TGRMLither"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span><b>TGRMLither</b><small>PIXEL IMAGE STUDIO</small></span></a>
 <button class="btn primary" id="openImage" title="Загрузить изображение" aria-label="Загрузить изображение">▣ Загрузить</button>
 <nav class="topnav" aria-label="Рабочие пространства"><button class="navbtn active" data-mode="editor">Редактор</button><button class="navbtn" data-mode="presets">Пресеты</button><button class="navbtn" data-mode="shape">Shape Lab</button><button class="navbtn" data-mode="script">Script Slayer</button><button class="navbtn" data-mode="batch">Пакетно</button><button class="navbtn" data-mode="video">Видео</button></nav>
-<div class="topright"><span class="local"><i class="live"></i>локально</span><details class="theme-menu" id="themeMenu"><summary class="btn sm" title="Тема интерфейса и код обмена">◐</summary><div class="theme-menu-panel"><label for="themePicker">Тема интерфейса</label><select id="themePicker" class="select full"><option value="night">Acid Night</option><option value="terminal">Terminal Green</option><option value="violet">Violet Signal</option><option value="paper">Paper Studio</option><option value="custom">Моя тема</option></select><label for="shellPicker">Оболочка интерфейса</label><select id="shellPicker" class="select full"><option value="studio">Современная студия</option><option value="xp">Windows XP Luna</option></select><div class="theme-custom-grid" id="themeCustomColors"><label>Фон<input type="color" id="themeColorBg" value="#11130f"></label><label>Панель<input type="color" id="themeColorPanel" value="#191c17"></label><label>Вложенная<input type="color" id="themeColorPanel2" value="#20241e"></label><label>Границы<input type="color" id="themeColorLine" value="#30372c"></label><label>Текст<input type="color" id="themeColorText" value="#eff3e9"></label><label>Вторичный<input type="color" id="themeColorMuted" value="#9aa393"></label><label>Акцент<input type="color" id="themeColorAcid" value="#cafa6a"></label><label>Второй акцент<input type="color" id="themeColorPurple" value="#b5a3ff"></label></div><button class="btn sm full" id="applyCustomTheme" type="button">Применить мои цвета</button><button class="btn sm full" id="makeThemeCode" type="button">↗ Создать / скопировать код темы</button><label for="themeCodeInput">Код темы для импорта</label><input type="text" id="themeCodeInput" placeholder="TGRMTHEME1:…" autocomplete="off"><button class="btn sm full" id="applyThemeCode" type="button">Применить код темы</button><small class="theme-status" id="themeStatus">Тема сохраняется в этом браузере.</small></div></details><button class="btn" id="offlineBtn" title="Скачать автономную HTML-версию">↓ Офлайн HTML</button><button class="btn primary" id="topExport">↓ Экспорт</button></div>
+<div class="topright"><span class="local"><i class="live"></i>локально</span><details class="theme-menu" id="themeMenu"><summary class="btn sm" title="Тема интерфейса и код обмена">◐</summary><div class="theme-menu-panel"><label for="themePicker">Тема интерфейса</label><select id="themePicker" class="select full"><option value="night">Acid Night</option><option value="terminal">Terminal Green</option><option value="violet">Violet Signal</option><option value="paper">Paper Studio</option><option value="custom">Моя тема</option></select><label for="shellPicker">Оболочка интерфейса</label><select id="shellPicker" class="select full"><option value="xp" selected>Windows XP Luna</option><option value="studio">Современная студия</option></select><div class="theme-custom-grid" id="themeCustomColors"><label>Фон<input type="color" id="themeColorBg" value="#11130f"></label><label>Панель<input type="color" id="themeColorPanel" value="#191c17"></label><label>Вложенная<input type="color" id="themeColorPanel2" value="#20241e"></label><label>Границы<input type="color" id="themeColorLine" value="#30372c"></label><label>Текст<input type="color" id="themeColorText" value="#eff3e9"></label><label>Вторичный<input type="color" id="themeColorMuted" value="#9aa393"></label><label>Акцент<input type="color" id="themeColorAcid" value="#cafa6a"></label><label>Второй акцент<input type="color" id="themeColorPurple" value="#b5a3ff"></label></div><button class="btn sm full" id="applyCustomTheme" type="button">Применить мои цвета</button><button class="btn sm full" id="makeThemeCode" type="button">↗ Создать / скопировать код темы</button><label for="themeCodeInput">Код темы для импорта</label><input type="text" id="themeCodeInput" placeholder="TGRMTHEME1:…" autocomplete="off"><button class="btn sm full" id="applyThemeCode" type="button">Применить код темы</button><small class="theme-status" id="themeStatus">Тема сохраняется в этом браузере.</small></div></details><button class="btn" id="offlineBtn" title="Скачать автономную HTML-версию">↓ Офлайн HTML</button><button class="btn primary" id="topExport">↓ Экспорт</button></div>
 </header>
 <div class="layout">
 <main>
@@ -1129,8 +1129,15 @@ function setShell(shell,persist=true){
  if(persist)store("tgrmlither-shell",value);
 }
 function bindShellControls(){
- setShell(loadStore("tgrmlither-shell","studio"),false);
- const picker=$("shellPicker");if(picker)picker.onchange=()=>{setShell(picker.value,true);say(picker.value==="xp"?"Включена оболочка Windows XP Luna":"Включена современная оболочка")};
+ // Migrate existing installs once: XP Luna returns as the default, but later user choices persist.
+ const migrated=loadStore("tgrmlither-shell-default-xp-v1",false);
+ if(!migrated){
+  setShell("xp",true);
+  store("tgrmlither-shell-default-xp-v1",true);
+ }else{
+  setShell(loadStore("tgrmlither-shell","xp"),false);
+ }
+ const picker=$("shellPicker");if(picker)picker.onchange=()=>{setShell(picker.value,true);store("tgrmlither-shell-default-xp-v1",true);say(picker.value==="xp"?"Включена оболочка Windows XP Luna":"Включена современная оболочка")};
 }
 function setInspectorLevel(level,persist=true){
  const value=level==="advanced"?"advanced":"basic";
