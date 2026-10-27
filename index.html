@@ -738,7 +738,7 @@ function cloneSettings(input){
  const raw=input&&typeof input==="object"?input:{},next={...def};
  for(const key of Object.keys(def))if(Object.prototype.hasOwnProperty.call(raw,key))next[key]=raw[key];
  const safeNumber=(value,fallback,min,max,integer=true)=>{
-  const n=Number(value);if(!Number.isFinite(n))return fallback;
+  if(value===null||value===undefined||(typeof value!=="number"&&typeof value!=="string")||(typeof value==="string"&&!value.trim()))return fallback;const n=Number(value);if(!Number.isFinite(n))return fallback;
   const bounded=clamp(n,min,max);return integer?Math.round(bounded):bounded;
  };
  const safeColor=(value,fallback)=>typeof value==="string"&&/^#[0-9a-f]{6}$/i.test(value)?value.toLowerCase():fallback;
