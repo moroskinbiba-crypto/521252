@@ -1,10 +1,10 @@
-TGRMLither Portable v1.2.0
+TGRMLither Portable v1.3.2
 
 QUICK START
 1. Extract this folder anywhere.
 2. Windows: double-click Launch-TGRMLither.bat.
 3. macOS/Linux: run ./Launch-TGRMLither.sh.
-4. Your default browser opens http://127.0.0.1:8765/.
+4. The launcher checks port 8765, starts the local server, and waits until it responds before opening the browser.
 
 REQUIREMENT
 Python 3 is used only to serve the local files to the browser. No Python packages or app installation are needed.

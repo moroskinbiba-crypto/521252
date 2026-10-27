@@ -55,6 +55,16 @@ MIT. See [LICENSE](LICENSE).
 
 - Source images are limited to 24 megapixels and a maximum edge of 32,767 px. Larger images are proportionally reduced before canvas allocation and the UI shows a warning; the same safeguard applies to images embedded in imported projects.
 - Video Lab processes up to 2.4 megapixels per frame to keep preview and WebM recording responsive. Full HD frames are processed at their original size; larger frames are scaled down.
-- The built-in batch ZIP writer uses the classic ZIP format and limits each archive to 128 MB and 65,535 files. Split larger batches into smaller exports.
+- The built-in batch ZIP writer uses the classic ZIP format and limits each archive to 64 MB and 65,535 files. Split larger batches into smaller exports.
 - The browser-based editor keeps image processing local. Imported project files must contain a self-contained PNG, JPEG, or WebP data URL; remote image URLs are not loaded from project files.
 - The offline service worker only clears old caches whose names use the `tgrmlither-` prefix. It does not remove caches belonging to other apps on the same origin.
+
+
+## Additional hardening in v1.3.2
+
+- PWA launch/background colours follow the default dark theme; browser chrome colour updates with the selected theme.
+- Project import refuses files above 160 MB before reading them and handles FileReader failures; project export avoids an unnecessary full-resolution canvas copy and reports failures.
+- Motion WebM recording validates browser support before changing the UI and cleans up recorder streams if setup fails.
+- CI validates the Portable shell launcher's syntax and checks that its executable permission survives packaging.
+
+- Portable launchers verify that the local server responds before opening the browser and report if port 8765 is already in use.

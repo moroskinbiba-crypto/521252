@@ -41,8 +41,17 @@ async function downloadFrom(page, selector) {
     assert.equal(unrelatedCachePreserved, true, "the app must not delete caches owned by other apps on the same origin");
 
     assert.match(await page.title(), /^TGRMLither/);
+    const manifestResponse = await page.request.get(new URL("./manifest.webmanifest", baseURL).href);
+    assert.equal(manifestResponse.status(), 200, "PWA manifest should be reachable");
+    const manifest = await manifestResponse.json();
+    assert.equal(manifest.theme_color, "#11130f", "installed PWA theme should match the default app theme");
+    assert.equal(manifest.background_color, "#11130f", "installed PWA background should match the default app theme");
+    assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"), "#11130f");
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor");
     assert.match(await page.locator("#homeLogo").innerText(), /TGRMLither/, "new product name must be visible in the app header");
+    await page.locator("#projectInput").setInputFiles({ name: "invalid-project.json", mimeType: "application/json", buffer: Buffer.from("{ invalid") });
+    await page.waitForFunction(() => document.querySelector("#toast")?.textContent === "Неверный файл проекта");
+    assert.equal(await page.locator("#projectInput").inputValue(), "", "project input should remain reusable after a bad file");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), true, "regular effects should be visible in Editor");
     assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer panel should be isolated from Editor");
     assert.equal(await page.locator("#shapeControl").isVisible(), false, "Shape Lab panel should be isolated from Editor");
@@ -67,12 +76,14 @@ async function downloadFrom(page, selector) {
     await page.locator("#themeMenu > summary").click();
     await page.locator("#themePicker").selectOption("terminal");
     assert.equal(await page.locator("body").getAttribute("data-theme"), "terminal");
+    assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"), "#07140c", "browser chrome color should follow the selected theme");
     assert.ok(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-theme")).vars["--acid"] === "#72ffa0"),
       "theme choice should persist locally");
     await page.locator("#makeThemeCode").click();
     const themeCode = await page.locator("#themeCodeInput").inputValue();
     assert.ok(themeCode.startsWith("TGRMTHEME1:"), "theme sharing should generate a portable code");
     await page.locator("#themePicker").selectOption("paper");
+    assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light", "Paper theme should switch native controls to a light color scheme");
     await page.locator("#themeCodeInput").fill(themeCode);
     await page.locator("#applyThemeCode").click();
     assert.equal(await page.locator("body").getAttribute("data-theme"), "terminal",
@@ -92,6 +103,16 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--acid").trim()), "#12abef");
     await page.locator("#themePicker").selectOption("night");
     assert.equal(await page.locator("body").getAttribute("data-theme"), "night");
+    const inheritedThemeCode = "TGRMTHEME1:" + Buffer.from(JSON.stringify({
+      format: "tgrmlither-theme", version: 1, id: "constructor",
+      vars: { "--bg": "#11130f", "--panel": "#191c17", "--panel2": "#20241e", "--line": "#30372c",
+        "--text": "#eff3e9", "--muted": "#9aa393", "--acid": "#cafa6a", "--purple": "#b5a3ff" }
+    })).toString("base64url");
+    await page.locator("#themeCodeInput").fill(inheritedThemeCode);
+    await page.locator("#applyThemeCode").click();
+    assert.equal(await page.locator("body").getAttribute("data-theme"), "custom",
+      "inherited object properties must not be treated as built-in themes");
+    await page.locator("#themePicker").selectOption("night");
 
     // Shuffle should randomize adjustments while preserving valid control ranges.
     await page.locator("#shuffle").click();
@@ -512,6 +533,72 @@ async function downloadFrom(page, selector) {
     await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
     assert.equal(await page.locator("body").getAttribute("data-mode"), "editor", "old project format should remain supported");
 
+    // Imported projects are data, not trusted code: unknown settings, bad ranges,
+    // malformed colours and invalid viewBoxes must be normalized before rendering.
+    const unsafeProject = JSON.parse(JSON.stringify(projectData));
+    unsafeProject.settings = {
+      ...unsafeProject.settings,
+      algorithm: "not-an-algorithm",
+      scale: 999999,
+      levels: "not-a-number",
+      patternShape: "not-a-shape",
+      effectStrength: { scanlines: 9999, glow: "broken" },
+      customColors: ["javascript:alert(1)", "#112233", "#334455"],
+      customShapePath: "M 0 0 ".repeat(5000),
+      customShapeViewBox: [0, 0, 0, 1],
+      shapeBands: [{ shape: "invalid", size: 999999, color: "not-a-colour", customViewBox: [0, 0, 0, 1] }],
+      unknownInjectedProperty: "ignored"
+    };
+    unsafeProject.workspaces.editor = {
+      ...unsafeProject.workspaces.editor,
+      scale: 999999,
+      asciiWidth: -100
+    };
+    unsafeProject.workspaces.batch = {
+      ...unsafeProject.workspaces.batch,
+      scale: 999999,
+      asciiWidth: -100
+    };
+    await page.locator("#projectInput").setInputFiles({
+      name: "unsafe-settings.tgrmlither.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(unsafeProject))
+    });
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
+    const safeSettings = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")));
+    assert.equal(safeSettings.editor.algorithm, "bayer4", "invalid algorithms should fall back to a supported algorithm");
+    assert.equal(safeSettings.editor.scale, 24, "numeric settings should be clamped to supported limits");
+    assert.equal(safeSettings.batch.scale, 24, "every workspace profile should be normalized during project import");
+    assert.equal(safeSettings.editor.levels, 4, "invalid numeric values should use defaults");
+    assert.equal(safeSettings.editor.effectStrength.scanlines, 100, "effect strength should be clamped");
+    assert.equal(safeSettings.editor.effectStrength.glow, 50, "invalid effect strength should use the default");
+    assert.equal(safeSettings.editor.customColors.length, 2, "invalid custom colours should be dropped");
+    assert.equal(safeSettings.editor.shapeBands[0].shape, "circle", "invalid shape values should use the default");
+    assert.equal(safeSettings.editor.shapeBands[0].size, 180, "shape sizes should be bounded");
+    assert.equal(safeSettings.editor.shapeBands[0].color, "#334b2b", "invalid shape colours should use a safe default");
+    assert.equal(safeSettings.editor.customShapePath.length, 20000, "global custom paths should be capped before rendering");
+    assert.deepEqual(safeSettings.editor.customShapeViewBox, [0, 0, 100, 100], "invalid global viewBoxes should be replaced");
+    assert.deepEqual(safeSettings.editor.shapeBands[0].customViewBox, [0, 0, 100, 100], "invalid viewBoxes should be replaced");
+    assert.equal("unknownInjectedProperty" in safeSettings.editor, false, "unknown project settings should not persist");
+
+    // Shape preset import has a separate validation path; validate the global viewBox there too.
+    const unsafeShapeProfile = {
+      shape: "custom", jitter: 20, shapeDistribution: "uniform", shapeRotation: 0,
+      shapeThresholds: [25, 50, 75],
+      shapeBands: Array.from({ length: 4 }, () => ({ shape: "circle", size: 70, color: "#334b2b", rotation: 0 })),
+      customShapePath: "M 0 0 L 1 1",
+      customShapeViewBox: [0, 0, 0, 1]
+    };
+    await page.locator("#shapePresetInput").setInputFiles({
+      name: "unsafe-shape.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify({ name: "Unsafe QA Shape", profile: unsafeShapeProfile }))
+    });
+    await page.waitForFunction(() => document.querySelector("#toast")?.textContent.includes("Пресет Shape Shifter импортирован"));
+    const cleanedShapeProfile = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.shape);
+    assert.deepEqual(cleanedShapeProfile.customShapeViewBox, [0, 0, 100, 100],
+      "global custom shape viewBox should be validated in the direct shape-preset import path");
+
     // Project files must preserve and restore the exclusive Script Slayer workspace.
     await page.locator('.topnav [data-mode="script"]').click();
     const scriptProject = await downloadFrom(page, "#saveProject");
@@ -695,23 +782,54 @@ async function downloadFrom(page, selector) {
     });
     assert.ok(await page.locator("#videoOutput").evaluate(canvas => canvas.width > 0 && canvas.height > 0),
       "video frame should be processed onto the output canvas");
-    const [videoDownload] = await Promise.all([
-      page.waitForEvent("download", { timeout: 20000 }),
-      page.locator("#videoExport").click()
-    ]);
+    const videoDownloadPromise = page.waitForEvent("download", { timeout: 20000 });
+    await page.locator("#videoExport").click();
+    assert.equal(await page.locator("#videoTimeline").isDisabled(), true, "video timeline must be locked during export");
+    const videoDownload = await videoDownloadPromise;
     assert.match(videoDownload.suggestedFilename(), /TGRMLither\.webm$/);
     assert.ok(fs.statSync(await videoDownload.path()).size > 500, "exported video should contain data");
     assert.equal(await page.locator("#videoExport").isEnabled(), true, "video export control must be re-enabled after recording finishes");
+    assert.equal(await page.locator("#videoTimeline").isDisabled(), false, "video timeline must unlock after recording finishes");
 
-    // Batch processing should accept and produce a real PNG.
+    // Batch processing should use a stable settings snapshot even if controls change while files are being encoded.
     await page.locator('.topnav [data-mode="batch"]').click();
     await page.locator("#batchInput").setInputFiles([
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
-      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer }
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
+      { name: "broken-image.png", mimeType: "image/png", buffer: Buffer.from("not a valid PNG") }
     ]);
-    assert.equal(await page.locator("#batchList .fileitem").count(), 2);
+    assert.equal(await page.locator("#batchList .fileitem").count(), 3);
+    await page.locator("#algorithm").selectOption("bayer4");
+    const batchScanlines = page.locator("#batch-effect-scanlines");
+    if (await batchScanlines.getAttribute("aria-checked") !== "true") await batchScanlines.click();
+    const batchScanlinesStrength = page.locator('#batchEffectsControl [data-effect-strength="scanlines"]');
+    await batchScanlinesStrength.evaluate(el => { el.value = "10"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await page.evaluate(() => {
+      window.__tgrmOriginalToBlob = HTMLCanvasElement.prototype.toBlob;
+      window.__tgrmToBlobCalls = 0;
+      HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
+        const canvas = this;
+        window.__tgrmToBlobCalls++;
+        setTimeout(() => window.__tgrmOriginalToBlob.call(canvas, callback, type, quality), 250);
+      };
+    });
     await page.locator("#runBatch").click();
+    assert.equal(await page.locator("#clearBatch").isDisabled(), true, "batch items must not be removed while processing is running");
+    assert.equal(await page.locator("#batchInput").isDisabled(), true, "new files must not be added while processing is running");
+    await page.waitForFunction(() => window.__tgrmToBlobCalls >= 1, null, { timeout: 10000 });
+    await batchScanlinesStrength.evaluate(el => { el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
     await page.waitForFunction(() => document.querySelectorAll("#batchResults a[download]").length === 2, null, { timeout: 15000 });
+    await page.waitForFunction(() => document.querySelectorAll("#batchResults .fileitem").length === 3 && !document.querySelector("#clearBatch")?.disabled, null, { timeout: 15000 });
+    assert.match(await page.locator("#batchResults").innerText(), /broken-image\.png[\s\S]*Ошибка:/, "failed batch files should remain visible with an error reason");
+    assert.match(await page.locator("#toast").textContent(), /2 успешно, 1 с ошибкой/, "batch summary should distinguish successes from failures");
+    const outputHashes = await page.locator("#batchResults a[download]").evaluateAll(async links => Promise.all(links.map(async link => {
+      const bytes = await (await fetch(link.href)).arrayBuffer();
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+    })));
+    assert.equal(outputHashes[0], outputHashes[1], "all batch outputs should use the starting settings snapshot even if a control changes mid-run");
+    await batchScanlinesStrength.evaluate(el => { el.value = "50"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await page.evaluate(() => { HTMLCanvasElement.prototype.toBlob = window.__tgrmOriginalToBlob; delete window.__tgrmOriginalToBlob; delete window.__tgrmToBlobCalls; });
     const batchNames = await page.locator("#batchResults a[download]").evaluateAll(links => links.map(link => link.download));
     assert.equal(new Set(batchNames).size, 2, "duplicate source filenames must not overwrite each other in the batch ZIP");
     assert.match(batchNames[0], /TGRMLither\.png$/);
@@ -727,7 +845,7 @@ async function downloadFrom(page, selector) {
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither.png")), "batch ZIP should contain the first processed PNG filename");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither-2.png")), "batch ZIP should contain a collision-free second PNG filename");
 
-    await page.locator("#batch-effect-scanlines").click();
+    if (await page.locator("#batch-effect-scanlines").getAttribute("aria-checked") !== "true") await page.locator("#batch-effect-scanlines").click();
     assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true");
     const batchProfileAfterClick = await page.evaluate(() => {
       try { return JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.batch?.effects || []; }
@@ -765,6 +883,71 @@ async function downloadFrom(page, selector) {
     await page.locator('.topnav [data-mode="script"]').click();
     assert.equal(await page.locator("#script-effect-scanlines").getAttribute("aria-checked"), "true", "Script Slayer effects should survive reload");
 
+    // Extremely tall sources must not produce a multi-billion-pixel ASCII output canvas.
+    await page.locator('.topnav [data-mode="script"]').click();
+
+    // A malformed palette item should be skipped without corrupting the library.
+    const previousPaletteCount = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library") || "[]").length);
+    await page.locator("#paletteLibraryInput").setInputFiles({
+      name: "mixed-palettes.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify({ palettes: [
+        { name: "Valid QA palette", colors: ["#112233", "#445566"] },
+        { name: "Invalid QA palette", colors: "not-an-array" }
+      ] }))
+    });
+    await page.waitForFunction(() => document.querySelector("#toast")?.textContent.includes("Импортировано палитр: 1"));
+    const importedPaletteState = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library") || "[]"));
+    assert.equal(importedPaletteState.length, previousPaletteCount + 1, "only valid palette records should be saved");
+    assert.ok(importedPaletteState.some(palette => palette.name === "Valid QA palette"));
+    // Oversized JSON imports must be rejected before their contents are read.
+    const oversizedJson = Buffer.alloc(5 * 1024 * 1024 + 1, 0x20);
+    await page.locator("#presetInput").setInputFiles({
+      name: "oversized-presets.json",
+      mimeType: "application/json",
+      buffer: oversizedJson
+    });
+    await page.waitForFunction(() => document.querySelector("#toast")?.textContent.includes("Файл пресетов слишком большой"));
+    oversizedJson.fill(0);
+
+    // ASCII animation export should either create a real WebM or leave controls usable when unsupported.
+    const asciiRecordingSupported = await page.evaluate(() => !!document.querySelector("#output")?.captureStream && typeof MediaRecorder !== "undefined");
+    if (asciiRecordingSupported) {
+      const asciiDownloadPromise = page.waitForEvent("download", { timeout: 20000 });
+      await page.locator("#asciiExportWebm").click();
+      assert.equal(await page.locator("#asciiPlay").isDisabled(), true, "ASCII playback control should lock during recording");
+      assert.equal(await page.locator("#asciiExportWebm").isDisabled(), true, "ASCII export button should lock during recording");
+      const asciiDownload = await asciiDownloadPromise;
+      assert.match(asciiDownload.suggestedFilename(), /script-slayer\.webm$/);
+      assert.ok(fs.statSync(await asciiDownload.path()).size > 300, "ASCII WebM export should contain encoded frames");
+      await page.waitForFunction(() => !document.querySelector("#asciiPlay")?.disabled && document.querySelector("#asciiStop")?.disabled);
+      assert.equal(await page.locator("#asciiExportWebm").isEnabled(), true, "ASCII export button should unlock after recording");
+    } else {
+      await page.locator("#asciiExportWebm").click();
+      assert.equal(await page.locator("#asciiPlay").isEnabled(), true, "unsupported ASCII recording should leave the controls usable");
+    }
+
+    const tallImageDataUrl = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1;
+      canvas.height = 32767;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#234567";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/png");
+    });
+    await page.locator("#imageInput").setInputFiles({
+      name: "extreme-tall.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(tallImageDataUrl.split(",")[1], "base64")
+    });
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("extreme-tall.png"));
+    await page.waitForFunction(() => !document.querySelector("#asciiLimitWarning")?.classList.contains("hidden"));
+    const asciiOutputSize = await page.locator("#output").evaluate(canvas => ({ width: canvas.width, height: canvas.height }));
+    assert.ok(asciiOutputSize.width * asciiOutputSize.height <= 4000000,
+      "extreme-ratio ASCII output must stay below the configured pixel budget");
+    assert.equal(await page.locator("#asciiLimitWarning").isVisible(), true,
+      "the UI should tell the user when the ASCII grid was limited");
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
     console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {
