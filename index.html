@@ -337,192 +337,48 @@ body[data-theme="paper"] .btn,body[data-theme="paper"] .select,body[data-theme="
 .export-modal input[type=range]{width:100%;accent-color:var(--acid)}
 </style>
 <style id="xpShellStyles" media="not all">
-/* Windows XP Luna + crisp pixel-graphics theme */
-:root{
- color-scheme:light;
- --bg:#3a6ea5;--panel:#ece9d8;--panel2:#f7f5ed;--line:#7f9db9;
- --text:#202020;--muted:#526171;--acid:#0754c9;--purple:#6b64b5;
- --xp-blue:#0054e3;--xp-blue-dark:#003c9d;--xp-blue-light:#78b4ff;
- --xp-face:#ece9d8;--xp-shadow:#7a7a7a;--xp-highlight:#ffffff;
-}
-html,body{background:#3a6ea5!important;color:#202020!important;font-family:"IBM Plex Mono","Lucida Console","Courier New",monospace!important;font-size:18px;line-height:1.12}
-body{background-color:#3a6ea5!important;background-image:linear-gradient(135deg,#4f87bb 0%,#2e5f95 55%,#245185 100%)!important}
-button,input,select,textarea{font-family:"IBM Plex Mono","Lucida Console","Courier New",monospace!important;font-size:18px!important;letter-spacing:0!important}
-a{color:#003c9d}
-header{
- background:linear-gradient(180deg,#3c8cf5 0%,#1767e9 12%,#0054e3 50%,#0050d5 51%,#0344ad 100%)!important;
- color:#fff;border:2px solid #8bbdff;border-bottom-color:#003b95;
- box-shadow:inset 1px 1px #c2ddff,inset -1px -1px #002c79;
- backdrop-filter:none;z-index:10
-}
-.brand{min-width:165px;gap:8px;color:#fff;text-decoration:none}
-.brand b{font-family:"Onest","Lucida Console",monospace!important;font-size:10px;line-height:1.8;letter-spacing:0;color:#fff;text-shadow:1px 1px #003b95}
+/* Luna-inspired shell. Uses the active theme tokens instead of imposing a second palette. */
+html,body{font-family:"IBM Plex Mono","Lucida Console","Courier New",monospace!important;font-size:14px;line-height:1.35}
+body{background:linear-gradient(135deg,color-mix(in srgb,var(--acid) 24%,var(--bg)),var(--bg))!important;color:var(--text)!important}
+button,input,select,textarea{font-family:"IBM Plex Mono","Lucida Console","Courier New",monospace!important;letter-spacing:0!important}
+a{color:var(--acid)}
+header{background:linear-gradient(180deg,color-mix(in srgb,var(--acid) 35%,white),color-mix(in srgb,var(--acid) 72%,#0054e3) 18%,color-mix(in srgb,var(--acid) 72%,#003c9d))!important;color:var(--text);border:2px solid color-mix(in srgb,var(--acid) 45%,white);border-bottom-color:var(--line);box-shadow:inset 1px 1px color-mix(in srgb,var(--text) 80%,white),inset -1px -1px color-mix(in srgb,var(--bg) 80%,black);backdrop-filter:none}
+.brand{gap:8px;text-decoration:none}
+.brand b{font-family:"Onest","Lucida Console",monospace!important;font-size:13px;line-height:1.5;letter-spacing:.02em;color:var(--text);text-shadow:1px 1px color-mix(in srgb,var(--bg) 60%,transparent)}
 .brand small{display:none}
-.mark{border:2px outset #c4ddff;border-radius:0;padding:3px;gap:2px;background:#0d4bb5}
-.mark i{border-radius:0;background:#fff}
-.topnav{gap:3px}
-.navbtn{color:#e0efff;border:1px solid transparent;border-radius:0;padding:7px 9px;font-size:18px!important;text-shadow:1px 1px #003b95}
-.navbtn:hover,.navbtn.active{background:linear-gradient(#6db1ff,#1764d9);color:#fff;border:1px solid #a6ceff;box-shadow:inset 1px 1px #d2e6ff,inset -1px -1px #003b95}
-.topright .local{font-size:16px;color:#fff}
-.live{background:#9cff73;box-shadow:none}
-.btn{
- border:2px outset #fff;border-radius:0;
- background:linear-gradient(#fff,#e2dfd3 48%,#c9c5b8);
- color:#202020;font-size:18px!important;font-weight:400;padding:5px 10px;
- box-shadow:none;text-shadow:none
-}
-.btn:hover{border-color:#fff;background:linear-gradient(#fff,#dbeaff 50%,#b8d5ff);color:#001e62}
+.mark{border:2px outset color-mix(in srgb,var(--text) 30%,var(--line));border-radius:0;padding:3px;gap:2px;background:color-mix(in srgb,var(--acid) 30%,var(--panel))}
+.mark i{border-radius:0;background:var(--acid)}
+.navbtn{border:1px solid transparent;border-radius:0;color:var(--text);padding:7px 9px;text-shadow:0 1px color-mix(in srgb,var(--bg) 70%,transparent)}
+.navbtn:hover,.navbtn.active{background:linear-gradient(color-mix(in srgb,var(--acid) 38%,var(--panel2)),color-mix(in srgb,var(--acid) 15%,var(--panel)));color:var(--text);border:1px solid color-mix(in srgb,var(--acid) 60%,var(--line));box-shadow:inset 1px 1px color-mix(in srgb,var(--text) 35%,transparent),inset -1px -1px color-mix(in srgb,var(--bg) 65%,transparent)}
+.btn{border:2px outset color-mix(in srgb,var(--line) 85%,var(--text));border-radius:0;background:linear-gradient(var(--panel2),var(--panel));color:var(--text);box-shadow:none;text-shadow:none}
+.btn:hover{border-color:var(--acid);background:linear-gradient(color-mix(in srgb,var(--panel2) 75%,var(--acid)),var(--panel2));color:var(--text)}
 .btn:active,.btn.primary:active{border-style:inset;transform:translate(1px,1px)}
-.btn.primary{background:linear-gradient(#b8d7ff,#75afff 48%,#2a72de);border:2px outset #d9ecff;color:#081c48;font-weight:700}
-.btn.primary:hover{background:linear-gradient(#d8eaff,#9fcaff 48%,#4d8df1)}
-.btn.ghost{background:var(--xp-face)}
-.btn.sm{padding:3px 7px}
-.layout{background:transparent;gap:0}
-.layout>.left,.layout>main,.layout>aside.right{
- border:2px outset #fff;background:#ece9d8!important;color:#202020;
- box-shadow:inset 1px 1px #fdfcf6,inset -1px -1px #c3c0b5
-}
-.layout>.left{border-right:0}
-.layout>main{border-left:0;border-right:0;background:#f6f4eb!important}
-.layout>aside.right{border-left:0}
-.sectionlabel,.controltitle,.inspectorhead strong,.card h2,.custom-colors-head{
- color:#003c9d;font-family:"Onest","Lucida Console",monospace!important;
- font-size:8px!important;letter-spacing:0;line-height:1.8
-}
-.menu{gap:2px}
-.menu button{border:1px solid transparent;border-radius:0;background:transparent;color:#202020;padding:6px 7px;font-size:18px!important}
-.menu button:hover{background:#dcecff;border-color:#7aa7e2;color:#001e62}
-.menu button.active{background:linear-gradient(#d9eaff,#a9ceff);color:#002e7d;border:1px solid #316ac5;box-shadow:inset 1px 1px #fff}
-.menu button .mi{font-family:"IBM Plex Mono",monospace;font-size:23px}
-.menu button .tag{font-size:14px!important;color:#31598f}
-.privacy{border:2px inset #fff;border-radius:0;background:#e1e8f4;padding:9px}
-.privacy strong{color:#003c9d;font-size:16px}
-.privacy p{font-size:16px;color:#36495d}
-.privacy span{font-size:14px;color:#003c9d}
-.heading h1,.card h2{
- font-family:"Onest","Lucida Console",monospace!important;color:#003c9d;
- font-size:12px!important;line-height:2;margin:4px 0
-}
-.heading p,.card p{font-size:18px!important;color:#34465a}
-.stagebar{
- background:linear-gradient(180deg,#3c8cf5,#0054e3 54%,#0347b4);
- border:2px outset #8bbdff;border-bottom:0;border-radius:0;
- color:#fff;padding:6px 9px
-}
-.stagebar .filename{font-size:18px;color:#fff;text-shadow:1px 1px #003b95}
-.stagebar .filename:before{background:#9cff73;border-radius:0}
-.stage{border:2px inset #fff;border-radius:0;background-color:#c8c8c8;background-image:linear-gradient(45deg,#bcbcbc 25%,transparent 25%),linear-gradient(-45deg,#bcbcbc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#bcbcbc 75%),linear-gradient(-45deg,transparent 75%,#bcbcbc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}
-.canvaswrap canvas{image-rendering:pixelated;box-shadow:2px 2px 0 #555,4px 4px 0 #eee;border:2px solid #fff}
-.stagefoot{color:#202020;font-size:16px}
-.stats b{color:#003c9d}
-.textbtn,.linkbtn{color:#003c9d;font-size:16px!important}
-.textbtn:hover,.linkbtn:hover{color:#0054e3;text-decoration:underline}
-.pill{border:1px solid #7f9db9;border-radius:0;color:#34465a;font-size:14px}
-.pill.green{background:#d5e7ff;color:#003c9d;border-color:#6495d1}
-.control{border-bottom:1px solid #c2c0b5}
-.controltitle{margin-bottom:7px}
-.controltitle small{color:#5b6573;font-family:"IBM Plex Mono",monospace!important;font-size:15px!important}
-.field label,.switchrow{color:#202020;font-size:18px!important}
-.val{color:#003c9d;font-size:16px!important}
-.select,.select.full{border:2px inset #fff;border-radius:0;background:#fff;color:#202020;max-width:100%;padding:4px 6px}
-.range{accent-color:#0754c9;height:15px;cursor:pointer}
-.range::-webkit-slider-runnable-track{height:5px;background:#b7c5d6;border:1px solid #8399ae}
-.range::-webkit-slider-thumb{margin-top:-6px}
-.switch{appearance:none!important;border:2px outset #fff;border-radius:0;background:#fff;width:32px;height:20px;flex:0 0 32px}
-.switch:before{content:"";width:10px;height:10px;top:3px;left:3px;border:1px solid #555;border-radius:0;background:#d0d0d0}
-.switch:checked{background:#6ea9f7}
-.switch:checked:before{left:15px;background:#fff}
-.palettes{gap:5px}
-.palette{border:2px outset #fff;border-radius:0;background:#ece9d8;padding:3px}
-.palette:hover{background:#dcecff;border-color:#8ab5ed}
-.palette.active{background:#c7ddff;border:2px inset #fff;box-shadow:none}
-.swatches{border:1px solid #888;border-radius:0}
-.pname{font-family:"IBM Plex Mono",monospace!important;font-size:14px!important;color:#202020}
-.effect-control{
- position:relative;display:block;border:2px outset #fff;border-radius:0;
- background:#f6f4eb;padding:5px 6px;isolation:isolate;overflow:visible
-}
-.effect-control.is-active{background:#e3edff;border-color:#7ca5df}
-.effect-control .effect{
- position:relative;z-index:2;display:flex;align-items:center;gap:7px;
- width:100%;min-height:27px;border:0;border-radius:0;padding:2px 1px 5px;
- color:#202020;cursor:pointer;user-select:none;pointer-events:auto;font-size:18px!important
-}
-.effect-control .effect-toggle[role="checkbox"]{
- position:relative;z-index:3;display:inline-flex;align-items:center;justify-content:center;
- flex:0 0 17px;width:17px;height:17px;min-width:17px;margin:0 3px 0 0;padding:0;
- border:2px inset #fff;border-radius:0;appearance:none;background:#fff;color:#003c9d;
- box-shadow:inset 1px 1px #c5c5c5;cursor:pointer;pointer-events:auto
-}
-.effect-control .effect-toggle[role="checkbox"][aria-checked="true"]{background:#c5dbff;border-color:#5c81b6}
-.effect-control .effect-toggle[role="checkbox"][aria-checked="true"]::after{
- content:"✓";font:14px/1 "IBM Plex Mono","Lucida Console",monospace;color:#003c9d;
- position:absolute;left:0;top:-2px
-}
-.effect-control .effect-toggle:focus-visible{outline:2px solid #0754c9;outline-offset:2px}
-.effect-control .effect small{margin-left:auto;color:#4c6581;font-size:14px!important}
-.effect-control .effect-order-actions{position:relative;z-index:4;display:inline-flex;margin:0 0 5px auto}
-.effect-order-actions button{background:linear-gradient(#fff,#d3d0c7);border:2px outset #fff;border-radius:0;color:#003c9d;padding:1px 6px;font-size:16px!important;cursor:pointer}
-.effect-order-actions button:active{border-style:inset}
-.effect-intensity{position:relative;z-index:1;display:flex;align-items:center;gap:7px}
-.effect-intensity input[type="range"]{pointer-events:auto;cursor:pointer}
-.effect-intensity output{color:#003c9d;font-size:16px!important}
-.custom-colors,.ascii-neoglow,.shape-band,.card,.drop,.fileitem,.ascii{border:2px outset #fff;border-radius:0;background:#f6f4eb;color:#202020}
-.custom-colors-head,.shape-band>b{color:#003c9d}
-.color-pick{font-size:15px!important;color:#27384b}
-.color-pick input,.shape-band-row input[type=color],.color-select-row input[type=color]{border:2px inset #fff;border-radius:0;background:#fff;padding:1px}
-.color-grid{gap:5px}
-.effects{gap:5px}
-.effect{color:#202020}
-.effect-intensity output{font-size:16px!important}
-.presetgrid{gap:8px}
-.preset{border:2px outset #fff;border-radius:0;background:#ece9d8;color:#202020}
-.preset:hover{border-color:#8bbcff;background:#dceaff;transform:none}
-.previewart{border-bottom:2px solid #a6a397;background:#c8c8c8}
-.presetinfo{padding:8px}
-.ptag{color:#003c9d;font-size:14px!important}
-.presetname{font-family:"Onest","Lucida Console",monospace!important;font-size:8px;line-height:2}
-.presetdesc{font-size:16px!important;color:#34465a}
-.drop{background:#e4efff;border:2px dashed #4e80bf}
-.fileicon{border:1px solid #7f9db9;border-radius:0;background:#d8e6fa}
-.filetext b{font-size:16px!important;color:#003c9d}
-.filetext small{font-size:15px!important;color:#526171}
-.progress{height:7px;border:1px inset #fff;border-radius:0;background:#c8c8c8}
-.progress i{background:linear-gradient(#66a9ff,#0754c9);border-right:1px solid #003c9d}
-.ascii{background:#fff}
-.ascii summary{font-size:18px;color:#003c9d}
-.ascii pre{font:16px/1.1 "IBM Plex Mono","Lucida Console",monospace!important;color:#003c9d}
-.toast{border:2px outset #fff;border-radius:0;background:#ece9d8;color:#202020;font-size:18px;box-shadow:2px 2px 0 #333}
-.modalbg{background:#15396699}
-.modal{border:2px outset #fff;border-radius:0;background:#ece9d8;box-shadow:3px 3px 0 #1d3a5d}
-.modal h2{font-family:"Onest","Lucida Console",monospace!important;color:#003c9d;font-size:10px;line-height:2}
-.modal p{color:#34465a;font-size:18px!important}
-.modal input{border:2px inset #fff;border-radius:0;background:#fff;color:#202020;font-size:18px!important}
-.hidden{display:none!important}
-@media(max-width:1140px){
- .layout>.left{border-right:2px outset #fff}
- .layout>main{border-left:0;border-right:0}
- .layout>aside.right{border-left:2px outset #fff}
-}
-@media(max-width:740px){
- header{padding:5px;gap:5px}
- .brand{min-width:0;gap:5px}
- .brand b{font-size:7px!important;line-height:1.4}
- .topnav .navbtn{padding:5px;font-size:15px!important}
- .topright{gap:4px}
- .topright .btn{padding:4px;font-size:15px!important}
- .layout>.left,.layout>main,.layout>aside.right{border-left:0;border-right:0}
- .layout>.left{border-bottom:2px outset #fff}
- .stage{min-height:135px}
- .stagefoot{font-size:14px}
- .stats{gap:4px}
- .stats span{font-size:13px!important}
- .stageactions{gap:3px}
- .stageactions .btn,.stageactions .select{font-size:14px!important;padding:3px 4px}
- .heading h1{font-size:8px!important}
- .heading p{font-size:16px!important}
- .presetname{font-size:7px!important}
-}
+.btn.primary{background:linear-gradient(color-mix(in srgb,var(--acid) 55%,white),var(--acid) 52%,color-mix(in srgb,var(--acid) 70%,black));border:2px outset color-mix(in srgb,var(--acid) 50%,white);color:var(--bg);font-weight:800}
+.btn.primary:hover{background:linear-gradient(color-mix(in srgb,var(--acid) 72%,white),var(--acid))}
+.btn.ghost{background:var(--panel)}
+.layout{gap:0}
+.layout>main,.layout>aside.right{border:2px outset var(--line);box-shadow:inset 1px 1px color-mix(in srgb,var(--text) 10%,transparent),inset -1px -1px color-mix(in srgb,var(--bg) 40%,transparent)}
+.layout>main{border-right:0;background:var(--panel2)!important}
+.layout>aside.right{border-left:0;background:var(--panel)!important}
+.sectionlabel,.controltitle,.inspectorhead strong,.card h2{color:var(--acid);font-family:"Onest","Lucida Console",monospace!important;letter-spacing:.03em}
+.menu button{border:1px solid transparent;border-radius:0;color:var(--text)}
+.menu button:hover{background:color-mix(in srgb,var(--acid) 12%,var(--panel2));border-color:var(--line);color:var(--text)}
+.menu button.active{background:linear-gradient(color-mix(in srgb,var(--acid) 22%,var(--panel2)),color-mix(in srgb,var(--acid) 10%,var(--panel)));color:var(--text);border:1px solid color-mix(in srgb,var(--acid) 55%,var(--line));box-shadow:inset 1px 1px color-mix(in srgb,var(--text) 10%,transparent)}
+.privacy{border:2px inset var(--line);border-radius:0;background:color-mix(in srgb,var(--acid) 8%,var(--panel2))}
+.privacy strong,.privacy span{color:var(--acid)}
+.privacy p{color:var(--muted)}
+.stagebar{background:linear-gradient(180deg,color-mix(in srgb,var(--acid) 38%,var(--panel2)),color-mix(in srgb,var(--acid) 18%,var(--panel)));border:2px outset color-mix(in srgb,var(--line) 75%,var(--text));border-bottom:0;border-radius:0;color:var(--text)}
+.stagebar .filename{font-size:11px;color:var(--text);text-shadow:0 1px color-mix(in srgb,var(--bg) 60%,transparent)}
+.stagebar .filename:before{border-radius:0;background:var(--acid)}
+.stage{border:2px inset var(--line);border-radius:0;background-color:var(--panel2);background-image:linear-gradient(45deg,color-mix(in srgb,var(--line) 45%,var(--panel2)) 25%,transparent 25%),linear-gradient(-45deg,color-mix(in srgb,var(--line) 45%,var(--panel2)) 25%,transparent 25%),linear-gradient(45deg,transparent 75%,color-mix(in srgb,var(--line) 45%,var(--panel2)) 75%),linear-gradient(-45deg,transparent 75%,color-mix(in srgb,var(--line) 45%,var(--panel2)) 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}
+.canvaswrap canvas{image-rendering:pixelated;box-shadow:2px 2px 0 color-mix(in srgb,var(--bg) 65%,var(--line)),4px 4px 0 color-mix(in srgb,var(--text) 15%,var(--panel));border:2px solid color-mix(in srgb,var(--text) 30%,var(--line))}
+.stagefoot{color:var(--muted)}
+.stats b,.textbtn,.linkbtn{color:var(--acid)}
+.textbtn:hover,.linkbtn:hover{color:var(--text);text-decoration:underline}
+.pill{border-radius:0}
+.theme-menu-panel{box-shadow:3px 3px 0 color-mix(in srgb,var(--bg) 55%,transparent)}
+.modal{border-radius:0;border:2px outset var(--line);box-shadow:4px 4px 0 color-mix(in srgb,var(--bg) 55%,transparent)}
+@media(max-width:740px){header{border-width:1px}.layout>main,.layout>aside.right{border-width:0}.layout>main{border-bottom:1px solid var(--line)}.layout>aside.right{border-top:1px solid var(--line)}}
 </style>
 </head>
 <body data-mode="editor" data-shell="studio" data-inspector-level="basic">
