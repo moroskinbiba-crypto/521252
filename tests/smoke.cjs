@@ -281,6 +281,57 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#script-effect-scanlines").getAttribute("aria-checked"), "true");
     assert.notEqual(await page.locator("#output").evaluate(c => c.toDataURL("image/png")), "",
       "Script Slayer should keep a rendered canvas after its own effect is enabled");
+    assert.equal(await page.locator("#neoGlowPhase").inputValue(), "50", "Neo Glow should start centered on the preview");
+    assert.equal(await page.locator("#neoGlowEnabled").getAttribute("aria-checked"), "false", "Neo Glow should initially be off unless the saved user profile enables it");
+    await page.locator("#asciiColorMode").selectOption("mono");
+    await page.locator("#asciiTextColor").evaluate(el => { el.value = "#222222"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await page.locator("#neoGlowColor").evaluate(el => { el.value = "#ff00ff"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    const setRange = async (selector, value) => page.locator(selector).evaluate((el, next) => {
+      el.value = String(next);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }, value);
+    await setRange("#neoGlowLength", 30);
+    await setRange("#neoGlowBrightness", 100);
+    await setRange("#neoGlowVisibility", 0);
+    await setRange("#neoGlowPhase", 50);
+    await page.locator("#neoGlowEnabled").click();
+    assert.equal(await page.locator("#neoGlowEnabled").getAttribute("aria-checked"), "true", "Neo Glow toggle must stay on after clicking");
+    const centeredGlow = await page.locator("#output").evaluate(canvas => {
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let center = 0, edges = 0;
+      for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
+        const i = (y * canvas.width + x) * 4;
+        if (pixels[i] > 170 && pixels[i + 1] < 100 && pixels[i + 2] > 170 && pixels[i + 3] > 80) {
+          if (x >= canvas.width * .35 && x <= canvas.width * .65) center++;
+          if (x <= canvas.width * .12 || x >= canvas.width * .88) edges++;
+        }
+      }
+      return { center, edges };
+    });
+    assert.ok(centeredGlow.center > 10, "enabled Neo Glow should render a visible neon band around the center of the ASCII output");
+    await setRange("#neoGlowPhase", 0);
+    const edgePositionGlow = await page.locator("#output").evaluate(canvas => {
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let center = 0, edges = 0;
+      for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
+        const i = (y * canvas.width + x) * 4;
+        if (pixels[i] > 170 && pixels[i + 1] < 100 && pixels[i + 2] > 170 && pixels[i + 3] > 80) {
+          if (x >= canvas.width * .35 && x <= canvas.width * .65) center++;
+          if (x <= canvas.width * .12 || x >= canvas.width * .88) edges++;
+        }
+      }
+      return { center, edges };
+    });
+    assert.ok(edgePositionGlow.edges > centeredGlow.edges, "moving the Neo Glow position to the edge should move the neon band, not leave it pinned in place");
+    await page.locator("#neoGlowEnabled").click();
+    assert.equal(await page.locator("#neoGlowEnabled").getAttribute("aria-checked"), "false", "Neo Glow toggle must turn off after a second click");
+    assert.equal(await page.locator("#neoGlowPhaseV").textContent(), "0%");
+    await setRange("#neoGlowPhase", 50);
+    await page.locator("#neoGlowEnabled").click();
+    assert.equal(await page.locator("#neoGlowEnabled").getAttribute("aria-checked"), "true", "Neo Glow toggle must stay on after clicking");
     await page.locator("#asciiSet").selectOption("binary");
     await page.locator("#asciiCustomChars").fill("01#X");
     assert.equal((await page.locator("#asciiCustomCount").textContent()).trim(), "4 / 10");
