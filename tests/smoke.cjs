@@ -282,6 +282,7 @@ async function downloadFrom(page, selector) {
     assert.notEqual(await page.locator("#output").evaluate(c => c.toDataURL("image/png")), "",
       "Script Slayer should keep a rendered canvas after its own effect is enabled");
     assert.equal(await page.locator("#neoGlowPhase").inputValue(), "50", "Neo Glow should start centered on the preview");
+    assert.equal(await page.locator("#neoGlowEnabled").isChecked(), false, "Neo Glow should initially be off unless the saved user profile enables it");
     await page.locator("#asciiColorMode").selectOption("mono");
     await page.locator("#asciiTextColor").evaluate(el => { el.value = "#222222"; el.dispatchEvent(new Event("input", { bubbles: true })); });
     await page.locator("#neoGlowColor").evaluate(el => { el.value = "#ff00ff"; el.dispatchEvent(new Event("input", { bubbles: true })); });
