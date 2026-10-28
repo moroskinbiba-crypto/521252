@@ -72,3 +72,7 @@ MIT. See [LICENSE](LICENSE).
 - CI validates the Portable shell launcher's syntax and checks that its executable permission survives packaging.
 
 - Portable launchers verify that the local server responds before opening the browser and report if port 8765 is already in use.
+
+
+### Script Slayer · Neo Glow
+Neo Glow includes an adjustable scan-band position, width, brightness, off-band visibility and colour. The band is centered by default, its settings follow the saved Script Slayer profile, and the Animation button moves the band across the symbol canvas.
