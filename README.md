@@ -81,5 +81,13 @@ MIT. See [LICENSE](LICENSE).
 - Batch processing now reports accessible progress, can be stopped after the current file, and preserves completed partial results for individual download or ZIP export.
 
 
+## Image loading UX in v1.3.4
+
+- Opening an image from the file picker, clipboard or preview drop zone now shows a visible, accessible loading state while the browser decodes it locally.
+- A failed or cancelled decode leaves the last valid preview intact; starting a newer load cancels the previous decode request.
+- Dropping files over nested preview elements no longer causes the drag highlight to flicker. Unsupported dropped files receive a clear message.
+- Image files larger than 128 MB are rejected before decoding to avoid unnecessarily large memory allocations. The existing 24 MP canvas limit still applies after decoding.
+
+
 ### Script Slayer · Neo Glow
 Neo Glow includes an adjustable scan-band position, width, brightness, off-band visibility and colour. The band is centered by default, its settings follow the saved Script Slayer profile, and the Animation button moves the band across the symbol canvas.
