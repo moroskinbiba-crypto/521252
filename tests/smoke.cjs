@@ -1086,7 +1086,7 @@ async function downloadFrom(page, selector) {
     await page.locator("#algorithm").selectOption("bayer4");
     const batchScanlines = page.locator("#batch-effect-scanlines");
     if (await batchScanlines.getAttribute("aria-checked") !== "true") await batchScanlines.click();
-    const batchScanlinesStrength = page.locator('#batchEffectsControl #generalEffectsControl [data-effect-strength="scanlines"]');
+    const batchScanlinesStrength = page.locator('#batchEffectsControl [data-effect-strength="scanlines"]');
     await batchScanlinesStrength.evaluate(el => { el.value = "10"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
     await page.evaluate(() => {
       window.__tgrmOriginalToBlob = HTMLCanvasElement.prototype.toBlob;
