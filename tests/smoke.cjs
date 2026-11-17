@@ -44,6 +44,47 @@ async function downloadFrom(page, selector) {
       return canvas && canvas.width > 0 && canvas.height > 0 &&
         document.querySelector("#statAlgorithm")?.textContent.trim();
     }, null, { timeout: 15000 });
+
+    // Exercise the real OffscreenCanvas worker with an image above its activation threshold.
+    const largeWorkerFixture = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024; canvas.height = 900;
+      const ctx = canvas.getContext("2d");
+      const gradient = ctx.createLinearGradient(0, 0, 1024, 900);
+      gradient.addColorStop(0, "#102030");
+      gradient.addColorStop(.5, "#b07038");
+      gradient.addColorStop(1, "#e0f0d0");
+      ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < canvas.height; y += 17) {
+        ctx.fillStyle = "rgba(20, 80, 120, .35)";
+        ctx.fillRect((y * 19) % canvas.width, y, 180, 8);
+      }
+      return canvas.toDataURL("image/png");
+    });
+    const largeWorkerBuffer = Buffer.from(largeWorkerFixture.split(",")[1], "base64");
+    await page.locator("#imageInput").setInputFiles({
+      name: "worker-large-fixture.png", mimeType: "image/png",
+      buffer: largeWorkerBuffer
+    });
+    await page.waitForFunction(() =>
+      document.querySelector("#filename")?.textContent.includes("worker-large-fixture.png")
+    );
+    await page.waitForFunction(() =>
+      document.body.dataset.processingEngine === "worker" &&
+      document.body.dataset.processingPending === "false",
+      null, { timeout: 30000 }
+    );
+    const workerPreview = await page.evaluate(() => ({
+      available: document.body.dataset.processingWorker === "available",
+      engine: document.body.dataset.processingEngine,
+      pending: document.body.dataset.processingPending,
+      width: document.querySelector("#output").width,
+      height: document.querySelector("#output").height
+    }));
+    assert.equal(workerPreview.available, true, "large previews should initialize the OffscreenCanvas worker");
+    assert.equal(workerPreview.engine, "worker", "large image processing should run in the worker");
+    assert.ok(workerPreview.width > 0 && workerPreview.height > 0, "the worker should return a drawable preview bitmap");
+    await page.evaluate(() => window.__tgrmlitherWaitForPreview());
     const unrelatedCachePreserved = await page.evaluate(async () => {
       if (!("serviceWorker" in navigator) || !("caches" in window)) return true;
       await navigator.serviceWorker.ready;
@@ -1006,7 +1047,7 @@ async function downloadFrom(page, selector) {
     // Generate a tiny, valid WebM in-browser and test video input, scrubbing and rendered-video export.
     const videoDataURL = await page.evaluate(async () => {
       const canvas = document.createElement("canvas");
-      canvas.width = 48; canvas.height = 32;
+      canvas.width = 1024; canvas.height = 900;
       const ctx = canvas.getContext("2d");
       const mime = ["video/webm;codecs=vp8", "video/webm"].find(type => MediaRecorder.isTypeSupported(type));
       if (!mime || !canvas.captureStream) throw new Error("WebM recording is unsupported in test browser");
@@ -1027,7 +1068,7 @@ async function downloadFrom(page, selector) {
         ctx.fillStyle = "#172b46";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "rgb(" + (i * 13 % 255) + ",120,210)";
-        ctx.fillRect(i * 2, 8, 12, 12);
+        ctx.fillRect(i * 18, 80, 120, 120);
         await new Promise(resolve => setTimeout(resolve, 80));
       }
       recorder.stop();
@@ -1042,6 +1083,9 @@ async function downloadFrom(page, selector) {
       return video && Number.isFinite(video.duration) && video.duration > 0;
     }, null, { timeout: 20000 });
     assert.match(await page.locator("#videoFilename").textContent(), /qa-video\.webm/);
+    await page.waitForFunction(() => document.body.dataset.videoProcessingEngine === "worker", null, { timeout: 30000 });
+    assert.equal(await page.locator("#videoOutput").evaluate(canvas => canvas.width >= 1024 && canvas.height >= 890), true,
+      "Video Lab should render high-resolution frames through OffscreenCanvas worker");
     assert.ok(Number(await page.locator("#videoTimeline").getAttribute("max")) > 0, "video timeline should have a duration");
     await page.locator("#videoTimeline").evaluate(el => {
       el.value = String(Math.min(0.3, Number(el.max)));
@@ -1128,6 +1172,31 @@ async function downloadFrom(page, selector) {
     assert.deepEqual([...batchZipBytes.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04], "batch archive should have a valid ZIP local-file signature");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither.png")), "batch ZIP should contain the first processed PNG filename");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither-2.png")), "batch ZIP should contain a collision-free second PNG filename");
+
+    // Large batch files should use the same background worker pipeline.
+    await page.locator("#clearBatch").click();
+    await page.locator("#batchInput").setInputFiles({
+      name: "worker-batch-fixture.png", mimeType: "image/png", buffer: largeWorkerBuffer
+    });
+    await page.locator("#runBatch").click();
+    await page.waitForFunction(() => document.body.dataset.batchProcessingEngine === "worker", null, { timeout: 15000 });
+    await page.waitForFunction(() =>
+      document.querySelectorAll("#batchResults a[download]").length === 1 &&
+      !document.querySelector("#clearBatch")?.disabled,
+      null, { timeout: 30000 }
+    );
+    assert.match(await page.locator("#batchResults").innerText(), /worker-batch-fixture\.png[\s\S]*Готово/,
+      "large batch output should be returned from worker processing");
+
+    // Restore the three small fixtures so the cancellation test targets the main-thread fallback.
+    await page.locator("#clearBatch").click();
+    await page.locator("#batchInput").setInputFiles([
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
+      { name: "broken-image.png", mimeType: "image/png", buffer: Buffer.from("not a valid PNG") }
+    ]);
+    assert.equal(await page.locator("#batchList .fileitem").count(), 3);
+
     // Batch cancellation stops after the in-flight file and keeps partial results downloadable.
     assert.equal(await page.locator("#cancelBatch").isVisible(), false, "batch cancellation should be hidden while idle");
     await page.evaluate(() => {

@@ -108,5 +108,12 @@ MIT. See [LICENSE](LICENSE).
 - Empty effect stacks (including effects set to zero strength) skip the bounded post-processing pass. This removes an unnecessary full-image downscale/upscale and preserves detail when no effects are active.
 - Browser regression tests verify unchanged-size canvas reuse and pixel-identical output when the effect stack is inactive.
 
+## Background processing in v1.3.8
+
+- Large image previews (786,432 source pixels and above) run in a dedicated Web Worker using OffscreenCanvas when the browser supports it. The source ImageBitmap is transferred once and reused across adjustments; the worker returns transferable ImageBitmaps instead of copying full pixel buffers back to the main thread.
+- Large batch items use the same worker pipeline after the existing safe image-size normalization. Large Video Lab frames are processed off the UI thread; frame requests are coalesced so slow frames do not build an unbounded queue.
+- Smaller images and browsers without Worker, OffscreenCanvas, or createImageBitmap keep using the established main-thread renderer. Worker errors automatically fall back to that path.
+- The portable/PWA service-worker cache includes the processing worker for offline use. Browser regression coverage checks the real worker path on a large image, plus the main-thread fallback.
+
 ### Script Slayer · Neo Glow
 Neo Glow includes an adjustable scan-band position, width, brightness, off-band visibility and colour. The band is centered by default, its settings follow the saved Script Slayer profile, and the Animation button moves the band across the symbol canvas.

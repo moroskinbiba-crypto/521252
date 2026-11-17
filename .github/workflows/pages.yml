@@ -35,6 +35,8 @@ jobs:
           Path('/tmp/tgrmlither-inline.js').write_text(scripts[-1], encoding='utf-8')
           PY
           node --check /tmp/tgrmlither-inline.js
+      - name: Validate processing worker
+        run: node --check processing-worker.js
       - name: Validate Portable launcher
         shell: bash
         run: |
