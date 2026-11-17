@@ -14,11 +14,22 @@ async function downloadFrom(page, selector) {
   return { download, path, bytes: fs.readFileSync(path) };
 }
 
+
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const errors = [];
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
+    const setRange = async (selector, value) => {
+      await page.locator(selector).evaluate((el, next) => {
+        el.value = String(next);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }, value);
+      // Continuous preview updates are intentionally coalesced into the next animation frame.
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+    };
     page.on("pageerror", error => errors.push(error.stack || error.message));
     await page.addInitScript(async () => {
       if ("caches" in window && /^https?:/.test(location.protocol)) {
@@ -252,7 +263,7 @@ async function downloadFrom(page, selector) {
     await page.locator("#makeShapeCode").click();
     const shapeCode = await page.locator("#shapeShareCode").inputValue();
     assert.ok(shapeCode.startsWith("TGRMSHAPE1:"), "Shape Shifter should generate a shareable settings code");
-    await page.locator("#bandRotation0").evaluate(el => { el.value = "67"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#bandRotation0", "67");
     assert.equal(await page.locator("#bandRotation0").inputValue(), "67", "per-band rotation should respond to the slider");
     await page.locator("#applyShapeCode").click();
     assert.equal(await page.locator("#bandRotation0").inputValue(), beforeShapeCode, "share code should restore the prior band rotation");
@@ -284,13 +295,9 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#neoGlowPhase").inputValue(), "50", "Neo Glow should start centered on the preview");
     assert.equal(await page.locator("#neoGlowEnabled").getAttribute("aria-checked"), "false", "Neo Glow should initially be off unless the saved user profile enables it");
     await page.locator("#asciiColorMode").selectOption("mono");
-    await page.locator("#asciiTextColor").evaluate(el => { el.value = "#222222"; el.dispatchEvent(new Event("input", { bubbles: true })); });
-    await page.locator("#neoGlowColor").evaluate(el => { el.value = "#ff00ff"; el.dispatchEvent(new Event("input", { bubbles: true })); });
-    const setRange = async (selector, value) => page.locator(selector).evaluate((el, next) => {
-      el.value = String(next);
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-    }, value);
+    await setRange("#asciiTextColor", "#222222");
+    await setRange("#neoGlowColor", "#ff00ff");
+    
     await setRange("#neoGlowLength", 30);
     await setRange("#neoGlowBrightness", 100);
     await setRange("#neoGlowVisibility", 0);
@@ -501,13 +508,13 @@ async function downloadFrom(page, selector) {
       assert.equal(await page.locator("#serpentineControl").isVisible(), diffusionAlgorithms.includes(algorithm),
         "serpentine scan mode should appear only for error-diffusion kernels: " + algorithm);
     }
-    await page.locator("#scale").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
-    await page.locator("#levels").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#scale", "2");
+    await setRange("#levels", "2");
     await page.locator("#algorithm").selectOption("halftone");
     await page.locator("#patternShape").selectOption("circle");
-    await page.locator("#patternAngle").evaluate(el => { el.value = "0"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#patternAngle", "0");
     const halftoneAngle0 = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
-    await page.locator("#patternAngle").evaluate(el => { el.value = "45"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await setRange("#patternAngle", "45");
     const halftoneAngle45 = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     assert.notEqual(halftoneAngle0, halftoneAngle45, "Halftone screen angle should rotate the dot grid even when dots are circular");
     await page.locator("#algorithm").selectOption("bayer16");
@@ -520,24 +527,24 @@ async function downloadFrom(page, selector) {
       "Bayer 16×16 output should be deterministic");
     await page.locator("#algorithm").selectOption("beehive");
     assert.equal(await page.locator("#markScaleControl").isVisible(), true, "pattern mark scale should appear for Beehive");
-    await page.locator("#markScale").evaluate(el => { el.value = "40"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#markScale", 40);
     const beehiveSmall = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
-    await page.locator("#markScale").evaluate(el => { el.value = "165"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#markScale", 165);
     const beehiveLarge = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     assert.notEqual(beehiveSmall, beehiveLarge, "mark scale should resize hexagonal marks independently of cell size");
-    await page.locator("#markScale").evaluate(el => { el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await setRange("#markScale", 100);
     await page.locator("#algorithm").selectOption("floyd");
     const fullStrengthOutput = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
-    await page.locator("#blend").evaluate(el => { el.value = "0"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await setRange("#blend", 0);
     const originalBlendOutput = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     assert.notEqual(fullStrengthOutput, originalBlendOutput, "zero blend should return the original image, not the processed pixels");
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.blend), 0, "blend amount should persist in workspace settings");
-    await page.locator("#blend").evaluate(el => { el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await setRange("#blend", 100);
     const crispOutput = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
-    await page.locator("#smoothing").evaluate(el => { el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await setRange("#smoothing", "100");
     const softenedOutput = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     assert.notEqual(crispOutput, softenedOutput, "smoothing should visibly blend a blurred pass into the processed image");
-    await page.locator("#smoothing").evaluate(el => { el.value = "0"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await setRange("#smoothing", "0");
     const gameboyPalette = page.locator("#palettes .palette[data-palette=\"gameboy\"]");
     assert.equal(await gameboyPalette.count(), 1, "the Game Boy retro palette must be available");
     await gameboyPalette.click();
@@ -569,10 +576,10 @@ async function downloadFrom(page, selector) {
     await page.locator("#palettes .palette[data-palette=\"moss\"]").click();
     await page.locator("#algorithm").selectOption("floyd");
     assert.equal(await page.locator("#scale").getAttribute("min"), "1", "dither cell size should support full-resolution one-pixel detail");
-    await page.locator("#scale").evaluate(el => { el.value = "1"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#scale", "1");
     assert.equal(await page.locator("#scale").inputValue(), "1", "the smallest detail size should be usable");
-    await page.locator("#scale").evaluate(el => { el.value = "2"; el.dispatchEvent(new Event("input", { bubbles: true })); });
-    await page.locator("#levels").evaluate(el => { el.value = "4"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#scale", "2");
+    await setRange("#levels", "4");
     await page.locator("#serpentine").uncheck();
     const standardScan = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     await page.locator("#serpentineControl").click();
@@ -763,11 +770,11 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#paletteLibrarySelect option:checked").textContent(), "QA palette", "palette pack import should restore named palettes");
 
     // Extract exactly the requested number of palette colours from the loaded image.
-    await page.locator("#levels").evaluate(el => { el.value = "8"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#levels", "8");
     await page.locator("#extractPalette").click();
     assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("ditherlab-colors")))).length, 8,
       "palette extraction should follow the selected colour depth");
-    await page.locator("#levels").evaluate(el => { el.value = "4"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#levels", "4");
 
     // Multi-colour palettes should remain intact beyond the original four-colour editor.
     const richPalette = { format: "tgrmlither-palette", version: 1, name: "Eight Tone QA",
@@ -816,9 +823,9 @@ async function downloadFrom(page, selector) {
     await page.locator("#activePaletteEditor button[aria-label^='Удалить цвет']").last().click();
     await page.waitForFunction(() => document.querySelector("#activePaletteMeta")?.textContent === "8 / 16 цветов");
     assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlither-palette-library")))).find(p => p.name === "Eight Tone QA").colors.length, 8, "deleting a colour should restore the original palette size");
-    await page.locator("#levels").evaluate(el => { el.value = "16"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#levels", "16");
     assert.equal(await page.locator("#levels").inputValue(), "16", "the editor should expose up to 16 palette levels");
-    await page.locator("#levels").evaluate(el => { el.value = "4"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+    await setRange("#levels", "4");
     await page.locator("#homeLogo").click();
 
     // Vector export supports print sizing and layered CMYK plates.
@@ -969,6 +976,32 @@ async function downloadFrom(page, selector) {
     assert.deepEqual([...batchZipBytes.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04], "batch archive should have a valid ZIP local-file signature");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither.png")), "batch ZIP should contain the first processed PNG filename");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither-2.png")), "batch ZIP should contain a collision-free second PNG filename");
+    // Batch cancellation stops after the in-flight file and keeps partial results downloadable.
+    assert.equal(await page.locator("#cancelBatch").isVisible(), false, "batch cancellation should be hidden while idle");
+    await page.evaluate(() => {
+      window.__tgrmOriginalToBlob = HTMLCanvasElement.prototype.toBlob;
+      window.__tgrmToBlobCalls = 0;
+      HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
+        const canvas = this;
+        window.__tgrmToBlobCalls++;
+        setTimeout(() => window.__tgrmOriginalToBlob.call(canvas, callback, type, quality), 300);
+      };
+    });
+    await page.locator("#runBatch").click();
+    await page.waitForFunction(() => window.__tgrmToBlobCalls >= 1, null, { timeout: 10000 });
+    assert.equal(await page.locator("#cancelBatch").isVisible(), true, "cancel action should appear while processing");
+    await page.locator("#cancelBatch").click();
+    await page.waitForFunction(() => document.querySelector("#cancelBatch")?.hidden === true, null, { timeout: 15000 });
+    assert.equal(await page.locator("#batchResults .fileitem").count(), 1, "cancellation should finish the current file but skip the remaining files");
+    assert.equal(await page.locator("#batchProgressCount").textContent(), "1 / 3", "partial progress should report completed files");
+    assert.match(await page.locator("#batchProgressLabel").textContent(), /остановлена/i, "the progress status should identify a cancelled batch");
+    assert.equal(await page.locator("#downloadBatchZip").isEnabled(), true, "partial batch results should remain available as a ZIP");
+    await page.evaluate(() => {
+      HTMLCanvasElement.prototype.toBlob = window.__tgrmOriginalToBlob;
+      delete window.__tgrmOriginalToBlob;
+      delete window.__tgrmToBlobCalls;
+    });
+
 
     if (await page.locator("#batch-effect-scanlines").getAttribute("aria-checked") !== "true") await page.locator("#batch-effect-scanlines").click();
     assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true");

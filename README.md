@@ -74,5 +74,12 @@ MIT. See [LICENSE](LICENSE).
 - Portable launchers verify that the local server responds before opening the browser and report if port 8765 is already in use.
 
 
+## UX and performance improvements in v1.3.3
+
+- Continuous slider and colour adjustments are coalesced into one preview render per animation frame, reducing redundant processing during fast adjustments.
+- Video Lab reuses its off-screen frame canvas and caps live frame processing at 24 fps to reduce allocation churn and CPU spikes.
+- Batch processing now reports accessible progress, can be stopped after the current file, and preserves completed partial results for individual download or ZIP export.
+
+
 ### Script Slayer · Neo Glow
 Neo Glow includes an adjustable scan-band position, width, brightness, off-band visibility and colour. The band is centered by default, its settings follow the saved Script Slayer profile, and the Animation button moves the band across the symbol canvas.
