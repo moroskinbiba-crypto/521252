@@ -102,5 +102,11 @@ MIT. See [LICENSE](LICENSE).
 - Order remains independent for Editor, Shape Lab, Script Slayer, Batch and Video Lab and is persisted in each workspace profile.
 
 
+## Rendering performance in v1.3.7
+
+- Preview and Video Lab canvases now keep their existing backing stores when frame dimensions are unchanged, avoiding repeated GPU/bitmap reallocation on every slider update or video frame.
+- Empty effect stacks (including effects set to zero strength) skip the bounded post-processing pass. This removes an unnecessary full-image downscale/upscale and preserves detail when no effects are active.
+- Browser regression tests verify unchanged-size canvas reuse and pixel-identical output when the effect stack is inactive.
+
 ### Script Slayer · Neo Glow
 Neo Glow includes an adjustable scan-band position, width, brightness, off-band visibility and colour. The band is centered by default, its settings follow the saved Script Slayer profile, and the Animation button moves the band across the symbol canvas.

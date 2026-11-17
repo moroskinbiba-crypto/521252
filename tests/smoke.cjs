@@ -197,6 +197,44 @@ async function downloadFrom(page, selector) {
     assert.ok(shuffled.levels >= 2 && shuffled.levels <= 16, "Shuffle supports the expanded 16-tone range");
     assert.ok(shuffled.threshold >= -80 && shuffled.threshold <= 80, "Shuffle keeps threshold in range");
     assert.ok(shuffled.contrast >= 50 && shuffled.contrast <= 180, "Shuffle keeps contrast in range");
+    // Clear effects randomized by the earlier Shuffle test without triggering several costly renders.
+    await page.evaluate(() => {
+      const key = "tgrmlithering-workspaces";
+      const profiles = JSON.parse(localStorage.getItem(key) || "{}");
+      profiles.editor = profiles.editor || {};
+      profiles.editor.effects = [];
+      profiles.editor.effectStrength = { ...(profiles.editor.effectStrength || {}), scanlines: 0 };
+      localStorage.setItem(key, JSON.stringify(profiles));
+    });
+    await page.reload({ waitUntil: "load" });
+    await page.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    // Use a deterministic algorithm so repeated preview renders can be compared byte-for-byte.
+    await page.locator("#algorithm").selectOption("bayer4");
+    // An enabled effect at zero intensity must not trigger a redundant post-processing resize.
+    const beforeNoOpEffect = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await setRange('#generalEffectsControl [data-effect-strength="scanlines"]', 0);
+    await page.locator("#effect-scanlines").click();
+    const afterNoOpEffect = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.equal(afterNoOpEffect, beforeNoOpEffect,
+      "an enabled effect at zero strength must leave the rendered pixels unchanged");
+    await page.locator("#effect-scanlines").click();
+    await setRange('#generalEffectsControl [data-effect-strength="scanlines"]', 50);
+
+    // Rendering at an unchanged size should reuse the existing canvas backing store.
+    const expectedOutputContext = await page.locator("#output").evaluate(canvas => {
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#123456";
+      context.globalAlpha = 0.37;
+      return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
+    });
+    await page.locator("#algorithm").selectOption("floyd");
+    const reusedOutputContext = await page.locator("#output").evaluate(canvas => {
+      const context = canvas.getContext("2d");
+      return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
+    });
+    assert.deepEqual(reusedOutputContext, expectedOutputContext,
+      "same-size preview renders should not reset the output canvas backing store");
+
     const initialSize = await page.locator("#output").evaluate(c => ({ width: c.width, height: c.height }));
     assert.ok(initialSize.width >= 1 && initialSize.height >= 1, "demo image should render");
     assert.equal(await page.locator("#algorithmStackControl").isVisible(), true, "algorithm stack is available in the image workspace");
@@ -1011,6 +1049,23 @@ async function downloadFrom(page, selector) {
     });
     assert.ok(await page.locator("#videoOutput").evaluate(canvas => canvas.width > 0 && canvas.height > 0),
       "video frame should be processed onto the output canvas");
+    const expectedVideoContext = await page.locator("#videoOutput").evaluate(canvas => {
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#123456";
+      context.globalAlpha = 0.37;
+      return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
+    });
+    await page.locator("#videoTimeline").evaluate(el => {
+      el.value = String(Math.min(0.3, Number(el.max)));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    const reusedVideoContext = await page.locator("#videoOutput").evaluate(canvas => {
+      const context = canvas.getContext("2d");
+      return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
+    });
+    assert.deepEqual(reusedVideoContext, expectedVideoContext,
+      "same-size video frames should reuse the output canvas backing store");
+
     const videoDownloadPromise = page.waitForEvent("download", { timeout: 20000 });
     await page.locator("#videoExport").click();
     assert.equal(await page.locator("#videoTimeline").isDisabled(), true, "video timeline must be locked during export");
