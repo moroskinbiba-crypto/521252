@@ -452,6 +452,65 @@ async function downloadFrom(page, selector) {
       return c.toDataURL("image/png");
     });
     const imageBuffer = Buffer.from(dataURL.split(",")[1], "base64");
+    // The image loading overlay must appear before decoding and disappear after success.
+    await page.evaluate(() => {
+      const NativeImage = window.Image;
+      const src = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
+      function DelayedImage() {
+        const image = new NativeImage();
+        Object.defineProperty(image, "src", {
+          configurable: true,
+          get: () => src.get.call(image),
+          set: value => setTimeout(() => src.set.call(image, value), 300)
+        });
+        return image;
+      }
+      window.__tgrmNativeImage = NativeImage;
+      window.Image = DelayedImage;
+    });
+    await page.locator("#imageInput").setInputFiles({
+      name: "qa-fixture.png", mimeType: "image/png", buffer: imageBuffer
+    });
+    await page.waitForFunction(() => {
+      const overlay = document.querySelector("#imageLoading");
+      return overlay && !overlay.classList.contains("hidden");
+    }, null, { timeout: 5000 });
+    assert.equal(await page.locator("#stage").getAttribute("aria-busy"), "true",
+      "image decoding should mark the preview stage as busy");
+    assert.match(await page.locator("#imageLoadingDetail").textContent(), /КБ|МБ|Б/,
+      "loading overlay should show the file size");
+    await page.waitForFunction(() => document.querySelector("#filename")?.textContent.includes("qa-fixture.png"));
+    await page.waitForFunction(() => document.querySelector("#stage")?.getAttribute("aria-busy") === "false");
+    assert.equal(await page.locator("#imageLoading").isVisible(), false,
+      "image loading overlay should disappear after successful decoding");
+    await page.evaluate(() => { window.Image = window.__tgrmNativeImage; delete window.__tgrmNativeImage; });
+
+    // A corrupt image must not replace the last valid image or leave the stage busy.
+    await page.locator("#imageInput").setInputFiles({
+      name: "broken-image.png", mimeType: "image/png", buffer: Buffer.from("not a PNG")
+    });
+    await page.waitForFunction(() => /Не удалось открыть файл изображения/.test(document.querySelector("#toast")?.textContent || ""));
+    assert.ok((await page.locator("#filename").textContent()).includes("qa-fixture.png"),
+      "a failed image load should leave the previous preview intact");
+    assert.equal(await page.locator("#stage").getAttribute("aria-busy"), "false");
+    assert.equal(await page.locator("#imageInput").inputValue(), "",
+      "image input should remain reusable after a failed file");
+
+    const dragHighlight = await page.evaluate(() => {
+      const stage = document.querySelector("#stage"), inner = document.querySelector("#canvaswrap");
+      const transfer = new DataTransfer();
+      transfer.items.add(new File(["x"], "drag.png", { type: "image/png" }));
+      stage.dispatchEvent(new DragEvent("dragenter", { bubbles: true, dataTransfer: transfer }));
+      const entered = stage.classList.contains("drag");
+      inner.dispatchEvent(new DragEvent("dragenter", { bubbles: true, dataTransfer: transfer, relatedTarget: stage }));
+      inner.dispatchEvent(new DragEvent("dragleave", { bubbles: true, dataTransfer: transfer, relatedTarget: stage }));
+      const stayedWhileInside = stage.classList.contains("drag");
+      stage.dispatchEvent(new DragEvent("dragleave", { bubbles: true, dataTransfer: transfer, relatedTarget: document.body }));
+      return { entered, stayedWhileInside, cleared: !stage.classList.contains("drag") };
+    });
+    assert.deepEqual(dragHighlight, { entered: true, stayedWhileInside: true, cleared: true },
+      "drag highlight should remain stable over nested preview elements and clear on exit");
+
     await page.locator("#imageInput").setInputFiles({
       name: "qa-fixture.png", mimeType: "image/png", buffer: imageBuffer
     });
