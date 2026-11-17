@@ -199,13 +199,13 @@ async function downloadFrom(page, selector) {
     assert.ok(shuffled.contrast >= 50 && shuffled.contrast <= 180, "Shuffle keeps contrast in range");
     // An enabled effect at zero intensity must not trigger a redundant post-processing resize.
     const beforeNoOpEffect = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
-    await setRange('[data-effect-strength="scanlines"]', 0);
+    await setRange('#generalEffectsControl [data-effect-strength="scanlines"]', 0);
     await page.locator("#effect-scanlines").click();
     const afterNoOpEffect = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     assert.equal(afterNoOpEffect, beforeNoOpEffect,
       "an enabled effect at zero strength must leave the rendered pixels unchanged");
     await page.locator("#effect-scanlines").click();
-    await setRange('[data-effect-strength="scanlines"]', 50);
+    await setRange('#generalEffectsControl [data-effect-strength="scanlines"]', 50);
 
     // Rendering at an unchanged size should reuse the existing canvas backing store.
     await page.locator("#output").evaluate(canvas => {
@@ -1075,7 +1075,7 @@ async function downloadFrom(page, selector) {
     await page.locator("#algorithm").selectOption("bayer4");
     const batchScanlines = page.locator("#batch-effect-scanlines");
     if (await batchScanlines.getAttribute("aria-checked") !== "true") await batchScanlines.click();
-    const batchScanlinesStrength = page.locator('#batchEffectsControl [data-effect-strength="scanlines"]');
+    const batchScanlinesStrength = page.locator('#batchEffectsControl #generalEffectsControl [data-effect-strength="scanlines"]');
     await batchScanlinesStrength.evaluate(el => { el.value = "10"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
     await page.evaluate(() => {
       window.__tgrmOriginalToBlob = HTMLCanvasElement.prototype.toBlob;
