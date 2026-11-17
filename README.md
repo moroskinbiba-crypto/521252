@@ -95,5 +95,12 @@ MIT. See [LICENSE](LICENSE).
 - Mobile navigation, primary actions, selects, effect toggles and range controls have larger touch targets while preserving the existing compact layout.
 
 
+## Effect stack ordering in v1.3.6
+
+- Moving an effect up or down now also moves its visible control row, so the inspector matches the order used by the image-processing pipeline.
+- The first effect disables its “move up” action and the last effect disables “move down”.
+- Order remains independent for Editor, Shape Lab, Script Slayer, Batch and Video Lab and is persisted in each workspace profile.
+
+
 ### Script Slayer · Neo Glow
 Neo Glow includes an adjustable scan-band position, width, brightness, off-band visibility and colour. The band is centered by default, its settings follow the saved Script Slayer profile, and the Animation button moves the band across the symbol canvas.
