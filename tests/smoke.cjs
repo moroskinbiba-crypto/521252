@@ -66,6 +66,29 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), true, "regular effects should be visible in Editor");
     assert.equal(await page.locator("#asciiControl").isVisible(), false, "Script Slayer panel should be isolated from Editor");
     assert.equal(await page.locator("#shapeControl").isVisible(), false, "Shape Lab panel should be isolated from Editor");
+
+    // Effect stack arrows must reorder the visible list, not only its saved processing order.
+    const initialEffectOrder = await page.locator("#generalEffectsControl .effects .effect-control").evaluateAll(rows =>
+      rows.map(row => row.querySelector("[data-effect]")?.dataset.effect));
+    assert.equal(initialEffectOrder[0], "scanlines");
+    const glowEffectRow = page.locator("#generalEffectsControl .effect-control:has(#effect-glow)");
+    await glowEffectRow.locator(".effect-order-actions button").first().click();
+    const movedEffectOrder = await page.locator("#generalEffectsControl .effects .effect-control").evaluateAll(rows =>
+      rows.map(row => row.querySelector("[data-effect]")?.dataset.effect));
+    assert.equal(movedEffectOrder[0], "glow", "moving Soft Glow up should move its visible control to the top");
+    assert.equal(movedEffectOrder[1], "scanlines");
+    assert.equal(await glowEffectRow.locator(".effect-order-actions button").first().isDisabled(), true,
+      "the top effect should disable its move-up action");
+    const storedEffectOrder = await page.evaluate(() => JSON.parse(localStorage.getItem("tgrmlithering-workspaces")).editor.effectOrder);
+    assert.deepEqual(storedEffectOrder.slice(0, 2), ["glow", "scanlines"],
+      "visual effect order should persist to the active workspace");
+    await glowEffectRow.locator(".effect-order-actions button").nth(1).click();
+    assert.deepEqual(
+      await page.locator("#generalEffectsControl .effects .effect-control").evaluateAll(rows =>
+        rows.map(row => row.querySelector("[data-effect]")?.dataset.effect)),
+      initialEffectOrder,
+      "moving the effect back down should restore the original visible order"
+    );
     const theme = await page.evaluate(() => ({
       bodyFont: getComputedStyle(document.body).fontFamily,
       headingFont: getComputedStyle(document.querySelector("#pageTitle")).fontFamily,
