@@ -197,30 +197,15 @@ async function downloadFrom(page, selector) {
     assert.ok(shuffled.levels >= 2 && shuffled.levels <= 16, "Shuffle supports the expanded 16-tone range");
     assert.ok(shuffled.threshold >= -80 && shuffled.threshold <= 80, "Shuffle keeps threshold in range");
     assert.ok(shuffled.contrast >= 50 && shuffled.contrast <= 180, "Shuffle keeps contrast in range");
-    // A no-op effect stack must not trigger a second quality-budget downscale.
-    const noEffectPipeline = await page.evaluate(() => {
-      const source = document.createElement("canvas");
-      source.width = 1000; source.height = 1000;
-      const context = source.getContext("2d");
-      const gradient = context.createLinearGradient(0, 0, 1000, 1000);
-      gradient.addColorStop(0, "#102030"); gradient.addColorStop(1, "#e0d0c0");
-      context.fillStyle = gradient; context.fillRect(0, 0, 1000, 1000);
-      const config = {
-        algorithm: "bayer4", qualityMode: "preview", scale: 1, blur: 0,
-        contrast: 100, brightness: 0, threshold: 0, midtones: 50, highlights: 50,
-        invert: false, effects: [], effectStrength: {}, effectOrder: [],
-        algorithmLayers: [], smoothing: 0, blend: 100, serpentine: false
-      };
-      const direct = window.raster(source, config);
-      const pipeline = window.rasterPipeline(source, config);
-      const a = direct.getContext("2d").getImageData(0, 0, direct.width, direct.height).data;
-      const b = pipeline.getContext("2d").getImageData(0, 0, pipeline.width, pipeline.height).data;
-      let different = 0;
-      for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) different++;
-      return { different, width: pipeline.width, height: pipeline.height };
-    });
-    assert.equal(noEffectPipeline.different, 0,
-      "an empty effect stack must preserve the raster output instead of downscaling it again");
+    // An enabled effect at zero intensity must not trigger a redundant post-processing resize.
+    const beforeNoOpEffect = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await setRange('[data-effect-strength="scanlines"]', 0);
+    await page.locator("#effect-scanlines").click();
+    const afterNoOpEffect = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.equal(afterNoOpEffect, beforeNoOpEffect,
+      "an enabled effect at zero strength must leave the rendered pixels unchanged");
+    await page.locator("#effect-scanlines").click();
+    await setRange('[data-effect-strength="scanlines"]', 50);
 
     // Rendering at an unchanged size should reuse the existing canvas backing store.
     await page.locator("#output").evaluate(canvas => {
@@ -1057,9 +1042,12 @@ async function downloadFrom(page, selector) {
       context.fillStyle = "#123456";
       context.globalAlpha = 0.37;
     });
-    const reusedVideoContext = await page.evaluate(() => {
-      window.renderVideoFrame();
-      const context = document.querySelector("#videoOutput").getContext("2d");
+    await page.locator("#videoTimeline").evaluate(el => {
+      el.value = String(Math.min(0.3, Number(el.max)));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    const reusedVideoContext = await page.locator("#videoOutput").evaluate(canvas => {
+      const context = canvas.getContext("2d");
       return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
     });
     assert.equal(reusedVideoContext.fillStyle, "rgb(18, 52, 86)",
