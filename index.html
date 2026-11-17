@@ -405,6 +405,15 @@ body[data-theme="paper"] .btn,body[data-theme="paper"] .select,body[data-theme="
 
 
 .batch-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:9px 1px 5px;color:var(--muted);font:500 10px/1.4 var(--mono-font)}.batch-progress-meta #batchProgressCount{color:var(--text);font-variant-numeric:tabular-nums}.progress[role="progressbar"]{overflow:hidden}#cancelBatch[hidden]{display:none!important}
+
+.image-loading{position:absolute;z-index:8;inset:12px;display:flex;align-items:center;justify-content:center;gap:13px;padding:18px;border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 92%,transparent);box-shadow:0 14px 48px #0008;backdrop-filter:blur(8px);text-align:left}
+.image-loading-spinner{width:27px;height:27px;flex:0 0 27px;border:3px solid var(--line);border-top-color:var(--acid);border-radius:50%;animation:tgrm-image-spin .8s linear infinite}
+.image-loading-copy{display:grid;gap:4px;min-width:0}
+.image-loading-copy strong{font-size:12px;color:var(--text);overflow-wrap:anywhere}
+.image-loading-copy small{font-size:10px;color:var(--muted)}
+@keyframes tgrm-image-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.image-loading-spinner{animation:none;border-top-color:var(--acid)}}
+@media(max-width:740px){.image-loading{inset:7px;padding:10px;gap:9px}.image-loading-copy strong{font-size:11px}.image-loading-copy small{font-size:9px}}
 </style>
 <style id="xpShellStyles" media="not all">
 /* Full Luna / Windows XP skin: real blue title bars, silver controls and crisp pixel geometry. */
@@ -963,7 +972,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <section id="editorView">
 <div class="heading"><div><div class="eyebrow" id="eyebrow">CREATIVE TOOLKIT / 01</div><h1 id="pageTitle">Редактор изображения<span style="color:var(--acid)">.</span></h1><p id="pageSubtitle">Изображение → алгоритм → собственный визуальный язык.</p></div><div class="badges"><span class="pill green">● ЖИВОЙ ПРОСМОТР</span><span class="pill">ОБРАБОТКА ЛОКАЛЬНО</span></div></div>
 <div class="stagebar"><span class="filename" id="filename">demo-image / 960 × 620</span><div class="stageactions" aria-label="Действия редактора"><div class="action-group" role="group" aria-label="История изменений"><button class="btn sm" id="undo" title="Отменить (Ctrl/Cmd+Z)" aria-label="Отменить" disabled>↶</button><button class="btn sm" id="redo" title="Повторить (Ctrl/Cmd+Shift+Z)" aria-label="Повторить" disabled>↷</button></div><div class="action-group" role="group" aria-label="Вид"><select class="select" id="zoom" aria-label="Масштаб"><option value="fit">Вписать</option><option value="100">100%</option><option value="50">50%</option><option value="150">150%</option></select><button class="btn sm" type="button" id="fullscreenBtn" title="Редактор на весь экран" aria-label="Редактор на весь экран">⛶</button></div><div class="action-group" role="group" aria-label="Творческие действия"><button class="btn sm" id="randomize" title="Случайный стиль">⤨ Случайный стиль</button><button class="btn sm" id="shuffle" title="Случайные настройки">⇄ Случайные настройки</button></div><div class="action-group" role="group" aria-label="Пресеты и проекты"><button class="btn sm" id="savePresetMenu" title="Сохранить настройки как пресет">☆ Пресет</button><button class="btn sm" id="saveProjectMenu" title="Сохранить проект">↓ Проект</button><button class="btn sm" id="openProjectMenu" title="Открыть проект">↑ Проект</button></div></div></div>
-<div class="stage" id="stage"><div class="canvaswrap" id="canvaswrap"><canvas id="output" aria-label="Предпросмотр"></canvas><canvas id="beforeOutput" class="compare-before hidden" aria-label="Оригинал для сравнения"></canvas><div id="compareDivider" class="compare-divider hidden" aria-hidden="true"></div></div><div class="empty" id="empty"><div class="emptyicon">▧</div><h2>Начните с изображения</h2><p>Загрузите фотографию, иллюстрацию или перетащите файл в это окно.</p><button class="btn primary" id="emptyOpen">Открыть изображение</button></div></div>
+<div class="stage" id="stage" aria-busy="false"><div class="canvaswrap" id="canvaswrap"><canvas id="output" aria-label="Предпросмотр"></canvas><canvas id="beforeOutput" class="compare-before hidden" aria-label="Оригинал для сравнения"></canvas><div id="compareDivider" class="compare-divider hidden" aria-hidden="true"></div></div><div class="image-loading hidden" id="imageLoading" role="status" aria-live="polite" aria-atomic="true"><span class="image-loading-spinner" aria-hidden="true"></span><span class="image-loading-copy"><strong id="imageLoadingTitle">Открываем изображение…</strong><small id="imageLoadingDetail">Файл обрабатывается локально</small></span></div><div class="empty" id="empty"><div class="emptyicon">▧</div><h2>Начните с изображения</h2><p>Загрузите фотографию, иллюстрацию или перетащите файл в это окно.</p><button class="btn primary" id="emptyOpen">Открыть изображение</button></div></div>
 <div class="stagefoot"><div class="stats"><span>Режим <b id="statAlgorithm">Bayer 4×4</b></span><span>Палитра <b id="statPalette">Moss Green</b></span><span>Шаг <b id="statScale">×5</b></span><span class="file-status" id="fileStatus" data-state="demo">Демо-пример</span></div><div><button class="textbtn" id="compareToggle" aria-pressed="false">↔ До / после</button><button class="textbtn" id="toggleOriginal">◉ Показать оригинал</button><label class="compare-controls hidden" id="compareControls"><span>Оригинал</span><input type="range" id="compareRange" min="0" max="100" value="50" aria-label="Граница сравнения до и после"><output id="compareValue">50%</output><span>Результат</span></label><span id="dimensions">960 × 620 px</span></div></div>
 <details class="ascii hidden" id="asciiDetails"><summary>Открыть ASCII-текст · TXT</summary><pre id="asciiText"></pre></details>
 </section>
@@ -1117,7 +1126,7 @@ for(const [key,values] of Object.entries(savedPaletteOverrides||{}))if(Object.pr
 const def={algorithm:"bayer4",scale:5,markScale:100,blend:100,smoothing:0,qualityMode:"balanced",serpentine:false,jpegQuality:94,levels:4,threshold:0,patternAngle:45,patternShape:"circle",algorithmLayers:[],depth:70,contrast:100,brightness:0,midtones:50,highlights:50,blur:0,invert:false,palette:"moss",colorMode:"color",effects:[],effectOrder:["scanlines","glow","chromatic","vignette","noise","epsilon","jpeg","lick","stress","modlines"],effectStrength:{scanlines:50,glow:50,chromatic:50,vignette:50,noise:50,epsilon:50,jpeg:50,lick:50,stress:50,modlines:50},customColors:loadStore("ditherlab-colors",["#10160f","#334b2b","#7a9a47","#d9efad"]),shape:"circle",jitter:20,shapeDistribution:"uniform",shapeRotation:0,shapeThresholds:[25,50,75],customShapePath:"",customShapeViewBox:[0,0,100,100],shapeBands:[{shape:"circle",size:55,color:"#334b2b",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:70,color:"#7a9a47",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:85,color:"#b8d785",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:100,color:"#d9efad",rotation:0,customPath:"",customViewBox:[0,0,100,100]}],asciiWidth:100,asciiSet:"classic",asciiDepth:10,asciiCellSize:8,asciiOffset:0,asciiCustomChars:"",asciiColorMode:"palette",asciiBgMode:"transparent",asciiBgColor:"#07110a",asciiTextColor:"#cafa6a",neoGlowEnabled:false,neoGlowDirection:"horizontal",neoGlowLength:18,neoGlowBrightness:90,neoGlowVisibility:12,neoGlowPhase:50,neoGlowColor:"#cafa6a"};
 pal.custom.c=def.customColors;
 let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],batchRunning=false,batchCancelRequested=false,batchResultsData=[],batchDownloadUrls=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0,historyPast=[],historyFuture=[],historyCurrent=null,historyCurrentSignature="",historyTimer=0,restoringHistory=false,compareEnabled=false,comparePosition=50,algorithmFavorites=[],showFavoritesOnly=false,resultDirty=false,lastExported=false,lastRenderedSignature="",hasRendered=false,renderFrame=0;
-const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_PROJECT_FILE_BYTES=160*1024*1024,MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_IMPORT_JSON_BYTES=5*1024*1024,MAX_SHAPE_SVG_BYTES=500000,MAX_BATCH_FILES=500;
+const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_IMAGE_FILE_BYTES=128*1024*1024,MAX_PROJECT_FILE_BYTES=160*1024*1024,MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_IMPORT_JSON_BYTES=5*1024*1024,MAX_SHAPE_SVG_BYTES=500000,MAX_BATCH_FILES=500;
 const WORKSPACE_NAMES=["editor","shape","script","batch","video"];
 async function readLimitedText(file,maxBytes,errorMessage){
  if(!file||!Number.isFinite(Number(file.size))||file.size>maxBytes)throw Error(errorMessage);
@@ -1987,7 +1996,71 @@ function renderBatch(){let box=$("batchList");box.innerHTML="";const hasBatchRes
 function addBatch(files){if(batchRunning){say("Дождитесь завершения пакетной обработки");return}const images=Array.from(files).filter(f=>f.type.startsWith("image/")),available=Math.max(0,MAX_BATCH_FILES-batch.length),accepted=images.slice(0,available);batch.push(...accepted);$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent=batch.length+" выбрано";$("batchProgressLabel").textContent=batch.length?"Готово к обработке":"Ожидает файлов";renderBatch();if(images.length>accepted.length)say("Ограничение пакетной обработки — "+MAX_BATCH_FILES+" изображений; добавлено "+accepted.length);else say(accepted.length?"Добавлено файлов: "+accepted.length:"Выберите файлы изображений")}
 function revokeBatchDownloadUrls(){for(const url of batchDownloadUrls)URL.revokeObjectURL(url);batchDownloadUrls=[]}
 function uniqueBatchFilename(fileName,usedNames){const root=slug(fileName.replace(/\.[^.]+$/,""))+"-TGRMLither";let name=root+".png",suffix=2;while(usedNames.has(name.toLowerCase()))name=root+"-"+suffix++ +".png";usedNames.add(name.toLowerCase());return name}
-function fileCanvas(f){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(f),im=new Image();let settled=false;const cleanup=()=>{if(settled)return;settled=true;URL.revokeObjectURL(url)};im.onload=()=>{try{const c=canvasFromImage(im);cleanup();resolve(c)}catch(error){cleanup();reject(error)}};im.onerror=()=>{cleanup();reject(Error("Не удалось открыть файл изображения"))};im.onabort=()=>{cleanup();reject(Error("Загрузка изображения отменена"))};im.src=url})}
+function fileCanvas(f,signal){
+ return new Promise((resolve,reject)=>{
+  const url=URL.createObjectURL(f),im=new Image();let settled=false;
+  const cleanup=()=>{
+   if(settled)return false;settled=true;
+   if(signal)signal.removeEventListener("abort",abort);
+   im.onload=null;im.onerror=null;im.onabort=null;URL.revokeObjectURL(url);return true;
+  };
+  const abort=()=>{
+   if(!cleanup())return;
+   try{im.src=""}catch(error){}
+   reject(new DOMException("Загрузка изображения отменена","AbortError"));
+  };
+  if(signal?.aborted){abort();return}
+  if(signal)signal.addEventListener("abort",abort,{once:true});
+  im.onload=()=>{
+   if(!cleanup())return;
+   try{resolve(canvasFromImage(im))}catch(error){reject(error)}
+  };
+  im.onerror=()=>{if(cleanup())reject(Error("Не удалось открыть файл изображения. Проверьте формат и целостность файла."))};
+  im.onabort=()=>{if(cleanup())reject(new DOMException("Загрузка изображения отменена","AbortError"))};
+  im.src=url;
+ });
+}
+let imageLoadController=null,imageLoadGeneration=0;
+function setImageLoading(loading,title="Открываем изображение…",detail="Файл обрабатывается локально"){
+ const stage=$("stage"),overlay=$("imageLoading");
+ if(!stage||!overlay)return;
+ stage.classList.toggle("is-loading",loading);stage.setAttribute("aria-busy",String(loading));
+ overlay.classList.toggle("hidden",!loading);
+ if(loading){$("imageLoadingTitle").textContent=title;$("imageLoadingDetail").textContent=detail}
+}
+function formatFileSize(bytes){
+ if(!Number.isFinite(bytes)||bytes<0)return "";
+ if(bytes<1024)return bytes+" Б";
+ const units=["КБ","МБ","ГБ"];let value=bytes/1024,index=0;
+ while(value>=1024&&index<units.length-1){value/=1024;index++}
+ return value.toFixed(value>=10?0:1)+" "+units[index];
+}
+async function loadImageFile(file,successMessage=""){
+ if(!file)return false;
+ if(!String(file.type||"").startsWith("image/")){say("Выберите файл изображения (PNG, JPEG, WebP, GIF или BMP)");return false}
+ if(!Number.isFinite(Number(file.size))||file.size>MAX_IMAGE_FILE_BYTES){say("Файл изображения больше 128 МБ. Уменьшите файл и повторите загрузку.");return false}
+ if(imageLoadController)imageLoadController.abort();
+ const controller=new AbortController(),generation=++imageLoadGeneration;
+ imageLoadController=controller;
+ const name=String(file.name||"изображение").slice(0,100);
+ setImageLoading(true,"Открываем "+name+"…",formatFileSize(file.size)+" · декодирование на устройстве");
+ await new Promise(resolve=>requestAnimationFrame(()=>resolve()));
+ try{
+  const canvas=await fileCanvas(file,controller.signal);
+  if(controller.signal.aborted||generation!==imageLoadGeneration)return false;
+  loadImage(canvas,name,false);
+  if(successMessage)say(successMessage);
+  return true;
+ }catch(error){
+  if(!controller.signal.aborted&&generation===imageLoadGeneration){
+   const message=error&&error.message&&error.message.length<160?error.message:"Не удалось открыть изображение. Файл может быть повреждён или слишком велик.";
+   say(message);
+  }
+  return false;
+ }finally{
+  if(generation===imageLoadGeneration){setImageLoading(false);imageLoadController=null}
+ }
+}
 function zipCrc32(bytes){
  let table=zipCrc32.table;
  if(!table){table=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);table[n]=c>>>0}zipCrc32.table=table}
@@ -2304,12 +2377,13 @@ async function exportProcessedVideo(){
 }
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
 function init(){buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();bindShellControls();bindInspectorLevel();initAlgorithmSearch();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);recordHistorySnapshot();presets.forEach(p=>{});renderPresets();renderBatch();
-$("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await readLimitedText(file,MAX_SHAPE_SVG_BYTES,"SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");const index=clamp(Number($("shapeImportBand").value)||0,0,3),customPath=path.getAttribute("d").slice(0,20000);s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===index?({...b,shape:"custom",customPath,customViewBox:raw}):({...b}));s.customShapePath=customPath;s.customShapeViewBox=raw;$("shapeSvgStatus").textContent=file.name+" · SVG → диапазон "+(index+1);sync();render();say("SVG назначен диапазону "+(index+1))}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(videoExportStarting){v.pause();stopVideoExport(true);return}if(!v.src){$("videoInput").click();return}if(videoRecorder&&videoRecorder.state!=="inactive"){v.pause();stopVideoExport(true);$("videoPlay").textContent="▶ Воспроизвести";return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{let f=e.target.files[0];if(f)try{loadImage(await fileCanvas(f),f.name)}catch(err){say(err&&err.message&&err.message.length<120?err.message:"Не удалось открыть изображение. Файл может быть повреждён или слишком велик.")}e.target.value=""};
+$("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await readLimitedText(file,MAX_SHAPE_SVG_BYTES,"SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");const index=clamp(Number($("shapeImportBand").value)||0,0,3),customPath=path.getAttribute("d").slice(0,20000);s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===index?({...b,shape:"custom",customPath,customViewBox:raw}):({...b}));s.customShapePath=customPath;s.customShapeViewBox=raw;$("shapeSvgStatus").textContent=file.name+" · SVG → диапазон "+(index+1);sync();render();say("SVG назначен диапазону "+(index+1))}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(videoExportStarting){v.pause();stopVideoExport(true);return}if(!v.src){$("videoInput").click();return}if(videoRecorder&&videoRecorder.state!=="inactive"){v.pause();stopVideoExport(true);$("videoPlay").textContent="▶ Воспроизвести";return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{const f=e.target.files?.[0];if(f)await loadImageFile(f);e.target.value=""};
 window.addEventListener("paste",async e=>{
  const items=Array.from(e.clipboardData?.items||[]),item=items.find(entry=>String(entry.type||"").startsWith("image/"));
  if(!item)return;const file=item.getAsFile?.();if(!file)return;e.preventDefault();
- try{const type=file.type||"image/png",extension=type==="image/jpeg"?"jpg":type==="image/webp"?"webp":type==="image/gif"?"gif":"png",named=new File([file],"clipboard-image."+extension,{type});loadImage(await fileCanvas(named),named.name);say("Изображение вставлено из буфера обмена")}
- catch(err){say(err&&err.message&&err.message.length<120?err.message:"Не удалось вставить изображение из буфера обмена")}
+ const type=file.type||"image/png",extension=type==="image/jpeg"?"jpg":type==="image/webp"?"webp":type==="image/gif"?"gif":"png";
+ const named=new File([file],"clipboard-image."+extension,{type});
+ await loadImageFile(named,"Изображение вставлено из буфера обмена");
 });
 function updateFullscreenButton(){
  const active=!!document.fullscreenElement,button=$("fullscreenBtn");
@@ -2333,7 +2407,20 @@ $("offlineBtn").onclick=saveStandalone;$("savePresetMenu").onclick=$("savePreset
 $("asciiPlay").onclick=()=>startAsciiAnimation(false);$("asciiStop").onclick=stopAsciiAnimation;$("asciiExportWebm").onclick=()=>startAsciiAnimation(true);
 document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));$("homeLogo").onclick=e=>{e.preventDefault();setMode("editor")};$("randomize").classList.toggle("hidden",mode!=="editor");$("shuffle").classList.toggle("hidden",mode!=="editor");
 $("batchBrowse").onclick=()=>$("batchInput").click();$("batchInput").onchange=e=>{addBatch(e.target.files);e.target.value=""};$("batchDrop").ondragover=e=>{e.preventDefault();$("batchDrop").style.borderColor="var(--acid)"};$("batchDrop").ondragleave=()=>$("batchDrop").style.borderColor="";$("batchDrop").ondrop=e=>{e.preventDefault();$("batchDrop").style.borderColor="";addBatch(e.dataTransfer.files)};$("runBatch").onclick=runBatch;$("downloadBatchZip").onclick=downloadBatchArchive;$("clearBatch").onclick=()=>{if(batchRunning)return;batch=[];batchResultsData=[];revokeBatchDownloadUrls();renderBatch();$("batchResults").innerHTML="";$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent="0 / 0";$("batchProgressLabel").textContent="Ожидает файлов";$("downloadBatchZip").disabled=true};$("cancelBatch").onclick=()=>{if(!batchRunning)return;batchCancelRequested=true;$("cancelBatch").disabled=true;$("batchProgressLabel").textContent="Остановка после текущего файла…";say("Остановка после текущего файла…")};
-let stage=$("stage");stage.ondragover=e=>{e.preventDefault();stage.classList.add("drag")};stage.ondragleave=()=>stage.classList.remove("drag");stage.ondrop=async e=>{e.preventDefault();stage.classList.remove("drag");let f=e.dataTransfer.files[0];if(f&&f.type.startsWith("image/"))try{loadImage(await fileCanvas(f),f.name)}catch(err){say("Не удалось открыть файл")}};
+let stage=$("stage");
+ stage.addEventListener("dragenter",e=>{if(!Array.from(e.dataTransfer?.types||[]).includes("Files"))return;e.preventDefault();if(!stage.contains(e.relatedTarget))stage.classList.add("drag")});
+ stage.addEventListener("dragover",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});
+ stage.addEventListener("dragleave",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files")&&!stage.contains(e.relatedTarget))stage.classList.remove("drag")});
+ stage.addEventListener("drop",async e=>{
+  if(!Array.from(e.dataTransfer?.types||[]).includes("Files"))return;
+  e.preventDefault();stage.classList.remove("drag");
+  const dropped=Array.from(e.dataTransfer?.files||[]);
+  const image=dropped.find(item=>String(item.type||"").startsWith("image/"));
+  if(image)await loadImageFile(image);
+  else if(dropped.length)say("Перетащите файл изображения (PNG, JPEG, WebP, GIF или BMP)");
+ });
+ document.addEventListener("dragover",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});
+ document.addEventListener("drop",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});
 $("modalCancel").onclick=()=>$("modal").classList.add("hidden");$("modal").onclick=e=>{if(e.target===$("modal"))$("modal").classList.add("hidden")};document.addEventListener("keydown",e=>{const key=e.key.toLowerCase(),target=e.target,textEditing=target?.isContentEditable||(target?.matches?.("input,textarea")&&["text","search","url","email","password","number"].includes(String(target.type||"").toLowerCase()));if((e.ctrlKey||e.metaKey)&&key==="o"){e.preventDefault();openImage();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="z"){e.preventDefault();if(e.shiftKey)redoAction();else undoAction();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="y"){e.preventDefault();redoAction();return}if(e.key==="Escape"){$("modal").classList.add("hidden");closeExportModal()}});
 if("serviceWorker"in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register("./sw.js").catch(()=>{});
 }
