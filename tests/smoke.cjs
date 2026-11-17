@@ -210,20 +210,19 @@ async function downloadFrom(page, selector) {
     await setRange('#generalEffectsControl [data-effect-strength="scanlines"]', 50);
 
     // Rendering at an unchanged size should reuse the existing canvas backing store.
-    await page.locator("#output").evaluate(canvas => {
+    const expectedOutputContext = await page.locator("#output").evaluate(canvas => {
       const context = canvas.getContext("2d");
       context.fillStyle = "#123456";
       context.globalAlpha = 0.37;
+      return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
     });
     await page.locator("#shuffle").click();
     const reusedOutputContext = await page.locator("#output").evaluate(canvas => {
       const context = canvas.getContext("2d");
       return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
     });
-    assert.equal(reusedOutputContext.fillStyle, "rgb(18, 52, 86)",
-      "same-size preview renders should not reset the output canvas context");
-    assert.equal(reusedOutputContext.globalAlpha, 0.37,
-      "same-size preview renders should retain the existing canvas backing store");
+    assert.deepEqual(reusedOutputContext, expectedOutputContext,
+      "same-size preview renders should not reset the output canvas backing store");
 
     const initialSize = await page.locator("#output").evaluate(c => ({ width: c.width, height: c.height }));
     assert.ok(initialSize.width >= 1 && initialSize.height >= 1, "demo image should render");
@@ -1039,10 +1038,11 @@ async function downloadFrom(page, selector) {
     });
     assert.ok(await page.locator("#videoOutput").evaluate(canvas => canvas.width > 0 && canvas.height > 0),
       "video frame should be processed onto the output canvas");
-    await page.locator("#videoOutput").evaluate(canvas => {
+    const expectedVideoContext = await page.locator("#videoOutput").evaluate(canvas => {
       const context = canvas.getContext("2d");
       context.fillStyle = "#123456";
       context.globalAlpha = 0.37;
+      return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
     });
     await page.locator("#videoTimeline").evaluate(el => {
       el.value = String(Math.min(0.3, Number(el.max)));
@@ -1052,10 +1052,8 @@ async function downloadFrom(page, selector) {
       const context = canvas.getContext("2d");
       return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
     });
-    assert.equal(reusedVideoContext.fillStyle, "rgb(18, 52, 86)",
+    assert.deepEqual(reusedVideoContext, expectedVideoContext,
       "same-size video frames should reuse the output canvas backing store");
-    assert.equal(reusedVideoContext.globalAlpha, 0.37,
-      "video frame updates should not reset canvas context state");
 
     const videoDownloadPromise = page.waitForEvent("download", { timeout: 20000 });
     await page.locator("#videoExport").click();
