@@ -1878,7 +1878,7 @@ function openExportModal(){
 function closeExportModal(){$("exportModal").classList.add("hidden")}
 async function confirmExport(){
  const format=$("exportFormat").value;closeExportModal();
- if(format!=="project"&&original){original=false;$("toggleOriginal").textContent="◉ Показать результат";render()}
+ if(format!=="project"&&original){original=false;$("toggleOriginal").textContent="◉ Показать оригинал";render()}
  if(format!=="project")await waitForProcessingPreview();
  if(format==="png")exportImage("png");
  else if(format==="jpeg")exportImage("jpeg");
