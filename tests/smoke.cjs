@@ -14,6 +14,16 @@ async function downloadFrom(page, selector) {
   return { download, path, bytes: fs.readFileSync(path) };
 }
 
+const setRange = async (selector, value) => {
+      await page.locator(selector).evaluate((el, next) => {
+        el.value = String(next);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }, value);
+      // Continuous preview updates are intentionally coalesced into the next animation frame.
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+    };
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const errors = [];
@@ -286,15 +296,7 @@ async function downloadFrom(page, selector) {
     await page.locator("#asciiColorMode").selectOption("mono");
     await setRange("#asciiTextColor", "#222222");
     await setRange("#neoGlowColor", "#ff00ff");
-    const setRange = async (selector, value) => {
-      await page.locator(selector).evaluate((el, next) => {
-        el.value = String(next);
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-      }, value);
-      // Continuous preview updates are intentionally coalesced into the next animation frame.
-      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
-    };
+    
     await setRange("#neoGlowLength", 30);
     await setRange("#neoGlowBrightness", 100);
     await setRange("#neoGlowVisibility", 0);
