@@ -14,7 +14,14 @@ async function downloadFrom(page, selector) {
   return { download, path, bytes: fs.readFileSync(path) };
 }
 
-const setRange = async (selector, value) => {
+
+
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const errors = [];
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
+    const setRange = async (selector, value) => {
       await page.locator(selector).evaluate((el, next) => {
         el.value = String(next);
         el.dispatchEvent(new Event("input", { bubbles: true }));
@@ -23,12 +30,6 @@ const setRange = async (selector, value) => {
       // Continuous preview updates are intentionally coalesced into the next animation frame.
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
     };
-
-(async () => {
-  const browser = await chromium.launch({ headless: true });
-  const errors = [];
-  try {
-    const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
     page.on("pageerror", error => errors.push(error.stack || error.message));
     await page.addInitScript(async () => {
       if ("caches" in window && /^https?:/.test(location.protocol)) {
