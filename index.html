@@ -2407,13 +2407,13 @@ $("offlineBtn").onclick=saveStandalone;$("savePresetMenu").onclick=$("savePreset
 $("asciiPlay").onclick=()=>startAsciiAnimation(false);$("asciiStop").onclick=stopAsciiAnimation;$("asciiExportWebm").onclick=()=>startAsciiAnimation(true);
 document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));$("homeLogo").onclick=e=>{e.preventDefault();setMode("editor")};$("randomize").classList.toggle("hidden",mode!=="editor");$("shuffle").classList.toggle("hidden",mode!=="editor");
 $("batchBrowse").onclick=()=>$("batchInput").click();$("batchInput").onchange=e=>{addBatch(e.target.files);e.target.value=""};$("batchDrop").ondragover=e=>{e.preventDefault();$("batchDrop").style.borderColor="var(--acid)"};$("batchDrop").ondragleave=()=>$("batchDrop").style.borderColor="";$("batchDrop").ondrop=e=>{e.preventDefault();$("batchDrop").style.borderColor="";addBatch(e.dataTransfer.files)};$("runBatch").onclick=runBatch;$("downloadBatchZip").onclick=downloadBatchArchive;$("clearBatch").onclick=()=>{if(batchRunning)return;batch=[];batchResultsData=[];revokeBatchDownloadUrls();renderBatch();$("batchResults").innerHTML="";$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent="0 / 0";$("batchProgressLabel").textContent="Ожидает файлов";$("downloadBatchZip").disabled=true};$("cancelBatch").onclick=()=>{if(!batchRunning)return;batchCancelRequested=true;$("cancelBatch").disabled=true;$("batchProgressLabel").textContent="Остановка после текущего файла…";say("Остановка после текущего файла…")};
-let stage=$("stage"),stageDragDepth=0;
- stage.addEventListener("dragenter",e=>{if(!Array.from(e.dataTransfer?.types||[]).includes("Files"))return;e.preventDefault();stageDragDepth++;stage.classList.add("drag")});
+let stage=$("stage");
+ stage.addEventListener("dragenter",e=>{if(!Array.from(e.dataTransfer?.types||[]).includes("Files"))return;e.preventDefault();if(!stage.contains(e.relatedTarget))stage.classList.add("drag")});
  stage.addEventListener("dragover",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});
- stage.addEventListener("dragleave",e=>{if(!Array.from(e.dataTransfer?.types||[]).includes("Files"))return;if(stage.contains(e.relatedTarget))return;stageDragDepth=Math.max(0,stageDragDepth-1);if(!stageDragDepth)stage.classList.remove("drag")});
+ stage.addEventListener("dragleave",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files")&&!stage.contains(e.relatedTarget))stage.classList.remove("drag")});
  stage.addEventListener("drop",async e=>{
   if(!Array.from(e.dataTransfer?.types||[]).includes("Files"))return;
-  e.preventDefault();stageDragDepth=0;stage.classList.remove("drag");
+  e.preventDefault();stage.classList.remove("drag");
   const dropped=Array.from(e.dataTransfer?.files||[]);
   const image=dropped.find(item=>String(item.type||"").startsWith("image/"));
   if(image)await loadImageFile(image);
