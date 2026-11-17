@@ -422,6 +422,17 @@ async function downloadFrom(page, selector) {
       }
     }
     await page.setViewportSize({ width: 390, height: 844 });
+    const mobileTouchTargets = await page.evaluate(() => {
+      const selectors = ["#topExport", '.topnav [data-mode="editor"]', "#algorithm", "#scale", "#effect-scanlines"];
+      return selectors.map(selector => {
+        const el = document.querySelector(selector), rect = el?.getBoundingClientRect();
+        return { selector, height: rect?.height || 0, visible: !!el && getComputedStyle(el).display !== "none" && rect.width > 0 };
+      });
+    });
+    for (const target of mobileTouchTargets) {
+      assert.equal(target.visible, true, "mobile control should remain visible: " + target.selector);
+      assert.ok(target.height >= 30, "mobile control should have a comfortable touch target: " + JSON.stringify(target));
+    }
     await page.locator('.topnav [data-mode="script"]').click();
     assert.equal(await page.locator("#asciiControl").isVisible(), true, "Script Slayer must remain accessible from mobile navigation");
     await page.locator(".topnav").evaluate(el => { el.scrollLeft = el.scrollWidth; });
@@ -894,10 +905,14 @@ async function downloadFrom(page, selector) {
     assert.match(blackSvgText, /viewBox="0 0 48 32"/, "source-detail black SVG should preserve the original coordinate grid");
     assert.match(blackSvgText, /width="4\.06mm"/, "SVG physical dimensions should follow source pixels and selected DPI");
     assert.match(blackSvgText, /data-dpi="300"/, "SVG export should record the selected print DPI");
+    assert.equal(await page.locator("#fileStatus").getAttribute("data-state"), "exported",
+      "successful direct SVG export should mark the current result as exported");
     const cmykSvg = await downloadFrom(page, "#svgCmyk");
     const cmykSvgText = cmykSvg.bytes.toString("utf8");
     for (const plate of ["Cyan Plate", "Magenta Plate", "Yellow Plate", "Black Plate"]) assert.ok(cmykSvgText.includes(plate), "CMYK export should contain " + plate);
     assert.equal((cmykSvgText.match(/inkscape:groupmode="layer"/g) || []).length, 4, "CMYK export should create four named vector layers");
+    assert.equal(await page.locator("#fileStatus").getAttribute("data-state"), "exported",
+      "successful direct CMYK export should keep the exported result state");
 
     const offline = await downloadFrom(page, "#offlineBtn");
     assert.match(offline.download.suggestedFilename(), /TGRMLither-offline\.html$/);

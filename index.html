@@ -414,7 +414,21 @@ body[data-theme="paper"] .btn,body[data-theme="paper"] .select,body[data-theme="
 @keyframes tgrm-image-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.image-loading-spinner{animation:none;border-top-color:var(--acid)}}
 @media(max-width:740px){.image-loading{inset:7px;padding:10px;gap:9px}.image-loading-copy strong{font-size:11px}.image-loading-copy small{font-size:9px}}
-</style>
+
+@media(max-width:740px){
+  .topnav [data-mode]{min-height:36px;padding:8px 11px}
+  .layout>.left .menu button{min-height:36px;padding:8px 11px}
+  .topright .btn,.theme-menu>summary{min-height:36px}
+  .stageactions .btn,.stageactions .select{min-height:34px}
+  .layout main .select,.layout aside.right .select,.layout aside.right input:not([type=range]){min-height:36px}
+  .layout aside.right input[type=range],#compareRange,#videoTimeline{height:32px;min-height:32px;touch-action:pan-x}
+  .layout aside.right .effect-toggle,.layout aside.right .effect-order-actions button{min-width:32px;min-height:32px}
+  .layout aside.right .switch{width:38px;height:22px;min-width:38px}
+  .layout aside.right .switch:before{width:14px;height:14px;top:4px;left:4px}
+  .layout aside.right .switch[aria-checked="true"]:before{left:20px}
+  .layout aside.right .fieldtop{min-height:24px}
+  .layout aside.right .btn{min-height:34px}
+}</style>
 <style id="xpShellStyles" media="not all">
 /* Full Luna / Windows XP skin: real blue title bars, silver controls and crisp pixel geometry. */
 body[data-shell="xp"]{
@@ -1676,9 +1690,9 @@ function confirmExport(){
  if(format!=="project"&&original){original=false;$("toggleOriginal").textContent="◉ Показать оригинал";render()}
  if(format==="png")exportImage("png");
  else if(format==="jpeg")exportImage("jpeg");
- else if(format==="svgColor"){exportSvg(false);markResultExported()}
- else if(format==="svgBlack"){exportSvg(true);markResultExported()}
- else if(format==="svgCmyk"){exportCmykSvg();markResultExported()}
+ else if(format==="svgColor"){if(exportSvg(false))markResultExported()}
+ else if(format==="svgBlack"){if(exportSvg(true))markResultExported()}
+ else if(format==="svgCmyk"){if(exportCmykSvg())markResultExported()}
  else if(format==="project")project();
  else if(format==="copy")copyResult();
 }
@@ -2231,45 +2245,61 @@ function printAttributes(){
  return {dpi,widthMm:(out.width/dpi*25.4).toFixed(2),heightMm:(out.height/dpi*25.4).toFixed(2)};
 }
 function exportSvg(blackOnly){
- if(!src)return;if(original){original=false;render()}
- const dimensions=vectorDimensions();if(!dimensions)return;
- const {w,h}=dimensions,c=document.createElement("canvas");c.width=w;c.height=h;const q=c.getContext("2d",{willReadFrequently:true});q.drawImage(out,0,0,w,h);
- const d=q.getImageData(0,0,w,h).data,threshold=Number($("vectorThreshold")?.value??145),active=new Map(),paths=new Map();let created=0;
- const finish=run=>{let list=paths.get(run.color);if(!list){list=[];paths.set(run.color,list)}list.push("M"+run.x+" "+run.y+"h"+run.width+"v"+run.height+"H"+run.x+"z")};
- for(let y=0;y<h;y++){
-  const current=new Map();let previousColor=null,start=0;
-  for(let x=0;x<=w;x++){
-   let color=null;if(x<w){const i=(y*w+x)*4,lum=d[i]*.2126+d[i+1]*.7152+d[i+2]*.0722;if(blackOnly){if(lum<threshold)color="#000000"}else color="#"+[d[i],d[i+1],d[i+2]].map(v=>Math.round(v).toString(16).padStart(2,"0")).join("")}
-   if(color!==previousColor){if(previousColor){const width=x-start,key=previousColor+"|"+start+"|"+width,prior=active.get(key);if(prior)current.set(key,{...prior,height:prior.height+1});else{created++;if(created>450000){say("Слишком много векторных контуров. Уменьшите детализацию SVG.");return}current.set(key,{x:start,y,width,height:1,color:previousColor})}}previousColor=color;start=x}
+ try{
+  if(!src)return false;
+  if(original){original=false;render()}
+  const dimensions=vectorDimensions();if(!dimensions)return false;
+  const {w,h}=dimensions,c=document.createElement("canvas");c.width=w;c.height=h;
+  const q=c.getContext("2d",{willReadFrequently:true});
+  if(!q){say("Не удалось создать холст для SVG-экспорта");return false}
+  q.drawImage(out,0,0,w,h);
+  const d=q.getImageData(0,0,w,h).data,threshold=Number($("vectorThreshold")?.value??145),active=new Map(),paths=new Map();let created=0;
+  const finish=run=>{let list=paths.get(run.color);if(!list){list=[];paths.set(run.color,list)}list.push("M"+run.x+" "+run.y+"h"+run.width+"v"+run.height+"H"+run.x+"z")};
+  for(let y=0;y<h;y++){
+   const current=new Map();let previousColor=null,start=0;
+   for(let x=0;x<=w;x++){
+    let color=null;if(x<w){const i=(y*w+x)*4,lum=d[i]*.2126+d[i+1]*.7152+d[i+2]*.0722;if(blackOnly){if(lum<threshold)color="#000000"}else color="#"+[d[i],d[i+1],d[i+2]].map(v=>Math.round(v).toString(16).padStart(2,"0")).join("")}
+    if(color!==previousColor){if(previousColor){const width=x-start,key=previousColor+"|"+start+"|"+width,prior=active.get(key);if(prior)current.set(key,{...prior,height:prior.height+1});else{created++;if(created>450000){say("Слишком много векторных контуров. Уменьшите детализацию SVG.");return false}current.set(key,{x:start,y,width,height:1,color:previousColor})}}previousColor=color;start=x}
+   }
+   for(const [key,run] of active)if(!current.has(key))finish(run);active.clear();for(const [key,run] of current)active.set(key,run);
   }
-  for(const [key,run] of active)if(!current.has(key))finish(run);active.clear();for(const [key,run] of current)active.set(key,run);
- }
- for(const run of active.values())finish(run);
- const print=printAttributes(),bg=blackOnly?"":'<rect width="'+w+'" height="'+h+'" fill="#ffffff"/>',vectorLayers=[...paths.entries()].map(([color,commands])=>'<path fill="'+color+'" d="'+commands.join("")+'"/>').join("");
- const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+print.widthMm+'mm" height="'+print.heightMm+'mm" viewBox="0 0 '+w+' '+h+'" data-source-width="'+out.width+'" data-source-height="'+out.height+'" data-dpi="'+print.dpi+'">'+bg+vectorLayers+'</svg>';
- download(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}),slug(srcName)+(blackOnly?"-black-vector":"-vector")+".svg");say((blackOnly?"Чёрный":"Цветной")+" SVG экспортирован · "+dimensions.detail+" px · "+print.dpi+" DPI");
+  for(const run of active.values())finish(run);
+  const print=printAttributes(),bg=blackOnly?"":'<rect width="'+w+'" height="'+h+'" fill="#ffffff"/>',vectorLayers=[...paths.entries()].map(([color,commands])=>'<path fill="'+color+'" d="'+commands.join("")+'"/>').join("");
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+print.widthMm+'mm" height="'+print.heightMm+'mm" viewBox="0 0 '+w+' '+h+'" data-source-width="'+out.width+'" data-source-height="'+out.height+'" data-dpi="'+print.dpi+'">'+bg+vectorLayers+'</svg>';
+  download(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}),slug(srcName)+(blackOnly?"-black-vector":"-vector")+".svg");
+  say((blackOnly?"Чёрный":"Цветной")+" SVG экспортирован · "+dimensions.detail+" px · "+print.dpi+" DPI");
+  return true;
+ }catch(error){say("Не удалось экспортировать SVG. Уменьшите детализацию или размер изображения.");return false}
 }
 function exportCmykSvg(){
- if(!src)return;if(original){original=false;render()}
- const dimensions=vectorDimensions();if(!dimensions)return;const {w,h}=dimensions,cell=clamp(Number($("cmykCell")?.value)||8,4,24);
- const estimated=4*Math.ceil(w/cell)*Math.ceil(h/cell)*1.5;if(estimated>450000){say("Слишком много CMYK-точек. Увеличьте размер точки или уменьшите детализацию.");return}
- const c=document.createElement("canvas");c.width=w;c.height=h;const q=c.getContext("2d",{willReadFrequently:true});q.drawImage(out,0,0,w,h);
- const data=q.getImageData(0,0,w,h).data,cx=w/2,cy=h/2,diagonal=Math.ceil(Math.hypot(w,h)/2+cell),print=printAttributes();
- const plates=[{id:"cyan",label:"Cyan Plate",color:"#00a8e0",angle:15,channel:0},{id:"magenta",label:"Magenta Plate",color:"#e6007e",angle:75,channel:1},{id:"yellow",label:"Yellow Plate",color:"#f2d400",angle:0,channel:2},{id:"black",label:"Black Plate",color:"#1d1d1b",angle:45,channel:3}];
- const fmt=n=>Number(n.toFixed(2)).toString(),groups=[];
- for(const plate of plates){
-  const rad=plate.angle*Math.PI/180,co=Math.cos(rad),si=Math.sin(rad),dots=[];
-  for(let v=-diagonal;v<=diagonal;v+=cell)for(let u=-diagonal;u<=diagonal;u+=cell){
-   const px=cx+u*co-v*si,py=cy+u*si+v*co;if(px<0||py<0||px>=w||py>=h)continue;
-   const i=(Math.floor(py)*w+Math.floor(px))*4,R=data[i]/255,G=data[i+1]/255,B=data[i+2]/255,K=1-Math.max(R,G,B);
-   const cover=plate.channel===0?(1-R-K)/(1-K||1):plate.channel===1?(1-G-K)/(1-K||1):plate.channel===2?(1-B-K)/(1-K||1):K;
-   const radius=cell*.5*Math.sqrt(clamp(cover,0,1));if(radius>.25)dots.push('<circle cx="'+fmt(px)+'" cy="'+fmt(py)+'" r="'+fmt(radius)+'"/>');
-   if(dots.length>450000){say("Слишком много CMYK-точек. Увеличьте размер точки.");return}
+ try{
+  if(!src)return false;
+  if(original){original=false;render()}
+  const dimensions=vectorDimensions();if(!dimensions)return false;
+  const {w,h}=dimensions,cell=clamp(Number($("cmykCell")?.value)||8,4,24);
+  const estimated=4*Math.ceil(w/cell)*Math.ceil(h/cell)*1.5;if(estimated>450000){say("Слишком много CMYK-точек. Увеличьте размер точки или уменьшите детализацию.");return false}
+  const c=document.createElement("canvas");c.width=w;c.height=h;const q=c.getContext("2d",{willReadFrequently:true});
+  if(!q){say("Не удалось создать холст для CMYK-экспорта");return false}
+  q.drawImage(out,0,0,w,h);
+  const data=q.getImageData(0,0,w,h).data,cx=w/2,cy=h/2,diagonal=Math.ceil(Math.hypot(w,h)/2+cell),print=printAttributes();
+  const plates=[{id:"cyan",label:"Cyan Plate",color:"#00a8e0",angle:15,channel:0},{id:"magenta",label:"Magenta Plate",color:"#e6007e",angle:75,channel:1},{id:"yellow",label:"Yellow Plate",color:"#f2d400",angle:0,channel:2},{id:"black",label:"Black Plate",color:"#1d1d1b",angle:45,channel:3}];
+  const fmt=n=>Number(n.toFixed(2)).toString(),groups=[];
+  for(const plate of plates){
+   const rad=plate.angle*Math.PI/180,co=Math.cos(rad),si=Math.sin(rad),dots=[];
+   for(let v=-diagonal;v<=diagonal;v+=cell)for(let u=-diagonal;u<=diagonal;u+=cell){
+    const px=cx+u*co-v*si,py=cy+u*si+v*co;if(px<0||py<0||px>=w||py>=h)continue;
+    const i=(Math.floor(py)*w+Math.floor(px))*4,R=data[i]/255,G=data[i+1]/255,B=data[i+2]/255,K=1-Math.max(R,G,B);
+    const cover=plate.channel===0?(1-R-K)/(1-K||1):plate.channel===1?(1-G-K)/(1-K||1):plate.channel===2?(1-B-K)/(1-K||1):K;
+    const radius=cell*.5*Math.sqrt(clamp(cover,0,1));if(radius>.25)dots.push('<circle cx="'+fmt(px)+'" cy="'+fmt(py)+'" r="'+fmt(radius)+'"/>');
+    if(dots.length>450000){say("Слишком много CMYK-точек. Увеличьте размер точки.");return false}
+   }
+   groups.push('<g id="plate-'+plate.id+'" inkscape:groupmode="layer" inkscape:label="'+plate.label+'" fill="'+plate.color+'">'+dots.join("")+'</g>');
   }
-  groups.push('<g id="plate-'+plate.id+'" inkscape:groupmode="layer" inkscape:label="'+plate.label+'" fill="'+plate.color+'">'+dots.join("")+'</g>');
- }
- const svg='<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="'+print.widthMm+'mm" height="'+print.heightMm+'mm" viewBox="0 0 '+w+' '+h+'" data-source-width="'+out.width+'" data-source-height="'+out.height+'" data-dpi="'+print.dpi+'"><title>TGRMLither CMYK vector separations</title><rect width="'+w+'" height="'+h+'" fill="#ffffff"/>'+groups.join("")+'</svg>';
- download(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}),slug(srcName)+"-CMYK-plates.svg");say("CMYK-экспорт готов · 4 подписанные векторные пластины");
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="'+print.widthMm+'mm" height="'+print.heightMm+'mm" viewBox="0 0 '+w+' '+h+'" data-source-width="'+out.width+'" data-source-height="'+out.height+'" data-dpi="'+print.dpi+'"><title>TGRMLither CMYK vector separations</title><rect width="'+w+'" height="'+h+'" fill="#ffffff"/>'+groups.join("")+'</svg>';
+  download(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}),slug(srcName)+"-CMYK-plates.svg");
+  say("CMYK-экспорт готов · 4 подписанные векторные пластины");
+  return true;
+ }catch(error){say("Не удалось экспортировать CMYK. Увеличьте размер точки или уменьшите изображение.");return false}
 }
 let temporalRaf=0,temporalStart=0,temporalBase=null,temporalRecorder=null,temporalChunks=[],temporalTimer=0;
 function startTemporal(recording){
@@ -2398,7 +2428,7 @@ updateFullscreenButton();
 $("reset").onclick=()=>{if(!WORKSPACE_NAMES.includes(mode))return;if(!confirm("Сбросить настройки только текущего пространства? Остальные пространства и пресеты не изменятся."))return;const algo=mode==="shape"?"shape":mode==="script"?"ascii":"bayer4";s=cloneSettings({...def,algorithm:algo,effects:[]});workspaceSettings[mode]=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Настройки текущего пространства сброшены")};
 $("randomize").onclick=()=>{let a=Object.keys(labels).filter(k=>k!=="ascii"&&k!=="shape"),p=Object.keys(pal);s.algorithm=a[Math.floor(Math.random()*a.length)];s.palette=p[Math.floor(Math.random()*p.length)];s.scale=2+Math.floor(Math.random()*15);s.levels=2+Math.floor(Math.random()*15);s.contrast=80+Math.floor(Math.random()*70);s.threshold=-25+Math.floor(Math.random()*51);s.effects=EFFECT_KEYS.filter(()=>Math.random()>.68);sync();render();saveWorkspaceSettings(mode);say("Случайная комбинация готова")};$("shuffle").onclick=()=>{const rnd=(a,b)=>Math.round(a+Math.random()*(b-a));s.scale=rnd(2,16);s.levels=rnd(2,16);s.threshold=rnd(-50,50);s.contrast=rnd(70,160);s.brightness=rnd(-35,35);s.midtones=rnd(20,80);s.highlights=rnd(20,80);s.blur=rnd(0,3);s.depth=rnd(25,100);s.patternAngle=rnd(0,180);s.jitter=rnd(0,70);s.effectStrength=Object.fromEntries(EFFECT_KEYS.map(k=>[k,rnd(10,100)]));if(!s.effects?.length)s.effects=EFFECT_KEYS.filter(()=>Math.random()>.78);sync();render();saveWorkspaceSettings(mode);say("Параметры перемешаны")};
 $("toggleOriginal").onclick=()=>{original=!original;$("toggleOriginal").textContent=original?"◉ Показать результат":"◉ Показать оригинал";updateCompareUI();render()};$("compareToggle").onclick=()=>{const wasOriginal=original;compareEnabled=!compareEnabled;if(compareEnabled)original=false;$("toggleOriginal").textContent=original?"◉ Показать результат":"◉ Показать оригинал";if(wasOriginal)render();else updateCompareUI()};$("compareRange").oninput=e=>{comparePosition=clamp(Number(e.target.value)||0,0,100);updateCompareUI()};window.addEventListener("resize",()=>requestAnimationFrame(updateCompareUI));$("zoom").onchange=zoom;$("undo").onclick=undoAction;$("redo").onclick=redoAction;
-$("png").onclick=()=>exportImage("png");$("topExport").onclick=openExportModal;$("exportCancel").onclick=closeExportModal;$("exportConfirm").onclick=confirmExport;$("exportFormat").onchange=updateExportFormatUI;$("exportJpegQuality").oninput=e=>{$("exportJpegQualityValue").textContent=e.target.value+"%";$("jpegQuality").value=e.target.value;$("jpegQuality").dispatchEvent(new Event("input",{bubbles:true}))};$("exportJpegQuality").onchange=()=>$("jpegQuality").dispatchEvent(new Event("change",{bubbles:true}));$("exportModal").onclick=e=>{if(e.target===$("exportModal"))closeExportModal()};$("jpg").onclick=()=>exportImage("jpeg");$("copy").onclick=copyResult;$("svgColor").onclick=()=>exportSvg(false);$("svgBlack").onclick=()=>exportSvg(true);$("svgCmyk").onclick=exportCmykSvg;
+$("png").onclick=()=>exportImage("png");$("topExport").onclick=openExportModal;$("exportCancel").onclick=closeExportModal;$("exportConfirm").onclick=confirmExport;$("exportFormat").onchange=updateExportFormatUI;$("exportJpegQuality").oninput=e=>{$("exportJpegQualityValue").textContent=e.target.value+"%";$("jpegQuality").value=e.target.value;$("jpegQuality").dispatchEvent(new Event("input",{bubbles:true}))};$("exportJpegQuality").onchange=()=>$("jpegQuality").dispatchEvent(new Event("change",{bubbles:true}));$("exportModal").onclick=e=>{if(e.target===$("exportModal"))closeExportModal()};$("jpg").onclick=()=>exportImage("jpeg");$("copy").onclick=copyResult;$("svgColor").onclick=()=>{if(exportSvg(false))markResultExported()};$("svgBlack").onclick=()=>{if(exportSvg(true))markResultExported()};$("svgCmyk").onclick=()=>{if(exportCmykSvg())markResultExported()};
 $("vectorDetail").onchange=()=>say("Детализация SVG: "+$("vectorDetail").selectedOptions[0].textContent);
 $("vectorThreshold").oninput=()=>{$("vectorThresholdV").textContent=$("vectorThreshold").value};
 $("printDpi").onchange=()=>{$("printDpi").value=String(clamp(Math.round(Number($("printDpi").value)||300),72,1200))};

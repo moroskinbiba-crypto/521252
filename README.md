@@ -89,5 +89,11 @@ MIT. See [LICENSE](LICENSE).
 - Image files larger than 128 MB are rejected before decoding to avoid unnecessarily large memory allocations. The existing 24 MP canvas limit still applies after decoding.
 
 
+## Export and mobile refinements in v1.3.5
+
+- Vector and CMYK exports now report success only after a file has actually been generated. A size/detail limit or an export error no longer changes the source status to “exported”.
+- Mobile navigation, primary actions, selects, effect toggles and range controls have larger touch targets while preserving the existing compact layout.
+
+
 ### Script Slayer · Neo Glow
 Neo Glow includes an adjustable scan-band position, width, brightness, off-band visibility and colour. The band is centered by default, its settings follow the saved Script Slayer profile, and the Animation button moves the band across the symbol canvas.
