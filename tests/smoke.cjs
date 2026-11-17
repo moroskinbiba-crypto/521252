@@ -1188,6 +1188,15 @@ async function downloadFrom(page, selector) {
     assert.match(await page.locator("#batchResults").innerText(), /worker-batch-fixture\.png[\s\S]*Готово/,
       "large batch output should be returned from worker processing");
 
+    // Restore the three small fixtures so the cancellation test targets the main-thread fallback.
+    await page.locator("#clearBatch").click();
+    await page.locator("#batchInput").setInputFiles([
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
+      { name: "broken-image.png", mimeType: "image/png", buffer: Buffer.from("not a valid PNG") }
+    ]);
+    assert.equal(await page.locator("#batchList .fileitem").count(), 3);
+
     // Batch cancellation stops after the in-flight file and keeps partial results downloadable.
     assert.equal(await page.locator("#cancelBatch").isVisible(), false, "batch cancellation should be hidden while idle");
     await page.evaluate(() => {
