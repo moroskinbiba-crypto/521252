@@ -969,6 +969,32 @@ async function downloadFrom(page, selector) {
     assert.deepEqual([...batchZipBytes.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04], "batch archive should have a valid ZIP local-file signature");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither.png")), "batch ZIP should contain the first processed PNG filename");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither-2.png")), "batch ZIP should contain a collision-free second PNG filename");
+    // Batch cancellation stops after the in-flight file and keeps partial results downloadable.
+    assert.equal(await page.locator("#cancelBatch").isVisible(), false, "batch cancellation should be hidden while idle");
+    await page.evaluate(() => {
+      window.__tgrmOriginalToBlob = HTMLCanvasElement.prototype.toBlob;
+      window.__tgrmToBlobCalls = 0;
+      HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
+        const canvas = this;
+        window.__tgrmToBlobCalls++;
+        setTimeout(() => window.__tgrmOriginalToBlob.call(canvas, callback, type, quality), 300);
+      };
+    });
+    await page.locator("#runBatch").click();
+    await page.waitForFunction(() => window.__tgrmToBlobCalls >= 1, null, { timeout: 10000 });
+    assert.equal(await page.locator("#cancelBatch").isVisible(), true, "cancel action should appear while processing");
+    await page.locator("#cancelBatch").click();
+    await page.waitForFunction(() => document.querySelector("#cancelBatch")?.hidden === true, null, { timeout: 15000 });
+    assert.equal(await page.locator("#batchResults .fileitem").count(), 1, "cancellation should finish the current file but skip the remaining files");
+    assert.equal(await page.locator("#batchProgressCount").textContent(), "1 / 3", "partial progress should report completed files");
+    assert.match(await page.locator("#batchProgressLabel").textContent(), /остановлена/i, "the progress status should identify a cancelled batch");
+    assert.equal(await page.locator("#downloadBatchZip").isEnabled(), true, "partial batch results should remain available as a ZIP");
+    await page.evaluate(() => {
+      HTMLCanvasElement.prototype.toBlob = window.__tgrmOriginalToBlob;
+      delete window.__tgrmOriginalToBlob;
+      delete window.__tgrmToBlobCalls;
+    });
+
 
     if (await page.locator("#batch-effect-scanlines").getAttribute("aria-checked") !== "true") await page.locator("#batch-effect-scanlines").click();
     assert.equal(await page.locator("#batch-effect-scanlines").getAttribute("aria-checked"), "true");
