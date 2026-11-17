@@ -47,8 +47,10 @@ function sendBitmap(id,result,extra={}){
 async function handleMessage(data){
   const {id,type}=data||{};
   if(type==="set-source"){
-    const old=sourceImages.get(data.sourceId);
-    if(old&&old.close)old.close();
+    for(const [oldId,old] of sourceImages){
+      if(old&&old.close)old.close();
+      sourceImages.delete(oldId);
+    }
     sourceImages.set(data.sourceId,data.bitmap);
     self.postMessage({id,type:"source-ready",sourceId:data.sourceId});
     return;
