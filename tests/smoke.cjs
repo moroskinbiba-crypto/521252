@@ -44,6 +44,46 @@ async function downloadFrom(page, selector) {
       return canvas && canvas.width > 0 && canvas.height > 0 &&
         document.querySelector("#statAlgorithm")?.textContent.trim();
     }, null, { timeout: 15000 });
+
+    // Exercise the real OffscreenCanvas worker with an image above its activation threshold.
+    const largeWorkerFixture = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024; canvas.height = 900;
+      const ctx = canvas.getContext("2d");
+      const gradient = ctx.createLinearGradient(0, 0, 1024, 900);
+      gradient.addColorStop(0, "#102030");
+      gradient.addColorStop(.5, "#b07038");
+      gradient.addColorStop(1, "#e0f0d0");
+      ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < canvas.height; y += 17) {
+        ctx.fillStyle = "rgba(20, 80, 120, .35)";
+        ctx.fillRect((y * 19) % canvas.width, y, 180, 8);
+      }
+      return canvas.toDataURL("image/png");
+    });
+    await page.locator("#imageInput").setInputFiles({
+      name: "worker-large-fixture.png", mimeType: "image/png",
+      buffer: Buffer.from(largeWorkerFixture.split(",")[1], "base64")
+    });
+    await page.waitForFunction(() =>
+      document.querySelector("#filename")?.textContent.includes("worker-large-fixture.png")
+    );
+    await page.waitForFunction(() =>
+      document.body.dataset.processingEngine === "worker" &&
+      document.body.dataset.processingPending === "false",
+      null, { timeout: 30000 }
+    );
+    const workerPreview = await page.evaluate(() => ({
+      available: document.body.dataset.processingWorker === "available",
+      engine: document.body.dataset.processingEngine,
+      pending: document.body.dataset.processingPending,
+      width: document.querySelector("#output").width,
+      height: document.querySelector("#output").height
+    }));
+    assert.equal(workerPreview.available, true, "large previews should initialize the OffscreenCanvas worker");
+    assert.equal(workerPreview.engine, "worker", "large image processing should run in the worker");
+    assert.ok(workerPreview.width > 0 && workerPreview.height > 0, "the worker should return a drawable preview bitmap");
+    await page.evaluate(() => window.__tgrmlitherWaitForPreview());
     const unrelatedCachePreserved = await page.evaluate(async () => {
       if (!("serviceWorker" in navigator) || !("caches" in window)) return true;
       await navigator.serviceWorker.ready;
