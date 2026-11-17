@@ -1525,7 +1525,7 @@ const WORKER_PIXEL_THRESHOLD=786432;
 let processingWorker=null,processingWorkerFailed=false,processingWorkerRequestSeq=0,processingWorkerPending=new Map();
 let processingSourceSeq=0,processingSourceId=0,processingSourceReadyId=0,processingSourcePending=false;
 let previewRevision=0,previewWorkerBusy=false,pendingWorkerPreview=null,previewWaiters=[];
-let videoWorkerBusy=false,videoFrameRevision=0;
+let videoWorkerBusy=false,videoFrameRevision=0,videoFrameQueued=false;
 
 function shouldUseProcessingWorker(image){
  return !!image&&Number(image.width||0)*Number(image.height||0)>=WORKER_PIXEL_THRESHOLD;
@@ -1878,8 +1878,8 @@ function openExportModal(){
 function closeExportModal(){$("exportModal").classList.add("hidden")}
 async function confirmExport(){
  const format=$("exportFormat").value;closeExportModal();
+ if(format!=="project"&&original){original=false;$("toggleOriginal").textContent="◉ Показать результат";render()}
  if(format!=="project")await waitForProcessingPreview();
- if(format!=="project"&&original){original=false;$("toggleOriginal").textContent="◉ Показать оригинал";render()}
  if(format==="png")exportImage("png");
  else if(format==="jpeg")exportImage("jpeg");
  else if(format==="svgColor"){if(exportSvg(false))markResultExported()}
@@ -2349,8 +2349,7 @@ async function runBatch(){
       const result=await workerRequest({type:"process",kind:"batch",bitmap,cfg,paletteColors:paletteColorsFor(cfg),outputType:"blob",mimeType:"image/png"},[bitmap]);
       blob=result.blob;width=result.width;height=result.height;
      }catch(workerError){
-      if(!processingWorker)throw workerError;
-      disableProcessingWorker(workerError);
+      if(processingWorker)disableProcessingWorker(workerError);
      }
     }
     if(!blob){
@@ -2412,7 +2411,7 @@ function loadProject(f){
  };
  try{r.readAsText(f)}catch(error){say("Не удалось прочитать файл проекта")}
 }
-async function copyResult(){try{let blob=await new Promise(r=>out.toBlob(r,"image/png"));await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);say("Изображение скопировано")}catch(e){say("Копирование недоступно. Скачайте PNG.")}}
+async function copyResult(){try{await waitForProcessingPreview();let blob=await new Promise(r=>out.toBlob(r,"image/png"));await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);say("Изображение скопировано")}catch(e){say("Копирование недоступно. Скачайте PNG.")}}
 
 let asciiAnimRaf=0,asciiAnimBase=0,asciiAnimGlowBase=0,asciiAnimStart=0,asciiRecorder=null,asciiChunks=[],asciiAnimTimer=0;
 function startAsciiAnimation(recording){
@@ -2574,24 +2573,30 @@ async function renderVideoFrame(){
  if(videoFrameCanvas.width!==width)videoFrameCanvas.width=width;
  if(videoFrameCanvas.height!==height)videoFrameCanvas.height=height;
  videoFrameContext.drawImage(video,0,0,width,height);
- const cfg=cloneSettings(s),frameTime=video.currentTime,revision=++videoFrameRevision;
- let result=null;
+ const cfg=cloneSettings(s);
  if(processingWorker&&shouldUseProcessingWorker(videoFrameCanvas)){
-  if(videoWorkerBusy)return false;
-  videoWorkerBusy=true;
+  if(videoWorkerBusy){videoFrameQueued=true;return false}
+  videoWorkerBusy=true;const revision=++videoFrameRevision;
   try{
    const bitmap=await createImageBitmap(videoFrameCanvas);
-   result=await workerRequest({type:"process",kind:"video",bitmap,cfg,paletteColors:paletteColorsFor(cfg)},[bitmap]);
-   if(revision!==videoFrameRevision||mode!=="video"||Math.abs(video.currentTime-frameTime)>.08){result.bitmap?.close?.();return false}
+   const result=await workerRequest({type:"process",kind:"video",bitmap,cfg,paletteColors:paletteColorsFor(cfg)},[bitmap]);
+   if(revision!==videoFrameRevision||mode!=="video"){result.bitmap?.close?.();return false}
    drawRenderedImageToCanvas(canvas,result.bitmap,result);
   }catch(error){
    if(processingWorker)disableProcessingWorker(error);
-   if(revision!==videoFrameRevision)return false;
+   if(revision!==videoFrameRevision||mode!=="video")return false;
    const fallback=raster(videoFrameCanvas,cfg);
    drawRenderedImageToCanvas(canvas,fallback,fallback);
-  }finally{videoWorkerBusy=false}
+  }finally{
+   videoWorkerBusy=false;
+   if(videoFrameQueued&&mode==="video"){
+    videoFrameQueued=false;
+    requestAnimationFrame(()=>renderVideoFrame());
+   }
+  }
  }else{
-  result=raster(videoFrameCanvas,cfg);
+  const revision=++videoFrameRevision;
+  const result=raster(videoFrameCanvas,cfg);
   if(revision!==videoFrameRevision)return false;
   drawRenderedImageToCanvas(canvas,result,result);
  }
