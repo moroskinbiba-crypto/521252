@@ -197,6 +197,8 @@ async function downloadFrom(page, selector) {
     assert.ok(shuffled.levels >= 2 && shuffled.levels <= 16, "Shuffle supports the expanded 16-tone range");
     assert.ok(shuffled.threshold >= -80 && shuffled.threshold <= 80, "Shuffle keeps threshold in range");
     assert.ok(shuffled.contrast >= 50 && shuffled.contrast <= 180, "Shuffle keeps contrast in range");
+    // Use a deterministic algorithm so repeated preview renders can be compared byte-for-byte.
+    await page.locator("#algorithm").selectOption("bayer4");
     // An enabled effect at zero intensity must not trigger a redundant post-processing resize.
     const beforeNoOpEffect = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     await setRange('#generalEffectsControl [data-effect-strength="scanlines"]', 0);
