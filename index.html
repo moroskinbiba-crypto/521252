@@ -1733,7 +1733,7 @@ document.querySelectorAll(".effect-control").forEach(row=>{
    const order=s.effectOrder||[],i=order.indexOf(key),j=i+delta;
    if(i<0||j<0||j>=order.length)return;
    [order[i],order[j]]=[order[j],order[i]];s.effectOrder=order;
-   saveWorkspaceSettings(panelScope);render();say("Порядок эффектов обновлён");
+   saveWorkspaceSettings(panelScope);syncEffectOrderPanel(panelScope);render();say("Порядок эффектов обновлён");
   };
   actions.append(b);
  }
@@ -1793,6 +1793,30 @@ function initAlgorithmStack(){
   s.algorithmLayers=layers;saveWorkspaceSettings(mode);renderAlgorithmStackUI();render();say("Стек алгоритмов обновлён");
  });
 }
+function syncEffectOrderPanel(scope){
+ const panel=$(scope==="editor"?"generalEffectsControl":scope+"EffectsControl"),list=panel?.querySelector(".effects");
+ if(!list)return;
+ const profile=scope===mode?s:(workspaceSettings[scope]||def);
+ const order=Array.isArray(profile.effectOrder)?profile.effectOrder:def.effectOrder;
+ const rows=Array.from(list.querySelectorAll(".effect-control"));
+ const rank=new Map(order.map((key,index)=>[key,index]));
+ rows.sort((a,b)=>{
+  const ka=a.querySelector("[data-effect]")?.dataset.effect,kb=b.querySelector("[data-effect]")?.dataset.effect;
+  return (rank.get(ka)??Number.MAX_SAFE_INTEGER)-(rank.get(kb)??Number.MAX_SAFE_INTEGER);
+ });
+ rows.forEach(row=>list.appendChild(row));
+ rows.forEach((row,index)=>{
+  const key=row.querySelector("[data-effect]")?.dataset.effect,label=row.querySelector("label")?.textContent.trim()||key||"эффект";
+  const buttons=row.querySelectorAll(".effect-order-actions button");
+  buttons.forEach((button,buttonIndex)=>{
+   const up=buttonIndex===0;
+   button.disabled=up?index===0:index===rows.length-1;
+   button.title=up?"Выше в стеке":"Ниже в стеке";
+   button.setAttribute("aria-label",(up?"Поднять":"Опустить")+" · "+label);
+  });
+ });
+}
+function syncEffectOrderPanels(){for(const scope of WORKSPACE_NAMES)syncEffectOrderPanel(scope)}
 function sync(){$("serpentine").checked=!!s.serpentine;for(const k of ["algorithm","scale","markScale","blend","smoothing","qualityMode","jpegQuality","levels","threshold","patternAngle","patternShape","depth","contrast","brightness","midtones","highlights","blur","invert","colorMode","shape","jitter","shapeDistribution","shapeRotation","asciiWidth","asciiSet","asciiDepth","asciiCellSize","asciiOffset","asciiCustomChars","asciiColorMode","asciiBgMode","asciiBgColor","asciiTextColor","neoGlowDirection","neoGlowLength","neoGlowBrightness","neoGlowVisibility","neoGlowPhase","neoGlowColor"])if($(k))$(k).value=s[k]??def[k];if(["shape","ascii"].includes(s.algorithm))$("algorithm").value="bayer4";$("scaleV").textContent=s.scale+" px";$("markScaleV").textContent=(s.markScale??100)+"%";$("blendV").textContent=(s.blend??100)+"%";$("smoothingV").textContent=(s.smoothing??0)+"%";$("jpegQualityV").textContent=(s.jpegQuality??94)+"%";$("levelsV").textContent=s.levels;$("thresholdV").textContent=s.threshold;$("patternAngleV").textContent=(s.patternAngle??45)+"°";$("vectorThresholdV").textContent=$("vectorThreshold")?.value??145;if($("cmykCellV"))$("cmykCellV").textContent=($("cmykCell")?.value??8)+" px";$("depthV").textContent=(s.depth??70)+"%";$("contrastV").textContent=s.contrast+"%";$("brightnessV").textContent=s.brightness;$("midtonesV").textContent=s.midtones+"%";$("highlightsV").textContent=s.highlights+"%";$("shapeRotationV").textContent=s.shapeRotation+"°";$("blurV").textContent=s.blur+" px";$("jitterV").textContent=s.jitter+"%";$("asciiWidthV").textContent=s.asciiWidth;$("asciiDepthV").textContent=s.asciiDepth;$("asciiCellSizeV").textContent=s.asciiCellSize+" px";$("asciiOffsetV").textContent=s.asciiOffset;$("asciiCustomCount").textContent=Array.from(s.asciiCustomChars||"").length+" / 10";$("neoGlowLengthV").textContent=s.neoGlowLength+"%";$("neoGlowBrightnessV").textContent=s.neoGlowBrightness+"%";$("neoGlowVisibilityV").textContent=s.neoGlowVisibility+"%";$("neoGlowPhaseV").textContent=Math.round(s.neoGlowPhase)+"%";$("neoGlowEnabled").setAttribute("aria-checked",String(!!s.neoGlowEnabled));const activeScope=effectScopeForMode();
 document.querySelectorAll('.effect-control .effect-toggle[role="checkbox"][data-effect]').forEach(e=>{
  const scope=e.closest("[data-effect-scope]")?.dataset.effectScope;
@@ -1807,7 +1831,7 @@ document.querySelectorAll("[data-effect-strength]").forEach(e=>{
  const profile=scope===activeScope?s:(workspaceSettings[scope]||def);
  const key=e.dataset.effectStrength;e.value=(profile.effectStrength||{})[key]??50;
  const output=e.closest(".effect-intensity")?.querySelector("output");if(output)output.textContent=e.value+"%";
-});document.querySelectorAll(".palette").forEach(e=>e.classList.toggle("active",e.dataset.palette===s.palette));(s.customColors||pal.custom.c).forEach((c,i)=>{const el=$("customColor"+(i+1));if(el)el.value=c});pal.custom.c=s.customColors||pal.custom.c;for(let i=0;i<4;i++)if($("bandShape"+i)){const b=(s.shapeBands||def.shapeBands)[i];$("bandShape"+i).value=b.shape;$("bandSize"+i).value=b.size;$("bandColor"+i).value=b.color;$("bandRotation"+i).value=b.rotation??0;$("bandRotation"+i+"V").textContent=(b.rotation??0)+"°"}const ts=s.shapeThresholds||def.shapeThresholds;for(let i=0;i<3;i++){$("shapeThreshold"+i).value=ts[i];$("shapeThreshold"+i+"V").textContent=ts[i]+"%"}renderAlgorithmStackUI()}
+});document.querySelectorAll(".palette").forEach(e=>e.classList.toggle("active",e.dataset.palette===s.palette));(s.customColors||pal.custom.c).forEach((c,i)=>{const el=$("customColor"+(i+1));if(el)el.value=c});pal.custom.c=s.customColors||pal.custom.c;for(let i=0;i<4;i++)if($("bandShape"+i)){const b=(s.shapeBands||def.shapeBands)[i];$("bandShape"+i).value=b.shape;$("bandSize"+i).value=b.size;$("bandColor"+i).value=b.color;$("bandRotation"+i).value=b.rotation??0;$("bandRotation"+i+"V").textContent=(b.rotation??0)+"°"}const ts=s.shapeThresholds||def.shapeThresholds;for(let i=0;i<3;i++){$("shapeThreshold"+i).value=ts[i];$("shapeThreshold"+i+"V").textContent=ts[i]+"%"}renderAlgorithmStackUI();syncEffectOrderPanels()}
 let paletteScrollPreview=null,paletteScrollBase=null;
 function initPalettes(){const paletteContainer=$("palettes");if(paletteContainer.dataset.wheelPreview!=="enabled"){paletteContainer.dataset.wheelPreview="enabled";paletteContainer.addEventListener("wheel",event=>{if(!event.deltaY&&!event.deltaX)return;event.preventDefault();const keys=Object.keys(pal);if(!paletteScrollPreview)paletteScrollBase=s.palette;const current=paletteScrollPreview||s.palette,index=Math.max(0,keys.indexOf(current)),direction=(event.deltaY||event.deltaX)>0?1:-1;paletteScrollPreview=keys[(index+direction+keys.length)%keys.length];s.palette=paletteScrollPreview;sync();renderActivePaletteEditor();render()},{passive:false});paletteContainer.addEventListener("pointerleave",()=>{if(!paletteScrollPreview)return;const prior=paletteScrollBase||"moss";paletteScrollPreview=null;paletteScrollBase=null;if(s.palette!==prior){s.palette=prior;sync();renderActivePaletteEditor();render()}})}paletteContainer.innerHTML="";for(const [key,p] of Object.entries(pal)){let b=document.createElement("button");b.className="palette";b.dataset.palette=key;b.title=p.name;let sw=document.createElement("span");sw.className="swatches";p.c.forEach(c=>{let i=document.createElement("i");i.style.background=c;sw.append(i)});let nm=document.createElement("span");nm.className="pname";nm.textContent=p.name;b.append(sw,nm);b.onclick=()=>{paletteScrollPreview=null;paletteScrollBase=null;s.palette=key;sync();renderActivePaletteEditor();render();if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode)};paletteContainer.append(b)}renderActivePaletteEditor()}
 function extractPalette(){if(!src){say("Сначала откройте изображение");return}const c=document.createElement("canvas");c.width=72;c.height=72;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0,72,72);const d=x.getImageData(0,0,72,72).data,p=[];for(let i=0;i<d.length;i+=4)if(d[i+3]>16)p.push([d[i],d[i+1],d[i+2]]);if(!p.length){say("В изображении нет доступных цветов");return}const count=clamp(Number(s.levels)||4,2,16);p.sort((a,b)=>lumin(...a)-lumin(...b));let centers=Array.from({length:count},(_,k)=>[...(p[Math.min(p.length-1,Math.floor((k+.5)*p.length/count))]||[0,0,0])]);for(let pass=0;pass<9;pass++){const sum=centers.map(()=>[0,0,0,0]);for(const v of p){let win=0,dist=Infinity;centers.forEach((cc,i)=>{const q=(v[0]-cc[0])**2+(v[1]-cc[1])**2+(v[2]-cc[2])**2;if(q<dist){dist=q;win=i}});for(let k=0;k<3;k++)sum[win][k]+=v[k];sum[win][3]++}centers=centers.map((cc,i)=>sum[i][3]?sum[i].slice(0,3).map(v=>Math.round(v/sum[i][3])):cc)}s.customColors=centers.sort((a,b)=>lumin(...a)-lumin(...b)).map(v=>"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""));pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);initPalettes();renderActivePaletteEditor();sync();render();say("Из фото извлечено цветов: "+count)}
