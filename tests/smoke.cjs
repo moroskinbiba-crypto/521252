@@ -199,6 +199,10 @@ async function downloadFrom(page, selector) {
     assert.ok(shuffled.contrast >= 50 && shuffled.contrast <= 180, "Shuffle keeps contrast in range");
     // Use a deterministic algorithm so repeated preview renders can be compared byte-for-byte.
     await page.locator("#algorithm").selectOption("bayer4");
+    // Clear effects randomized by the earlier Shuffle test before checking a no-op effect.
+    for (const toggle of await page.locator('#generalEffectsControl .effect-toggle[aria-checked="true"]').all()) {
+      await toggle.click();
+    }
     // An enabled effect at zero intensity must not trigger a redundant post-processing resize.
     const beforeNoOpEffect = await page.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
     await setRange('#generalEffectsControl [data-effect-strength="scanlines"]', 0);
@@ -216,7 +220,7 @@ async function downloadFrom(page, selector) {
       context.globalAlpha = 0.37;
       return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
     });
-    await page.locator("#shuffle").click();
+    await page.locator("#algorithm").selectOption("floyd");
     const reusedOutputContext = await page.locator("#output").evaluate(canvas => {
       const context = canvas.getContext("2d");
       return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
