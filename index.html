@@ -2336,6 +2336,7 @@ async function runBatch(){
  $("runBatch").disabled=true;$("clearBatch").disabled=true;$("batchBrowse").disabled=true;$("batchInput").disabled=true;$("cancelBatch").hidden=false;$("cancelBatch").disabled=false;
  $("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressLabel").textContent="Обработка файлов…";$("batchProgressCount").textContent="0 / "+files.length;
  $("downloadBatchZip").disabled=true;revokeBatchDownloadUrls();$("batchResults").innerHTML="";batchResultsData=[];
+ document.body.dataset.batchProcessingEngine="main";
  const cfg=cloneSettings(s),usedNames=new Set();let succeeded=0,failed=0;
  try{
   for(let i=0;i<files.length;i++){
@@ -2344,11 +2345,13 @@ async function runBatch(){
    try{
     const image=await fileCanvas(f);let blob=null,width=image.width,height=image.height;
     if(processingWorker&&shouldUseProcessingWorker(image)){
+     document.body.dataset.batchProcessingEngine="worker";
      try{
       const bitmap=await createImageBitmap(image);
       const result=await workerRequest({type:"process",kind:"batch",bitmap,cfg,paletteColors:paletteColorsFor(cfg),outputType:"blob",mimeType:"image/png"},[bitmap]);
       blob=result.blob;width=result.width;height=result.height;
      }catch(workerError){
+      document.body.dataset.batchProcessingEngine="main";
       if(processingWorker)disableProcessingWorker(workerError);
      }
     }
