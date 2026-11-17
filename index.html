@@ -2575,6 +2575,7 @@ async function renderVideoFrame(){
  videoFrameContext.drawImage(video,0,0,width,height);
  const cfg=cloneSettings(s);
  if(processingWorker&&shouldUseProcessingWorker(videoFrameCanvas)){
+  document.body.dataset.videoProcessingEngine="worker-pending";
   if(videoWorkerBusy){videoFrameQueued=true;return false}
   videoWorkerBusy=true;const revision=++videoFrameRevision;
   try{
@@ -2582,11 +2583,13 @@ async function renderVideoFrame(){
    const result=await workerRequest({type:"process",kind:"video",bitmap,cfg,paletteColors:paletteColorsFor(cfg)},[bitmap]);
    if(revision!==videoFrameRevision||mode!=="video"){result.bitmap?.close?.();return false}
    drawRenderedImageToCanvas(canvas,result.bitmap,result);
+   document.body.dataset.videoProcessingEngine="worker";
   }catch(error){
    if(processingWorker)disableProcessingWorker(error);
    if(revision!==videoFrameRevision||mode!=="video")return false;
    const fallback=raster(videoFrameCanvas,cfg);
    drawRenderedImageToCanvas(canvas,fallback,fallback);
+   document.body.dataset.videoProcessingEngine="main";
   }finally{
    videoWorkerBusy=false;
    if(videoFrameQueued&&mode==="video"){
@@ -2595,6 +2598,7 @@ async function renderVideoFrame(){
    }
   }
  }else{
+  document.body.dataset.videoProcessingEngine="main";
   const revision=++videoFrameRevision;
   const result=raster(videoFrameCanvas,cfg);
   if(revision!==videoFrameRevision)return false;
