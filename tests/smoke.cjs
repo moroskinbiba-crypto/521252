@@ -286,11 +286,15 @@ async function downloadFrom(page, selector) {
     await page.locator("#asciiColorMode").selectOption("mono");
     await page.locator("#asciiTextColor").evaluate(el => { el.value = "#222222"; el.dispatchEvent(new Event("input", { bubbles: true })); });
     await page.locator("#neoGlowColor").evaluate(el => { el.value = "#ff00ff"; el.dispatchEvent(new Event("input", { bubbles: true })); });
-    const setRange = async (selector, value) => page.locator(selector).evaluate((el, next) => {
-      el.value = String(next);
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-    }, value);
+    const setRange = async (selector, value) => {
+      await page.locator(selector).evaluate((el, next) => {
+        el.value = String(next);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }, value);
+      // Continuous preview updates are intentionally coalesced into the next animation frame.
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+    };
     await setRange("#neoGlowLength", 30);
     await setRange("#neoGlowBrightness", 100);
     await setRange("#neoGlowVisibility", 0);
