@@ -1040,26 +1040,36 @@ async function downloadFrom(page, selector) {
       }
     }
 
-    // Start Video Lab from a clean default profile. Earlier smoke scenarios intentionally
-    // mutate editor settings; those are unrelated to Worker/fallback rendering parity.
-    await page.evaluate(() => localStorage.clear());
-    await page.reload({ waitUntil: "load" });
-    await page.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    // Exercise Video Lab in a clean browser context so workspace persistence checks above/below
+    // are not reset or contaminated by this media test.
+    const videoWorkerPage = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
+    const videoWorkerErrors = [];
+    videoWorkerPage.on("pageerror", error => videoWorkerErrors.push(error.stack || error.message));
+    await videoWorkerPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await videoWorkerPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const videoSetRange = async (selector, value) => {
+      await videoWorkerPage.locator(selector).evaluate((el, next) => {
+        el.value = String(next);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }, value);
+      await videoWorkerPage.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+    };
 
     // Video workspace should have a separate visible timeline and standard post-processing controls.
-    await page.locator('.topnav [data-mode="video"]').click();
-    assert.equal(await page.locator("body").getAttribute("data-mode"), "video");
-    assert.equal(await page.locator("#videoView").isVisible(), true);
-    assert.equal(await page.locator("#videoTimeline").isVisible(), true);
-    assert.equal(await page.locator("#algorithmStackControl").isVisible(), false, "video controls remain outside the still-image algorithm stack");
-    assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "Video Lab should not reuse Editor's effect stack");
-    assert.equal(await page.locator("#videoEffectsControl").isVisible(), true, "Video Lab has an independent effect stack");
-    assert.equal(await page.locator("#asciiControl").isVisible(), false);
-    assert.equal(await page.locator("#shapeControl").isVisible(), false);
-    assert.equal(await page.locator("#algorithm").isVisible(), true, "video workspace should retain algorithm selection");
+    await videoWorkerPage.locator('.topnav [data-mode="video"]').click();
+    assert.equal(await videoWorkerPage.locator("body").getAttribute("data-mode"), "video");
+    assert.equal(await videoWorkerPage.locator("#videoView").isVisible(), true);
+    assert.equal(await videoWorkerPage.locator("#videoTimeline").isVisible(), true);
+    assert.equal(await videoWorkerPage.locator("#algorithmStackControl").isVisible(), false, "video controls remain outside the still-image algorithm stack");
+    assert.equal(await videoWorkerPage.locator("#generalEffectsControl").isVisible(), false, "Video Lab should not reuse Editor's effect stack");
+    assert.equal(await videoWorkerPage.locator("#videoEffectsControl").isVisible(), true, "Video Lab has an independent effect stack");
+    assert.equal(await videoWorkerPage.locator("#asciiControl").isVisible(), false);
+    assert.equal(await videoWorkerPage.locator("#shapeControl").isVisible(), false);
+    assert.equal(await videoWorkerPage.locator("#algorithm").isVisible(), true, "video workspace should retain algorithm selection");
 
     // Generate a tiny, valid WebM in-browser and test video input, scrubbing and rendered-video export.
-    const videoDataURL = await page.evaluate(async () => {
+    const videoDataURL = await videoWorkerPage.evaluate(async () => {
       const canvas = document.createElement("canvas");
       canvas.width = 1024; canvas.height = 900;
       const ctx = canvas.getContext("2d");
@@ -1093,33 +1103,33 @@ async function downloadFrom(page, selector) {
     });
     const videoBuffer = Buffer.from(videoDataURL.split(",")[1], "base64");
     assert.ok(videoBuffer.length > 500, "test video should contain encoded frames");
-    await page.locator("#videoInput").setInputFiles({ name: "qa-video.webm", mimeType: "video/webm", buffer: videoBuffer });
-    await page.waitForFunction(() => {
+    await videoWorkerPage.locator("#videoInput").setInputFiles({ name: "qa-video.webm", mimeType: "video/webm", buffer: videoBuffer });
+    await videoWorkerPage.waitForFunction(() => {
       const video = document.querySelector("#videoSource");
       return video && Number.isFinite(video.duration) && video.duration > 0;
     }, null, { timeout: 20000 });
-    assert.match(await page.locator("#videoFilename").textContent(), /qa-video\.webm/);
-    await page.waitForFunction(() => document.body.dataset.videoProcessingEngine === "worker", null, { timeout: 30000 });
-    assert.equal(await page.locator("#videoOutput").evaluate(canvas => canvas.width >= 1024 && canvas.height >= 890), true,
+    assert.match(await videoWorkerPage.locator("#videoFilename").textContent(), /qa-video\.webm/);
+    await videoWorkerPage.waitForFunction(() => document.body.dataset.videoProcessingEngine === "worker", null, { timeout: 30000 });
+    assert.equal(await videoWorkerPage.locator("#videoOutput").evaluate(canvas => canvas.width >= 1024 && canvas.height >= 890), true,
       "Video Lab should render high-resolution frames through OffscreenCanvas worker");
-    assert.ok(Number(await page.locator("#videoTimeline").getAttribute("max")) > 0, "video timeline should have a duration");
-    await page.locator("#videoTimeline").evaluate(el => {
+    assert.ok(Number(await videoWorkerPage.locator("#videoTimeline").getAttribute("max")) > 0, "video timeline should have a duration");
+    await videoWorkerPage.locator("#videoTimeline").evaluate(el => {
       el.value = String(Math.min(0.3, Number(el.max)));
       el.dispatchEvent(new Event("input", { bubbles: true }));
     });
-    assert.ok(await page.locator("#videoOutput").evaluate(canvas => canvas.width > 0 && canvas.height > 0),
+    assert.ok(await videoWorkerPage.locator("#videoOutput").evaluate(canvas => canvas.width > 0 && canvas.height > 0),
       "video frame should be processed onto the output canvas");
-    const expectedVideoContext = await page.locator("#videoOutput").evaluate(canvas => {
+    const expectedVideoContext = await videoWorkerPage.locator("#videoOutput").evaluate(canvas => {
       const context = canvas.getContext("2d");
       context.fillStyle = "#123456";
       context.globalAlpha = 0.37;
       return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
     });
-    await page.locator("#videoTimeline").evaluate(el => {
+    await videoWorkerPage.locator("#videoTimeline").evaluate(el => {
       el.value = String(Math.min(0.3, Number(el.max)));
       el.dispatchEvent(new Event("input", { bubbles: true }));
     });
-    const reusedVideoContext = await page.locator("#videoOutput").evaluate(canvas => {
+    const reusedVideoContext = await videoWorkerPage.locator("#videoOutput").evaluate(canvas => {
       const context = canvas.getContext("2d");
       return { fillStyle: context.fillStyle, globalAlpha: context.globalAlpha };
     });
@@ -1127,16 +1137,16 @@ async function downloadFrom(page, selector) {
       "same-size video frames should reuse the output canvas backing store");
 
     // Worker and main-thread Video Lab paths must produce the same result with the same effect profile.
-    await setRange("#scale", 16);
-    const videoScanlines = page.locator("#video-effect-scanlines");
+    await videoSetRange("#scale", 16);
+    const videoScanlines = videoWorkerPage.locator("#video-effect-scanlines");
     if (await videoScanlines.getAttribute("aria-checked") !== "true") await videoScanlines.click();
-    await setRange('#videoEffectsControl [data-effect-strength="scanlines"]', 100);
-    await page.locator("#videoTimeline").evaluate(el => {
+    await videoSetRange('#videoEffectsControl [data-effect-strength="scanlines"]', 100);
+    await videoWorkerPage.locator("#videoTimeline").evaluate(el => {
       el.value = String(Math.min(0.3, Number(el.max)));
       el.dispatchEvent(new Event("input", { bubbles: true }));
     });
-    await page.waitForTimeout(500);
-    const workerVideoFingerprint = await page.locator("#videoOutput").evaluate(canvas => {
+    await videoWorkerPage.waitForTimeout(500);
+    const workerVideoFingerprint = await videoWorkerPage.locator("#videoOutput").evaluate(canvas => {
       const data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
       let hash = 2166136261;
       for (let i = 0; i < data.length; i += 68) { hash ^= data[i]; hash = Math.imul(hash, 16777619); }
@@ -1186,19 +1196,24 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(mainThreadVideoErrors, [], "Video Lab main-thread fallback should not create runtime errors");
     await mainThreadVideoPage.close();
 
-    const videoDownloadPromise = page.waitForEvent("download", { timeout: 20000 });
-    await page.locator("#videoExport").click();
-    assert.equal(await page.locator("#videoTimeline").isDisabled(), true, "video timeline must be locked during export");
+    const videoDownloadPromise = videoWorkerPage.waitForEvent("download", { timeout: 20000 });
+    await videoWorkerPage.locator("#videoExport").click();
+    assert.equal(await videoWorkerPage.locator("#videoTimeline").isDisabled(), true, "video timeline must be locked during export");
     const videoDownload = await videoDownloadPromise;
     assert.match(videoDownload.suggestedFilename(), /TGRMLither\.webm$/);
     assert.ok(fs.statSync(await videoDownload.path()).size > 500, "exported video should contain data");
-    assert.equal(await page.locator("#videoExport").isEnabled(), true, "video export control must be re-enabled after recording finishes");
-    assert.equal(await page.locator("#videoTimeline").isDisabled(), false, "video timeline must unlock after recording finishes");
+    assert.equal(await videoWorkerPage.locator("#videoExport").isEnabled(), true, "video export control must be re-enabled after recording finishes");
+    assert.equal(await videoWorkerPage.locator("#videoTimeline").isDisabled(), false, "video timeline must unlock after recording finishes");
+
+    assert.deepEqual(videoWorkerErrors, [], "Video Lab Worker page should not create runtime errors");
+    // Video Lab resource buffers are released when leaving its workspace.
+    await videoWorkerPage.locator('.topnav [data-mode="batch"]').click();
+    const releasedVideoBuffers = await videoWorkerPage.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(releasedVideoBuffers.videoFramePixels, 1, "leaving Video Lab should release its reusable frame buffer");
+    await videoWorkerPage.close();
 
     // Batch processing should use a stable settings snapshot even if controls change while files are being encoded.
     await page.locator('.topnav [data-mode="batch"]').click();
-    const releasedVideoBuffers = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
-    assert.equal(releasedVideoBuffers.videoFramePixels, 1, "leaving Video Lab should release its reusable frame buffer");
     await page.locator("#batchInput").setInputFiles([
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
