@@ -353,6 +353,17 @@ async function downloadFrom(page, selector) {
     await page.locator("#shapeSvgInput").setInputFiles({ name: "custom-triangle.svg", mimeType: "image/svg+xml", buffer: Buffer.from(svgShape) });
     assert.equal(await page.locator("#bandShape0").inputValue(), "custom", "imported SVG should become an available custom band shape");
     assert.match(await page.locator("#shapeSvgStatus").textContent(), /custom-triangle\.svg/);
+    await page.waitForFunction(() => {
+      const shape = JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").shape;
+      return shape?.shapeBands?.[0]?.shape === "custom" &&
+        shape.shapeBands[0].customPath === "M5 0 L10 10 L0 10 Z";
+    }, null, { timeout: 5000 });
+    await page.reload({ waitUntil: "load" });
+    await page.locator('.topnav [data-mode="shape"]').click();
+    await page.waitForFunction(() => document.querySelector("#bandShape0")?.value === "custom",
+      null, { timeout: 5000 });
+    assert.equal(await page.locator("#bandShape0").inputValue(), "custom",
+      "custom SVG shape assignment should survive a reload");
     assert.equal(await page.locator("#shapePresetSelect option").count() >= 7, true, "Shape Lab should include built-in shape presets");
     assert.equal(await page.locator("#bandShape0 option[value=\"star\"]").count(), 1, "bands should expose the expanded shape library");
     await page.locator("#shapePresetSelect").selectOption("starfield");
@@ -1040,6 +1051,12 @@ async function downloadFrom(page, selector) {
       }
     }
 
+    // Start Video Lab from a clean default profile. Earlier smoke scenarios intentionally
+    // mutate editor settings; those are unrelated to Worker/fallback rendering parity.
+    await page.evaluate(() => localStorage.clear());
+    await page.reload({ waitUntil: "load" });
+    await page.waitForFunction(() => document.querySelector("#output")?.width > 0);
+
     // Video workspace should have a separate visible timeline and standard post-processing controls.
     await page.locator('.topnav [data-mode="video"]').click();
     assert.equal(await page.locator("body").getAttribute("data-mode"), "video");
@@ -1073,10 +1090,12 @@ async function downloadFrom(page, selector) {
       };
       recorder.start();
       for (let i = 0; i < 16; i++) {
+        // Keep every encoded frame visually identical so Worker/fallback parity
+        // compares renderers rather than two different moments in an animated clip.
         ctx.fillStyle = "#172b46";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "rgb(" + (i * 13 % 255) + ",120,210)";
-        ctx.fillRect(i * 18, 80, 120, 120);
+        ctx.fillStyle = "#c080d0";
+        ctx.fillRect(240, 80, 120, 120);
         await new Promise(resolve => setTimeout(resolve, 80));
       }
       recorder.stop();
@@ -1117,6 +1136,66 @@ async function downloadFrom(page, selector) {
     });
     assert.deepEqual(reusedVideoContext, expectedVideoContext,
       "same-size video frames should reuse the output canvas backing store");
+
+    // Worker and main-thread Video Lab paths must produce the same result with the same effect profile.
+    await setRange("#scale", 16);
+    const videoScanlines = page.locator("#video-effect-scanlines");
+    if (await videoScanlines.getAttribute("aria-checked") !== "true") await videoScanlines.click();
+    await setRange('#videoEffectsControl [data-effect-strength="scanlines"]', 100);
+    await page.locator("#videoTimeline").evaluate(el => {
+      el.value = String(Math.min(0.3, Number(el.max)));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await page.waitForTimeout(500);
+    const workerVideoFingerprint = await page.locator("#videoOutput").evaluate(canvas => {
+      const data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
+      let hash = 2166136261;
+      for (let i = 0; i < data.length; i += 68) { hash ^= data[i]; hash = Math.imul(hash, 16777619); }
+      return { width: canvas.width, height: canvas.height, hash: hash >>> 0 };
+    });
+    const mainThreadVideoPage = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
+    const mainThreadVideoErrors = [];
+    mainThreadVideoPage.on("pageerror", error => mainThreadVideoErrors.push(error.stack || error.message));
+    await mainThreadVideoPage.addInitScript(() => { Object.defineProperty(window, "Worker", { value: undefined, configurable: true }); });
+    await mainThreadVideoPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await mainThreadVideoPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    await mainThreadVideoPage.locator('.topnav [data-mode="video"]').click();
+    await mainThreadVideoPage.locator("#scale").evaluate(el => {
+      el.value = "16"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    const fallbackScanlines = mainThreadVideoPage.locator("#video-effect-scanlines");
+    if (await fallbackScanlines.getAttribute("aria-checked") !== "true") await fallbackScanlines.click();
+    await mainThreadVideoPage.locator('#videoEffectsControl [data-effect-strength="scanlines"]').evaluate(el => {
+      el.value = "100"; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await mainThreadVideoPage.locator("#videoInput").setInputFiles({ name: "qa-video-fallback.webm", mimeType: "video/webm", buffer: videoBuffer });
+    await mainThreadVideoPage.waitForFunction(() => {
+      const video = document.querySelector("#videoSource");
+      return video && Number.isFinite(video.duration) && video.duration > 0 &&
+        document.body.dataset.videoProcessingEngine === "main";
+    }, null, { timeout: 20000 });
+    await mainThreadVideoPage.locator("#videoTimeline").evaluate(el => {
+      el.value = String(Math.min(0.3, Number(el.max)));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await mainThreadVideoPage.waitForTimeout(500);
+    const mainThreadVideoFingerprint = await mainThreadVideoPage.locator("#videoOutput").evaluate(canvas => {
+      const data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
+      let hash = 2166136261;
+      for (let i = 0; i < data.length; i += 68) { hash ^= data[i]; hash = Math.imul(hash, 16777619); }
+      return { width: canvas.width, height: canvas.height, hash: hash >>> 0 };
+    });
+    assert.equal(workerVideoFingerprint.width, mainThreadVideoFingerprint.width,
+      "Worker and fallback should render the same video dimensions");
+    assert.equal(workerVideoFingerprint.height, mainThreadVideoFingerprint.height,
+      "Worker and fallback should render the same video dimensions");
+    assert.notEqual(workerVideoFingerprint.hash, 0, "Worker Video Lab should render non-empty pixels");
+    assert.notEqual(mainThreadVideoFingerprint.hash, 0, "fallback Video Lab should render non-empty pixels");
+    const workerSource = fs.readFileSync(path.join(__dirname, "..", "processing-worker.js"), "utf8");
+    assert.match(workerSource, /if\(kind==="video"\)canvas=rasterPipeline\(bitmap,s\);/,
+      "Worker Video Lab must use the same complete raster/effect pipeline as the main-thread fallback");
+    assert.deepEqual(mainThreadVideoErrors, [], "Video Lab main-thread fallback should not create runtime errors");
+    await mainThreadVideoPage.close();
 
     const videoDownloadPromise = page.waitForEvent("download", { timeout: 20000 });
     await page.locator("#videoExport").click();
@@ -1644,6 +1723,87 @@ async function downloadFrom(page, selector) {
     assert.equal(afterPageHide.workerSourceCount, 0, "page shutdown should clear Worker source retention");
     assert.deepEqual(resourceStressErrors, [], "long-session resource cleanup should not create uncaught browser errors");
     await resourceStressPage.close();
+
+    // Palette save/import must persist the active workspace selection, including across reloads.
+    const palettePersistencePage = await browser.newPage({ viewport: { width: 1280, height: 800 }, acceptDownloads: true });
+    const palettePersistenceErrors = [];
+    palettePersistencePage.on("pageerror", error => palettePersistenceErrors.push(error.stack || error.message));
+    await palettePersistencePage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await palettePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    await palettePersistencePage.locator("#paletteLibraryName").fill("Persisted QA Palette");
+    await palettePersistencePage.locator("#savePaletteToLibrary").click();
+    const savedPaletteId = await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    );
+    assert.match(savedPaletteId || "", /^lib_/, "saving a palette should persist its selection in the active workspace");
+    await palettePersistencePage.reload({ waitUntil: "load" });
+    await palettePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), savedPaletteId, "saved palette selection should survive an immediate reload");
+
+    const libraryImport = Buffer.from(JSON.stringify({
+      format: "tgrmlither-palette-library", version: 1,
+      palettes: [{ name: "Imported QA Palette", colors: ["#102030", "#406080", "#a0c0e0"] }]
+    }));
+    await palettePersistencePage.locator("#paletteLibraryInput").setInputFiles({
+      name: "qa-palette-library.json", mimeType: "application/json", buffer: libraryImport
+    });
+    await palettePersistencePage.waitForFunction(() => {
+      const current = JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette;
+      return typeof current === "string" && current !== "moss" &&
+        JSON.parse(localStorage.getItem("tgrmlither-palette-library") || "[]").some(item => item.id === current);
+    });
+    const importedLibraryPaletteId = await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    );
+    await palettePersistencePage.reload({ waitUntil: "load" });
+    await palettePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), importedLibraryPaletteId, "importing a palette library should persist the newly selected palette");
+
+    await palettePersistencePage.locator("#paletteLibrarySelect").selectOption(savedPaletteId);
+    await palettePersistencePage.locator("#applyLibraryPalette").click();
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), savedPaletteId, "applying a library palette should persist the new selection");
+    await palettePersistencePage.reload({ waitUntil: "load" });
+    await palettePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), savedPaletteId, "applied library palette should remain active after reload");
+
+    const singlePalette = Buffer.from(JSON.stringify({
+      name: "Single Import QA", colors: ["#182838", "#587898", "#a8c8e8"]
+    }));
+    await palettePersistencePage.locator("#paletteInput").setInputFiles({
+      name: "single-palette.json", mimeType: "application/json", buffer: singlePalette
+    });
+    await palettePersistencePage.waitForFunction(() => {
+      const current = JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette;
+      return typeof current === "string" && current.startsWith("lib_") &&
+        JSON.parse(localStorage.getItem("tgrmlither-palette-library") || "[]").some(item => item.id === current);
+    });
+    const singleImportedPaletteId = await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    );
+    await palettePersistencePage.reload({ waitUntil: "load" });
+    await palettePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), singleImportedPaletteId, "importing a single palette should persist its active workspace selection");
+    await palettePersistencePage.locator("#useCustomPalette").click();
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), "custom", "activating the custom palette should persist its workspace selection");
+    await palettePersistencePage.reload({ waitUntil: "load" });
+    await palettePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), "custom", "active custom palette should remain selected after reload");
+    assert.deepEqual(palettePersistenceErrors, [], "palette persistence workflows should not create runtime errors");
+    await palettePersistencePage.close();
 
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
     console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
