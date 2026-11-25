@@ -1146,7 +1146,7 @@ function withTrackedScratchCanvases(operation){
  return result;
 }
 function renderProcessingCanvas(image,cfg,renderMode){
- return withTrackedScratchCanvases(()=>renderMode==="script"||cfg?.algorithm==="ascii"?makeAscii(image,cfg):rasterPipeline(image,cfg));
+ return withTrackedScratchCanvases(()=>renderMode==="script"||(renderMode==="batch"&&cfg?.algorithm==="ascii")?makeAscii(image,cfg):rasterPipeline(image,cfg));
 }
 function mergeWorkerResourceMetrics(snapshot){
  if(snapshot&&typeof snapshot==="object")resourceMetrics.workerResources={...snapshot};
