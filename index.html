@@ -1152,8 +1152,9 @@ const def={algorithm:"bayer4",scale:5,markScale:100,blend:100,smoothing:0,qualit
 pal.custom.c=def.customColors;
 let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],batchRunning=false,batchCancelRequested=false,batchResultsData=[],batchResultsBytes=0,batchDownloadUrls=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0,historyPast=[],historyFuture=[],historyCurrent=null,historyCurrentSignature="",historyTimer=0,restoringHistory=false,compareEnabled=false,comparePosition=50,algorithmFavorites=[],showFavoritesOnly=false,resultDirty=false,lastExported=false,lastRenderedSignature="",hasRendered=false,renderFrame=0;
 const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_IMAGE_FILE_BYTES=128*1024*1024,MAX_PROJECT_FILE_BYTES=160*1024*1024,MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_IMPORT_JSON_BYTES=5*1024*1024,MAX_SHAPE_SVG_BYTES=500000,MAX_BATCH_FILES=500,MAX_BATCH_RESULT_BYTES=128*1024*1024;
-const DEFAULT_IMAGE_DECODE_TIMEOUT_MS=60000;
-let imageDecodeTimeoutMs=DEFAULT_IMAGE_DECODE_TIMEOUT_MS;
+const DEFAULT_IMAGE_DECODE_TIMEOUT_MS=60000,DEFAULT_CANVAS_RECOVERY_TIMEOUT_MS=5000;
+let imageDecodeTimeoutMs=DEFAULT_IMAGE_DECODE_TIMEOUT_MS,canvasRecoveryTimeoutMs=DEFAULT_CANVAS_RECOVERY_TIMEOUT_MS;
+let canvasRecoveryActive=false,canvasRecoveryTimer=0,beforeCanvasRecoveryTimer=0;
 const WORKSPACE_NAMES=["editor","shape","script","batch","video"];
 async function readLimitedText(file,maxBytes,errorMessage){
  if(!file||!Number.isFinite(Number(file.size))||file.size>maxBytes)throw Error(errorMessage);
@@ -1304,7 +1305,7 @@ function buildWorkflowEffectsPanels(){
  createPanel("shape","05 / Эффекты Shape Lab","SHAPE FX",$("shapeControl"));
  createPanel("script","05 / Эффекты Script Slayer","SCRIPT FX",$("asciiControl"));
 }
-const out=$("output"),octx=out.getContext("2d",{willReadFrequently:true});
+let out=$("output");
 const labels={"floyd":"Floyd–Steinberg","atkinson":"Atkinson","jarvis":"Jarvis–Judice–Ninke","stucki":"Stucki","burkes":"Burkes","sierra":"Sierra","sierra2":"Sierra Two-Row","sierraLite":"Sierra Lite","fan":"Fan","shiau2":"Shiau 2","shiau3":"Shiau 3","stevenson":"Stevenson–Arce","falseFloyd":"False Floyd–Steinberg","twoRow":"Two-row diffusion","simpleDiff":"Simple diffusion","bayer2":"Bayer 2×2","bayer4":"Bayer 4×4","bayer8":"Bayer 8×8","bayer16":"Bayer 16×16","blueNoise":"Blue Noise · Rank 16×16","beehive":"Beehive · Hexagonal Dither","clustered4":"Clustered Dot 4×4","clustered8":"Clustered Dot 8×8","halftone":"Halftone Dots","shape":"Shape Shifter","spiral":"Spiral Dither","crosshatch":"Crosshatch","diagonal":"Diagonal Hatch","waves":"Wave Dither","concentric":"Concentric Rings","lines":"Modulation Bars","modulation":"Modulation Lines","glitch_jpeg":"JPEG Glitch","glitch_chromatic":"Chromatic Aberration","glitch_scanlines":"CRT Scanlines","glitch_rows":"Row Displacement","glitch_pixels":"Pixel Sort","glitch_blocks":"Block Glitch","glitch_tearing":"Signal Tearing","glitch_static":"Digital Static","glitch_bitcrush":"Bitcrush","glitch_interlace":"Interlacing","glitch_vhs":"VHS Tracking","glitch_wave":"Wave Distortion","glitch_sort":"Luminance Sort","glitch_mosh":"Data Mosh","glitch_color":"Color Bars","glitch_negative":"Negative Bands","glitch_shift":"RGB Shift","special_cmyk":"CMYK Halftone","special_threshold":"Threshold","special_posterize":"Posterize","special_edges":"Edge Dither","special_emboss":"Emboss","special_contour":"Contour Map","special_mosaic":"Mosaic","special_stipple":"Stipple","special_thermal":"Thermal Map","special_xray":"X-Ray","special_relief":"Relief Print","special_ditherMask":"Dither Mask","special_grainMap":"Grain Map","special_invertBands":"Inverted Bands","special_woodcut":"Woodcut","special_outline":"Outline","pixel":"Pixel Poster","ascii":"Script Slayer / ASCII"};
 const presets=[
 {id:"moss",name:"Moss Print",desc:"Зелёная печать · ordered",tag:"EDITOR'S PICK",c:{algorithm:"bayer4",scale:5,levels:4,contrast:112,palette:"moss"}},
@@ -1903,16 +1904,20 @@ function dispatchWorkerPreview(){
  });
 }
 function drawRenderedImage(image,cfg,renderMode,metadata=null){
+ if(canvasRecoveryActive){image?.close?.();return false}
  const width=Number(metadata?.width||image.width),height=Number(metadata?.height||image.height);
+ if(!Number.isFinite(width)||!Number.isFinite(height)||width<1||height<1){image?.close?.();throw new Error("Некорректный размер результата")}
  const resized=out.width!==width||out.height!==height;
  if(out.width!==width)out.width=width;
  if(out.height!==height)out.height=height;
  const context=out.getContext("2d");
+ if(!context){image?.close?.();throw new Error("Canvas 2D context unavailable")}
  if(!resized)context.clearRect(0,0,width,height);
  context.drawImage(image,0,0);
  if(image&&typeof image.close==="function")image.close();
  out.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(cfg.algorithm)?"pixelated":"auto";
  updateRenderControls(cfg,renderMode,metadata);
+ return true;
 }
 function updateRenderControls(cfg,renderMode,metadata=null){
  const asciiWarning=$("asciiLimitWarning");
@@ -1944,6 +1949,7 @@ function queueRender(){if(renderFrame)return;renderFrame=requestAnimationFrame((
 function render(){
  if(renderFrame){cancelAnimationFrame(renderFrame);renderFrame=0}
  if(!src)return;
+ if(canvasRecoveryActive){setProcessingPending(false);return}
  const signature=JSON.stringify(s);
  if(hasRendered&&signature!==lastRenderedSignature){resultDirty=true;lastExported=false}
  lastRenderedSignature=signature;hasRendered=true;
@@ -1978,6 +1984,69 @@ function render(){
  if(renderMode==="video")renderVideoFrame();
 }
 function zoom(){if($("zoom").value==="fit"){out.style.width="auto";out.style.height="auto";out.style.maxWidth="100%";out.style.maxHeight="100%"}else{let z=Number($("zoom").value)/100;out.style.maxWidth="none";out.style.maxHeight="none";out.style.width=Math.round(out.width*z)+"px";out.style.height=Math.round(out.height*z)+"px"}updateCompareUI()}
+function replaceLostCanvas(canvas){
+ if(!canvas?.parentNode)return null;
+ const replacement=document.createElement("canvas");
+ for(const attribute of Array.from(canvas.attributes))replacement.setAttribute(attribute.name,attribute.value);
+ replacement.width=canvas.width;replacement.height=canvas.height;
+ replacement.style.cssText=canvas.style.cssText;
+ canvas.replaceWith(replacement);
+ if(canvas===out)out=replacement;
+ bindCanvasRecoveryEvents(replacement);
+ return replacement;
+}
+function finishCanvasRecovery(status="restored"){
+ clearTimeout(canvasRecoveryTimer);canvasRecoveryTimer=0;
+ canvasRecoveryActive=false;
+ document.body.dataset.canvasRecovery="idle";
+ document.body.dataset.canvasRecoveryResult=status;
+ setProcessingPending(false);
+ if(src)queueRender();
+}
+function bindCanvasRecoveryEvents(canvas){
+ if(!canvas||canvas.dataset.recoveryBound==="true")return;
+ canvas.dataset.recoveryBound="true";
+ canvas.addEventListener("contextlost",event=>{
+  try{event.preventDefault()}catch(error){}
+  if(canvas===out){
+   if(canvasRecoveryActive)return;
+   canvasRecoveryActive=true;
+   document.body.dataset.canvasRecovery="recovering";
+   setProcessingPending(false);
+   say("Графический контекст потерян. Пытаемся восстановить предпросмотр…");
+   clearTimeout(canvasRecoveryTimer);
+   canvasRecoveryTimer=setTimeout(()=>{
+    if(!canvasRecoveryActive||canvas!==out)return;
+    const replacement=replaceLostCanvas(canvas);
+    if(!replacement)return;
+    finishCanvasRecovery("recreated");
+    say("Полотно предпросмотра пересоздано. Обработка продолжена.");
+   },canvasRecoveryTimeoutMs);
+  }else if(canvas.id==="beforeOutput"){
+   clearTimeout(beforeCanvasRecoveryTimer);
+   beforeCanvasRecoveryTimer=setTimeout(()=>{
+    if(canvas.isConnected&&canvas.id==="beforeOutput"){
+     replaceLostCanvas(canvas);updateCompareUI();
+    }
+   },canvasRecoveryTimeoutMs);
+  }
+ },{passive:false});
+ canvas.addEventListener("contextrestored",()=>{
+  if(canvas===out&&canvasRecoveryActive){
+   finishCanvasRecovery("restored");
+   say("Графический контекст восстановлен");
+  }else if(canvas.id==="beforeOutput"){
+   clearTimeout(beforeCanvasRecoveryTimer);beforeCanvasRecoveryTimer=0;
+   updateCompareUI();
+  }
+ });
+}
+function bindCanvasRecovery(){
+ bindCanvasRecoveryEvents(out);
+ bindCanvasRecoveryEvents($("beforeOutput"));
+ document.body.dataset.canvasRecovery="idle";
+}
+
 
 
 function syncExactRangeInputs(){
@@ -3017,7 +3086,7 @@ async function exportProcessedVideo(){
  }
 }
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
-function init(){initProcessingWorker();bindUserBackupControls();window.__tgrmlitherWaitForPreview=waitForProcessingPreview;window.__tgrmlitherWorkerStatus=()=>({available:!!processingWorker,failed:processingWorkerFailed,threshold:WORKER_PIXEL_THRESHOLD,timeoutMs:workerRequestTimeoutMs});
+function init(){initProcessingWorker();bindUserBackupControls();bindCanvasRecovery();window.__tgrmlitherWaitForPreview=waitForProcessingPreview;window.__tgrmlitherWorkerStatus=()=>({available:!!processingWorker,failed:processingWorkerFailed,threshold:WORKER_PIXEL_THRESHOLD,timeoutMs:workerRequestTimeoutMs});
  if(["localhost","127.0.0.1","::1"].includes(location.hostname)){
   window.__tgrmlitherSetWorkerTimeoutForTests=ms=>{
    const value=Number(ms);
@@ -3025,6 +3094,8 @@ function init(){initProcessingWorker();bindUserBackupControls();window.__tgrmlit
    workerRequestTimeoutMs=clamp(Math.round(value),100,180000);
    return true;
   };
+  window.__tgrmlitherSetCanvasRecoveryTimeoutForTests=ms=>{if(!isLocalhost)return false;canvasRecoveryTimeoutMs=clamp(Number(ms)||DEFAULT_CANVAS_RECOVERY_TIMEOUT_MS,100,30000);return true};
+  window.__tgrmlitherCanvasStatus=()=>({recovering:canvasRecoveryActive,timeoutMs:canvasRecoveryTimeoutMs,outputId:out?.id,outputConnected:!!out?.isConnected});
   window.__tgrmlitherSetImageDecodeTimeoutForTests=ms=>{
    const value=Number(ms);
    if(!Number.isFinite(value))return false;
