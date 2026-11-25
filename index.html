@@ -979,7 +979,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <a class="brand" href="#" id="homeLogo" aria-label="TGRMLither"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span><b>TGRMLither</b><small>PIXEL IMAGE STUDIO</small></span></a>
 <button class="btn primary" id="openImage" title="Загрузить изображение" aria-label="Загрузить изображение">▣ Загрузить</button>
 <nav class="topnav" aria-label="Рабочие пространства"><button class="navbtn active" data-mode="editor">Редактор</button><button class="navbtn" data-mode="presets">Пресеты</button><button class="navbtn" data-mode="shape">Shape Lab</button><button class="navbtn" data-mode="script">Script Slayer</button><button class="navbtn" data-mode="batch">Пакетно</button><button class="navbtn" data-mode="video">Видео</button></nav>
-<div class="topright"><span class="local"><i class="live"></i>локально</span><details class="theme-menu" id="themeMenu"><summary class="btn sm" title="Тема интерфейса и код обмена">◐</summary><div class="theme-menu-panel"><label for="themePicker">Тема интерфейса</label><select id="themePicker" class="select full"><option value="night">Acid Night</option><option value="terminal">Terminal Green</option><option value="violet">Violet Signal</option><option value="paper">Paper Studio</option><option value="custom">Моя тема</option></select><label for="shellPicker">Оболочка интерфейса</label><select id="shellPicker" class="select full"><option value="xp" selected>Windows XP Luna</option><option value="studio">Современная студия</option></select><div class="theme-custom-grid" id="themeCustomColors"><label>Фон<input type="color" id="themeColorBg" value="#11130f"></label><label>Панель<input type="color" id="themeColorPanel" value="#191c17"></label><label>Вложенная<input type="color" id="themeColorPanel2" value="#20241e"></label><label>Границы<input type="color" id="themeColorLine" value="#30372c"></label><label>Текст<input type="color" id="themeColorText" value="#eff3e9"></label><label>Вторичный<input type="color" id="themeColorMuted" value="#9aa393"></label><label>Акцент<input type="color" id="themeColorAcid" value="#cafa6a"></label><label>Второй акцент<input type="color" id="themeColorPurple" value="#b5a3ff"></label></div><button class="btn sm full" id="applyCustomTheme" type="button">Применить мои цвета</button><button class="btn sm full" id="makeThemeCode" type="button">↗ Создать / скопировать код темы</button><label for="themeCodeInput">Код темы для импорта</label><input type="text" id="themeCodeInput" placeholder="TGRMTHEME1:…" autocomplete="off"><button class="btn sm full" id="applyThemeCode" type="button">Применить код темы</button><small class="theme-status" id="themeStatus">Тема сохраняется в этом браузере.</small></div></details><button class="btn" id="offlineBtn" title="Скачать автономную HTML-версию">↓ Офлайн HTML</button><button class="btn primary" id="topExport">↓ Экспорт</button></div>
+<div class="topright"><span class="local"><i class="live"></i>локально</span><details class="theme-menu" id="themeMenu"><summary class="btn sm" title="Тема интерфейса и код обмена">◐</summary><div class="theme-menu-panel"><label for="themePicker">Тема интерфейса</label><select id="themePicker" class="select full"><option value="night">Acid Night</option><option value="terminal">Terminal Green</option><option value="violet">Violet Signal</option><option value="paper">Paper Studio</option><option value="custom">Моя тема</option></select><label for="shellPicker">Оболочка интерфейса</label><select id="shellPicker" class="select full"><option value="xp" selected>Windows XP Luna</option><option value="studio">Современная студия</option></select><div class="theme-custom-grid" id="themeCustomColors"><label>Фон<input type="color" id="themeColorBg" value="#11130f"></label><label>Панель<input type="color" id="themeColorPanel" value="#191c17"></label><label>Вложенная<input type="color" id="themeColorPanel2" value="#20241e"></label><label>Границы<input type="color" id="themeColorLine" value="#30372c"></label><label>Текст<input type="color" id="themeColorText" value="#eff3e9"></label><label>Вторичный<input type="color" id="themeColorMuted" value="#9aa393"></label><label>Акцент<input type="color" id="themeColorAcid" value="#cafa6a"></label><label>Второй акцент<input type="color" id="themeColorPurple" value="#b5a3ff"></label></div><button class="btn sm full" id="applyCustomTheme" type="button">Применить мои цвета</button><button class="btn sm full" id="makeThemeCode" type="button">↗ Создать / скопировать код темы</button><label for="themeCodeInput">Код темы для импорта</label><input type="text" id="themeCodeInput" placeholder="TGRMTHEME1:…" autocomplete="off"><button class="btn sm full" id="applyThemeCode" type="button">Применить код темы</button><div class="theme-custom-grid" style="margin-top:9px"><button class="btn sm" id="exportUserBackup" type="button">↓ Резервная копия</button><button class="btn sm" id="importUserBackup" type="button">↑ Восстановить</button></div><small class="theme-status" id="themeStatus">Тема сохраняется в этом браузере.</small></div></details><button class="btn" id="offlineBtn" title="Скачать автономную HTML-версию">↓ Офлайн HTML</button><button class="btn primary" id="topExport">↓ Экспорт</button></div>
 </header>
 <div class="layout">
 <main>
@@ -1097,13 +1097,24 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <input class="hidden" type="file" id="shapeSvgInput" accept=".svg,image/svg+xml"><input class="hidden" type="file" id="shapePresetInput" accept=".json,application/json">
 <video id="videoSource" class="hidden" playsinline preload="metadata"></video>
 <input class="hidden" type="file" id="batchInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" multiple>
-<input class="hidden" type="file" id="projectInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteInput" accept=".json,application/json"><input class="hidden" type="file" id="presetInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteLibraryInput" accept=".json,application/json">
+<input class="hidden" type="file" id="projectInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteInput" accept=".json,application/json"><input class="hidden" type="file" id="presetInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteLibraryInput" accept=".json,application/json"><input class="hidden" type="file" id="userBackupInput" accept=".json,application/json">
 <div class="toast" id="toast" role="status"></div>
 <div class="modalbg hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle"><div class="modal export-modal"><h2 id="exportModalTitle">Экспорт результата</h2><p>Выберите формат и проверьте параметры перед сохранением файла.</p><div class="export-fields"><div><label for="exportFormat">Что экспортировать</label><select id="exportFormat" class="select full"><option value="png">PNG — изображение с прозрачностью</option><option value="jpeg">JPEG — фотография, сжатие</option><option value="svgColor">SVG — цветной вектор</option><option value="svgBlack">SVG — чёрно-белый вектор</option><option value="svgCmyk">SVG — CMYK-пластины</option><option value="project">Проект TGRMLither (JSON)</option><option value="copy">Копировать результат</option></select></div><div class="hidden" id="exportJpegSettings"><label for="exportJpegQuality">Качество JPEG · <output id="exportJpegQualityValue">94%</output></label><input type="range" id="exportJpegQuality" min="70" max="100" value="94"></div><div class="export-note" id="exportSummary">Локальная обработка · файл не загружается на сервер.</div></div><div class="modalactions"><button class="btn" id="exportCancel" type="button">Отмена</button><button class="btn primary" id="exportConfirm" type="button">Экспортировать</button></div></div></div><div class="modalbg hidden" id="modal"><div class="modal"><h2 id="modalTitle">Сохранить пресет</h2><p>Название будет сохранено локально в браузере.</p><input id="presetName" maxlength="48" placeholder="Например, Moss print"><div class="modalactions"><button class="btn" id="modalCancel">Отмена</button><button class="btn primary" id="modalSave">Сохранить</button></div></div></div>
 <script>
 "use strict";
 (function(){
 const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const USER_DATA_STORAGE_KEYS=[
+ "tgrmlithering-workspaces","ditherlab-presets","tgrmlither-palette-library",
+ "tgrmlither-shape-presets","ditherlab-colors","tgrmlither-built-in-palette-overrides",
+ "tgrmlither-favorite-algorithms","tgrmlither-theme","tgrmlither-shell","tgrmlither-inspector-level"
+];
+const USER_DATA_STORAGE_KEY_SET=new Set(USER_DATA_STORAGE_KEYS);
+const STORAGE_BACKUP_PREFIX="tgrmlither-backup-v1:";
+const STORAGE_BACKUP_ITEM_LIMIT=512*1024;
+const STORAGE_BACKUP_TOTAL_LIMIT=2*1024*1024;
+const MAX_USER_BACKUP_BYTES=10*1024*1024;
+const storageRecoveryNotices=new Set();
 const pal={
 moss:{name:"Moss Green",c:["#10160f","#334b2b","#7a9a47","#d9efad"]},
 mono:{name:"Ink",c:["#111111","#505050","#a8a8a8","#f4f0e8"]},
@@ -1305,8 +1316,85 @@ const presets=[
 {id:"rust",name:"Analog Oxide",desc:"Тёплая текстура",tag:"TEXTURE",c:{algorithm:"halftone",scale:7,contrast:115,palette:"rust",effects:["noise","vignette"]}},
 {id:"terminal",name:"Green Phosphor",desc:"Монохромный терминал",tag:"DIGITAL",c:{algorithm:"ascii",scale:5,contrast:120,palette:"terminal"}}
 ];
-function loadStore(k,f){try{return JSON.parse(localStorage.getItem(k)||"null")||f}catch(e){return f}}
-function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){say("Не удалось сохранить: хранилище недоступно");return false}}
+function storageChecksum(value){
+ let hash=2166136261;
+ for(let i=0;i<value.length;i++){hash^=value.charCodeAt(i);hash=Math.imul(hash,16777619)}
+ return (hash>>>0).toString(16).padStart(8,"0");
+}
+function queueStorageNotice(key,message){
+ if(storageRecoveryNotices.has(key))return;
+ storageRecoveryNotices.add(key);
+ setTimeout(()=>say(message),0);
+}
+function readStorageBackup(key){
+ if(!USER_DATA_STORAGE_KEY_SET.has(key))return null;
+ try{
+  const raw=localStorage.getItem(STORAGE_BACKUP_PREFIX+key);
+  if(!raw)return null;
+  const envelope=JSON.parse(raw);
+  if(envelope?.format!=="tgrmlither-storage-backup"||envelope.version!==1||envelope.key!==key||typeof envelope.raw!=="string"||envelope.checksum!==storageChecksum(envelope.raw))return null;
+  const value=JSON.parse(envelope.raw);
+  return {raw:envelope.raw,value};
+ }catch(error){return null}
+}
+function loadStore(k,f){
+ let raw=null;
+ try{raw=localStorage.getItem(k)}catch(error){return f}
+ if(raw===null)return f;
+ try{return JSON.parse(raw)}catch(error){
+  const backup=readStorageBackup(k);
+  if(backup){
+   try{localStorage.setItem(k,backup.raw)}catch(storageError){}
+   queueStorageNotice(k,"Повреждённые настройки восстановлены из резервной копии");
+   return backup.value;
+  }
+  queueStorageNotice(k,"Не удалось прочитать сохранённые данные. Используются настройки по умолчанию");
+  return f;
+ }
+}
+function writeStorageBackup(key,previousRaw){
+ if(!USER_DATA_STORAGE_KEY_SET.has(key)||typeof previousRaw!=="string"||previousRaw.length>STORAGE_BACKUP_ITEM_LIMIT)return null;
+ try{JSON.parse(previousRaw)}catch(error){return null}
+ const backupKey=STORAGE_BACKUP_PREFIX+key,previousBackup=localStorage.getItem(backupKey);
+ const envelope=JSON.stringify({format:"tgrmlither-storage-backup",version:1,key,createdAt:new Date().toISOString(),checksum:storageChecksum(previousRaw),raw:previousRaw});
+ let total=0;
+ for(const candidate of USER_DATA_STORAGE_KEYS){
+  if(candidate===key)continue;
+  total+=(localStorage.getItem(STORAGE_BACKUP_PREFIX+candidate)||"").length;
+ }
+ if(total+envelope.length>STORAGE_BACKUP_TOTAL_LIMIT)return null;
+ try{localStorage.setItem(backupKey,envelope);return {backupKey,previousBackup,envelope}}catch(error){return null}
+}
+function store(k,v){
+ let raw,backup=null;
+ try{
+  raw=JSON.stringify(v);
+  if(typeof raw!=="string")throw new Error("Данные невозможно сериализовать");
+  let previous=null;
+  try{previous=localStorage.getItem(k)}catch(error){}
+  if(previous!==null&&previous!==raw)backup=writeStorageBackup(k,previous);
+  try{
+   localStorage.setItem(k,raw);
+   if(localStorage.getItem(k)!==raw)throw new Error("Проверка сохранения не пройдена");
+   return true;
+  }catch(writeError){
+   // A just-created backup must not consume the last free quota needed by the primary save.
+   if(backup){
+    try{if(localStorage.getItem(backup.backupKey)===backup.envelope)localStorage.removeItem(backup.backupKey)}catch(error){}
+    try{
+     localStorage.setItem(k,raw);
+     if(localStorage.getItem(k)!==raw)throw new Error("Проверка сохранения не пройдена");
+     if(backup.previousBackup!==null)try{localStorage.setItem(backup.backupKey,backup.previousBackup)}catch(error){}
+     return true;
+    }catch(retryError){}
+   }
+   throw writeError;
+  }
+ }catch(error){
+  say("Не удалось сохранить данные. Освободите место в хранилище или экспортируйте резервную копию.");
+  return false;
+ }
+}
 function say(m){$("toast").textContent=m;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2400)}
 
 const APP_THEMES={
