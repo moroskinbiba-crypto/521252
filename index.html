@@ -1139,8 +1139,8 @@ const savedPaletteOverrides=loadStore("tgrmlither-built-in-palette-overrides",{}
 for(const [key,values] of Object.entries(savedPaletteOverrides||{}))if(Object.prototype.hasOwnProperty.call(pal,key)&&key!=="custom"&&Array.isArray(values)&&values.length>=2&&values.length<=16&&values.every(c=>/^#[0-9a-f]{6}$/i.test(c)))pal[key].c=[...values.map(c=>c.toLowerCase())];
 const def={algorithm:"bayer4",scale:5,markScale:100,blend:100,smoothing:0,qualityMode:"balanced",serpentine:false,jpegQuality:94,levels:4,threshold:0,patternAngle:45,patternShape:"circle",algorithmLayers:[],depth:70,contrast:100,brightness:0,midtones:50,highlights:50,blur:0,invert:false,palette:"moss",colorMode:"color",effects:[],effectOrder:["scanlines","glow","chromatic","vignette","noise","epsilon","jpeg","lick","stress","modlines"],effectStrength:{scanlines:50,glow:50,chromatic:50,vignette:50,noise:50,epsilon:50,jpeg:50,lick:50,stress:50,modlines:50},customColors:loadStore("ditherlab-colors",["#10160f","#334b2b","#7a9a47","#d9efad"]),shape:"circle",jitter:20,shapeDistribution:"uniform",shapeRotation:0,shapeThresholds:[25,50,75],customShapePath:"",customShapeViewBox:[0,0,100,100],shapeBands:[{shape:"circle",size:55,color:"#334b2b",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:70,color:"#7a9a47",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:85,color:"#b8d785",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:100,color:"#d9efad",rotation:0,customPath:"",customViewBox:[0,0,100,100]}],asciiWidth:100,asciiSet:"classic",asciiDepth:10,asciiCellSize:8,asciiOffset:0,asciiCustomChars:"",asciiColorMode:"palette",asciiBgMode:"transparent",asciiBgColor:"#07110a",asciiTextColor:"#cafa6a",neoGlowEnabled:false,neoGlowDirection:"horizontal",neoGlowLength:18,neoGlowBrightness:90,neoGlowVisibility:12,neoGlowPhase:50,neoGlowColor:"#cafa6a"};
 pal.custom.c=def.customColors;
-let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],batchRunning=false,batchCancelRequested=false,batchResultsData=[],batchDownloadUrls=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0,historyPast=[],historyFuture=[],historyCurrent=null,historyCurrentSignature="",historyTimer=0,restoringHistory=false,compareEnabled=false,comparePosition=50,algorithmFavorites=[],showFavoritesOnly=false,resultDirty=false,lastExported=false,lastRenderedSignature="",hasRendered=false,renderFrame=0;
-const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_IMAGE_FILE_BYTES=128*1024*1024,MAX_PROJECT_FILE_BYTES=160*1024*1024,MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_IMPORT_JSON_BYTES=5*1024*1024,MAX_SHAPE_SVG_BYTES=500000,MAX_BATCH_FILES=500;
+let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],batchRunning=false,batchCancelRequested=false,batchResultsData=[],batchResultsBytes=0,batchDownloadUrls=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0,historyPast=[],historyFuture=[],historyCurrent=null,historyCurrentSignature="",historyTimer=0,restoringHistory=false,compareEnabled=false,comparePosition=50,algorithmFavorites=[],showFavoritesOnly=false,resultDirty=false,lastExported=false,lastRenderedSignature="",hasRendered=false,renderFrame=0;
+const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_IMAGE_FILE_BYTES=128*1024*1024,MAX_PROJECT_FILE_BYTES=160*1024*1024,MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_IMPORT_JSON_BYTES=5*1024*1024,MAX_SHAPE_SVG_BYTES=500000,MAX_BATCH_FILES=500,MAX_BATCH_RESULT_BYTES=128*1024*1024;
 const WORKSPACE_NAMES=["editor","shape","script","batch","video"];
 async function readLimitedText(file,maxBytes,errorMessage){
  if(!file||!Number.isFinite(Number(file.size))||file.size>maxBytes)throw Error(errorMessage);
@@ -1521,7 +1521,8 @@ function makeAscii(image,cfg){
 function drawDemo(){let c=document.createElement("canvas");c.width=960;c.height=620;let x=c.getContext("2d"),g=x.createLinearGradient(0,0,960,620);g.addColorStop(0,"#192a24");g.addColorStop(.5,"#8ca28b");g.addColorStop(1,"#111c1a");x.fillStyle=g;x.fillRect(0,0,960,620);let sky=x.createLinearGradient(0,0,0,420);sky.addColorStop(0,"#8ba68a");sky.addColorStop(1,"#d6ce9e");x.fillStyle=sky;x.fillRect(0,0,960,420);x.fillStyle="#f3e3ab";x.beginPath();x.arc(690,190,91,0,7);x.fill();x.fillStyle="#c1bf8b";x.beginPath();x.moveTo(0,390);x.lineTo(140,250);x.lineTo(265,375);x.lineTo(390,220);x.lineTo(585,420);x.closePath();x.fill();x.fillStyle="#576e56";x.beginPath();x.moveTo(0,440);x.lineTo(230,310);x.lineTo(390,440);x.lineTo(560,295);x.lineTo(790,450);x.lineTo(960,330);x.lineTo(960,620);x.lineTo(0,620);x.closePath();x.fill();x.fillStyle="#243e33";x.beginPath();x.moveTo(0,500);x.lineTo(230,385);x.lineTo(420,520);x.lineTo(620,390);x.lineTo(960,530);x.lineTo(960,620);x.lineTo(0,620);x.closePath();x.fill();x.fillStyle="#d7dcaa";x.beginPath();x.moveTo(410,620);x.lineTo(590,400);x.lineTo(635,400);x.lineTo(530,620);x.closePath();x.fill();for(let i=0;i<34;i++){x.fillStyle=["#101b17","#263b2b","#3c5738"][i%3];x.fillRect(i*29,540+(i%4)*12,20,82-(i%4)*6)}return c}
 function imageResizeMessage(c){return c&&c.tgrmlitherDownscaled?"Изображение уменьшено для стабильной обработки: "+c.tgrmlitherOriginalWidth+" × "+c.tgrmlitherOriginalHeight+" → "+c.width+" × "+c.height+" px":""}
 function canvasFromImage(image){const ow=Math.floor(Number(image.naturalWidth||image.videoWidth||image.width)||0),oh=Math.floor(Number(image.naturalHeight||image.videoHeight||image.height)||0);if(!ow||!oh)throw Error("У изображения нет допустимых размеров");const scale=Math.min(1,Math.sqrt(MAX_SOURCE_PIXELS/(ow*oh)),MAX_SOURCE_EDGE/ow,MAX_SOURCE_EDGE/oh),w=Math.max(1,Math.floor(ow*scale)),h=Math.max(1,Math.floor(oh*scale)),c=document.createElement("canvas");c.width=w;c.height=h;const ctx=c.getContext("2d",{willReadFrequently:true});if(!ctx)throw Error("Не удалось выделить память для изображения");ctx.imageSmoothingEnabled=scale<1;ctx.imageSmoothingQuality="high";ctx.drawImage(image,0,0,w,h);c.tgrmlitherDownscaled=w<ow||h<oh;c.tgrmlitherOriginalWidth=ow;c.tgrmlitherOriginalHeight=oh;return c}
-const WORKER_PIXEL_THRESHOLD=786432;
+const WORKER_PIXEL_THRESHOLD=786432,WORKER_REQUEST_TIMEOUT_MS=120000;
+let workerRequestTimeoutMs=WORKER_REQUEST_TIMEOUT_MS;
 let processingWorker=null,processingWorkerFailed=false,processingWorkerRequestSeq=0,processingWorkerPending=new Map();
 let processingSourceSeq=0,processingSourceId=0,processingSourceReadyId=0,processingSourcePending=false;
 let previewRevision=0,previewWorkerBusy=false,pendingWorkerPreview=null,previewWaiters=[];
@@ -1542,6 +1543,7 @@ function initProcessingWorker(){
   processingWorker.onmessage=event=>{
    const data=event.data||{},pending=processingWorkerPending.get(data.id);
    if(!pending){if(data.bitmap&&data.bitmap.close)data.bitmap.close();return}
+   clearTimeout(pending.timer);
    processingWorkerPending.delete(data.id);
    if(data.type==="error")pending.reject(new Error(data.message||"Фоновая обработка не удалась"));
    else pending.resolve(data);
@@ -1549,6 +1551,10 @@ function initProcessingWorker(){
   processingWorker.onerror=event=>{
    event.preventDefault?.();
    disableProcessingWorker(new Error(event.message||"Ошибка фонового потока"));
+   if(src)render();
+  };
+  processingWorker.onmessageerror=()=>{
+   disableProcessingWorker(new Error("Не удалось прочитать ответ фонового потока"));
    if(src)render();
   };
   document.body.dataset.processingWorker="available";
@@ -1559,20 +1565,47 @@ function initProcessingWorker(){
   return false;
  }
 }
-function workerRequest(message,transfer=[]){
+function workerRequest(message,transfer=[],timeoutMs=workerRequestTimeoutMs){
  return new Promise((resolve,reject)=>{
   if(!processingWorker){reject(new Error("Фоновый обработчик недоступен"));return}
   const id=++processingWorkerRequestSeq;
-  processingWorkerPending.set(id,{resolve,reject});
+  const timeout=Math.max(100,Number(timeoutMs)||workerRequestTimeoutMs);
+  const pending={resolve,reject,timer:0};
+  pending.timer=setTimeout(()=>{
+   if(!processingWorkerPending.has(id))return;
+   processingWorkerPending.delete(id);
+   const error=new Error("Фоновая обработка не ответила за "+Math.ceil(timeout/1000)+" с");
+   reject(error);
+   disableProcessingWorker(error);
+  },timeout);
+  processingWorkerPending.set(id,pending);
   try{processingWorker.postMessage({...message,id},transfer)}
-  catch(error){processingWorkerPending.delete(id);reject(error)}
+  catch(error){clearTimeout(pending.timer);processingWorkerPending.delete(id);reject(error)}
+ });
+}
+function createWorkerBitmap(image){
+ return new Promise((resolve,reject)=>{
+  let settled=false;
+  const timeout=workerRequestTimeoutMs;
+  const timer=setTimeout(()=>{settled=true;reject(new Error("Подготовка изображения для фоновой обработки превысила лимит времени"))},timeout);
+  Promise.resolve().then(()=>createImageBitmap(image)).then(bitmap=>{
+   if(settled){bitmap?.close?.();return}
+   settled=true;clearTimeout(timer);resolve(bitmap);
+  },error=>{
+   if(settled)return;
+   settled=true;clearTimeout(timer);reject(error);
+  });
  });
 }
 function disableProcessingWorker(error){
  processingWorkerFailed=true;
  const worker=processingWorker;processingWorker=null;
  try{worker?.terminate()}catch(e){}
- for(const pending of processingWorkerPending.values())pending.reject(error||new Error("Фоновый обработчик остановлен"));
+ const reason=error||new Error("Фоновый обработчик остановлен");
+ for(const pending of processingWorkerPending.values()){
+  clearTimeout(pending.timer);
+  pending.reject(reason);
+ }
  processingWorkerPending.clear();
  processingSourceId=0;processingSourceReadyId=0;processingSourcePending=false;
  pendingWorkerPreview=null;previewWorkerBusy=false;
@@ -1589,7 +1622,7 @@ function setProcessingSource(image){
   return;
  }
  processingSourceId=id;processingSourcePending=true;
- createImageBitmap(image).then(bitmap=>{
+ createWorkerBitmap(image).then(bitmap=>{
   if(id!==processingSourceId){bitmap.close?.();return null}
   return workerRequest({type:"set-source",sourceId:id,bitmap},[bitmap]);
  }).then(result=>{
@@ -2335,7 +2368,7 @@ async function runBatch(){
  const files=batch.slice();
  $("runBatch").disabled=true;$("clearBatch").disabled=true;$("batchBrowse").disabled=true;$("batchInput").disabled=true;$("cancelBatch").hidden=false;$("cancelBatch").disabled=false;
  $("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressLabel").textContent="Обработка файлов…";$("batchProgressCount").textContent="0 / "+files.length;
- $("downloadBatchZip").disabled=true;revokeBatchDownloadUrls();$("batchResults").innerHTML="";batchResultsData=[];
+ $("downloadBatchZip").disabled=true;revokeBatchDownloadUrls();$("batchResults").innerHTML="";batchResultsData=[];batchResultsBytes=0;
  document.body.dataset.batchProcessingEngine="main";
  const cfg=cloneSettings(s),usedNames=new Set();let succeeded=0,failed=0;
  try{
@@ -2347,7 +2380,7 @@ async function runBatch(){
     if(processingWorker&&shouldUseProcessingWorker(image)){
      document.body.dataset.batchProcessingEngine="worker";
      try{
-      const bitmap=await createImageBitmap(image);
+      const bitmap=await createWorkerBitmap(image);
       const result=await workerRequest({type:"process",kind:"batch",bitmap,cfg,paletteColors:paletteColorsFor(cfg),outputType:"blob",mimeType:"image/png"},[bitmap]);
       blob=result.blob;width=result.width;height=result.height;
      }catch(workerError){
@@ -2361,8 +2394,9 @@ async function runBatch(){
      width=canvas.width;height=canvas.height;
     }
     if(!blob)throw Error("PNG export failed");
+     if(batchResultsBytes+blob.size>MAX_BATCH_RESULT_BYTES)throw Error("Пакет превысил лимит результатов 128 МБ. Скачайте готовые файлы и обработайте остаток отдельно.");
     const name=uniqueBatchFilename(f.name,usedNames),url=URL.createObjectURL(blob),row=document.createElement("div");
-    batchDownloadUrls.push(url);batchResultsData.push({name,blob});row.className="fileitem";
+    batchDownloadUrls.push(url);batchResultsData.push({name,blob});batchResultsBytes+=blob.size;row.className="fileitem";
     const a=document.createElement("a");a.className="btn sm";a.textContent="↓ PNG";a.href=url;a.download=name;
     const text=document.createElement("div");text.className="filetext";text.innerHTML="<b></b><small>Готово · "+width+" × "+height+(image.tgrmlitherDownscaled?" · уменьшено для обработки":"")+"</small>";text.querySelector("b").textContent=f.name;
     row.append(text,a);$("batchResults").append(row);succeeded++;
@@ -2582,7 +2616,7 @@ async function renderVideoFrame(){
   if(videoWorkerBusy){videoFrameQueued=true;return false}
   videoWorkerBusy=true;const revision=++videoFrameRevision;
   try{
-   const bitmap=await createImageBitmap(videoFrameCanvas);
+   const bitmap=await createWorkerBitmap(videoFrameCanvas);
    const result=await workerRequest({type:"process",kind:"video",bitmap,cfg,paletteColors:paletteColorsFor(cfg)},[bitmap]);
    if(revision!==videoFrameRevision||mode!=="video"){result.bitmap?.close?.();return false}
    drawRenderedImageToCanvas(canvas,result.bitmap,result);
@@ -2694,7 +2728,15 @@ async function exportProcessedVideo(){
  }
 }
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
-function init(){initProcessingWorker();window.__tgrmlitherWaitForPreview=waitForProcessingPreview;window.__tgrmlitherWorkerStatus=()=>({available:!!processingWorker,failed:processingWorkerFailed,threshold:WORKER_PIXEL_THRESHOLD});buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();bindShellControls();bindInspectorLevel();initAlgorithmSearch();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);recordHistorySnapshot();presets.forEach(p=>{});renderPresets();renderBatch();
+function init(){initProcessingWorker();window.__tgrmlitherWaitForPreview=waitForProcessingPreview;window.__tgrmlitherWorkerStatus=()=>({available:!!processingWorker,failed:processingWorkerFailed,threshold:WORKER_PIXEL_THRESHOLD,timeoutMs:workerRequestTimeoutMs});
+ if(["localhost","127.0.0.1","::1"].includes(location.hostname)){
+  window.__tgrmlitherSetWorkerTimeoutForTests=ms=>{
+   const value=Number(ms);
+   if(!Number.isFinite(value))return false;
+   workerRequestTimeoutMs=clamp(Math.round(value),100,180000);
+   return true;
+  };
+ }buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();bindShellControls();bindInspectorLevel();initAlgorithmSearch();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);recordHistorySnapshot();presets.forEach(p=>{});renderPresets();renderBatch();
 $("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await readLimitedText(file,MAX_SHAPE_SVG_BYTES,"SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");const index=clamp(Number($("shapeImportBand").value)||0,0,3),customPath=path.getAttribute("d").slice(0,20000);s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===index?({...b,shape:"custom",customPath,customViewBox:raw}):({...b}));s.customShapePath=customPath;s.customShapeViewBox=raw;$("shapeSvgStatus").textContent=file.name+" · SVG → диапазон "+(index+1);sync();render();say("SVG назначен диапазону "+(index+1))}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(videoExportStarting){v.pause();stopVideoExport(true);return}if(!v.src){$("videoInput").click();return}if(videoRecorder&&videoRecorder.state!=="inactive"){v.pause();stopVideoExport(true);$("videoPlay").textContent="▶ Воспроизвести";return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{const f=e.target.files?.[0];if(f)await loadImageFile(f);e.target.value=""};
 window.addEventListener("paste",async e=>{
  const items=Array.from(e.clipboardData?.items||[]),item=items.find(entry=>String(entry.type||"").startsWith("image/"));
@@ -2724,7 +2766,7 @@ $("cmykCell").oninput=()=>{$("cmykCellV").textContent=$("cmykCell").value+" px"}
 $("offlineBtn").onclick=saveStandalone;$("savePresetMenu").onclick=$("savePresetLibrary").onclick=savePreset;$("exportPresets").onclick=()=>download(new Blob([JSON.stringify({format:"tgrmlithering-presets",version:1,presets:loadStore("ditherlab-presets",[])},null,2)],{type:"application/json"}),"TGRMLither-presets.json");$("importPresets").onclick=()=>$("presetInput").click();$("presetInput").onchange=async e=>{const f=e.target.files[0];if(f)try{const j=JSON.parse(await readLimitedText(f,MAX_IMPORT_JSON_BYTES,"Файл пресетов слишком большой")),items=Array.isArray(j)?j:(j.presets||[]);if(!items.length)throw Error("presets");const valid=items.slice(0,500).filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,100);if(!valid.length)throw Error("presets");const saved=loadStore("ditherlab-presets",[]),existing=Array.isArray(saved)?saved.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object"):[];custom=[...valid,...existing].slice(0,100);store("ditherlab-presets",custom);renderPresets();say("Пресеты импортированы")}catch(err){say("Файл пресетов слишком большой или не распознан")}e.target.value=""};$("downloadTxt").onclick=async()=>{if(!src)return;await waitForProcessingPreview();if(!ascii)makeAscii(src,s);download(new Blob([ascii],{type:"text/plain;charset=utf-8"}),slug(srcName)+"-script-slayer.txt")};
 $("asciiPlay").onclick=()=>startAsciiAnimation(false);$("asciiStop").onclick=stopAsciiAnimation;$("asciiExportWebm").onclick=()=>startAsciiAnimation(true);
 document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));$("homeLogo").onclick=e=>{e.preventDefault();setMode("editor")};$("randomize").classList.toggle("hidden",mode!=="editor");$("shuffle").classList.toggle("hidden",mode!=="editor");
-$("batchBrowse").onclick=()=>$("batchInput").click();$("batchInput").onchange=e=>{addBatch(e.target.files);e.target.value=""};$("batchDrop").ondragover=e=>{e.preventDefault();$("batchDrop").style.borderColor="var(--acid)"};$("batchDrop").ondragleave=()=>$("batchDrop").style.borderColor="";$("batchDrop").ondrop=e=>{e.preventDefault();$("batchDrop").style.borderColor="";addBatch(e.dataTransfer.files)};$("runBatch").onclick=runBatch;$("downloadBatchZip").onclick=downloadBatchArchive;$("clearBatch").onclick=()=>{if(batchRunning)return;batch=[];batchResultsData=[];revokeBatchDownloadUrls();renderBatch();$("batchResults").innerHTML="";$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent="0 / 0";$("batchProgressLabel").textContent="Ожидает файлов";$("downloadBatchZip").disabled=true};$("cancelBatch").onclick=()=>{if(!batchRunning)return;batchCancelRequested=true;$("cancelBatch").disabled=true;$("batchProgressLabel").textContent="Остановка после текущего файла…";say("Остановка после текущего файла…")};
+$("batchBrowse").onclick=()=>$("batchInput").click();$("batchInput").onchange=e=>{addBatch(e.target.files);e.target.value=""};$("batchDrop").ondragover=e=>{e.preventDefault();$("batchDrop").style.borderColor="var(--acid)"};$("batchDrop").ondragleave=()=>$("batchDrop").style.borderColor="";$("batchDrop").ondrop=e=>{e.preventDefault();$("batchDrop").style.borderColor="";addBatch(e.dataTransfer.files)};$("runBatch").onclick=runBatch;$("downloadBatchZip").onclick=downloadBatchArchive;$("clearBatch").onclick=()=>{if(batchRunning)return;batch=[];batchResultsData=[];batchResultsBytes=0;revokeBatchDownloadUrls();renderBatch();$("batchResults").innerHTML="";$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent="0 / 0";$("batchProgressLabel").textContent="Ожидает файлов";$("downloadBatchZip").disabled=true};$("cancelBatch").onclick=()=>{if(!batchRunning)return;batchCancelRequested=true;$("cancelBatch").disabled=true;$("batchProgressLabel").textContent="Остановка после текущего файла…";say("Остановка после текущего файла…")};
 let stage=$("stage");
  stage.addEventListener("dragenter",e=>{if(!Array.from(e.dataTransfer?.types||[]).includes("Files"))return;e.preventDefault();if(!stage.contains(e.relatedTarget))stage.classList.add("drag")});
  stage.addEventListener("dragover",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});
