@@ -1437,6 +1437,105 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(fallbackErrors, [], "worker timeout recovery must not create uncaught page errors");
     await fallbackPage.close();
 
+    // Storage snapshots must recover a corrupted primary record from the last known-good value.
+    const storagePage = await browser.newPage({ viewport: { width: 1100, height: 800 }, acceptDownloads: true });
+    const storageErrors = [];
+    storagePage.on("pageerror", error => storageErrors.push(error.stack || error.message));
+    await storagePage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await storagePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const setStorageScale = async value => storagePage.locator("#scale").evaluate((el, next) => {
+      el.value = String(next);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }, value);
+    await setStorageScale(8);
+    await storagePage.waitForFunction(() => {
+      try { return JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.editor?.scale === 8; }
+      catch { return false; }
+    });
+    await setStorageScale(9);
+    await storagePage.waitForFunction(() => {
+      try {
+        const backup = JSON.parse(localStorage.getItem("tgrmlither-backup-v1:tgrmlithering-workspaces") || "null");
+        return backup?.format === "tgrmlither-storage-backup" &&
+          JSON.parse(backup.raw)?.editor?.scale === 8;
+      } catch { return false; }
+    });
+    await storagePage.evaluate(() => localStorage.setItem("tgrmlithering-workspaces", "{ broken json"));
+    await storagePage.reload({ waitUntil: "load" });
+    await storagePage.waitForFunction(() => document.querySelector("#scale")?.value === "8");
+    const recoveredStorage = await storagePage.evaluate(() => ({
+      scale: Number(document.querySelector("#scale").value),
+      raw: localStorage.getItem("tgrmlithering-workspaces"),
+      notice: document.querySelector("#toast")?.textContent || ""
+    }));
+    assert.equal(recoveredStorage.scale, 8, "corrupted workspace settings should recover the previous saved state");
+    assert.doesNotThrow(() => JSON.parse(recoveredStorage.raw), "recovery should rewrite a valid primary storage record");
+    await storagePage.waitForFunction(() => /восстановлены из резервной копии/i.test(document.querySelector("#toast")?.textContent || ""));
+
+    // The full user-data backup must round-trip through export and validated transactional restore.
+    await storagePage.locator("#themeMenu > summary").click();
+    const [userBackupDownload] = await Promise.all([
+      storagePage.waitForEvent("download", { timeout: 15000 }),
+      storagePage.locator("#exportUserBackup").click()
+    ]);
+    const userBackupBuffer = fs.readFileSync(await userBackupDownload.path());
+    const userBackupDoc = JSON.parse(userBackupBuffer.toString("utf8"));
+    assert.equal(userBackupDoc.format, "tgrmlither-user-backup");
+    assert.equal(userBackupDoc.version, 1);
+    assert.ok(userBackupDoc.data["tgrmlithering-workspaces"], "backup should include workspace profiles");
+    assert.ok(userBackupDoc.data["tgrmlither-theme"], "backup should include the current interface theme");
+    await storagePage.locator("#shellPicker").selectOption("studio");
+    await storagePage.waitForFunction(() => localStorage.getItem("tgrmlither-shell") === "studio");
+    storagePage.on("dialog", dialog => dialog.accept());
+    await storagePage.locator("#userBackupInput").setInputFiles({
+      name: "TGRMLither-backup.json",
+      mimeType: "application/json",
+      buffer: userBackupBuffer
+    });
+    await storagePage.waitForFunction(() =>
+      document.body.dataset.shell === "xp" &&
+      localStorage.getItem("tgrmlither-shell") === "xp" &&
+      document.querySelector("#scale")?.value === "8",
+      null, { timeout: 15000 }
+    );
+    assert.deepEqual(storageErrors, [], "storage recovery and backup restore must not create uncaught page errors");
+
+    // A failed storage write during project import must not replace the currently open image.
+    const projectAtomicPage = await browser.newPage({ viewport: { width: 1100, height: 800 } });
+    await projectAtomicPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await projectAtomicPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const previousProjectSource = await projectAtomicPage.locator("#filename").textContent();
+    const validProject = {
+      format: "tgrmlither-project", version: 2, workspace: "editor",
+      sourceName: "must-not-open.png", source: dataURL,
+      settings: { algorithm: "floyd", scale: 11 }
+    };
+    await projectAtomicPage.evaluate(() => {
+      const nativeSetItem = Storage.prototype.setItem;
+      window.__nativeStorageSetItem = nativeSetItem;
+      Storage.prototype.setItem = function (key, value) {
+        if (key === "tgrmlithering-workspaces") throw new DOMException("Quota exceeded", "QuotaExceededError");
+        return nativeSetItem.call(this, key, value);
+      };
+    });
+    await projectAtomicPage.locator("#projectInput").setInputFiles({
+      name: "valid-but-unwritable.tgrmlither.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(validProject))
+    });
+    await projectAtomicPage.waitForFunction(() =>
+      /Проект не открыт/.test(document.querySelector("#toast")?.textContent || ""),
+      null, { timeout: 10000 }
+    );
+    assert.equal(await projectAtomicPage.locator("#filename").textContent(), previousProjectSource,
+      "a project import must leave the active image intact when persistence fails");
+    assert.equal(await projectAtomicPage.locator("body").getAttribute("data-mode"), "editor",
+      "a failed project import must return to the original workspace");
+    await projectAtomicPage.evaluate(() => { Storage.prototype.setItem = window.__nativeStorageSetItem; });
+    await projectAtomicPage.close();
+    await storagePage.close();
+
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
     console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {
