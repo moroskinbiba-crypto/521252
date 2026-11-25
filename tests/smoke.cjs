@@ -1501,7 +1501,42 @@ async function downloadFrom(page, selector) {
       document.querySelector("#scale")?.value === "8",
       null, { timeout: 15000 }
     );
-    assert.deepEqual(storageErrors, [], "storage recovery and backup restore must not create uncaught page errors");
+    // Recover the primary preview after a restored or permanently lost Canvas 2D context.
+    await storagePage.evaluate(() => {
+      window.__firstCanvasBeforeLoss = document.querySelector("#output");
+      window.__firstCanvasBeforeLoss.dispatchEvent(new Event("contextlost", { cancelable: true }));
+    });
+    await storagePage.waitForFunction(() => document.body.dataset.canvasRecovery === "recovering");
+    assert.equal(await storagePage.evaluate(() => window.__firstCanvasBeforeLoss.isConnected), true,
+      "the original canvas remains mounted while the browser attempts context restoration");
+    await storagePage.evaluate(() => window.__firstCanvasBeforeLoss.dispatchEvent(new Event("contextrestored")));
+    await storagePage.waitForFunction(() =>
+      document.body.dataset.canvasRecovery === "idle" &&
+      document.body.dataset.canvasRecoveryResult === "restored"
+    );
+    await storagePage.evaluate(() => window.__tgrmlitherWaitForPreview());
+    assert.equal(await storagePage.locator("#output").evaluate(canvas => canvas.width > 0 && canvas.height > 0), true,
+      "the preview should be rendered again after context restoration");
+
+    const canvasWatchdogConfigured = await storagePage.evaluate(() =>
+      window.__tgrmlitherSetCanvasRecoveryTimeoutForTests?.(450) === true
+    );
+    assert.equal(canvasWatchdogConfigured, true, "local smoke tests should be able to shorten the canvas recovery watchdog");
+    await storagePage.evaluate(() => {
+      window.__lostCanvasForReplacement = document.querySelector("#output");
+      window.__lostCanvasForReplacement.dispatchEvent(new Event("contextlost", { cancelable: true }));
+    });
+    await storagePage.waitForFunction(() =>
+      document.body.dataset.canvasRecovery === "idle" &&
+      document.body.dataset.canvasRecoveryResult === "recreated" &&
+      document.querySelector("#output") !== window.__lostCanvasForReplacement,
+      null, { timeout: 5000 }
+    );
+    await storagePage.evaluate(() => window.__tgrmlitherWaitForPreview());
+    assert.equal(await storagePage.locator("#output").evaluate(canvas => canvas.width > 0 && canvas.height > 0), true,
+      "a context that never restores should be replaced with a fresh canvas and re-rendered");
+
+    assert.deepEqual(storageErrors, [], "storage and canvas recovery must not create uncaught page errors");
 
     // A failed storage write during project import must not replace the currently open image.
     const projectAtomicPage = await browser.newPage({ viewport: { width: 1100, height: 800 } });
