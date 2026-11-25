@@ -2669,7 +2669,7 @@ function loadProject(f){
    loadedSettings=cloneSettings(p.settings||def);
    if(target==="shape")loadedSettings.algorithm="shape";
    if(target==="script")loadedSettings.algorithm="ascii";
-  }catch(error){say("Неверный файл проекта или повреждённые настройки");return}
+  }catch(error){say("Неверный файл проекта");return}
   const image=new Image();let decodeFinished=false,decodeTimer=0;
   const finishDecode=()=>{
    if(decodeFinished)return false;
