@@ -139,3 +139,14 @@ Neo Glow includes an adjustable scan-band position, width, brightness, off-band 
 - Project import validates the document and image before changing the active workspace. It commits normalized workspace settings before replacing the active image and leaves the previous image in place when persistence fails. Project reads and image decoding are time-bounded.
 - PWA cache version advances so installed copies pick up the updated persistence and import logic.
 - Browser smoke tests cover corrupted-storage recovery, backup export/restore and project-import rollback on a simulated storage quota failure.
+
+
+## Canvas recovery and cross-browser reliability in v1.3.11
+
+- The visible output Canvas listens for `contextlost` and `contextrestored`. It opts into restoration, suspends rendering during loss and rerenders the retained source after the browser restores the context.
+- If the browser does not restore the 2D context within the recovery window, the app replaces the damaged canvas element, rebinds recovery events and rebuilds the preview from the retained source. The comparison canvas has its own replacement path.
+- Worker results that arrive while the output context is lost are discarded and their ImageBitmap resources are closed; the restored/recreated surface is rendered from the current settings.
+- The recovery timeout is 5 seconds by default. A localhost-only test hook makes the timeout deterministic in automated tests.
+- Browser checks now run on Chromium, Firefox and WebKit. They cover startup, image decoding/rendering, Canvas context loss/restoration/recreation, 24 repeated edits, bounded canvas DOM count, and uncaught runtime errors.
+- The full Chromium regression suite also verifies restored and recreated Canvas paths alongside Worker fallback, persistence recovery and project-import rollback.
+- The Service Worker cache advances to `tgrmlither-v16`.
