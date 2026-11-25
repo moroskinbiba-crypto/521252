@@ -1858,7 +1858,7 @@ function workerRequest(message,transfer=[],timeoutMs=workerRequestTimeoutMs){
   try{
    processingWorker.postMessage({...message,id},transfer);
    if(Array.isArray(transfer)&&typeof ImageBitmap!=="undefined")resourceMetrics.imageBitmapsTransferred+=transfer.filter(item=>item instanceof ImageBitmap).length;
-  }catch(error){clearTimeout(pending.timer);processingWorkerPending.delete(id);reject(error)}
+  }catch(error){clearTimeout(pending.timer);processingWorkerPending.delete(id);if(Array.isArray(transfer))transfer.forEach(item=>closeImageBitmap(item));reject(error)}
  });
 }
 function createWorkerBitmap(image){
@@ -1902,7 +1902,7 @@ function setProcessingSource(image){
  }
  processingSourceId=id;processingSourcePending=true;
  createWorkerBitmap(image).then(bitmap=>{
-  if(id!==processingSourceId){bitmap.close?.();return null}
+  if(id!==processingSourceId){closeImageBitmap(bitmap,{late:true});return null}
   return workerRequest({type:"set-source",sourceId:id,bitmap},[bitmap]);
  }).then(result=>{
   if(!result||id!==processingSourceId)return;
@@ -1952,7 +1952,7 @@ function dispatchWorkerPreview(){
    if(typeof result.ascii==="string")ascii=result.ascii;
    drawRenderedImage(result.bitmap,request.cfg,request.renderMode,result);
    settleProcessingPreview();
-  }else if(result.bitmap)result.bitmap.close?.();
+  }else closeImageBitmap(result.bitmap);
   if(pendingWorkerPreview)dispatchWorkerPreview();
  }).catch(error=>{
   previewWorkerBusy=false;
