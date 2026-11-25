@@ -1397,6 +1397,129 @@ function store(k,v){
 }
 function say(m){$("toast").textContent=m;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2400)}
 
+function normaliseBackupEntry(key,value){
+ if(key==="tgrmlithering-workspaces"){
+  if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Структура рабочих пространств повреждена");
+  return normaliseWorkspaceSettings(value);
+ }
+ if(key==="ditherlab-presets"){
+  if(!Array.isArray(value)||value.length>100)throw Error("Некорректный список пресетов");
+  return value.map(item=>{
+   if(!item||typeof item!=="object"||typeof item.name!=="string"||!item.name.trim()||!item.c||typeof item.c!=="object"||Array.isArray(item.c))throw Error("Некорректный пользовательский пресет");
+   return {name:item.name.trim().slice(0,48),desc:typeof item.desc==="string"?item.desc.slice(0,160):"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(item.workspace)?item.workspace:"editor",c:cloneSettings(item.c)};
+  });
+ }
+ if(key==="tgrmlither-palette-library"){
+  if(!Array.isArray(value)||value.length>100)throw Error("Некорректная библиотека палитр");
+  const seen=new Set();
+  return value.map(item=>{
+   if(!item||typeof item!=="object"||!/^lib_[a-z0-9_-]{1,40}$/i.test(item.id||"")||seen.has(item.id)||typeof item.name!=="string"||!Array.isArray(item.colors)||item.colors.length<2||item.colors.length>16||!item.colors.every(color=>typeof color==="string"&&/^#[0-9a-f]{6}$/i.test(color)))throw Error("Некорректная запись библиотеки палитр");
+   seen.add(item.id);return {id:item.id,name:item.name.trim().slice(0,48)||"Моя палитра",colors:item.colors.map(color=>color.toLowerCase())};
+  });
+ }
+ if(key==="tgrmlither-shape-presets"){
+  if(!Array.isArray(value)||value.length>50)throw Error("Некорректная библиотека Shape Shifter");
+  const seen=new Set();
+  return value.map(item=>{
+   if(!item||typeof item!=="object"||!/^user_[a-z0-9_-]{1,48}$/i.test(item.id||"")||seen.has(item.id)||typeof item.name!=="string"||!item.profile)throw Error("Некорректный Shape Shifter пресет");
+   seen.add(item.id);return {id:item.id,name:item.name.trim().slice(0,48)||"Shape preset",profile:cleanShapeProfile(item.profile)};
+  });
+ }
+ if(key==="ditherlab-colors"){
+  if(!Array.isArray(value)||value.length<2||value.length>16||!value.every(color=>typeof color==="string"&&/^#[0-9a-f]{6}$/i.test(color)))throw Error("Некорректная пользовательская палитра");
+  return value.map(color=>color.toLowerCase());
+ }
+ if(key==="tgrmlither-built-in-palette-overrides"){
+  if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Некорректные переопределения палитр");
+  const clean={};
+  for(const [id,colors] of Object.entries(value)){
+   if(!Object.prototype.hasOwnProperty.call(pal,id)||id==="custom"||!Array.isArray(colors)||colors.length<2||colors.length>16||!colors.every(color=>typeof color==="string"&&/^#[0-9a-f]{6}$/i.test(color)))throw Error("Некорректная встроенная палитра: "+id);
+   clean[id]=colors.map(color=>color.toLowerCase());
+  }
+  return clean;
+ }
+ if(key==="tgrmlither-favorite-algorithms"){
+  if(!Array.isArray(value)||value.length>100)throw Error("Некорректное избранное алгоритмов");
+  const known=new Set(Object.keys(labels));
+  if(!value.every(item=>typeof item==="string"&&known.has(item)))throw Error("В резервной копии есть неизвестный алгоритм");
+  return [...new Set(value)];
+ }
+ if(key==="tgrmlither-theme"){
+  if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Некорректная тема интерфейса");
+  const id=value.id==="custom"||Object.prototype.hasOwnProperty.call(APP_THEMES,value.id)?value.id:"custom";
+  return {id,vars:safeThemeVars(value.vars)};
+ }
+ if(key==="tgrmlither-shell"){
+  if(!["xp","studio"].includes(value))throw Error("Некорректная оболочка интерфейса");
+  return value;
+ }
+ if(key==="tgrmlither-inspector-level"){
+  if(!["basic","advanced"].includes(value))throw Error("Некорректный уровень настроек");
+  return value;
+ }
+ throw Error("Неизвестный раздел резервной копии");
+}
+function exportUserBackup(){
+ try{
+  const data={};
+  for(const key of USER_DATA_STORAGE_KEYS){
+   const value=loadStore(key,undefined);
+   if(value!==undefined)data[key]=value;
+  }
+  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.3.9",data};
+  const json=JSON.stringify(doc,null,2);
+  if(json.length>MAX_USER_BACKUP_BYTES)throw Error("Резервная копия превышает лимит 10 МБ");
+  download(new Blob([json],{type:"application/json;charset=utf-8"}),"TGRMLither-backup.json");
+  say("Резервная копия подготовлена · "+Object.keys(data).length+" разделов");
+ }catch(error){say(error?.message||"Не удалось создать резервную копию")}
+}
+async function importUserBackup(file){
+ if(!file)return;
+ if(!Number.isFinite(Number(file.size))||file.size>MAX_USER_BACKUP_BYTES){say("Файл резервной копии превышает лимит 10 МБ");return}
+ try{
+  const doc=JSON.parse(await readLimitedText(file,MAX_USER_BACKUP_BYTES,"Файл резервной копии превышает лимит 10 МБ"));
+  if(doc?.format!=="tgrmlither-user-backup"||doc.version!==1||!doc.data||typeof doc.data!=="object"||Array.isArray(doc.data))throw Error("Формат резервной копии не распознан");
+  const entries=Object.entries(doc.data);
+  if(!entries.length||entries.some(([key])=>!USER_DATA_STORAGE_KEY_SET.has(key)))throw Error("Резервная копия содержит неизвестные разделы");
+  const validated={};
+  for(const [key,value] of entries)validated[key]=normaliseBackupEntry(key,value);
+  if(!confirm("Восстановить "+entries.length+" разделов из резервной копии? Текущие пользовательские настройки будут заменены."))return;
+  const previous=new Map(entries.map(([key])=>[key,localStorage.getItem(key)]));
+  const written=[];
+  try{
+   for(const [key,value] of Object.entries(validated)){
+    if(!store(key,value))throw Error("Не удалось сохранить раздел: "+key);
+    written.push(key);
+   }
+   for(const key of written){
+    const expected=JSON.stringify(validated[key]);
+    if(localStorage.getItem(key)!==expected)throw Error("Проверка восстановления не пройдена: "+key);
+   }
+  }catch(error){
+   let rollbackOk=true;
+   for(const key of written.reverse()){
+    try{
+     const raw=previous.get(key);
+     if(raw===null)localStorage.removeItem(key);else localStorage.setItem(key,raw);
+     if(localStorage.getItem(key)!==raw)rollbackOk=false;
+    }catch(rollbackError){rollbackOk=false}
+   }
+   throw Error(rollbackOk?"Восстановление отменено. Прежние данные сохранены.":"Не удалось полностью откатить восстановление. Проверьте резервную копию и свободное место.");
+  }
+  say("Резервная копия восстановлена. Перезапускаю приложение…");
+  setTimeout(()=>location.reload(),450);
+ }catch(error){say(error?.message||"Не удалось восстановить резервную копию")}
+}
+function bindUserBackupControls(){
+ $("exportUserBackup").onclick=exportUserBackup;
+ $("importUserBackup").onclick=()=>$("userBackupInput").click();
+ $("userBackupInput").onchange=async event=>{
+  const file=event.target.files?.[0];
+  if(file)await importUserBackup(file);
+  event.target.value="";
+ };
+}
+
 const APP_THEMES={
  night:{name:"Acid Night",vars:{"--bg":"#11130f","--panel":"#191c17","--panel2":"#20241e","--line":"#30372c","--text":"#eff3e9","--muted":"#9aa393","--acid":"#cafa6a","--purple":"#b5a3ff"}},
  terminal:{name:"Terminal Green",vars:{"--bg":"#07140c","--panel":"#0c2114","--panel2":"#12301c","--line":"#285239","--text":"#e1ffe8","--muted":"#8fbd9c","--acid":"#72ffa0","--purple":"#b3f3c5"}},
@@ -2831,7 +2954,7 @@ async function exportProcessedVideo(){
  }
 }
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
-function init(){initProcessingWorker();window.__tgrmlitherWaitForPreview=waitForProcessingPreview;window.__tgrmlitherWorkerStatus=()=>({available:!!processingWorker,failed:processingWorkerFailed,threshold:WORKER_PIXEL_THRESHOLD,timeoutMs:workerRequestTimeoutMs});
+function init(){initProcessingWorker();bindUserBackupControls();window.__tgrmlitherWaitForPreview=waitForProcessingPreview;window.__tgrmlitherWorkerStatus=()=>({available:!!processingWorker,failed:processingWorkerFailed,threshold:WORKER_PIXEL_THRESHOLD,timeoutMs:workerRequestTimeoutMs});
  if(["localhost","127.0.0.1","::1"].includes(location.hostname)){
   window.__tgrmlitherSetWorkerTimeoutForTests=ms=>{
    const value=Number(ms);
