@@ -1141,6 +1141,8 @@ const def={algorithm:"bayer4",scale:5,markScale:100,blend:100,smoothing:0,qualit
 pal.custom.c=def.customColors;
 let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],batchRunning=false,batchCancelRequested=false,batchResultsData=[],batchResultsBytes=0,batchDownloadUrls=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0,historyPast=[],historyFuture=[],historyCurrent=null,historyCurrentSignature="",historyTimer=0,restoringHistory=false,compareEnabled=false,comparePosition=50,algorithmFavorites=[],showFavoritesOnly=false,resultDirty=false,lastExported=false,lastRenderedSignature="",hasRendered=false,renderFrame=0;
 const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_IMAGE_FILE_BYTES=128*1024*1024,MAX_PROJECT_FILE_BYTES=160*1024*1024,MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_IMPORT_JSON_BYTES=5*1024*1024,MAX_SHAPE_SVG_BYTES=500000,MAX_BATCH_FILES=500,MAX_BATCH_RESULT_BYTES=128*1024*1024;
+const DEFAULT_IMAGE_DECODE_TIMEOUT_MS=60000;
+let imageDecodeTimeoutMs=DEFAULT_IMAGE_DECODE_TIMEOUT_MS;
 const WORKSPACE_NAMES=["editor","shape","script","batch","video"];
 async function readLimitedText(file,maxBytes,errorMessage){
  if(!file||!Number.isFinite(Number(file.size))||file.size>maxBytes)throw Error(errorMessage);
@@ -1744,7 +1746,15 @@ function render(){
   return;
  }
  pendingWorkerPreview=null;document.body.dataset.processingEngine="main";
- const canvas=renderMode==="script"?makeAscii(src,cfg):rasterPipeline(src,cfg);
+ let canvas;
+ try{canvas=renderMode==="script"?makeAscii(src,cfg):rasterPipeline(src,cfg)}
+ catch(error){
+  document.body.dataset.processingError="true";
+  settleProcessingPreview();
+  say("Не удалось обработать изображение. Предыдущий результат сохранён.");
+  return;
+ }
+ document.body.dataset.processingError="false";
  drawRenderedImage(canvas,cfg,renderMode,canvas);
  settleProcessingPreview();
  if(renderMode==="video")renderVideoFrame();
@@ -2261,9 +2271,9 @@ function revokeBatchDownloadUrls(){for(const url of batchDownloadUrls)URL.revoke
 function uniqueBatchFilename(fileName,usedNames){const root=slug(fileName.replace(/\.[^.]+$/,""))+"-TGRMLither";let name=root+".png",suffix=2;while(usedNames.has(name.toLowerCase()))name=root+"-"+suffix++ +".png";usedNames.add(name.toLowerCase());return name}
 function fileCanvas(f,signal){
  return new Promise((resolve,reject)=>{
-  const url=URL.createObjectURL(f),im=new Image();let settled=false;
+  const url=URL.createObjectURL(f),im=new Image();let settled=false,timer=0;
   const cleanup=()=>{
-   if(settled)return false;settled=true;
+   if(settled)return false;settled=true;clearTimeout(timer);
    if(signal)signal.removeEventListener("abort",abort);
    im.onload=null;im.onerror=null;im.onabort=null;URL.revokeObjectURL(url);return true;
   };
@@ -2280,6 +2290,11 @@ function fileCanvas(f,signal){
   };
   im.onerror=()=>{if(cleanup())reject(Error("Не удалось открыть файл изображения. Проверьте формат и целостность файла."))};
   im.onabort=()=>{if(cleanup())reject(new DOMException("Загрузка изображения отменена","AbortError"))};
+  timer=setTimeout(()=>{
+   if(!cleanup())return;
+   try{im.src=""}catch(error){}
+   reject(new Error("Декодирование изображения превысило лимит времени. Попробуйте уменьшить файл."));
+  },imageDecodeTimeoutMs);
   im.src=url;
  });
 }
@@ -2734,6 +2749,12 @@ function init(){initProcessingWorker();window.__tgrmlitherWaitForPreview=waitFor
    const value=Number(ms);
    if(!Number.isFinite(value))return false;
    workerRequestTimeoutMs=clamp(Math.round(value),100,180000);
+   return true;
+  };
+  window.__tgrmlitherSetImageDecodeTimeoutForTests=ms=>{
+   const value=Number(ms);
+   if(!Number.isFinite(value))return false;
+   imageDecodeTimeoutMs=clamp(Math.round(value),100,180000);
    return true;
   };
  }buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();bindShellControls();bindInspectorLevel();initAlgorithmSearch();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);recordHistorySnapshot();presets.forEach(p=>{});renderPresets();renderBatch();
