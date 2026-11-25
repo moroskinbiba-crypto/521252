@@ -3180,6 +3180,7 @@ async function exportProcessedVideo(){
    if(blob.size)download(blob,slug(videoName())+"-TGRMLither.webm");
    stream.getTracks().forEach(t=>t.stop());if(audioStream)audioStream.getTracks().forEach(t=>t.stop());
    videoExportStream=null;videoAudioStream=null;videoRecorder=null;videoChunks=[];
+   if(mode!=="video")releaseVideoFrameBuffers({includeOutput:true});
    $("videoExport").disabled=false;$("videoTimeline").disabled=false;$("videoPlay").textContent="▶ Воспроизвести";
    say(!blob.size?"Не удалось получить данные видео":videoExportInterrupted?"Запись остановлена · частичный WebM сохранён":"Обработанное видео экспортировано");
   };
