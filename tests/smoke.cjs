@@ -1487,7 +1487,7 @@ async function downloadFrom(page, selector) {
     assert.ok(userBackupDoc.data["tgrmlithering-workspaces"], "backup should include workspace profiles");
     assert.ok(userBackupDoc.data["tgrmlither-theme"], "backup should include the current interface theme");
     await storagePage.locator("#shellPicker").selectOption("studio");
-    await storagePage.waitForFunction(() => localStorage.getItem("tgrmlither-shell") === "studio");
+    await storagePage.waitForFunction(() => JSON.parse(localStorage.getItem("tgrmlither-shell") || "null") === "studio");
     storagePage.on("dialog", dialog => dialog.accept());
     await storagePage.locator("#userBackupInput").setInputFiles({
       name: "TGRMLither-backup.json",
@@ -1497,7 +1497,7 @@ async function downloadFrom(page, selector) {
     await storagePage.waitForFunction(() =>
       document.body.dataset.shell === "xp" &&
       document.body.dataset.theme === "terminal" &&
-      localStorage.getItem("tgrmlither-shell") === "xp" &&
+      JSON.parse(localStorage.getItem("tgrmlither-shell") || "null") === "xp" &&
       document.querySelector("#scale")?.value === "8",
       null, { timeout: 15000 }
     );
