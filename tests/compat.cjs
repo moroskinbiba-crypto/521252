@@ -94,7 +94,7 @@ const engines = [
         )
       );
       assert.ok(algorithms.length >= 3, name + ": expected common raster algorithms should exist");
-      for (let i = 0; i < 24; i++) {
+      for (let i = 0; i < 60; i++) {
         await page.locator("#algorithm").selectOption(algorithms[i % algorithms.length]);
         await page.locator("#scale").evaluate((element, value) => {
           element.value = String(value);
@@ -120,7 +120,7 @@ const engines = [
       assert.equal(resourceState.scratchCanvasOutstanding, 0, name + ": every tracked temporary Canvas should be released after rendering");
       assert.deepEqual(errors, [], name + ": browser compatibility run should not create uncaught exceptions");
 
-      console.log(name + " compatibility checks passed (startup, image render, Canvas recovery, 24 repeated edits).");
+      console.log(name + " compatibility checks passed (startup, image render, Canvas recovery, 60 repeated edits).");
       await page.close();
     } finally {
       await browser.close();
