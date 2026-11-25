@@ -35,6 +35,8 @@ jobs:
           Path('/tmp/tgrmlither-inline.js').write_text(scripts[-1], encoding='utf-8')
           PY
           node --check /tmp/tgrmlither-inline.js
+      - name: Validate processing worker
+        run: node --check processing-worker.js
       - name: Validate Portable launcher
         shell: bash
         run: |
@@ -57,11 +59,13 @@ jobs:
           cleanup_port_test
           trap - EXIT
       - name: Validate browser smoke-test JavaScript
-        run: node --check tests/smoke.cjs
-      - name: Install Chromium smoke-test dependencies
+        run: |
+          node --check tests/smoke.cjs
+          node --check tests/compat.cjs
+      - name: Install cross-browser smoke-test dependencies
         run: |
           npm install --prefix /tmp/tgrmlither-qa playwright@1.55.0
-          npx --yes playwright@1.55.0 install chromium
+          npx --yes playwright@1.55.0 install --with-deps chromium firefox webkit
       - name: Run browser smoke tests
         shell: bash
         run: |
@@ -73,6 +77,7 @@ jobs:
             sleep 1
           done
           PLAYWRIGHT_MODULE=/tmp/tgrmlither-qa/node_modules/playwright node tests/smoke.cjs
+          PLAYWRIGHT_MODULE=/tmp/tgrmlither-qa/node_modules/playwright node tests/compat.cjs
       - name: Configure Pages
         if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v6

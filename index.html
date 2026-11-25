@@ -979,7 +979,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <a class="brand" href="#" id="homeLogo" aria-label="TGRMLither"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span><b>TGRMLither</b><small>PIXEL IMAGE STUDIO</small></span></a>
 <button class="btn primary" id="openImage" title="Загрузить изображение" aria-label="Загрузить изображение">▣ Загрузить</button>
 <nav class="topnav" aria-label="Рабочие пространства"><button class="navbtn active" data-mode="editor">Редактор</button><button class="navbtn" data-mode="presets">Пресеты</button><button class="navbtn" data-mode="shape">Shape Lab</button><button class="navbtn" data-mode="script">Script Slayer</button><button class="navbtn" data-mode="batch">Пакетно</button><button class="navbtn" data-mode="video">Видео</button></nav>
-<div class="topright"><span class="local"><i class="live"></i>локально</span><details class="theme-menu" id="themeMenu"><summary class="btn sm" title="Тема интерфейса и код обмена">◐</summary><div class="theme-menu-panel"><label for="themePicker">Тема интерфейса</label><select id="themePicker" class="select full"><option value="night">Acid Night</option><option value="terminal">Terminal Green</option><option value="violet">Violet Signal</option><option value="paper">Paper Studio</option><option value="custom">Моя тема</option></select><label for="shellPicker">Оболочка интерфейса</label><select id="shellPicker" class="select full"><option value="xp" selected>Windows XP Luna</option><option value="studio">Современная студия</option></select><div class="theme-custom-grid" id="themeCustomColors"><label>Фон<input type="color" id="themeColorBg" value="#11130f"></label><label>Панель<input type="color" id="themeColorPanel" value="#191c17"></label><label>Вложенная<input type="color" id="themeColorPanel2" value="#20241e"></label><label>Границы<input type="color" id="themeColorLine" value="#30372c"></label><label>Текст<input type="color" id="themeColorText" value="#eff3e9"></label><label>Вторичный<input type="color" id="themeColorMuted" value="#9aa393"></label><label>Акцент<input type="color" id="themeColorAcid" value="#cafa6a"></label><label>Второй акцент<input type="color" id="themeColorPurple" value="#b5a3ff"></label></div><button class="btn sm full" id="applyCustomTheme" type="button">Применить мои цвета</button><button class="btn sm full" id="makeThemeCode" type="button">↗ Создать / скопировать код темы</button><label for="themeCodeInput">Код темы для импорта</label><input type="text" id="themeCodeInput" placeholder="TGRMTHEME1:…" autocomplete="off"><button class="btn sm full" id="applyThemeCode" type="button">Применить код темы</button><small class="theme-status" id="themeStatus">Тема сохраняется в этом браузере.</small></div></details><button class="btn" id="offlineBtn" title="Скачать автономную HTML-версию">↓ Офлайн HTML</button><button class="btn primary" id="topExport">↓ Экспорт</button></div>
+<div class="topright"><span class="local"><i class="live"></i>локально</span><details class="theme-menu" id="themeMenu"><summary class="btn sm" title="Тема интерфейса и код обмена">◐</summary><div class="theme-menu-panel"><label for="themePicker">Тема интерфейса</label><select id="themePicker" class="select full"><option value="night">Acid Night</option><option value="terminal">Terminal Green</option><option value="violet">Violet Signal</option><option value="paper">Paper Studio</option><option value="custom">Моя тема</option></select><label for="shellPicker">Оболочка интерфейса</label><select id="shellPicker" class="select full"><option value="xp" selected>Windows XP Luna</option><option value="studio">Современная студия</option></select><div class="theme-custom-grid" id="themeCustomColors"><label>Фон<input type="color" id="themeColorBg" value="#11130f"></label><label>Панель<input type="color" id="themeColorPanel" value="#191c17"></label><label>Вложенная<input type="color" id="themeColorPanel2" value="#20241e"></label><label>Границы<input type="color" id="themeColorLine" value="#30372c"></label><label>Текст<input type="color" id="themeColorText" value="#eff3e9"></label><label>Вторичный<input type="color" id="themeColorMuted" value="#9aa393"></label><label>Акцент<input type="color" id="themeColorAcid" value="#cafa6a"></label><label>Второй акцент<input type="color" id="themeColorPurple" value="#b5a3ff"></label></div><button class="btn sm full" id="applyCustomTheme" type="button">Применить мои цвета</button><button class="btn sm full" id="makeThemeCode" type="button">↗ Создать / скопировать код темы</button><label for="themeCodeInput">Код темы для импорта</label><input type="text" id="themeCodeInput" placeholder="TGRMTHEME1:…" autocomplete="off"><button class="btn sm full" id="applyThemeCode" type="button">Применить код темы</button><div class="theme-custom-grid" style="margin-top:9px"><button class="btn sm" id="exportUserBackup" type="button">↓ Резервная копия</button><button class="btn sm" id="importUserBackup" type="button">↑ Восстановить</button></div><small class="theme-status" id="themeStatus">Тема сохраняется в этом браузере.</small></div></details><button class="btn" id="offlineBtn" title="Скачать автономную HTML-версию">↓ Офлайн HTML</button><button class="btn primary" id="topExport">↓ Экспорт</button></div>
 </header>
 <div class="layout">
 <main>
@@ -1097,13 +1097,78 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <input class="hidden" type="file" id="shapeSvgInput" accept=".svg,image/svg+xml"><input class="hidden" type="file" id="shapePresetInput" accept=".json,application/json">
 <video id="videoSource" class="hidden" playsinline preload="metadata"></video>
 <input class="hidden" type="file" id="batchInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" multiple>
-<input class="hidden" type="file" id="projectInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteInput" accept=".json,application/json"><input class="hidden" type="file" id="presetInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteLibraryInput" accept=".json,application/json">
+<input class="hidden" type="file" id="projectInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteInput" accept=".json,application/json"><input class="hidden" type="file" id="presetInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteLibraryInput" accept=".json,application/json"><input class="hidden" type="file" id="userBackupInput" accept=".json,application/json">
 <div class="toast" id="toast" role="status"></div>
 <div class="modalbg hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle"><div class="modal export-modal"><h2 id="exportModalTitle">Экспорт результата</h2><p>Выберите формат и проверьте параметры перед сохранением файла.</p><div class="export-fields"><div><label for="exportFormat">Что экспортировать</label><select id="exportFormat" class="select full"><option value="png">PNG — изображение с прозрачностью</option><option value="jpeg">JPEG — фотография, сжатие</option><option value="svgColor">SVG — цветной вектор</option><option value="svgBlack">SVG — чёрно-белый вектор</option><option value="svgCmyk">SVG — CMYK-пластины</option><option value="project">Проект TGRMLither (JSON)</option><option value="copy">Копировать результат</option></select></div><div class="hidden" id="exportJpegSettings"><label for="exportJpegQuality">Качество JPEG · <output id="exportJpegQualityValue">94%</output></label><input type="range" id="exportJpegQuality" min="70" max="100" value="94"></div><div class="export-note" id="exportSummary">Локальная обработка · файл не загружается на сервер.</div></div><div class="modalactions"><button class="btn" id="exportCancel" type="button">Отмена</button><button class="btn primary" id="exportConfirm" type="button">Экспортировать</button></div></div></div><div class="modalbg hidden" id="modal"><div class="modal"><h2 id="modalTitle">Сохранить пресет</h2><p>Название будет сохранено локально в браузере.</p><input id="presetName" maxlength="48" placeholder="Например, Moss print"><div class="modalactions"><button class="btn" id="modalCancel">Отмена</button><button class="btn primary" id="modalSave">Сохранить</button></div></div></div>
 <script>
 "use strict";
 (function(){
 const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const resourceMetrics={
+ scratchCanvasesCreated:0,scratchCanvasesReleased:0,scratchPixelsReleased:0,sourceCanvasesReleased:0,
+ imageBitmapsCreated:0,imageBitmapsClosed:0,imageBitmapsTransferred:0,lateImageBitmapsClosed:0,
+ workerResources:null,batchResultBytes:0,batchResultUrls:0,transientDownloadUrls:0
+};
+let activeScratchCanvasScope=null;
+const nativeDocumentCreateElement=document.createElement.bind(document);
+document.createElement=function(tag,...args){
+ const element=nativeDocumentCreateElement(tag,...args);
+ if(String(tag).toLowerCase()==="canvas"&&activeScratchCanvasScope){
+  element.__tgrmlitherScratchCanvas=true;
+  resourceMetrics.scratchCanvasesCreated++;
+  activeScratchCanvasScope.push(element);
+ }
+ return element;
+};
+function releaseCanvasBuffer(canvas,{source=false}={}){
+ if(!canvas||canvas===out||canvas.id==="output"||canvas.id==="beforeOutput"||canvas.id==="videoOutput")return false;
+ const pixels=Math.max(0,Number(canvas.width)||0)*Math.max(0,Number(canvas.height)||0);
+ const tracked=canvas.__tgrmlitherScratchCanvas===true&&!canvas.__tgrmlitherScratchReleased;
+ if(tracked)canvas.__tgrmlitherScratchReleased=true;
+ try{canvas.width=0;canvas.height=0}catch(error){return false}
+ if(tracked){resourceMetrics.scratchCanvasesReleased++;resourceMetrics.scratchPixelsReleased+=pixels}
+ if(source)resourceMetrics.sourceCanvasesReleased++;
+ return true;
+}
+function withTrackedScratchCanvases(operation){
+ const parent=activeScratchCanvasScope,allocated=[];
+ activeScratchCanvasScope=allocated;
+ let result;
+ try{result=operation()}
+ catch(error){
+  activeScratchCanvasScope=parent;
+  if(parent)parent.push(...allocated);else for(const canvas of allocated)releaseCanvasBuffer(canvas);
+  throw error;
+ }
+ activeScratchCanvasScope=parent;
+ if(parent)parent.push(...allocated);
+ else for(const canvas of allocated)if(canvas!==result)releaseCanvasBuffer(canvas);
+ return result;
+}
+function renderProcessingCanvas(image,cfg,renderMode){
+ return withTrackedScratchCanvases(()=>renderMode==="script"||(renderMode==="batch"&&cfg?.algorithm==="ascii")?makeAscii(image,cfg):rasterPipeline(image,cfg));
+}
+function mergeWorkerResourceMetrics(snapshot){
+ if(snapshot&&typeof snapshot==="object")resourceMetrics.workerResources={...snapshot};
+}
+function closeImageBitmap(bitmap,{late=false}={}){
+ if(!bitmap||typeof bitmap.close!=="function")return false;
+ try{bitmap.close()}catch(error){}
+ resourceMetrics.imageBitmapsClosed++;
+ if(late)resourceMetrics.lateImageBitmapsClosed++;
+ return true;
+}
+const USER_DATA_STORAGE_KEYS=[
+ "tgrmlithering-workspaces","ditherlab-presets","tgrmlither-palette-library",
+ "tgrmlither-shape-presets","ditherlab-colors","tgrmlither-built-in-palette-overrides",
+ "tgrmlither-favorite-algorithms","tgrmlither-theme","tgrmlither-shell","tgrmlither-inspector-level"
+];
+const USER_DATA_STORAGE_KEY_SET=new Set(USER_DATA_STORAGE_KEYS);
+const STORAGE_BACKUP_PREFIX="tgrmlither-backup-v1:";
+const STORAGE_BACKUP_ITEM_LIMIT=512*1024;
+const STORAGE_BACKUP_TOTAL_LIMIT=2*1024*1024;
+const MAX_USER_BACKUP_BYTES=10*1024*1024;
+const storageRecoveryNotices=new Set();
 const pal={
 moss:{name:"Moss Green",c:["#10160f","#334b2b","#7a9a47","#d9efad"]},
 mono:{name:"Ink",c:["#111111","#505050","#a8a8a8","#f4f0e8"]},
@@ -1139,8 +1204,11 @@ const savedPaletteOverrides=loadStore("tgrmlither-built-in-palette-overrides",{}
 for(const [key,values] of Object.entries(savedPaletteOverrides||{}))if(Object.prototype.hasOwnProperty.call(pal,key)&&key!=="custom"&&Array.isArray(values)&&values.length>=2&&values.length<=16&&values.every(c=>/^#[0-9a-f]{6}$/i.test(c)))pal[key].c=[...values.map(c=>c.toLowerCase())];
 const def={algorithm:"bayer4",scale:5,markScale:100,blend:100,smoothing:0,qualityMode:"balanced",serpentine:false,jpegQuality:94,levels:4,threshold:0,patternAngle:45,patternShape:"circle",algorithmLayers:[],depth:70,contrast:100,brightness:0,midtones:50,highlights:50,blur:0,invert:false,palette:"moss",colorMode:"color",effects:[],effectOrder:["scanlines","glow","chromatic","vignette","noise","epsilon","jpeg","lick","stress","modlines"],effectStrength:{scanlines:50,glow:50,chromatic:50,vignette:50,noise:50,epsilon:50,jpeg:50,lick:50,stress:50,modlines:50},customColors:loadStore("ditherlab-colors",["#10160f","#334b2b","#7a9a47","#d9efad"]),shape:"circle",jitter:20,shapeDistribution:"uniform",shapeRotation:0,shapeThresholds:[25,50,75],customShapePath:"",customShapeViewBox:[0,0,100,100],shapeBands:[{shape:"circle",size:55,color:"#334b2b",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:70,color:"#7a9a47",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:85,color:"#b8d785",rotation:0,customPath:"",customViewBox:[0,0,100,100]},{shape:"circle",size:100,color:"#d9efad",rotation:0,customPath:"",customViewBox:[0,0,100,100]}],asciiWidth:100,asciiSet:"classic",asciiDepth:10,asciiCellSize:8,asciiOffset:0,asciiCustomChars:"",asciiColorMode:"palette",asciiBgMode:"transparent",asciiBgColor:"#07110a",asciiTextColor:"#cafa6a",neoGlowEnabled:false,neoGlowDirection:"horizontal",neoGlowLength:18,neoGlowBrightness:90,neoGlowVisibility:12,neoGlowPhase:50,neoGlowColor:"#cafa6a"};
 pal.custom.c=def.customColors;
-let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],batchRunning=false,batchCancelRequested=false,batchResultsData=[],batchDownloadUrls=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0,historyPast=[],historyFuture=[],historyCurrent=null,historyCurrentSignature="",historyTimer=0,restoringHistory=false,compareEnabled=false,comparePosition=50,algorithmFavorites=[],showFavoritesOnly=false,resultDirty=false,lastExported=false,lastRenderedSignature="",hasRendered=false,renderFrame=0;
-const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_IMAGE_FILE_BYTES=128*1024*1024,MAX_PROJECT_FILE_BYTES=160*1024*1024,MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_IMPORT_JSON_BYTES=5*1024*1024,MAX_SHAPE_SVG_BYTES=500000,MAX_BATCH_FILES=500;
+let s={...def},src=null,srcName="demo-image",demo=true,original=false,ascii="",mode="editor",batch=[],batchRunning=false,batchCancelRequested=false,batchResultsData=[],batchResultsBytes=0,batchDownloadUrls=[],custom=loadStore("ditherlab-presets",[]),toastTimer=0,historyPast=[],historyFuture=[],historyCurrent=null,historyCurrentSignature="",historyTimer=0,restoringHistory=false,compareEnabled=false,comparePosition=50,algorithmFavorites=[],showFavoritesOnly=false,resultDirty=false,lastExported=false,lastRenderedSignature="",hasRendered=false,renderFrame=0;
+const MAX_SOURCE_PIXELS=24000000,MAX_SOURCE_EDGE=32767,MAX_IMAGE_FILE_BYTES=128*1024*1024,MAX_PROJECT_FILE_BYTES=160*1024*1024,MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_IMPORT_JSON_BYTES=5*1024*1024,MAX_SHAPE_SVG_BYTES=500000,MAX_BATCH_FILES=500,MAX_BATCH_RESULT_BYTES=128*1024*1024;
+const DEFAULT_IMAGE_DECODE_TIMEOUT_MS=60000,DEFAULT_CANVAS_RECOVERY_TIMEOUT_MS=5000;
+let imageDecodeTimeoutMs=DEFAULT_IMAGE_DECODE_TIMEOUT_MS,canvasRecoveryTimeoutMs=DEFAULT_CANVAS_RECOVERY_TIMEOUT_MS;
+let canvasRecoveryActive=false,canvasRecoveryTimer=0,beforeCanvasRecoveryTimer=0;
 const WORKSPACE_NAMES=["editor","shape","script","batch","video"];
 async function readLimitedText(file,maxBytes,errorMessage){
  if(!file||!Number.isFinite(Number(file.size))||file.size>maxBytes)throw Error(errorMessage);
@@ -1263,9 +1331,9 @@ if(!loadStore(neoGlowMigrationKey,false)){
 }
 s=cloneSettings(workspaceSettings.editor);
 function saveWorkspaceSettings(name=mode){
- if(!WORKSPACE_NAMES.includes(name))return;
+ if(!WORKSPACE_NAMES.includes(name))return false;
  workspaceSettings[name]=cloneSettings(s);
- store("tgrmlithering-workspaces",workspaceSettings);
+ return store("tgrmlithering-workspaces",workspaceSettings);
 }
 function effectScopeForMode(name=mode){return WORKSPACE_NAMES.includes(name)?name:null;}
 function buildWorkflowEffectsPanels(){
@@ -1291,7 +1359,7 @@ function buildWorkflowEffectsPanels(){
  createPanel("shape","05 / Эффекты Shape Lab","SHAPE FX",$("shapeControl"));
  createPanel("script","05 / Эффекты Script Slayer","SCRIPT FX",$("asciiControl"));
 }
-const out=$("output"),octx=out.getContext("2d",{willReadFrequently:true});
+let out=$("output");
 const labels={"floyd":"Floyd–Steinberg","atkinson":"Atkinson","jarvis":"Jarvis–Judice–Ninke","stucki":"Stucki","burkes":"Burkes","sierra":"Sierra","sierra2":"Sierra Two-Row","sierraLite":"Sierra Lite","fan":"Fan","shiau2":"Shiau 2","shiau3":"Shiau 3","stevenson":"Stevenson–Arce","falseFloyd":"False Floyd–Steinberg","twoRow":"Two-row diffusion","simpleDiff":"Simple diffusion","bayer2":"Bayer 2×2","bayer4":"Bayer 4×4","bayer8":"Bayer 8×8","bayer16":"Bayer 16×16","blueNoise":"Blue Noise · Rank 16×16","beehive":"Beehive · Hexagonal Dither","clustered4":"Clustered Dot 4×4","clustered8":"Clustered Dot 8×8","halftone":"Halftone Dots","shape":"Shape Shifter","spiral":"Spiral Dither","crosshatch":"Crosshatch","diagonal":"Diagonal Hatch","waves":"Wave Dither","concentric":"Concentric Rings","lines":"Modulation Bars","modulation":"Modulation Lines","glitch_jpeg":"JPEG Glitch","glitch_chromatic":"Chromatic Aberration","glitch_scanlines":"CRT Scanlines","glitch_rows":"Row Displacement","glitch_pixels":"Pixel Sort","glitch_blocks":"Block Glitch","glitch_tearing":"Signal Tearing","glitch_static":"Digital Static","glitch_bitcrush":"Bitcrush","glitch_interlace":"Interlacing","glitch_vhs":"VHS Tracking","glitch_wave":"Wave Distortion","glitch_sort":"Luminance Sort","glitch_mosh":"Data Mosh","glitch_color":"Color Bars","glitch_negative":"Negative Bands","glitch_shift":"RGB Shift","special_cmyk":"CMYK Halftone","special_threshold":"Threshold","special_posterize":"Posterize","special_edges":"Edge Dither","special_emboss":"Emboss","special_contour":"Contour Map","special_mosaic":"Mosaic","special_stipple":"Stipple","special_thermal":"Thermal Map","special_xray":"X-Ray","special_relief":"Relief Print","special_ditherMask":"Dither Mask","special_grainMap":"Grain Map","special_invertBands":"Inverted Bands","special_woodcut":"Woodcut","special_outline":"Outline","pixel":"Pixel Poster","ascii":"Script Slayer / ASCII"};
 const presets=[
 {id:"moss",name:"Moss Print",desc:"Зелёная печать · ordered",tag:"EDITOR'S PICK",c:{algorithm:"bayer4",scale:5,levels:4,contrast:112,palette:"moss"}},
@@ -1303,9 +1371,216 @@ const presets=[
 {id:"rust",name:"Analog Oxide",desc:"Тёплая текстура",tag:"TEXTURE",c:{algorithm:"halftone",scale:7,contrast:115,palette:"rust",effects:["noise","vignette"]}},
 {id:"terminal",name:"Green Phosphor",desc:"Монохромный терминал",tag:"DIGITAL",c:{algorithm:"ascii",scale:5,contrast:120,palette:"terminal"}}
 ];
-function loadStore(k,f){try{return JSON.parse(localStorage.getItem(k)||"null")||f}catch(e){return f}}
-function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){say("Не удалось сохранить: хранилище недоступно");return false}}
+function storageChecksum(value){
+ let hash=2166136261;
+ for(let i=0;i<value.length;i++){hash^=value.charCodeAt(i);hash=Math.imul(hash,16777619)}
+ return (hash>>>0).toString(16).padStart(8,"0");
+}
+function queueStorageNotice(key,message){
+ if(storageRecoveryNotices.has(key))return;
+ storageRecoveryNotices.add(key);
+ setTimeout(()=>say(message),0);
+}
+function readStorageBackup(key){
+ if(!USER_DATA_STORAGE_KEY_SET.has(key))return null;
+ try{
+  const raw=localStorage.getItem(STORAGE_BACKUP_PREFIX+key);
+  if(!raw)return null;
+  const envelope=JSON.parse(raw);
+  if(envelope?.format!=="tgrmlither-storage-backup"||envelope.version!==1||envelope.key!==key||typeof envelope.raw!=="string"||envelope.checksum!==storageChecksum(envelope.raw))return null;
+  const value=JSON.parse(envelope.raw);
+  return {raw:envelope.raw,value};
+ }catch(error){return null}
+}
+function loadStore(k,f){
+ let raw=null;
+ try{raw=localStorage.getItem(k)}catch(error){return f}
+ if(raw===null)return f;
+ try{return JSON.parse(raw)}catch(error){
+  const backup=readStorageBackup(k);
+  if(backup){
+   try{localStorage.setItem(k,backup.raw)}catch(storageError){}
+   queueStorageNotice(k,"Повреждённые настройки восстановлены из резервной копии");
+   return backup.value;
+  }
+  queueStorageNotice(k,"Не удалось прочитать сохранённые данные. Используются настройки по умолчанию");
+  return f;
+ }
+}
+function writeStorageBackup(key,previousRaw){
+ if(!USER_DATA_STORAGE_KEY_SET.has(key)||typeof previousRaw!=="string"||previousRaw.length>STORAGE_BACKUP_ITEM_LIMIT)return null;
+ try{JSON.parse(previousRaw)}catch(error){return null}
+ const backupKey=STORAGE_BACKUP_PREFIX+key,previousBackup=localStorage.getItem(backupKey);
+ const envelope=JSON.stringify({format:"tgrmlither-storage-backup",version:1,key,createdAt:new Date().toISOString(),checksum:storageChecksum(previousRaw),raw:previousRaw});
+ let total=0;
+ for(const candidate of USER_DATA_STORAGE_KEYS){
+  if(candidate===key)continue;
+  total+=(localStorage.getItem(STORAGE_BACKUP_PREFIX+candidate)||"").length;
+ }
+ if(total+envelope.length>STORAGE_BACKUP_TOTAL_LIMIT)return null;
+ try{localStorage.setItem(backupKey,envelope);return {backupKey,previousBackup,envelope}}catch(error){return null}
+}
+function store(k,v){
+ let raw,backup=null;
+ try{
+  raw=JSON.stringify(v);
+  if(typeof raw!=="string")throw new Error("Данные невозможно сериализовать");
+  let previous=null;
+  try{previous=localStorage.getItem(k)}catch(error){}
+  if(previous!==null&&previous!==raw)backup=writeStorageBackup(k,previous);
+  try{
+   localStorage.setItem(k,raw);
+   if(localStorage.getItem(k)!==raw)throw new Error("Проверка сохранения не пройдена");
+   return true;
+  }catch(writeError){
+   // A just-created backup must not consume the last free quota needed by the primary save.
+   if(backup){
+    try{if(localStorage.getItem(backup.backupKey)===backup.envelope)localStorage.removeItem(backup.backupKey)}catch(error){}
+    try{
+     localStorage.setItem(k,raw);
+     if(localStorage.getItem(k)!==raw)throw new Error("Проверка сохранения не пройдена");
+     if(backup.previousBackup!==null)try{localStorage.setItem(backup.backupKey,backup.previousBackup)}catch(error){}
+     return true;
+    }catch(retryError){}
+   }
+   throw writeError;
+  }
+ }catch(error){
+  say("Не удалось сохранить данные. Освободите место в хранилище или экспортируйте резервную копию.");
+  return false;
+ }
+}
 function say(m){$("toast").textContent=m;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2400)}
+
+function normaliseBackupEntry(key,value){
+ if(key==="tgrmlithering-workspaces"){
+  if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Структура рабочих пространств повреждена");
+  return normaliseWorkspaceSettings(value);
+ }
+ if(key==="ditherlab-presets"){
+  if(!Array.isArray(value)||value.length>100)throw Error("Некорректный список пресетов");
+  return value.map(item=>{
+   if(!item||typeof item!=="object"||typeof item.name!=="string"||!item.name.trim()||!item.c||typeof item.c!=="object"||Array.isArray(item.c))throw Error("Некорректный пользовательский пресет");
+   return {name:item.name.trim().slice(0,48),desc:typeof item.desc==="string"?item.desc.slice(0,160):"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(item.workspace)?item.workspace:"editor",c:cloneSettings(item.c)};
+  });
+ }
+ if(key==="tgrmlither-palette-library"){
+  if(!Array.isArray(value)||value.length>100)throw Error("Некорректная библиотека палитр");
+  const seen=new Set();
+  return value.map(item=>{
+   if(!item||typeof item!=="object"||!/^lib_[a-z0-9_-]{1,40}$/i.test(item.id||"")||seen.has(item.id)||typeof item.name!=="string"||!Array.isArray(item.colors)||item.colors.length<2||item.colors.length>16||!item.colors.every(color=>typeof color==="string"&&/^#[0-9a-f]{6}$/i.test(color)))throw Error("Некорректная запись библиотеки палитр");
+   seen.add(item.id);return {id:item.id,name:item.name.trim().slice(0,48)||"Моя палитра",colors:item.colors.map(color=>color.toLowerCase())};
+  });
+ }
+ if(key==="tgrmlither-shape-presets"){
+  if(!Array.isArray(value)||value.length>50)throw Error("Некорректная библиотека Shape Shifter");
+  const seen=new Set();
+  return value.map(item=>{
+   if(!item||typeof item!=="object"||!/^user_[a-z0-9_-]{1,48}$/i.test(item.id||"")||seen.has(item.id)||typeof item.name!=="string"||!item.profile)throw Error("Некорректный Shape Shifter пресет");
+   seen.add(item.id);return {id:item.id,name:item.name.trim().slice(0,48)||"Shape preset",profile:cleanShapeProfile(item.profile)};
+  });
+ }
+ if(key==="ditherlab-colors"){
+  if(!Array.isArray(value)||value.length<2||value.length>16||!value.every(color=>typeof color==="string"&&/^#[0-9a-f]{6}$/i.test(color)))throw Error("Некорректная пользовательская палитра");
+  return value.map(color=>color.toLowerCase());
+ }
+ if(key==="tgrmlither-built-in-palette-overrides"){
+  if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Некорректные переопределения палитр");
+  const clean={};
+  for(const [id,colors] of Object.entries(value)){
+   if(!Object.prototype.hasOwnProperty.call(pal,id)||id==="custom"||!Array.isArray(colors)||colors.length<2||colors.length>16||!colors.every(color=>typeof color==="string"&&/^#[0-9a-f]{6}$/i.test(color)))throw Error("Некорректная встроенная палитра: "+id);
+   clean[id]=colors.map(color=>color.toLowerCase());
+  }
+  return clean;
+ }
+ if(key==="tgrmlither-favorite-algorithms"){
+  if(!Array.isArray(value)||value.length>100)throw Error("Некорректное избранное алгоритмов");
+  const known=new Set(Object.keys(labels));
+  if(!value.every(item=>typeof item==="string"&&known.has(item)))throw Error("В резервной копии есть неизвестный алгоритм");
+  return [...new Set(value)];
+ }
+ if(key==="tgrmlither-theme"){
+  if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Некорректная тема интерфейса");
+  const id=value.id==="custom"||Object.prototype.hasOwnProperty.call(APP_THEMES,value.id)?value.id:"custom";
+  return {id,vars:safeThemeVars(value.vars)};
+ }
+ if(key==="tgrmlither-shell"){
+  if(!["xp","studio"].includes(value))throw Error("Некорректная оболочка интерфейса");
+  return value;
+ }
+ if(key==="tgrmlither-inspector-level"){
+  if(!["basic","advanced"].includes(value))throw Error("Некорректный уровень настроек");
+  return value;
+ }
+ throw Error("Неизвестный раздел резервной копии");
+}
+function exportUserBackup(){
+ try{
+  if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
+  const data={};
+  for(const key of USER_DATA_STORAGE_KEYS){
+   const value=loadStore(key,undefined);
+   if(value!==undefined)data[key]=value;
+  }
+  data["tgrmlithering-workspaces"]=workspaceSettings;
+  data["tgrmlither-theme"]={id:document.body.dataset.theme||"night",vars:Object.fromEntries(THEME_KEYS.map(key=>[key,getComputedStyle(document.documentElement).getPropertyValue(key).trim()]))};
+  data["tgrmlither-shell"]=document.body.dataset.shell||"xp";
+  data["tgrmlither-inspector-level"]=document.body.dataset.inspectorLevel||"basic";
+  data["tgrmlither-favorite-algorithms"]=[...algorithmFavorites];
+  data["ditherlab-colors"]=[...(s.customColors||pal.custom.c)];
+  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.3.10",data};
+  const json=JSON.stringify(doc,null,2);
+  if(json.length>MAX_USER_BACKUP_BYTES)throw Error("Резервная копия превышает лимит 10 МБ");
+  download(new Blob([json],{type:"application/json;charset=utf-8"}),"TGRMLither-backup.json");
+  say("Резервная копия подготовлена · "+Object.keys(data).length+" разделов");
+ }catch(error){say(error?.message||"Не удалось создать резервную копию")}
+}
+async function importUserBackup(file){
+ if(!file)return;
+ if(!Number.isFinite(Number(file.size))||file.size>MAX_USER_BACKUP_BYTES){say("Файл резервной копии превышает лимит 10 МБ");return}
+ try{
+  const doc=JSON.parse(await readLimitedText(file,MAX_USER_BACKUP_BYTES,"Файл резервной копии превышает лимит 10 МБ"));
+  if(doc?.format!=="tgrmlither-user-backup"||doc.version!==1||!doc.data||typeof doc.data!=="object"||Array.isArray(doc.data))throw Error("Формат резервной копии не распознан");
+  const entries=Object.entries(doc.data);
+  if(!entries.length||entries.some(([key])=>!USER_DATA_STORAGE_KEY_SET.has(key)))throw Error("Резервная копия содержит неизвестные разделы");
+  const validated={};
+  for(const [key,value] of entries)validated[key]=normaliseBackupEntry(key,value);
+  if(!confirm("Восстановить "+entries.length+" разделов из резервной копии? Текущие пользовательские настройки будут заменены."))return;
+  const previous=new Map(entries.map(([key])=>[key,localStorage.getItem(key)]));
+  const written=[];
+  try{
+   for(const [key,value] of Object.entries(validated)){
+    if(!store(key,value))throw Error("Не удалось сохранить раздел: "+key);
+    written.push(key);
+   }
+   for(const key of written){
+    const expected=JSON.stringify(validated[key]);
+    if(localStorage.getItem(key)!==expected)throw Error("Проверка восстановления не пройдена: "+key);
+   }
+  }catch(error){
+   let rollbackOk=true;
+   for(const key of written.reverse()){
+    try{
+     const raw=previous.get(key);
+     if(raw===null)localStorage.removeItem(key);else localStorage.setItem(key,raw);
+     if(localStorage.getItem(key)!==raw)rollbackOk=false;
+    }catch(rollbackError){rollbackOk=false}
+   }
+   throw Error(rollbackOk?"Восстановление отменено. Прежние данные сохранены.":"Не удалось полностью откатить восстановление. Проверьте резервную копию и свободное место.");
+  }
+  say("Резервная копия восстановлена. Перезапускаю приложение…");
+  setTimeout(()=>location.reload(),450);
+ }catch(error){say(error?.message||"Не удалось восстановить резервную копию")}
+}
+function bindUserBackupControls(){
+ $("exportUserBackup").onclick=exportUserBackup;
+ $("importUserBackup").onclick=()=>$("userBackupInput").click();
+ $("userBackupInput").onchange=async event=>{
+  const file=event.target.files?.[0];
+  if(file)await importUserBackup(file);
+  event.target.value="";
+ };
+}
 
 const APP_THEMES={
  night:{name:"Acid Night",vars:{"--bg":"#11130f","--panel":"#191c17","--panel2":"#20241e","--line":"#30372c","--text":"#eff3e9","--muted":"#9aa393","--acid":"#cafa6a","--purple":"#b5a3ff"}},
@@ -1338,10 +1613,10 @@ function shapeStore(){const saved=loadStore("tgrmlither-shape-presets",[]);retur
 function renderShapePresetOptions(){const select=$("shapePresetSelect");if(!select)return;const previous=select.value;select.innerHTML="";const built=document.createElement("optgroup");built.label="Встроенные пресеты";for(const [id,p] of Object.entries(SHAPE_PRESETS)){const o=document.createElement("option");o.value=id;o.textContent=p.name;built.append(o)}select.append(built);const saved=shapeStore();if(saved.length){const group=document.createElement("optgroup");group.label="Мои пресеты";for(const p of saved){const o=document.createElement("option");o.value=p.id;o.textContent=p.name;group.append(o)}select.append(group)}select.value=[...Object.keys(SHAPE_PRESETS),...saved.map(p=>p.id)].includes(previous)?previous:"classic";$("deleteShapePreset").disabled=!select.value.startsWith("user_")}
 function cleanShapeProfile(input){if(!input||typeof input!=="object"||!Array.isArray(input.shapeBands)||input.shapeBands.length!==4)throw Error("shape");const bands=input.shapeBands.map((b)=>{const shape=SHAPE_OPTIONS.includes(b?.shape)?b.shape:"circle",color=/^#[0-9a-f]{6}$/i.test(b?.color||"")?b.color:"#334b2b",vb=Array.isArray(b?.customViewBox)&&b.customViewBox.length===4&&b.customViewBox.every(Number.isFinite)&&b.customViewBox[2]>0&&b.customViewBox[3]>0?b.customViewBox:[0,0,100,100];return {shape,size:clamp(Number(b?.size)||70,20,180),color,rotation:clamp(Number(b?.rotation)||0,-180,180),customPath:typeof b?.customPath==="string"?b.customPath.slice(0,20000):"",customViewBox:vb}});const raw=Array.isArray(input.shapeThresholds)?input.shapeThresholds:[25,50,75],thresholds=raw.slice(0,3).map((v,i)=>clamp(Number(v)||[25,50,75][i],0,100)).sort((a,b)=>a-b);while(thresholds.length<3)thresholds.push([25,50,75][thresholds.length]);return {shape:SHAPE_OPTIONS.includes(input.shape)?input.shape:"circle",jitter:clamp(Number(input.jitter)||0,0,80),shapeDistribution:["uniform","radial","horizontal","vertical","random","wave","edge"].includes(input.shapeDistribution)?input.shapeDistribution:"uniform",shapeRotation:clamp(Number(input.shapeRotation)||0,-180,180),shapeThresholds:thresholds,shapeBands:bands,customShapePath:typeof input.customShapePath==="string"?input.customShapePath.slice(0,20000):"",customShapeViewBox:Array.isArray(input.customShapeViewBox)&&input.customShapeViewBox.length===4&&input.customShapeViewBox.every(Number.isFinite)&&input.customShapeViewBox[2]>0&&input.customShapeViewBox[3]>0?input.customShapeViewBox:[0,0,100,100]}}
 function applyShapeProfile(input,message="Shape Shifter загружен"){try{const profile=cleanShapeProfile(input);if(mode!=="shape")setMode("shape");s.shape=profile.shape;s.jitter=profile.jitter;s.shapeDistribution=profile.shapeDistribution;s.shapeRotation=profile.shapeRotation;s.shapeThresholds=profile.shapeThresholds;s.shapeBands=profile.shapeBands;s.customShapePath=profile.customShapePath;s.customShapeViewBox=profile.customShapeViewBox;s.algorithm="shape";saveWorkspaceSettings("shape");sync();render();say(message);return true}catch(err){say("Настройки Shape Shifter не распознаны");return false}}
-function persistShapePreset(name,profile){const saved=shapeStore();if(saved.length>=50){say("Библиотека Shape Shifter заполнена (50 пресетов)");return null}const id="user_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),entry={id,name:(name||"Shape preset").trim().slice(0,48)||"Shape preset",profile:cleanShapeProfile(profile)};saved.unshift(entry);store("tgrmlither-shape-presets",saved);renderShapePresetOptions();$("shapePresetSelect").value=id;$("deleteShapePreset").disabled=false;return entry}
+function persistShapePreset(name,profile){const saved=shapeStore();if(saved.length>=50){say("Библиотека Shape Shifter заполнена (50 пресетов)");return null}const id="user_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),entry={id,name:(name||"Shape preset").trim().slice(0,48)||"Shape preset",profile:cleanShapeProfile(profile)},next=[entry,...saved];if(!store("tgrmlither-shape-presets",next))return null;renderShapePresetOptions();$("shapePresetSelect").value=id;$("deleteShapePreset").disabled=false;return entry}
 function applyShapePreset(){const id=$("shapePresetSelect").value,entry=SHAPE_PRESETS[id]||shapeStore().find(p=>p.id===id),input=entry?.profile||entry;if(!input){say("Выберите пресет форм");return}try{const profile=cleanShapeProfile(input);if(mode!=="shape")setMode("shape");Object.assign(s,profile,{algorithm:"shape"});workspaceSettings.shape=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);$("shapePresetSelect").value=id;$("deleteShapePreset").disabled=!id.startsWith("user_");sync();render();say("Пресет: "+entry.name)}catch(err){say("Не удалось применить пресет Shape Shifter")}}
 function saveShapePreset(){const name=$("shapePresetName").value.trim();if(!name){say("Введите название пресета");$("shapePresetName").focus();return}const entry=persistShapePreset(name,shapeProfile());if(entry){$("shapePresetName").value="";say("Shape Shifter сохранён: "+entry.name)}}
-function deleteShapePreset(){const id=$("shapePresetSelect").value,saved=shapeStore(),i=saved.findIndex(p=>p.id===id);if(i<0){say("Встроенные пресеты удалить нельзя");return}const name=saved[i].name;saved.splice(i,1);store("tgrmlither-shape-presets",saved);renderShapePresetOptions();say("Пресет удалён: "+name)}
+function deleteShapePreset(){const id=$("shapePresetSelect").value,saved=shapeStore(),i=saved.findIndex(p=>p.id===id);if(i<0){say("Встроенные пресеты удалить нельзя");return}const name=saved[i].name,next=saved.filter(p=>p.id!==id);if(!store("tgrmlither-shape-presets",next))return;renderShapePresetOptions();say("Пресет удалён: "+name)}
 function exportShapePreset(){const name=$("shapePresetName").value.trim()||SHAPE_PRESETS[$("shapePresetSelect").value]?.name||shapeStore().find(p=>p.id===$("shapePresetSelect").value)?.name||"Shape Shifter";download(new Blob([JSON.stringify({format:"tgrmlither-shape-preset",version:1,name,profile:shapeProfile()},null,2)],{type:"application/json"}),slug(name)+"-TGRMLither-shape.json");say("Пресет Shape Shifter экспортирован")}
 async function importShapePreset(file){try{const doc=JSON.parse(await readLimitedText(file,MAX_IMPORT_JSON_BYTES,"Файл JSON-формы слишком большой")),profile=doc.profile||doc.shape||doc;cleanShapeProfile(profile);if(doc.name)persistShapePreset(String(doc.name).slice(0,48),profile);applyShapeProfile(profile,"Пресет Shape Shifter импортирован")}catch(err){say("Не удалось импортировать JSON-форму")}}
 function encodeShareCode(prefix,data){const bytes=new TextEncoder().encode(JSON.stringify(data));let binary="";for(const b of bytes)binary+=String.fromCharCode(b);return prefix+btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
@@ -1521,11 +1796,334 @@ function makeAscii(image,cfg){
 function drawDemo(){let c=document.createElement("canvas");c.width=960;c.height=620;let x=c.getContext("2d"),g=x.createLinearGradient(0,0,960,620);g.addColorStop(0,"#192a24");g.addColorStop(.5,"#8ca28b");g.addColorStop(1,"#111c1a");x.fillStyle=g;x.fillRect(0,0,960,620);let sky=x.createLinearGradient(0,0,0,420);sky.addColorStop(0,"#8ba68a");sky.addColorStop(1,"#d6ce9e");x.fillStyle=sky;x.fillRect(0,0,960,420);x.fillStyle="#f3e3ab";x.beginPath();x.arc(690,190,91,0,7);x.fill();x.fillStyle="#c1bf8b";x.beginPath();x.moveTo(0,390);x.lineTo(140,250);x.lineTo(265,375);x.lineTo(390,220);x.lineTo(585,420);x.closePath();x.fill();x.fillStyle="#576e56";x.beginPath();x.moveTo(0,440);x.lineTo(230,310);x.lineTo(390,440);x.lineTo(560,295);x.lineTo(790,450);x.lineTo(960,330);x.lineTo(960,620);x.lineTo(0,620);x.closePath();x.fill();x.fillStyle="#243e33";x.beginPath();x.moveTo(0,500);x.lineTo(230,385);x.lineTo(420,520);x.lineTo(620,390);x.lineTo(960,530);x.lineTo(960,620);x.lineTo(0,620);x.closePath();x.fill();x.fillStyle="#d7dcaa";x.beginPath();x.moveTo(410,620);x.lineTo(590,400);x.lineTo(635,400);x.lineTo(530,620);x.closePath();x.fill();for(let i=0;i<34;i++){x.fillStyle=["#101b17","#263b2b","#3c5738"][i%3];x.fillRect(i*29,540+(i%4)*12,20,82-(i%4)*6)}return c}
 function imageResizeMessage(c){return c&&c.tgrmlitherDownscaled?"Изображение уменьшено для стабильной обработки: "+c.tgrmlitherOriginalWidth+" × "+c.tgrmlitherOriginalHeight+" → "+c.width+" × "+c.height+" px":""}
 function canvasFromImage(image){const ow=Math.floor(Number(image.naturalWidth||image.videoWidth||image.width)||0),oh=Math.floor(Number(image.naturalHeight||image.videoHeight||image.height)||0);if(!ow||!oh)throw Error("У изображения нет допустимых размеров");const scale=Math.min(1,Math.sqrt(MAX_SOURCE_PIXELS/(ow*oh)),MAX_SOURCE_EDGE/ow,MAX_SOURCE_EDGE/oh),w=Math.max(1,Math.floor(ow*scale)),h=Math.max(1,Math.floor(oh*scale)),c=document.createElement("canvas");c.width=w;c.height=h;const ctx=c.getContext("2d",{willReadFrequently:true});if(!ctx)throw Error("Не удалось выделить память для изображения");ctx.imageSmoothingEnabled=scale<1;ctx.imageSmoothingQuality="high";ctx.drawImage(image,0,0,w,h);c.tgrmlitherDownscaled=w<ow||h<oh;c.tgrmlitherOriginalWidth=ow;c.tgrmlitherOriginalHeight=oh;return c}
-function loadImage(c,n,isDemo=false){src=c;srcName=n||"image";demo=isDemo;original=false;resultDirty=false;lastExported=false;lastRenderedSignature="";hasRendered=false;compareEnabled=false;$("empty").style.display="none";out.style.display="block";$("toggleOriginal").textContent="◉ Показать оригинал";refresh();render();say(isDemo?"Демо-изображение готово":imageResizeMessage(c)||"Изображение загружено")}
+const WORKER_PIXEL_THRESHOLD=786432,WORKER_REQUEST_TIMEOUT_MS=120000;
+let workerRequestTimeoutMs=WORKER_REQUEST_TIMEOUT_MS;
+let processingWorker=null,processingWorkerFailed=false,processingWorkerRequestSeq=0,processingWorkerPending=new Map();
+let processingSourceSeq=0,processingSourceId=0,processingSourceReadyId=0,processingSourcePending=false,processingSourceCanvasCopy=null;
+let previewRevision=0,previewWorkerBusy=false,pendingWorkerPreview=null,previewWaiters=[];
+let videoWorkerBusy=false,videoFrameRevision=0,videoFrameQueued=false;
+
+function shouldUseProcessingWorker(image){
+ return !!image&&Number(image.width||0)*Number(image.height||0)>=WORKER_PIXEL_THRESHOLD;
+}
+function paletteColorsFor(cfg){
+ const palette=pal[cfg?.palette]||pal.moss;
+ return (palette?.c||pal.moss.c).map(color=>typeof color==="string"?color:"#"+color.map(v=>Math.round(v).toString(16).padStart(2,"0")).join(""));
+}
+function initProcessingWorker(){
+ if(processingWorker||processingWorkerFailed)return !!processingWorker;
+ if(typeof Worker!=="function"||typeof OffscreenCanvas!=="function"||typeof createImageBitmap!=="function")return false;
+ try{
+  processingWorker=new Worker(new URL("./processing-worker.js",document.baseURI));
+  processingWorker.onmessage=event=>{
+   const data=event.data||{},pending=processingWorkerPending.get(data.id);
+   mergeWorkerResourceMetrics(data.workerResources);
+   if(!pending){closeImageBitmap(data.bitmap);return}
+   clearTimeout(pending.timer);
+   processingWorkerPending.delete(data.id);
+   if(data.type==="error")pending.reject(new Error(data.message||"Фоновая обработка не удалась"));
+   else pending.resolve(data);
+  };
+  processingWorker.onerror=event=>{
+   event.preventDefault?.();
+   disableProcessingWorker(new Error(event.message||"Ошибка фонового потока"));
+   if(src)render();
+  };
+  processingWorker.onmessageerror=()=>{
+   disableProcessingWorker(new Error("Не удалось прочитать ответ фонового потока"));
+   if(src)render();
+  };
+  document.body.dataset.processingWorker="available";
+  return true;
+ }catch(error){
+  processingWorker=null;
+  document.body.dataset.processingWorker="unavailable";
+  return false;
+ }
+}
+function workerRequest(message,transfer=[],timeoutMs=workerRequestTimeoutMs){
+ return new Promise((resolve,reject)=>{
+  if(!processingWorker){
+   if(Array.isArray(transfer))transfer.forEach(item=>closeImageBitmap(item));
+   reject(new Error("Фоновый обработчик недоступен"));return;
+  }
+  const id=++processingWorkerRequestSeq;
+  const timeout=Math.max(100,Number(timeoutMs)||workerRequestTimeoutMs);
+  const pending={resolve,reject,timer:0};
+  pending.timer=setTimeout(()=>{
+   if(!processingWorkerPending.has(id))return;
+   processingWorkerPending.delete(id);
+   const error=new Error("Фоновая обработка не ответила за "+Math.ceil(timeout/1000)+" с");
+   reject(error);
+   disableProcessingWorker(error);
+  },timeout);
+  processingWorkerPending.set(id,pending);
+  try{
+   processingWorker.postMessage({...message,id},transfer);
+   if(Array.isArray(transfer)&&typeof ImageBitmap!=="undefined")resourceMetrics.imageBitmapsTransferred+=transfer.filter(item=>item instanceof ImageBitmap).length;
+  }catch(error){clearTimeout(pending.timer);processingWorkerPending.delete(id);if(Array.isArray(transfer))transfer.forEach(item=>closeImageBitmap(item));reject(error)}
+ });
+}
+function createWorkerBitmap(image){
+ return new Promise((resolve,reject)=>{
+  let settled=false;
+  const timeout=workerRequestTimeoutMs;
+  const timer=setTimeout(()=>{settled=true;reject(new Error("Подготовка изображения для фоновой обработки превысила лимит времени"))},timeout);
+  Promise.resolve().then(()=>createImageBitmap(image)).then(bitmap=>{
+   if(settled){closeImageBitmap(bitmap,{late:true});return}
+   settled=true;clearTimeout(timer);resourceMetrics.imageBitmapsCreated++;resolve(bitmap);
+  },error=>{
+   if(settled)return;
+   settled=true;clearTimeout(timer);reject(error);
+  });
+ });
+}
+function disableProcessingWorker(error){
+ processingWorkerFailed=true;
+ const worker=processingWorker;processingWorker=null;
+ try{worker?.terminate()}catch(e){}
+ const reason=error||new Error("Фоновый обработчик остановлен");
+ for(const pending of processingWorkerPending.values()){
+  clearTimeout(pending.timer);
+  pending.reject(reason);
+ }
+ processingWorkerPending.clear();
+ processingSourceId=0;processingSourceReadyId=0;processingSourcePending=false;
+ pendingWorkerPreview=null;previewWorkerBusy=false;
+ document.body.dataset.processingWorker="failed";
+ document.body.dataset.processingEngine="main";
+ document.body.dataset.processingPending="false";
+ mergeWorkerResourceMetrics({sourceCount:0,sourcePixels:0});
+ const waiters=previewWaiters.splice(0);waiters.forEach(resolve=>resolve());
+}
+function setProcessingSource(image){
+ const previousId=processingSourceId,id=++processingSourceSeq;
+ processingSourceCanvasCopy=null;
+ processingSourceId=0;processingSourceReadyId=0;processingSourcePending=false;
+ if(!processingWorker||!shouldUseProcessingWorker(image)){
+  if(processingWorker&&previousId)workerRequest({type:"clear-source",sourceId:previousId}).catch(()=>{});
+  return;
+ }
+ processingSourceId=id;processingSourcePending=true;
+ const bitmapPromise=createWorkerBitmap(image);
+ processingSourceCanvasCopy=bitmapPromise.then(()=>true,()=>false);
+ bitmapPromise.then(bitmap=>{
+  if(id!==processingSourceId){closeImageBitmap(bitmap,{late:true});return null}
+  return workerRequest({type:"set-source",sourceId:id,bitmap},[bitmap]);
+ }).then(result=>{
+  if(!result||id!==processingSourceId)return;
+  processingSourceReadyId=id;processingSourcePending=false;
+  dispatchWorkerPreview();
+ }).catch(error=>{
+  if(id!==processingSourceId)return;
+  processingSourcePending=false;
+  disableProcessingWorker(error);
+  if(src)render();
+ });
+}
+function setProcessingPending(pending){
+ document.body.dataset.processingPending=String(!!pending);
+ const status=$("fileStatus");
+ if(status&&pending){status.textContent="Обработка в фоновом потоке…";status.dataset.state="processing"}
+}
+function settleProcessingPreview(){
+ setProcessingPending(false);
+ if(src)refresh();
+ const waiters=previewWaiters.splice(0);waiters.forEach(resolve=>resolve());
+}
+function waitForProcessingPreview(){
+ if(document.body.dataset.processingPending!=="true")return Promise.resolve();
+ return new Promise(resolve=>previewWaiters.push(resolve));
+}
+function queueWorkerPreview(cfg,renderMode,signature,revision){
+ pendingWorkerPreview={
+  cfg:cloneSettings(cfg),renderMode,signature,revision,sourceId:processingSourceId,
+  paletteColors:paletteColorsFor(cfg)
+ };
+ dispatchWorkerPreview();
+}
+function dispatchWorkerPreview(){
+ if(!processingWorker||previewWorkerBusy||!pendingWorkerPreview)return;
+ const request=pendingWorkerPreview;
+ if(!request.sourceId||processingSourceReadyId!==request.sourceId)return;
+ pendingWorkerPreview=null;previewWorkerBusy=true;
+ workerRequest({
+  type:"render",kind:request.renderMode,sourceId:request.sourceId,
+  cfg:request.cfg,paletteColors:request.paletteColors,renderRevision:request.revision
+ }).then(result=>{
+  previewWorkerBusy=false;
+  const current=request.revision===previewRevision&&request.sourceId===processingSourceId&&
+   request.renderMode===mode&&request.signature===JSON.stringify(s)&&!original;
+  if(current){
+   if(typeof result.ascii==="string")ascii=result.ascii;
+   drawRenderedImage(result.bitmap,request.cfg,request.renderMode,result);
+   settleProcessingPreview();
+  }else closeImageBitmap(result.bitmap);
+  if(pendingWorkerPreview)dispatchWorkerPreview();
+ }).catch(error=>{
+  previewWorkerBusy=false;
+  if(pendingWorkerPreview)pendingWorkerPreview=null;
+  disableProcessingWorker(error);
+  if(src)render();
+ });
+}
+function drawRenderedImage(image,cfg,renderMode,metadata=null){
+ if(canvasRecoveryActive){closeImageBitmap(image);return false}
+ try{
+  const width=Number(metadata?.width||image.width),height=Number(metadata?.height||image.height);
+  if(!Number.isFinite(width)||!Number.isFinite(height)||width<1||height<1)throw new Error("Некорректный размер результата");
+  const resized=out.width!==width||out.height!==height;
+  if(out.width!==width)out.width=width;
+  if(out.height!==height)out.height=height;
+  const context=out.getContext("2d");
+  if(!context)throw new Error("Canvas 2D context unavailable");
+  if(!resized)context.clearRect(0,0,width,height);
+  context.drawImage(image,0,0);
+  out.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(cfg.algorithm)?"pixelated":"auto";
+  updateRenderControls(cfg,renderMode,metadata);
+  return true;
+ }finally{closeImageBitmap(image)}
+}
+function updateRenderControls(cfg,renderMode,metadata=null){
+ const asciiWarning=$("asciiLimitWarning");
+ if(asciiWarning){
+  const limited=renderMode==="script"&&!!(metadata?.asciiRowsLimited||metadata?.tgrmlitherAsciiRowsLimited);
+  asciiWarning.classList.toggle("hidden",!limited);
+  if(limited){
+   const rows=metadata?.asciiRows||metadata?.tgrmlitherAsciiRows||0;
+   const natural=metadata?.asciiNaturalRows||metadata?.tgrmlitherAsciiNaturalRows||0;
+   asciiWarning.textContent="Очень вытянутое изображение: сетка ограничена до "+rows+" строк (естественная высота — "+natural+"), чтобы сохранить отзывчивость редактора.";
+  }
+ }
+ $("asciiText").textContent=ascii;$("asciiDetails").classList.toggle("hidden",renderMode!=="script");
+ $("shapeControl").classList.toggle("hidden",renderMode!=="shape");$("asciiControl").classList.toggle("hidden",renderMode!=="script");
+ $("glitchDepthControl").classList.toggle("hidden",!String(cfg.algorithm).startsWith("glitch_"));
+ const showSerpentine=!!diffusionKernels[cfg.algorithm];
+ $("serpentineControl").classList.toggle("hidden",!showSerpentine);$("serpentineHint").classList.toggle("hidden",!showSerpentine);
+ const hasPatterns=patternAlgorithms.includes(cfg.algorithm)||(cfg.algorithmLayers||[]).some(layer=>patternAlgorithms.includes(layer.algorithm));
+ $("patternAngleControl").classList.toggle("hidden",!hasPatterns);
+ $("patternShapeControl").classList.toggle("hidden",cfg.algorithm!=="halftone"&&!(cfg.algorithmLayers||[]).some(layer=>layer.algorithm==="halftone"));
+ $("markScaleControl").classList.toggle("hidden",!hasPatterns||renderMode==="video"||renderMode==="script");
+ $("blendControl").classList.toggle("hidden",!["editor","shape","batch"].includes(renderMode));
+ $("smoothingControl").classList.toggle("hidden",["video","script","presets"].includes(renderMode));
+ refresh();zoom();updateCompareUI();updateFavoriteButton();bindExactRangeInputs();scheduleHistorySnapshot();
+}
+function loadImage(c,n,isDemo=false){
+ const previousSource=src,previousSourceCopy=processingSourceCanvasCopy;
+ src=c;srcName=n||"image";demo=isDemo;original=false;resultDirty=false;lastExported=false;lastRenderedSignature="";hasRendered=false;compareEnabled=false;
+ setProcessingSource(c);
+ if(previousSource&&previousSource!==c){
+  const releasePrevious=()=>releaseCanvasBuffer(previousSource,{source:true});
+  if(previousSourceCopy)previousSourceCopy.then(releasePrevious,releasePrevious);else releasePrevious();
+ }
+ $("empty").style.display="none";out.style.display="block";$("toggleOriginal").textContent="◉ Показать оригинал";refresh();render();
+ say(isDemo?"Демо-изображение готово":imageResizeMessage(c)||"Изображение загружено");
+}
 function refresh(){if(!src)return;$("filename").textContent=srcName+" / "+src.width+" × "+src.height;$("dimensions").textContent=src.width+" × "+src.height+" px";$("statAlgorithm").textContent=labels[s.algorithm];$("statPalette").textContent=pal[s.palette].name;$("statScale").textContent="×"+s.scale;const status=$("fileStatus");if(status){status.textContent=resultDirty?"Есть изменения":demo?"Демо-пример":lastExported?"Результат экспортирован":"Исходный файл";status.dataset.state=resultDirty?"dirty":demo?"demo":lastExported?"exported":"source"}}
 function queueRender(){if(renderFrame)return;renderFrame=requestAnimationFrame(()=>{renderFrame=0;render()})}
-function render(){if(renderFrame){cancelAnimationFrame(renderFrame);renderFrame=0}if(!src)return;const signature=JSON.stringify(s);if(hasRendered&&signature!==lastRenderedSignature){resultDirty=true;lastExported=false}lastRenderedSignature=signature;hasRendered=true;const cfg=s;let c=original?src:(mode==="script"?makeAscii(src,cfg):rasterPipeline(src,cfg));const asciiWarning=$("asciiLimitWarning");if(asciiWarning){const limited=mode==="script"&&!!c.tgrmlitherAsciiRowsLimited;asciiWarning.classList.toggle("hidden",!limited);if(limited)asciiWarning.textContent="Очень вытянутое изображение: сетка ограничена до "+c.tgrmlitherAsciiRows+" строк (естественная высота — "+c.tgrmlitherAsciiNaturalRows+"), чтобы сохранить отзывчивость редактора."}const outputResized=out.width!==c.width||out.height!==c.height;if(out.width!==c.width)out.width=c.width;if(out.height!==c.height)out.height=c.height;let x=out.getContext("2d");if(!outputResized)x.clearRect(0,0,out.width,out.height);x.drawImage(c,0,0);out.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(s.algorithm)?"pixelated":"auto";$("asciiText").textContent=ascii;$("asciiDetails").classList.toggle("hidden",mode!=="script");$("shapeControl").classList.toggle("hidden",mode!=="shape");$("asciiControl").classList.toggle("hidden",mode!=="script");$("glitchDepthControl").classList.toggle("hidden",!String(s.algorithm).startsWith("glitch_"));const showSerpentine=!!diffusionKernels[s.algorithm];$("serpentineControl").classList.toggle("hidden",!showSerpentine);$("serpentineHint").classList.toggle("hidden",!showSerpentine);const hasPatterns=patternAlgorithms.includes(s.algorithm)||(s.algorithmLayers||[]).some(l=>patternAlgorithms.includes(l.algorithm));$("patternAngleControl").classList.toggle("hidden",!hasPatterns);$("patternShapeControl").classList.toggle("hidden",s.algorithm!=="halftone"&&!(s.algorithmLayers||[]).some(l=>l.algorithm==="halftone"));$("markScaleControl").classList.toggle("hidden",!hasPatterns||mode==="video"||mode==="script");$("blendControl").classList.toggle("hidden",!["editor","shape","batch"].includes(mode));$("smoothingControl").classList.toggle("hidden",["video","script","presets"].includes(mode));refresh();zoom();if(mode==="video")renderVideoFrame();updateCompareUI();updateFavoriteButton();bindExactRangeInputs();scheduleHistorySnapshot()}
+function render(){
+ if(renderFrame){cancelAnimationFrame(renderFrame);renderFrame=0}
+ if(!src)return;
+ if(canvasRecoveryActive){setProcessingPending(false);return}
+ const signature=JSON.stringify(s);
+ if(hasRendered&&signature!==lastRenderedSignature){resultDirty=true;lastExported=false}
+ lastRenderedSignature=signature;hasRendered=true;
+ const cfg=cloneSettings(s),renderMode=mode,revision=++previewRevision;
+ if(original){
+  pendingWorkerPreview=null;document.body.dataset.processingEngine="main";
+  drawRenderedImage(src,cfg,renderMode,null);settleProcessingPreview();
+  if(renderMode==="video")renderVideoFrame();
+  return;
+ }
+ if(processingWorker&&processingSourceId&&shouldUseProcessingWorker(src)){
+  document.body.dataset.processingEngine="worker";
+  setProcessingPending(true);
+  updateRenderControls(cfg,renderMode,null);
+  setProcessingPending(true);
+  queueWorkerPreview(cfg,renderMode,signature,revision);
+  if(renderMode==="video")renderVideoFrame();
+  return;
+ }
+ pendingWorkerPreview=null;document.body.dataset.processingEngine="main";
+ let canvas=null;
+ try{
+  canvas=renderProcessingCanvas(src,cfg,renderMode);
+  document.body.dataset.processingError="false";
+  drawRenderedImage(canvas,cfg,renderMode,canvas);
+ }catch(error){
+  document.body.dataset.processingError="true";
+  settleProcessingPreview();
+  say("Не удалось обработать изображение. Предыдущий результат сохранён.");
+  return;
+ }finally{releaseCanvasBuffer(canvas)}
+ settleProcessingPreview();
+ if(renderMode==="video")renderVideoFrame();
+}
 function zoom(){if($("zoom").value==="fit"){out.style.width="auto";out.style.height="auto";out.style.maxWidth="100%";out.style.maxHeight="100%"}else{let z=Number($("zoom").value)/100;out.style.maxWidth="none";out.style.maxHeight="none";out.style.width=Math.round(out.width*z)+"px";out.style.height=Math.round(out.height*z)+"px"}updateCompareUI()}
+function replaceLostCanvas(canvas){
+ if(!canvas?.parentNode)return null;
+ const replacement=document.createElement("canvas");
+ for(const attribute of Array.from(canvas.attributes))replacement.setAttribute(attribute.name,attribute.value);
+ replacement.width=canvas.width;replacement.height=canvas.height;
+ replacement.style.cssText=canvas.style.cssText;
+ canvas.replaceWith(replacement);
+ replacement.removeAttribute("data-recovery-bound");
+ if(canvas===out)out=replacement;
+ bindCanvasRecoveryEvents(replacement);
+ return replacement;
+}
+function finishCanvasRecovery(status="restored"){
+ clearTimeout(canvasRecoveryTimer);canvasRecoveryTimer=0;
+ canvasRecoveryActive=false;
+ document.body.dataset.canvasRecovery="idle";
+ document.body.dataset.canvasRecoveryResult=status;
+ setProcessingPending(false);
+ if(src)queueRender();
+}
+function bindCanvasRecoveryEvents(canvas){
+ if(!canvas||canvas.dataset.recoveryBound==="true")return;
+ canvas.dataset.recoveryBound="true";
+ canvas.addEventListener("contextlost",event=>{
+  try{event.preventDefault()}catch(error){}
+  if(canvas===out){
+   if(canvasRecoveryActive)return;
+   canvasRecoveryActive=true;
+   document.body.dataset.canvasRecovery="recovering";
+   setProcessingPending(false);
+   say("Графический контекст потерян. Пытаемся восстановить предпросмотр…");
+   clearTimeout(canvasRecoveryTimer);
+   canvasRecoveryTimer=setTimeout(()=>{
+    if(!canvasRecoveryActive||canvas!==out)return;
+    const replacement=replaceLostCanvas(canvas);
+    if(!replacement)return;
+    finishCanvasRecovery("recreated");
+    say("Полотно предпросмотра пересоздано. Обработка продолжена.");
+   },canvasRecoveryTimeoutMs);
+  }else if(canvas.id==="beforeOutput"){
+   clearTimeout(beforeCanvasRecoveryTimer);
+   beforeCanvasRecoveryTimer=setTimeout(()=>{
+    if(canvas.isConnected&&canvas.id==="beforeOutput"){
+     replaceLostCanvas(canvas);updateCompareUI();
+    }
+   },canvasRecoveryTimeoutMs);
+  }
+ },{passive:false});
+ canvas.addEventListener("contextrestored",()=>{
+  if(canvas===out&&canvasRecoveryActive){
+   finishCanvasRecovery("restored");
+   say("Графический контекст восстановлен");
+  }else if(canvas.id==="beforeOutput"){
+   clearTimeout(beforeCanvasRecoveryTimer);beforeCanvasRecoveryTimer=0;
+   updateCompareUI();
+  }
+ });
+}
+function bindCanvasRecovery(){
+ bindCanvasRecoveryEvents(out);
+ bindCanvasRecoveryEvents($("beforeOutput"));
+ document.body.dataset.canvasRecovery="idle";
+}
+
 
 
 function syncExactRangeInputs(){
@@ -1685,9 +2283,10 @@ function openExportModal(){
  $("exportModal").classList.remove("hidden");$("exportFormat").focus();
 }
 function closeExportModal(){$("exportModal").classList.add("hidden")}
-function confirmExport(){
+async function confirmExport(){
  const format=$("exportFormat").value;closeExportModal();
  if(format!=="project"&&original){original=false;$("toggleOriginal").textContent="◉ Показать оригинал";render()}
+ if(format!=="project")await waitForProcessingPreview();
  if(format==="png")exportImage("png");
  else if(format==="jpeg")exportImage("jpeg");
  else if(format==="svgColor"){if(exportSvg(false))markResultExported()}
@@ -1834,16 +2433,64 @@ document.querySelectorAll("[data-effect-strength]").forEach(e=>{
 });document.querySelectorAll(".palette").forEach(e=>e.classList.toggle("active",e.dataset.palette===s.palette));(s.customColors||pal.custom.c).forEach((c,i)=>{const el=$("customColor"+(i+1));if(el)el.value=c});pal.custom.c=s.customColors||pal.custom.c;for(let i=0;i<4;i++)if($("bandShape"+i)){const b=(s.shapeBands||def.shapeBands)[i];$("bandShape"+i).value=b.shape;$("bandSize"+i).value=b.size;$("bandColor"+i).value=b.color;$("bandRotation"+i).value=b.rotation??0;$("bandRotation"+i+"V").textContent=(b.rotation??0)+"°"}const ts=s.shapeThresholds||def.shapeThresholds;for(let i=0;i<3;i++){$("shapeThreshold"+i).value=ts[i];$("shapeThreshold"+i+"V").textContent=ts[i]+"%"}renderAlgorithmStackUI();syncEffectOrderPanels()}
 let paletteScrollPreview=null,paletteScrollBase=null;
 function initPalettes(){const paletteContainer=$("palettes");if(paletteContainer.dataset.wheelPreview!=="enabled"){paletteContainer.dataset.wheelPreview="enabled";paletteContainer.addEventListener("wheel",event=>{if(!event.deltaY&&!event.deltaX)return;event.preventDefault();const keys=Object.keys(pal);if(!paletteScrollPreview)paletteScrollBase=s.palette;const current=paletteScrollPreview||s.palette,index=Math.max(0,keys.indexOf(current)),direction=(event.deltaY||event.deltaX)>0?1:-1;paletteScrollPreview=keys[(index+direction+keys.length)%keys.length];s.palette=paletteScrollPreview;sync();renderActivePaletteEditor();render()},{passive:false});paletteContainer.addEventListener("pointerleave",()=>{if(!paletteScrollPreview)return;const prior=paletteScrollBase||"moss";paletteScrollPreview=null;paletteScrollBase=null;if(s.palette!==prior){s.palette=prior;sync();renderActivePaletteEditor();render()}})}paletteContainer.innerHTML="";for(const [key,p] of Object.entries(pal)){let b=document.createElement("button");b.className="palette";b.dataset.palette=key;b.title=p.name;let sw=document.createElement("span");sw.className="swatches";p.c.forEach(c=>{let i=document.createElement("i");i.style.background=c;sw.append(i)});let nm=document.createElement("span");nm.className="pname";nm.textContent=p.name;b.append(sw,nm);b.onclick=()=>{paletteScrollPreview=null;paletteScrollBase=null;s.palette=key;sync();renderActivePaletteEditor();render();if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode)};paletteContainer.append(b)}renderActivePaletteEditor()}
-function extractPalette(){if(!src){say("Сначала откройте изображение");return}const c=document.createElement("canvas");c.width=72;c.height=72;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0,72,72);const d=x.getImageData(0,0,72,72).data,p=[];for(let i=0;i<d.length;i+=4)if(d[i+3]>16)p.push([d[i],d[i+1],d[i+2]]);if(!p.length){say("В изображении нет доступных цветов");return}const count=clamp(Number(s.levels)||4,2,16);p.sort((a,b)=>lumin(...a)-lumin(...b));let centers=Array.from({length:count},(_,k)=>[...(p[Math.min(p.length-1,Math.floor((k+.5)*p.length/count))]||[0,0,0])]);for(let pass=0;pass<9;pass++){const sum=centers.map(()=>[0,0,0,0]);for(const v of p){let win=0,dist=Infinity;centers.forEach((cc,i)=>{const q=(v[0]-cc[0])**2+(v[1]-cc[1])**2+(v[2]-cc[2])**2;if(q<dist){dist=q;win=i}});for(let k=0;k<3;k++)sum[win][k]+=v[k];sum[win][3]++}centers=centers.map((cc,i)=>sum[i][3]?sum[i].slice(0,3).map(v=>Math.round(v/sum[i][3])):cc)}s.customColors=centers.sort((a,b)=>lumin(...a)-lumin(...b)).map(v=>"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""));pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);initPalettes();renderActivePaletteEditor();sync();render();say("Из фото извлечено цветов: "+count)}
+function extractPalette(){
+ if(!src){say("Сначала откройте изображение");return}
+ const sample=document.createElement("canvas");sample.width=72;sample.height=72;
+ let pixels=[];
+ try{
+  const context=sample.getContext("2d",{willReadFrequently:true});
+  if(!context)throw new Error("Canvas 2D context unavailable");
+  context.drawImage(src,0,0,72,72);
+  const data=context.getImageData(0,0,72,72).data;
+  for(let i=0;i<data.length;i+=4)if(data[i+3]>16)pixels.push([data[i],data[i+1],data[i+2]]);
+ }catch(error){say("Не удалось извлечь цвета из изображения");return}
+ finally{releaseCanvasBuffer(sample)}
+ if(!pixels.length){say("В изображении нет доступных цветов");return}
+ const count=clamp(Number(s.levels)||4,2,16);
+ pixels.sort((a,b)=>lumin(...a)-lumin(...b));
+ let centers=Array.from({length:count},(_,k)=>[...(pixels[Math.min(pixels.length-1,Math.floor((k+.5)*pixels.length/count))]||[0,0,0])]);
+ for(let pass=0;pass<9;pass++){
+  const sum=centers.map(()=>[0,0,0,0]);
+  for(const value of pixels){
+   let win=0,dist=Infinity;
+   centers.forEach((center,index)=>{
+    const distance=(value[0]-center[0])**2+(value[1]-center[1])**2+(value[2]-center[2])**2;
+    if(distance<dist){dist=distance;win=index}
+   });
+   for(let channel=0;channel<3;channel++)sum[win][channel]+=value[channel];
+   sum[win][3]++;
+  }
+  centers=centers.map((center,index)=>sum[index][3]?sum[index].slice(0,3).map(value=>Math.round(value/sum[index][3])):center);
+ }
+ s.customColors=centers.sort((a,b)=>lumin(...a)-lumin(...b)).map(value=>"#"+value.map(channel=>Math.round(channel).toString(16).padStart(2,"0")).join(""));
+ pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);
+ if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
+ initPalettes();renderActivePaletteEditor();sync();render();say("Из фото извлечено цветов: "+count);
+}
 function exportPalette(){const active=pal[s.palette]||pal.custom;download(new Blob([JSON.stringify({format:"tgrmlither-palette",version:1,name:active.name||"My Colors",colors:active.c.map(v=>typeof v==="string"?v:"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""))},null,2)],{type:"application/json"}),"TGRMLither-palette.json")}
 
 function persistActivePaletteColors(key,values){
  const safe=values.map(v=>String(v).toLowerCase()).filter(v=>/^#[0-9a-f]{6}$/i.test(v)).slice(0,16);
  if(safe.length<2||safe.length!==values.length)return false;
  const palette=pal[key];if(!palette)return false;
+ const oldPalette=[...palette.c],oldCustom=[...(s.customColors||[])];
+ let persisted=false;
+ if(key==="custom"){
+  s.customColors=[...safe];persisted=store("ditherlab-colors",s.customColors);
+ }else{
+  const entry=paletteLibrary.find(p=>p.id===key);
+  if(entry){
+   const oldColors=[...entry.colors];entry.colors=[...safe];
+   persisted=store("tgrmlither-palette-library",paletteLibrary);
+   if(!persisted)entry.colors=oldColors;
+  }else if(Object.prototype.hasOwnProperty.call(pal,key)){
+   const overrides=loadStore("tgrmlither-built-in-palette-overrides",{});
+   const next={...(overrides&&typeof overrides==="object"?overrides:{})};next[key]=[...safe];
+   persisted=store("tgrmlither-built-in-palette-overrides",next);
+  }
+ }
+ if(!persisted){palette.c=oldPalette;s.customColors=oldCustom;return false}
  palette.c=[...safe];
- if(key==="custom"){s.customColors=[...safe];store("ditherlab-colors",s.customColors)}
- else {const entry=paletteLibrary.find(p=>p.id===key);if(entry){entry.colors=[...safe];store("tgrmlither-palette-library",paletteLibrary)}else if(Object.prototype.hasOwnProperty.call(pal,key)&&key!=="custom"){const overrides=loadStore("tgrmlither-built-in-palette-overrides",{});overrides[key]=[...safe];store("tgrmlither-built-in-palette-overrides",overrides)}}
  if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
  return true;
 }
@@ -1898,9 +2545,10 @@ function savePaletteToLibrary(){
  const active=pal[s.palette]||pal.moss,rawName=$("paletteLibraryName").value.trim(),name=(rawName||active.name||("Моя палитра "+(paletteLibrary.length+1))).slice(0,48);
  const colors=active.c.map(v=>typeof v==="string"?v:"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""));
  if(colors.length<2||colors.length>16||!colors.every(c=>/^#[0-9a-f]{6}$/i.test(c))){say("В палитре должно быть от 2 до 16 цветов");return}
- const id="lib_"+Date.now().toString(36);
- const entry={id,name,colors:colors.map(c=>c.toLowerCase())};paletteLibrary.push(entry);pal[id]={name,c:[...entry.colors]};s.palette=id;
- store("tgrmlither-palette-library",paletteLibrary);$("paletteLibraryName").value="";initPalettes();renderPaletteLibrary();sync();render();say("Палитра «"+name+"» сохранена");
+ const id="lib_"+Date.now().toString(36),entry={id,name,colors:colors.map(c=>c.toLowerCase())},next=[...paletteLibrary,entry];
+ if(!store("tgrmlither-palette-library",next))return;
+ paletteLibrary.push(entry);pal[id]={name,c:[...entry.colors]};s.palette=id;
+ $("paletteLibraryName").value="";initPalettes();renderPaletteLibrary();sync();render();say("Палитра «"+name+"» сохранена");
 }
 function deletePaletteFromLibrary(){
  const id=$("paletteLibrarySelect").value,index=paletteLibrary.findIndex(p=>p.id===id);if(index<0){say("Выберите палитру");return}
@@ -1929,8 +2577,18 @@ async function importPaletteLibrary(file){
  }catch(err){say("Файл библиотеки палитр не распознан")}
 }
 function slug(t){return(t||"TGRMLither").replace(/[^a-z0-9а-яё_-]+/gi,"-").replace(/^-+|-+$/g,"").slice(0,60)||"TGRMLither"}
-function download(blob,name){let url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
-function exportImage(type="png"){if(!src){say("Сначала загрузите изображение");return}if(original){original=false;render()}const quality=clamp(Number($("jpegQuality")?.value??s.jpegQuality??94)/100,.7,1);out.toBlob(b=>{if(!b){say("Экспорт не удался");return}download(b,slug(srcName)+"-TGRMLither."+(type==="jpeg"?"jpg":type));markResultExported();say(type==="jpeg"?"JPEG экспортирован":"PNG экспортирован")},type==="jpeg"?"image/jpeg":"image/png",type==="jpeg"?quality:undefined)}
+const transientDownloadUrls=new Map();
+function releaseTransientDownloadUrls(){
+ for(const [url,timer] of transientDownloadUrls){clearTimeout(timer);URL.revokeObjectURL(url)}
+ transientDownloadUrls.clear();resourceMetrics.transientDownloadUrls=0;
+}
+function download(blob,name){
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
+ const timer=setTimeout(()=>{URL.revokeObjectURL(url);transientDownloadUrls.delete(url);resourceMetrics.transientDownloadUrls=transientDownloadUrls.size},15000);
+ transientDownloadUrls.set(url,timer);resourceMetrics.transientDownloadUrls=transientDownloadUrls.size;
+}
+async function exportImage(type="png"){if(!src){say("Сначала загрузите изображение");return}if(original){original=false;render()}await waitForProcessingPreview();const quality=clamp(Number($("jpegQuality")?.value??s.jpegQuality??94)/100,.7,1);out.toBlob(b=>{if(!b){say("Экспорт не удался");return}download(b,slug(srcName)+"-TGRMLither."+(type==="jpeg"?"jpg":type));markResultExported();say(type==="jpeg"?"JPEG экспортирован":"PNG экспортирован")},type==="jpeg"?"image/jpeg":"image/png",type==="jpeg"?quality:undefined)}
 function project(){if(!src){say("Сначала загрузите изображение");return}try{if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);const source=src.toDataURL("image/png");if(source.length>MAX_PROJECT_FILE_BYTES){say("Проект слишком велик для сохранения. Уменьшите изображение и повторите экспорт.");return}const p={format:"tgrmlither-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source,settings:cloneSettings(s),workspaces:workspaceSettings},json=JSON.stringify(p);if(json.length>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ. Уменьшите изображение и повторите экспорт.");return}download(new Blob([json],{type:"application/json"}),slug(srcName)+".tgrmlither.json");say("Проект сохранён")}catch(error){say("Не удалось сохранить проект. Попробуйте уменьшить изображение и повторить экспорт.")}}
 function saveStandalone(){let html="<!doctype html>\n"+document.documentElement.outerHTML;download(new Blob([html],{type:"text/html;charset=utf-8"}),"TGRMLither-offline.html");say("Автономная HTML-версия скачана")}
 function openImage(){ $("imageInput").click() }
@@ -1940,10 +2598,14 @@ function setMode(m){
  if(m!==previousMode){
   if(m!=="script"&&asciiAnimRaf)stopAsciiAnimation();
   if(temporalRaf)stopTemporal();
-  if(m!=="video"&&$("videoSource")){$("videoSource").pause();if(videoRaf)cancelAnimationFrame(videoRaf);videoRaf=0;stopVideoExport(true)}
+  if(m!=="video"&&$("videoSource")){
+    $("videoSource").pause();if(videoRaf)cancelAnimationFrame(videoRaf);videoRaf=0;stopVideoExport(true);
+    releaseVideoFrameBuffers({includeOutput:!videoRecorder||videoRecorder.state==="inactive"});
+   }
  }
  if(WORKSPACE_NAMES.includes(previousMode))saveWorkspaceSettings(previousMode);
  mode=m;
+ if(m==="video"&&previousMode!=="video"&&$("videoSource")?.readyState>=2)requestAnimationFrame(()=>renderVideoFrame());
  if(WORKSPACE_NAMES.includes(m)){
   // Re-read persisted profiles after saving the outgoing workspace. This keeps the UI
   // and localStorage authoritative if another panel or a restored project changed profiles.
@@ -2025,20 +2687,20 @@ function renderPresets(){
    workspaceSettings[target]=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Пресет применён");
   };
   const del=document.createElement("button");del.className="btn sm";del.textContent="×";del.title="Удалить пользовательский пресет";
-  del.onclick=()=>{custom.splice(i,1);store("ditherlab-presets",custom);renderPresets()};
+  del.onclick=()=>{const next=custom.filter((item,index)=>index!==i);if(!store("ditherlab-presets",next))return;custom=next;renderPresets()};
   row.append(txt,use,del);box.append(row);
  });
 }
-function savePreset(){ $("modalTitle").textContent="Сохранить пресет";$("modal").classList.remove("hidden");$("presetName").value="";$("presetName").focus();$("modalSave").onclick=()=>{let name=$("presetName").value.trim();if(!name){say("Введите название");return}const stored=loadStore("ditherlab-presets",[]);custom=Array.isArray(stored)?stored.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,99):[];custom.unshift({name,desc:"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",c:cloneSettings(s)});store("ditherlab-presets",custom);$("modal").classList.add("hidden");renderPresets();say("Пресет сохранён")}}
+function savePreset(){ $("modalTitle").textContent="Сохранить пресет";$("modal").classList.remove("hidden");$("presetName").value="";$("presetName").focus();$("modalSave").onclick=()=>{let name=$("presetName").value.trim();if(!name){say("Введите название");return}const stored=loadStore("ditherlab-presets",[]),base=Array.isArray(stored)?stored.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,99):[],next=[{name:name.slice(0,48),desc:"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",c:cloneSettings(s)},...base];if(!store("ditherlab-presets",next))return;custom=next;$("modal").classList.add("hidden");renderPresets();say("Пресет сохранён")}}
 function renderBatch(){let box=$("batchList");box.innerHTML="";const hasBatchResults=!!$("batchResults")?.querySelector(".fileitem");if($("batchProgressCount")&&!batchRunning&&!hasBatchResults)$("batchProgressCount").textContent=batch.length+" выбрано";if($("batchProgressLabel")&&!batchRunning&&!hasBatchResults){if(!batch.length)$("batchProgressLabel").textContent="Ожидает файлов";else $("batchProgressLabel").textContent="Готово к обработке"}if(!batch.length){box.textContent="Выбранные файлы появятся здесь.";box.style.color="var(--muted)";box.style.fontSize="10px";return}batch.forEach((f,i)=>{let row=document.createElement("div");row.className="fileitem";let icon=document.createElement("div");icon.className="fileicon";icon.textContent="▧";let txt=document.createElement("div");txt.className="filetext";txt.innerHTML="<b></b><small></small>";txt.querySelector("b").textContent=f.name;txt.querySelector("small").textContent=(f.size/1048576).toFixed(2)+" MB";let rm=document.createElement("button");rm.className="btn sm";rm.textContent="×";rm.disabled=batchRunning;rm.onclick=()=>{if(batchRunning)return;batch.splice(i,1);renderBatch()};row.append(icon,txt,rm);box.append(row)})}
 function addBatch(files){if(batchRunning){say("Дождитесь завершения пакетной обработки");return}const images=Array.from(files).filter(f=>f.type.startsWith("image/")),available=Math.max(0,MAX_BATCH_FILES-batch.length),accepted=images.slice(0,available);batch.push(...accepted);$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent=batch.length+" выбрано";$("batchProgressLabel").textContent=batch.length?"Готово к обработке":"Ожидает файлов";renderBatch();if(images.length>accepted.length)say("Ограничение пакетной обработки — "+MAX_BATCH_FILES+" изображений; добавлено "+accepted.length);else say(accepted.length?"Добавлено файлов: "+accepted.length:"Выберите файлы изображений")}
-function revokeBatchDownloadUrls(){for(const url of batchDownloadUrls)URL.revokeObjectURL(url);batchDownloadUrls=[]}
+function revokeBatchDownloadUrls(){for(const url of batchDownloadUrls)URL.revokeObjectURL(url);batchDownloadUrls=[];resourceMetrics.batchResultUrls=0}
 function uniqueBatchFilename(fileName,usedNames){const root=slug(fileName.replace(/\.[^.]+$/,""))+"-TGRMLither";let name=root+".png",suffix=2;while(usedNames.has(name.toLowerCase()))name=root+"-"+suffix++ +".png";usedNames.add(name.toLowerCase());return name}
 function fileCanvas(f,signal){
  return new Promise((resolve,reject)=>{
-  const url=URL.createObjectURL(f),im=new Image();let settled=false;
+  const url=URL.createObjectURL(f),im=new Image();let settled=false,timer=0;
   const cleanup=()=>{
-   if(settled)return false;settled=true;
+   if(settled)return false;settled=true;clearTimeout(timer);
    if(signal)signal.removeEventListener("abort",abort);
    im.onload=null;im.onerror=null;im.onabort=null;URL.revokeObjectURL(url);return true;
   };
@@ -2055,6 +2717,11 @@ function fileCanvas(f,signal){
   };
   im.onerror=()=>{if(cleanup())reject(Error("Не удалось открыть файл изображения. Проверьте формат и целостность файла."))};
   im.onabort=()=>{if(cleanup())reject(new DOMException("Загрузка изображения отменена","AbortError"))};
+  timer=setTimeout(()=>{
+   if(!cleanup())return;
+   try{im.src=""}catch(error){}
+   reject(new Error("Декодирование изображения превысило лимит времени. Попробуйте уменьшить файл."));
+  },imageDecodeTimeoutMs);
   im.src=url;
  });
 }
@@ -2143,23 +2810,41 @@ async function runBatch(){
  const files=batch.slice();
  $("runBatch").disabled=true;$("clearBatch").disabled=true;$("batchBrowse").disabled=true;$("batchInput").disabled=true;$("cancelBatch").hidden=false;$("cancelBatch").disabled=false;
  $("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressLabel").textContent="Обработка файлов…";$("batchProgressCount").textContent="0 / "+files.length;
- $("downloadBatchZip").disabled=true;revokeBatchDownloadUrls();$("batchResults").innerHTML="";batchResultsData=[];
+ $("downloadBatchZip").disabled=true;revokeBatchDownloadUrls();$("batchResults").innerHTML="";batchResultsData=[];batchResultsBytes=0;resourceMetrics.batchResultBytes=0;
+ document.body.dataset.batchProcessingEngine="main";
  const cfg=cloneSettings(s),usedNames=new Set();let succeeded=0,failed=0;
  try{
   for(let i=0;i<files.length;i++){
    if(batchCancelRequested)break;
-   const f=files[i];
+   const f=files[i];let image=null;
    try{
-    const image=await fileCanvas(f),c=cfg.algorithm==="ascii"?makeAscii(image,cfg):rasterPipeline(image,cfg);
-    const blob=await new Promise(resolve=>c.toBlob(resolve,"image/png"));if(!blob)throw Error("PNG export failed");
+    let blob=null,width=0,height=0;image=await fileCanvas(f);width=image.width;height=image.height;
+    if(processingWorker&&shouldUseProcessingWorker(image)){
+     document.body.dataset.batchProcessingEngine="worker";
+     try{
+      const bitmap=await createWorkerBitmap(image);
+      const result=await workerRequest({type:"process",kind:"batch",bitmap,cfg,paletteColors:paletteColorsFor(cfg),outputType:"blob",mimeType:"image/png"},[bitmap]);
+      blob=result.blob;width=result.width;height=result.height;
+     }catch(workerError){
+      document.body.dataset.batchProcessingEngine="main";
+      if(processingWorker)disableProcessingWorker(workerError);
+     }
+    }
+    if(!blob){
+     const canvas=renderProcessingCanvas(image,cfg,"batch");
+     try{blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));width=canvas.width;height=canvas.height}
+     finally{releaseCanvasBuffer(canvas)}
+    }
+    if(!blob)throw Error("PNG export failed");
+     if(batchResultsBytes+blob.size>MAX_BATCH_RESULT_BYTES){batchCancelRequested=true;throw Error("Пакет превысил лимит результатов 128 МБ. Скачайте готовые файлы и обработайте остаток отдельно.");}
     const name=uniqueBatchFilename(f.name,usedNames),url=URL.createObjectURL(blob),row=document.createElement("div");
-    batchDownloadUrls.push(url);batchResultsData.push({name,blob});row.className="fileitem";
+    batchDownloadUrls.push(url);batchResultsData.push({name,blob});batchResultsBytes+=blob.size;resourceMetrics.batchResultBytes=batchResultsBytes;resourceMetrics.batchResultUrls=batchDownloadUrls.length;row.className="fileitem";
     const a=document.createElement("a");a.className="btn sm";a.textContent="↓ PNG";a.href=url;a.download=name;
-    const text=document.createElement("div");text.className="filetext";text.innerHTML="<b></b><small>Готово · "+c.width+" × "+c.height+(image.tgrmlitherDownscaled?" · уменьшено для обработки":"")+"</small>";text.querySelector("b").textContent=f.name;
+    const text=document.createElement("div");text.className="filetext";text.innerHTML="<b></b><small>Готово · "+width+" × "+height+(image.tgrmlitherDownscaled?" · уменьшено для обработки":"")+"</small>";text.querySelector("b").textContent=f.name;
     row.append(text,a);$("batchResults").append(row);succeeded++;
    }catch(error){
     failed++;const row=document.createElement("div"),text=document.createElement("div");row.className="fileitem";text.className="filetext";text.innerHTML="<b></b><small></small>";text.querySelector("b").textContent=f.name;text.querySelector("small").textContent="Ошибка: "+(error&&error.message?String(error.message).slice(0,120):"не удалось обработать файл");row.append(text);$("batchResults").append(row);
-   }
+   }finally{releaseCanvasBuffer(image,{source:true})}
    const progress=Math.round((i+1)/files.length*100);$("batchProgress").style.width=progress+"%";$("batchProgressTrack").setAttribute("aria-valuenow",String(progress));$("batchProgressCount").textContent=(i+1)+" / "+files.length;$("batchProgressLabel").textContent="Обработано "+(i+1)+" из "+files.length;
    await new Promise(resolve=>setTimeout(resolve,10));
    if(batchCancelRequested)break;
@@ -2172,40 +2857,80 @@ async function runBatch(){
   $("downloadBatchZip").disabled=batchResultsData.length===0;renderBatch();
  }
 }
+let activeProjectReader=null,projectLoadGeneration=0;
 function loadProject(f){
  if(!f)return;
  if(!Number.isFinite(Number(f.size))||f.size>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ");return}
- const r=new FileReader();
- r.onerror=()=>say("Не удалось прочитать файл проекта");
- r.onabort=()=>say("Чтение файла проекта отменено");
+ if(activeProjectReader)try{activeProjectReader.abort()}catch(error){}
+ const generation=++projectLoadGeneration,r=new FileReader();
+ activeProjectReader=r;
+ let finished=false,readTimer=0;
+ const finishRead=()=>{
+  if(finished)return false;
+  finished=true;clearTimeout(readTimer);
+  if(activeProjectReader===r)activeProjectReader=null;
+  r.onload=null;r.onerror=null;r.onabort=null;
+  return true;
+ };
+ r.onerror=()=>{if(finishRead()&&generation===projectLoadGeneration)say("Не удалось прочитать файл проекта")};
+ r.onabort=()=>{if(finishRead()&&generation===projectLoadGeneration)say("Чтение файла проекта отменено")};
  r.onload=()=>{
+  if(!finishRead()||generation!==projectLoadGeneration)return;
+  let p,target,loadedSettings;
   try{
    if(typeof r.result!=="string")throw Error("read");
-   const p=JSON.parse(r.result);
-   if(!["tgrmlither-project","tgrmlithering-project","ditherlab-project"].includes(p.format)||typeof p.source!=="string"||!/^data:image\/(?:png|jpeg|webp);base64,/i.test(p.source))throw Error("project");
-   const target=WORKSPACE_NAMES.includes(p.workspace)?p.workspace:p.settings?.algorithm==="ascii"?"script":p.settings?.algorithm==="shape"?"shape":"editor";
-   const loadedSettings=cloneSettings(p.settings||def);
-   const im=new Image();
-   im.onload=()=>{
-    let c;try{c=canvasFromImage(im)}catch(error){say("Изображение проекта слишком велико или не поддерживается");return}
-    if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
-    setMode("presets");
-    if(p.workspaces&&typeof p.workspaces==="object")workspaceSettings=normaliseWorkspaceSettings(p.workspaces);
-    workspaceSettings[target]=cloneSettings(loadedSettings);
-    if(target==="shape")workspaceSettings[target].algorithm="shape";
-    if(target==="script")workspaceSettings[target].algorithm="ascii";
-    store("tgrmlithering-workspaces",workspaceSettings);
-    const projectName=typeof p.sourceName==="string"&&p.sourceName.trim()?p.sourceName.slice(0,160):"project";
-    loadImage(c,projectName,false);
-    setMode(target);sync();render();say(imageResizeMessage(c)||"Проект открыт");
-   };
-   im.onerror=()=>say("Не удалось открыть изображение проекта");
-   im.src=p.source;
-  }catch(error){say("Неверный файл проекта")}
+   p=JSON.parse(r.result);
+   if(!p||typeof p!=="object"||!["tgrmlither-project","tgrmlithering-project","ditherlab-project"].includes(p.format)||typeof p.source!=="string"||p.source.length>MAX_PROJECT_FILE_BYTES||!/^data:image\/(?:png|jpeg|webp);base64,/i.test(p.source))throw Error("project");
+   target=WORKSPACE_NAMES.includes(p.workspace)?p.workspace:p.settings?.algorithm==="ascii"?"script":p.settings?.algorithm==="shape"?"shape":"editor";
+   loadedSettings=cloneSettings(p.settings||def);
+   if(target==="shape")loadedSettings.algorithm="shape";
+   if(target==="script")loadedSettings.algorithm="ascii";
+  }catch(error){say("Неверный файл проекта");return}
+  const image=new Image();let decodeFinished=false,decodeTimer=0;
+  const finishDecode=()=>{
+   if(decodeFinished)return false;
+   decodeFinished=true;clearTimeout(decodeTimer);
+   image.onload=null;image.onerror=null;
+   return true;
+  };
+  image.onload=()=>{
+   if(!finishDecode()||generation!==projectLoadGeneration)return;
+   let canvas;
+   try{canvas=canvasFromImage(image)}catch(error){say("Изображение проекта слишком велико или не поддерживается");return}
+   const previousMode=mode;
+   if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
+   const currentWorkspaces=workspaceSettings;
+   setMode("presets");
+   const nextWorkspaces=normaliseWorkspaceSettings(p.workspaces&&typeof p.workspaces==="object"?p.workspaces:currentWorkspaces);
+   nextWorkspaces[target]=cloneSettings(loadedSettings);
+   if(!store("tgrmlithering-workspaces",nextWorkspaces)){
+    setMode(previousMode);
+    say("Проект не открыт: настройки не удалось безопасно сохранить");
+    return;
+   }
+   workspaceSettings=nextWorkspaces;
+   const projectName=typeof p.sourceName==="string"&&p.sourceName.trim()?p.sourceName.slice(0,160):"project";
+   loadImage(canvas,projectName,false);
+   setMode(target);sync();render();
+   say(imageResizeMessage(canvas)||"Проект открыт");
+  };
+  image.onerror=()=>{if(finishDecode()&&generation===projectLoadGeneration)say("Не удалось открыть изображение проекта")};
+  decodeTimer=setTimeout(()=>{
+   if(!finishDecode())return;
+   if(generation===projectLoadGeneration)say("Декодирование проекта превысило лимит времени. Текущая работа сохранена.");
+  },imageDecodeTimeoutMs);
+  image.src=p.source;
  };
- try{r.readAsText(f)}catch(error){say("Не удалось прочитать файл проекта")}
+ try{
+  r.readAsText(f);
+  readTimer=setTimeout(()=>{
+   if(!finishRead())return;
+   try{r.abort()}catch(error){}
+   if(generation===projectLoadGeneration)say("Чтение проекта превысило лимит времени");
+  },45000);
+ }catch(error){finishRead();say("Не удалось прочитать файл проекта")}
 }
-async function copyResult(){try{let blob=await new Promise(r=>out.toBlob(r,"image/png"));await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);say("Изображение скопировано")}catch(e){say("Копирование недоступно. Скачайте PNG.")}}
+async function copyResult(){try{await waitForProcessingPreview();let blob=await new Promise(r=>out.toBlob(r,"image/png"));await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);say("Изображение скопировано")}catch(e){say("Копирование недоступно. Скачайте PNG.")}}
 
 let asciiAnimRaf=0,asciiAnimBase=0,asciiAnimGlowBase=0,asciiAnimStart=0,asciiRecorder=null,asciiChunks=[],asciiAnimTimer=0;
 function startAsciiAnimation(recording){
@@ -2269,11 +2994,12 @@ function printAttributes(){
  return {dpi,widthMm:(out.width/dpi*25.4).toFixed(2),heightMm:(out.height/dpi*25.4).toFixed(2)};
 }
 function exportSvg(blackOnly){
+ let tempCanvas=null;
  try{
   if(!src)return false;
   if(original){original=false;render()}
   const dimensions=vectorDimensions();if(!dimensions)return false;
-  const {w,h}=dimensions,c=document.createElement("canvas");c.width=w;c.height=h;
+  const {w,h}=dimensions,c=tempCanvas=document.createElement("canvas");c.width=w;c.height=h;
   const q=c.getContext("2d",{willReadFrequently:true});
   if(!q){say("Не удалось создать холст для SVG-экспорта");return false}
   q.drawImage(out,0,0,w,h);
@@ -2294,15 +3020,17 @@ function exportSvg(blackOnly){
   say((blackOnly?"Чёрный":"Цветной")+" SVG экспортирован · "+dimensions.detail+" px · "+print.dpi+" DPI");
   return true;
  }catch(error){say("Не удалось экспортировать SVG. Уменьшите детализацию или размер изображения.");return false}
+ finally{releaseCanvasBuffer(tempCanvas)}
 }
 function exportCmykSvg(){
+ let tempCanvas=null;
  try{
   if(!src)return false;
   if(original){original=false;render()}
   const dimensions=vectorDimensions();if(!dimensions)return false;
   const {w,h}=dimensions,cell=clamp(Number($("cmykCell")?.value)||8,4,24);
   const estimated=4*Math.ceil(w/cell)*Math.ceil(h/cell)*1.5;if(estimated>450000){say("Слишком много CMYK-точек. Увеличьте размер точки или уменьшите детализацию.");return false}
-  const c=document.createElement("canvas");c.width=w;c.height=h;const q=c.getContext("2d",{willReadFrequently:true});
+  const c=tempCanvas=document.createElement("canvas");c.width=w;c.height=h;const q=c.getContext("2d",{willReadFrequently:true});
   if(!q){say("Не удалось создать холст для CMYK-экспорта");return false}
   q.drawImage(out,0,0,w,h);
   const data=q.getImageData(0,0,w,h).data,cx=w/2,cy=h/2,diagonal=Math.ceil(Math.hypot(w,h)/2+cell),print=printAttributes();
@@ -2324,7 +3052,9 @@ function exportCmykSvg(){
   say("CMYK-экспорт готов · 4 подписанные векторные пластины");
   return true;
  }catch(error){say("Не удалось экспортировать CMYK. Увеличьте размер точки или уменьшите изображение.");return false}
+ finally{releaseCanvasBuffer(tempCanvas)}
 }
+
 let temporalRaf=0,temporalStart=0,temporalBase=null,temporalRecorder=null,temporalChunks=[],temporalTimer=0;
 function startTemporal(recording){
  if(!src){say("Сначала откройте изображение");return}
@@ -2356,10 +3086,135 @@ function startTemporal(recording){
 }
 function stopTemporal(){if(temporalRaf)cancelAnimationFrame(temporalRaf);temporalRaf=0;clearTimeout(temporalTimer);temporalTimer=0;if(temporalBase){s.threshold=temporalBase.threshold;s.brightness=temporalBase.brightness;s.asciiOffset=temporalBase.asciiOffset;temporalBase=null;sync();render()}$("temporalPlay").disabled=false;$("temporalStop").disabled=true;if(temporalRecorder&&temporalRecorder.state!=="inactive")temporalRecorder.stop()}
 let videoObjectURL="",videoRaf=0,videoRecorder=null,videoChunks=[],videoExportStream=null,videoAudioStream=null,videoExportInterrupted=false,videoExportStarting=false,videoExportGeneration=0,videoFrameCanvas=null,videoFrameContext=null,videoLastRenderAt=0;
+function releaseVideoFrameBuffers({includeOutput=false}={}){
+ videoFrameRevision++;videoFrameQueued=false;
+ if(videoFrameCanvas){videoFrameCanvas.width=1;videoFrameCanvas.height=1}
+ const output=$("videoOutput");
+ if(includeOutput&&output&&(!videoRecorder||videoRecorder.state==="inactive")){output.width=1;output.height=1}
+}
+function releaseVideoSource(){
+ const video=$("videoSource");
+ if(video){
+  video.pause();video.onloadedmetadata=null;video.onerror=null;
+  video.removeAttribute("src");video.load();
+ }
+ if(videoObjectURL){URL.revokeObjectURL(videoObjectURL);videoObjectURL=""}
+ releaseVideoFrameBuffers({includeOutput:true});
+}
 function formatTime(seconds){if(!Number.isFinite(seconds)||seconds<0)seconds=0;const mm=Math.floor(seconds/60),ss=seconds%60;return String(mm).padStart(2,"0")+":"+ss.toFixed(1).padStart(4,"0")}
-function renderVideoFrame(){const video=$("videoSource"),canvas=$("videoOutput");if(!video||!canvas||video.readyState<2||!video.videoWidth||!video.videoHeight)return;const budget=2400000,scale=Math.min(1,Math.sqrt(budget/(video.videoWidth*video.videoHeight))),width=Math.max(1,Math.round(video.videoWidth*scale)),height=Math.max(1,Math.round(video.videoHeight*scale));if(!videoFrameCanvas){videoFrameCanvas=document.createElement("canvas");videoFrameContext=videoFrameCanvas.getContext("2d",{willReadFrequently:true})}if(!videoFrameContext)return;if(videoFrameCanvas.width!==width)videoFrameCanvas.width=width;if(videoFrameCanvas.height!==height)videoFrameCanvas.height=height;videoFrameContext.drawImage(video,0,0,width,height);const cfg={...s,effects:s.effects||[]};const result=raster(videoFrameCanvas,cfg);const outputResized=canvas.width!==result.width||canvas.height!==result.height;if(canvas.width!==result.width)canvas.width=result.width;if(canvas.height!==result.height)canvas.height=result.height;const ctx=canvas.getContext("2d");if(!outputResized)ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(result,0,0);canvas.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(s.algorithm)?"pixelated":"auto";$("videoTimeLabel").textContent=formatTime(video.currentTime);$("videoTimeline").value=String(video.currentTime);videoLastRenderAt=performance.now()}
+async function renderVideoFrame(){
+ const video=$("videoSource"),canvas=$("videoOutput");
+ if(!video||!canvas||video.readyState<2||!video.videoWidth||!video.videoHeight)return false;
+ const budget=2400000,scale=Math.min(1,Math.sqrt(budget/(video.videoWidth*video.videoHeight)));
+ const width=Math.max(1,Math.round(video.videoWidth*scale)),height=Math.max(1,Math.round(video.videoHeight*scale));
+ if(!videoFrameCanvas){videoFrameCanvas=document.createElement("canvas");videoFrameContext=videoFrameCanvas.getContext("2d",{willReadFrequently:true})}
+ if(!videoFrameContext)return false;
+ if(videoFrameCanvas.width!==width)videoFrameCanvas.width=width;
+ if(videoFrameCanvas.height!==height)videoFrameCanvas.height=height;
+ videoFrameContext.drawImage(video,0,0,width,height);
+ const cfg=cloneSettings(s);
+ if(processingWorker&&shouldUseProcessingWorker(videoFrameCanvas)){
+  document.body.dataset.videoProcessingEngine="worker-pending";
+  if(videoWorkerBusy){videoFrameQueued=true;return false}
+  videoWorkerBusy=true;const revision=++videoFrameRevision;
+  try{
+   const bitmap=await createWorkerBitmap(videoFrameCanvas);
+   const result=await workerRequest({type:"process",kind:"video",bitmap,cfg,paletteColors:paletteColorsFor(cfg)},[bitmap]);
+   if(revision!==videoFrameRevision||mode!=="video"){closeImageBitmap(result.bitmap);return false}
+   drawRenderedImageToCanvas(canvas,result.bitmap,result);
+   document.body.dataset.videoProcessingEngine="worker";
+  }catch(error){
+   if(processingWorker)disableProcessingWorker(error);
+   if(revision!==videoFrameRevision||mode!=="video")return false;
+   const fallback=renderProcessingCanvas(videoFrameCanvas,cfg,"video");
+   try{drawRenderedImageToCanvas(canvas,fallback,fallback)}
+   finally{releaseCanvasBuffer(fallback)}
+   document.body.dataset.videoProcessingEngine="main";
+  }finally{
+   videoWorkerBusy=false;
+   if(videoFrameQueued&&mode==="video"){
+    videoFrameQueued=false;
+    requestAnimationFrame(()=>renderVideoFrame());
+   }
+  }
+ }else{
+  document.body.dataset.videoProcessingEngine="main";
+  const revision=++videoFrameRevision;
+  const result=renderProcessingCanvas(videoFrameCanvas,cfg,"video");
+  try{
+   if(revision!==videoFrameRevision)return false;
+   drawRenderedImageToCanvas(canvas,result,result);
+  }finally{releaseCanvasBuffer(result)}
+ }
+ canvas.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(cfg.algorithm)?"pixelated":"auto";
+ $("videoTimeLabel").textContent=formatTime(video.currentTime);$("videoTimeline").value=String(video.currentTime);
+ videoLastRenderAt=performance.now();
+ return true;
+}
+function drawRenderedImageToCanvas(canvas,image,metadata){
+ try{
+  const width=Number(metadata?.width||image.width),height=Number(metadata?.height||image.height);
+  const resized=canvas.width!==width||canvas.height!==height;
+  if(canvas.width!==width)canvas.width=width;
+  if(canvas.height!==height)canvas.height=height;
+  const context=canvas.getContext("2d");
+  if(!context)throw new Error("Canvas 2D context unavailable");
+  if(!resized)context.clearRect(0,0,width,height);
+  context.drawImage(image,0,0);
+ }finally{closeImageBitmap(image)}
+}
 function videoLoop(now){if(mode!=="video")return;const timestamp=Number.isFinite(now)?now:performance.now();if(timestamp-videoLastRenderAt>=1000/24)renderVideoFrame();if(!$("videoSource").paused&&!$("videoSource").ended)videoRaf=requestAnimationFrame(videoLoop);else videoRaf=0}
-function loadVideo(file){if(videoExportStarting||(videoRecorder&&videoRecorder.state!=="inactive"))stopVideoExport(true);if(!file||!file.type.startsWith("video/")){say("Выберите видеофайл");return}const video=$("videoSource");if(videoObjectURL)URL.revokeObjectURL(videoObjectURL);video.pause();videoObjectURL=URL.createObjectURL(file);$("videoEmpty").style.display="none";$("videoFilename").textContent=file.name;video.src=videoObjectURL;video.onloadedmetadata=()=>{$("videoTimeline").max=String(video.duration||0);$("videoTimeline").value="0";$("videoDurationLabel").textContent=formatTime(video.duration);$("videoPlay").disabled=false;$("videoExport").disabled=false;renderVideoFrame();say("Видео загружено · "+Math.round(video.videoWidth)+" × "+Math.round(video.videoHeight))};video.onerror=()=>say("Не удалось открыть видео. Попробуйте MP4 или WebM.");video.load()}
+function loadVideo(file){
+ if(videoExportStarting||(videoRecorder&&videoRecorder.state!=="inactive"))stopVideoExport(true);
+ if(!file||!file.type.startsWith("video/")){say("Выберите видеофайл");return}
+ releaseVideoSource();
+ const video=$("videoSource");videoObjectURL=URL.createObjectURL(file);
+ $("videoEmpty").style.display="none";$("videoFilename").textContent=file.name;
+ video.src=videoObjectURL;
+ video.onloadedmetadata=()=>{
+  $("videoTimeline").max=String(video.duration||0);$("videoTimeline").value="0";
+  $("videoDurationLabel").textContent=formatTime(video.duration);$("videoPlay").disabled=false;$("videoExport").disabled=false;
+  renderVideoFrame();say("Видео загружено · "+Math.round(video.videoWidth)+" × "+Math.round(video.videoHeight));
+ };
+ video.onerror=()=>say("Не удалось открыть видео. Попробуйте MP4 или WebM.");
+ video.load();
+}
+function releasePageResources(){
+ if(videoRaf)cancelAnimationFrame(videoRaf);videoRaf=0;
+ if(asciiAnimRaf)cancelAnimationFrame(asciiAnimRaf);asciiAnimRaf=0;
+ if(temporalRaf)cancelAnimationFrame(temporalRaf);temporalRaf=0;
+ clearTimeout(asciiAnimTimer);clearTimeout(temporalTimer);
+ try{$("videoSource").pause()}catch(error){}
+ for(const stream of [videoExportStream,videoAudioStream])for(const track of stream?.getTracks?.()||[])try{track.stop()}catch(error){}
+ if(videoRecorder&&videoRecorder.state!=="inactive"){
+  videoRecorder.onstop=null;videoRecorder.ondataavailable=null;
+  try{videoRecorder.stop()}catch(error){}
+ }
+ if(asciiRecorder&&asciiRecorder.state!=="inactive")try{asciiRecorder.stop()}catch(error){}
+ if(temporalRecorder&&temporalRecorder.state!=="inactive")try{temporalRecorder.stop()}catch(error){}
+ releaseVideoSource();revokeBatchDownloadUrls();releaseTransientDownloadUrls();
+ batchResultsData=[];batchResultsBytes=0;resourceMetrics.batchResultBytes=0;
+ const previous=src;src=null;if(previous)releaseCanvasBuffer(previous,{source:true});
+ try{out.width=1;out.height=1;$("beforeOutput").width=1;$("beforeOutput").height=1}catch(error){}
+ if(processingWorker){try{processingWorker.terminate()}catch(error){}processingWorker=null}
+ for(const pending of processingWorkerPending.values()){clearTimeout(pending.timer);try{pending.reject(new Error("Страница закрывается"))}catch(error){}}
+ processingWorkerPending.clear();processingSourceId=0;processingSourceReadyId=0;processingSourcePending=false;processingSourceCanvasCopy=null;
+ mergeWorkerResourceMetrics({sourceCount:0,sourcePixels:0});
+}
+window.addEventListener("pagehide",event=>{if(!event.persisted)releasePageResources()});
+function resourceStatus(){
+ const worker=resourceMetrics.workerResources||{};
+ return {
+  ...resourceMetrics,
+  scratchCanvasOutstanding:Math.max(0,resourceMetrics.scratchCanvasesCreated-resourceMetrics.scratchCanvasesReleased),
+  batchResultCount:batchResultsData.length,batchResultBytes:batchResultsBytes,batchResultUrls:batchDownloadUrls.length,
+  transientDownloadUrls:transientDownloadUrls.size,
+  sourcePixels:src?Math.max(0,Number(src.width)||0)*Math.max(0,Number(src.height)||0):0,
+  workerSourceCount:worker.sourceCount||0,workerSourcePixels:worker.sourcePixels||0,
+  videoFramePixels:videoFrameCanvas?Math.max(0,videoFrameCanvas.width)*Math.max(0,videoFrameCanvas.height):0,
+  canvasRecovery:canvasRecoveryActive?"recovering":"idle"
+ };
+}
 function stopVideoExport(interrupted=true){
  if(videoExportStarting){
   videoExportGeneration++;videoExportStarting=false;
@@ -2394,7 +3249,7 @@ async function exportProcessedVideo(){
    });
   }else video.currentTime=0;
   if(generation!==videoExportGeneration||mode!=="video")return;
-  renderVideoFrame();
+  await renderVideoFrame();
   stream=canvas.captureStream(30);
   try{if(video.captureStream)audioStream=video.captureStream();else if(video.mozCaptureStream)audioStream=video.mozCaptureStream()}catch(e){}
   if(audioStream)audioStream.getAudioTracks().forEach(t=>stream.addTrack(t));
@@ -2408,6 +3263,7 @@ async function exportProcessedVideo(){
    if(blob.size)download(blob,slug(videoName())+"-TGRMLither.webm");
    stream.getTracks().forEach(t=>t.stop());if(audioStream)audioStream.getTracks().forEach(t=>t.stop());
    videoExportStream=null;videoAudioStream=null;videoRecorder=null;videoChunks=[];
+   if(mode!=="video")releaseVideoFrameBuffers({includeOutput:true});
    $("videoExport").disabled=false;$("videoTimeline").disabled=false;$("videoPlay").textContent="▶ Воспроизвести";
    say(!blob.size?"Не удалось получить данные видео":videoExportInterrupted?"Запись остановлена · частичный WebM сохранён":"Обработанное видео экспортировано");
   };
@@ -2430,7 +3286,24 @@ async function exportProcessedVideo(){
  }
 }
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
-function init(){buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();bindShellControls();bindInspectorLevel();initAlgorithmSearch();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);recordHistorySnapshot();presets.forEach(p=>{});renderPresets();renderBatch();
+function init(){initProcessingWorker();bindUserBackupControls();bindCanvasRecovery();window.__tgrmlitherWaitForPreview=waitForProcessingPreview;window.__tgrmlitherWorkerStatus=()=>({available:!!processingWorker,failed:processingWorkerFailed,threshold:WORKER_PIXEL_THRESHOLD,timeoutMs:workerRequestTimeoutMs});
+ if(["localhost","127.0.0.1","::1"].includes(location.hostname)){
+  window.__tgrmlitherSetWorkerTimeoutForTests=ms=>{
+   const value=Number(ms);
+   if(!Number.isFinite(value))return false;
+   workerRequestTimeoutMs=clamp(Math.round(value),100,180000);
+   return true;
+  };
+  window.__tgrmlitherSetCanvasRecoveryTimeoutForTests=ms=>{const value=Number(ms);if(!Number.isFinite(value))return false;canvasRecoveryTimeoutMs=clamp(Math.round(value),100,30000);return true};
+  window.__tgrmlitherCanvasStatus=()=>({recovering:canvasRecoveryActive,timeoutMs:canvasRecoveryTimeoutMs,outputId:out?.id,outputConnected:!!out?.isConnected});
+  window.__tgrmlitherResourceStatus=resourceStatus;
+  window.__tgrmlitherSetImageDecodeTimeoutForTests=ms=>{
+   const value=Number(ms);
+   if(!Number.isFinite(value))return false;
+   imageDecodeTimeoutMs=clamp(Math.round(value),100,180000);
+   return true;
+  };
+ }buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();bindShellControls();bindInspectorLevel();initAlgorithmSearch();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);recordHistorySnapshot();presets.forEach(p=>{});renderPresets();renderBatch();
 $("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await readLimitedText(file,MAX_SHAPE_SVG_BYTES,"SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");const index=clamp(Number($("shapeImportBand").value)||0,0,3),customPath=path.getAttribute("d").slice(0,20000);s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===index?({...b,shape:"custom",customPath,customViewBox:raw}):({...b}));s.customShapePath=customPath;s.customShapeViewBox=raw;$("shapeSvgStatus").textContent=file.name+" · SVG → диапазон "+(index+1);sync();render();say("SVG назначен диапазону "+(index+1))}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(videoExportStarting){v.pause();stopVideoExport(true);return}if(!v.src){$("videoInput").click();return}if(videoRecorder&&videoRecorder.state!=="inactive"){v.pause();stopVideoExport(true);$("videoPlay").textContent="▶ Воспроизвести";return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{const f=e.target.files?.[0];if(f)await loadImageFile(f);e.target.value=""};
 window.addEventListener("paste",async e=>{
  const items=Array.from(e.clipboardData?.items||[]),item=items.find(entry=>String(entry.type||"").startsWith("image/"));
@@ -2452,15 +3325,15 @@ updateFullscreenButton();
 $("reset").onclick=()=>{if(!WORKSPACE_NAMES.includes(mode))return;if(!confirm("Сбросить настройки только текущего пространства? Остальные пространства и пресеты не изменятся."))return;const algo=mode==="shape"?"shape":mode==="script"?"ascii":"bayer4";s=cloneSettings({...def,algorithm:algo,effects:[]});workspaceSettings[mode]=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Настройки текущего пространства сброшены")};
 $("randomize").onclick=()=>{let a=Object.keys(labels).filter(k=>k!=="ascii"&&k!=="shape"),p=Object.keys(pal);s.algorithm=a[Math.floor(Math.random()*a.length)];s.palette=p[Math.floor(Math.random()*p.length)];s.scale=2+Math.floor(Math.random()*15);s.levels=2+Math.floor(Math.random()*15);s.contrast=80+Math.floor(Math.random()*70);s.threshold=-25+Math.floor(Math.random()*51);s.effects=EFFECT_KEYS.filter(()=>Math.random()>.68);sync();render();saveWorkspaceSettings(mode);say("Случайная комбинация готова")};$("shuffle").onclick=()=>{const rnd=(a,b)=>Math.round(a+Math.random()*(b-a));s.scale=rnd(2,16);s.levels=rnd(2,16);s.threshold=rnd(-50,50);s.contrast=rnd(70,160);s.brightness=rnd(-35,35);s.midtones=rnd(20,80);s.highlights=rnd(20,80);s.blur=rnd(0,3);s.depth=rnd(25,100);s.patternAngle=rnd(0,180);s.jitter=rnd(0,70);s.effectStrength=Object.fromEntries(EFFECT_KEYS.map(k=>[k,rnd(10,100)]));if(!s.effects?.length)s.effects=EFFECT_KEYS.filter(()=>Math.random()>.78);sync();render();saveWorkspaceSettings(mode);say("Параметры перемешаны")};
 $("toggleOriginal").onclick=()=>{original=!original;$("toggleOriginal").textContent=original?"◉ Показать результат":"◉ Показать оригинал";updateCompareUI();render()};$("compareToggle").onclick=()=>{const wasOriginal=original;compareEnabled=!compareEnabled;if(compareEnabled)original=false;$("toggleOriginal").textContent=original?"◉ Показать результат":"◉ Показать оригинал";if(wasOriginal)render();else updateCompareUI()};$("compareRange").oninput=e=>{comparePosition=clamp(Number(e.target.value)||0,0,100);updateCompareUI()};window.addEventListener("resize",()=>requestAnimationFrame(updateCompareUI));$("zoom").onchange=zoom;$("undo").onclick=undoAction;$("redo").onclick=redoAction;
-$("png").onclick=()=>exportImage("png");$("topExport").onclick=openExportModal;$("exportCancel").onclick=closeExportModal;$("exportConfirm").onclick=confirmExport;$("exportFormat").onchange=updateExportFormatUI;$("exportJpegQuality").oninput=e=>{$("exportJpegQualityValue").textContent=e.target.value+"%";$("jpegQuality").value=e.target.value;$("jpegQuality").dispatchEvent(new Event("input",{bubbles:true}))};$("exportJpegQuality").onchange=()=>$("jpegQuality").dispatchEvent(new Event("change",{bubbles:true}));$("exportModal").onclick=e=>{if(e.target===$("exportModal"))closeExportModal()};$("jpg").onclick=()=>exportImage("jpeg");$("copy").onclick=copyResult;$("svgColor").onclick=()=>{if(exportSvg(false))markResultExported()};$("svgBlack").onclick=()=>{if(exportSvg(true))markResultExported()};$("svgCmyk").onclick=()=>{if(exportCmykSvg())markResultExported()};
+$("png").onclick=()=>exportImage("png");$("topExport").onclick=openExportModal;$("exportCancel").onclick=closeExportModal;$("exportConfirm").onclick=confirmExport;$("exportFormat").onchange=updateExportFormatUI;$("exportJpegQuality").oninput=e=>{$("exportJpegQualityValue").textContent=e.target.value+"%";$("jpegQuality").value=e.target.value;$("jpegQuality").dispatchEvent(new Event("input",{bubbles:true}))};$("exportJpegQuality").onchange=()=>$("jpegQuality").dispatchEvent(new Event("change",{bubbles:true}));$("exportModal").onclick=e=>{if(e.target===$("exportModal"))closeExportModal()};$("jpg").onclick=()=>exportImage("jpeg");$("copy").onclick=copyResult;$("svgColor").onclick=async()=>{await waitForProcessingPreview();if(exportSvg(false))markResultExported()};$("svgBlack").onclick=async()=>{await waitForProcessingPreview();if(exportSvg(true))markResultExported()};$("svgCmyk").onclick=async()=>{await waitForProcessingPreview();if(exportCmykSvg())markResultExported()};
 $("vectorDetail").onchange=()=>say("Детализация SVG: "+$("vectorDetail").selectedOptions[0].textContent);
 $("vectorThreshold").oninput=()=>{$("vectorThresholdV").textContent=$("vectorThreshold").value};
 $("printDpi").onchange=()=>{$("printDpi").value=String(clamp(Math.round(Number($("printDpi").value)||300),72,1200))};
 $("cmykCell").oninput=()=>{$("cmykCellV").textContent=$("cmykCell").value+" px"};$("temporalPlay").onclick=()=>startTemporal(false);$("temporalStop").onclick=stopTemporal;$("temporalRecord").onclick=()=>startTemporal(true);$("saveProject").onclick=$("saveProjectMenu").onclick=project;$("openProjectMenu").onclick=()=>$("projectInput").click();$("projectInput").onchange=e=>{if(e.target.files[0])loadProject(e.target.files[0]);e.target.value=""};
-$("offlineBtn").onclick=saveStandalone;$("savePresetMenu").onclick=$("savePresetLibrary").onclick=savePreset;$("exportPresets").onclick=()=>download(new Blob([JSON.stringify({format:"tgrmlithering-presets",version:1,presets:loadStore("ditherlab-presets",[])},null,2)],{type:"application/json"}),"TGRMLither-presets.json");$("importPresets").onclick=()=>$("presetInput").click();$("presetInput").onchange=async e=>{const f=e.target.files[0];if(f)try{const j=JSON.parse(await readLimitedText(f,MAX_IMPORT_JSON_BYTES,"Файл пресетов слишком большой")),items=Array.isArray(j)?j:(j.presets||[]);if(!items.length)throw Error("presets");const valid=items.slice(0,500).filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,100);if(!valid.length)throw Error("presets");const saved=loadStore("ditherlab-presets",[]),existing=Array.isArray(saved)?saved.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object"):[];custom=[...valid,...existing].slice(0,100);store("ditherlab-presets",custom);renderPresets();say("Пресеты импортированы")}catch(err){say("Файл пресетов слишком большой или не распознан")}e.target.value=""};$("downloadTxt").onclick=()=>{if(!src)return;makeAscii(src,s);download(new Blob([ascii],{type:"text/plain;charset=utf-8"}),slug(srcName)+"-script-slayer.txt")};
+$("offlineBtn").onclick=saveStandalone;$("savePresetMenu").onclick=$("savePresetLibrary").onclick=savePreset;$("exportPresets").onclick=()=>download(new Blob([JSON.stringify({format:"tgrmlithering-presets",version:1,presets:loadStore("ditherlab-presets",[])},null,2)],{type:"application/json"}),"TGRMLither-presets.json");$("importPresets").onclick=()=>$("presetInput").click();$("presetInput").onchange=async e=>{const f=e.target.files[0];if(f)try{const j=JSON.parse(await readLimitedText(f,MAX_IMPORT_JSON_BYTES,"Файл пресетов слишком большой")),items=Array.isArray(j)?j:(j.presets||[]);if(!items.length)throw Error("presets");const valid=items.slice(0,500).filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,100);if(!valid.length)throw Error("presets");const saved=loadStore("ditherlab-presets",[]),existing=Array.isArray(saved)?saved.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object"):[];custom=[...valid,...existing].slice(0,100);store("ditherlab-presets",custom);renderPresets();say("Пресеты импортированы")}catch(err){say("Файл пресетов слишком большой или не распознан")}e.target.value=""};$("downloadTxt").onclick=async()=>{if(!src)return;await waitForProcessingPreview();if(!ascii){const canvas=renderProcessingCanvas(src,s,"script");releaseCanvasBuffer(canvas)}download(new Blob([ascii],{type:"text/plain;charset=utf-8"}),slug(srcName)+"-script-slayer.txt")};
 $("asciiPlay").onclick=()=>startAsciiAnimation(false);$("asciiStop").onclick=stopAsciiAnimation;$("asciiExportWebm").onclick=()=>startAsciiAnimation(true);
 document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));$("homeLogo").onclick=e=>{e.preventDefault();setMode("editor")};$("randomize").classList.toggle("hidden",mode!=="editor");$("shuffle").classList.toggle("hidden",mode!=="editor");
-$("batchBrowse").onclick=()=>$("batchInput").click();$("batchInput").onchange=e=>{addBatch(e.target.files);e.target.value=""};$("batchDrop").ondragover=e=>{e.preventDefault();$("batchDrop").style.borderColor="var(--acid)"};$("batchDrop").ondragleave=()=>$("batchDrop").style.borderColor="";$("batchDrop").ondrop=e=>{e.preventDefault();$("batchDrop").style.borderColor="";addBatch(e.dataTransfer.files)};$("runBatch").onclick=runBatch;$("downloadBatchZip").onclick=downloadBatchArchive;$("clearBatch").onclick=()=>{if(batchRunning)return;batch=[];batchResultsData=[];revokeBatchDownloadUrls();renderBatch();$("batchResults").innerHTML="";$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent="0 / 0";$("batchProgressLabel").textContent="Ожидает файлов";$("downloadBatchZip").disabled=true};$("cancelBatch").onclick=()=>{if(!batchRunning)return;batchCancelRequested=true;$("cancelBatch").disabled=true;$("batchProgressLabel").textContent="Остановка после текущего файла…";say("Остановка после текущего файла…")};
+$("batchBrowse").onclick=()=>$("batchInput").click();$("batchInput").onchange=e=>{addBatch(e.target.files);e.target.value=""};$("batchDrop").ondragover=e=>{e.preventDefault();$("batchDrop").style.borderColor="var(--acid)"};$("batchDrop").ondragleave=()=>$("batchDrop").style.borderColor="";$("batchDrop").ondrop=e=>{e.preventDefault();$("batchDrop").style.borderColor="";addBatch(e.dataTransfer.files)};$("runBatch").onclick=runBatch;$("downloadBatchZip").onclick=downloadBatchArchive;$("clearBatch").onclick=()=>{if(batchRunning)return;batch=[];batchResultsData=[];batchResultsBytes=0;resourceMetrics.batchResultBytes=0;revokeBatchDownloadUrls();renderBatch();$("batchResults").innerHTML="";$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent="0 / 0";$("batchProgressLabel").textContent="Ожидает файлов";$("downloadBatchZip").disabled=true};$("cancelBatch").onclick=()=>{if(!batchRunning)return;batchCancelRequested=true;$("cancelBatch").disabled=true;$("batchProgressLabel").textContent="Остановка после текущего файла…";say("Остановка после текущего файла…")};
 let stage=$("stage");
  stage.addEventListener("dragenter",e=>{if(!Array.from(e.dataTransfer?.types||[]).includes("Files"))return;e.preventDefault();if(!stage.contains(e.relatedTarget))stage.classList.add("drag")});
  stage.addEventListener("dragover",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});

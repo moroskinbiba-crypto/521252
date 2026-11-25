@@ -44,6 +44,55 @@ async function downloadFrom(page, selector) {
       return canvas && canvas.width > 0 && canvas.height > 0 &&
         document.querySelector("#statAlgorithm")?.textContent.trim();
     }, null, { timeout: 15000 });
+
+    // Exercise the real OffscreenCanvas worker with an image above its activation threshold.
+    const largeWorkerFixture = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024; canvas.height = 900;
+      const ctx = canvas.getContext("2d");
+      const gradient = ctx.createLinearGradient(0, 0, 1024, 900);
+      gradient.addColorStop(0, "#102030");
+      gradient.addColorStop(.5, "#b07038");
+      gradient.addColorStop(1, "#e0f0d0");
+      ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < canvas.height; y += 17) {
+        ctx.fillStyle = "rgba(20, 80, 120, .35)";
+        ctx.fillRect((y * 19) % canvas.width, y, 180, 8);
+      }
+      return canvas.toDataURL("image/png");
+    });
+    const largeWorkerBuffer = Buffer.from(largeWorkerFixture.split(",")[1], "base64");
+    await page.locator("#imageInput").setInputFiles({
+      name: "worker-large-fixture.png", mimeType: "image/png",
+      buffer: largeWorkerBuffer
+    });
+    await page.waitForFunction(() =>
+      document.querySelector("#filename")?.textContent.includes("worker-large-fixture.png")
+    );
+    await page.waitForFunction(() =>
+      document.body.dataset.processingEngine === "worker" &&
+      document.body.dataset.processingPending === "false",
+      null, { timeout: 30000 }
+    );
+    const workerPreview = await page.evaluate(() => ({
+      available: document.body.dataset.processingWorker === "available",
+      engine: document.body.dataset.processingEngine,
+      pending: document.body.dataset.processingPending,
+      width: document.querySelector("#output").width,
+      height: document.querySelector("#output").height
+    }));
+    assert.equal(workerPreview.available, true, "large previews should initialize the OffscreenCanvas worker");
+    assert.equal(workerPreview.engine, "worker", "large image processing should run in the worker");
+    assert.ok(workerPreview.width > 0 && workerPreview.height > 0, "the worker should return a drawable preview bitmap");
+    await page.evaluate(() => window.__tgrmlitherWaitForPreview());
+    const workerResources = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.ok(workerResources, "localhost QA should expose resource counters");
+    assert.equal(workerResources.scratchCanvasOutstanding, 0, "main-thread scratch canvases should be released after rendering");
+    assert.ok(workerResources.workerResources?.scratchCanvasesCreated > 0, "the Worker should report tracked scratch canvas allocations");
+    assert.equal(workerResources.workerResources.scratchCanvasesCreated, workerResources.workerResources.scratchCanvasesReleased,
+      "all worker scratch canvases, including the output surface, should be released after transferring the frame");
+    assert.equal(workerResources.workerResources.sourceCount, 1, "the Worker should retain only the current source bitmap");
+    assert.equal(workerResources.workerResources.sourcePixels, 1024 * 900, "worker source retention should match the bounded input image");
     const unrelatedCachePreserved = await page.evaluate(async () => {
       if (!("serviceWorker" in navigator) || !("caches" in window)) return true;
       await navigator.serviceWorker.ready;
@@ -1006,7 +1055,7 @@ async function downloadFrom(page, selector) {
     // Generate a tiny, valid WebM in-browser and test video input, scrubbing and rendered-video export.
     const videoDataURL = await page.evaluate(async () => {
       const canvas = document.createElement("canvas");
-      canvas.width = 48; canvas.height = 32;
+      canvas.width = 1024; canvas.height = 900;
       const ctx = canvas.getContext("2d");
       const mime = ["video/webm;codecs=vp8", "video/webm"].find(type => MediaRecorder.isTypeSupported(type));
       if (!mime || !canvas.captureStream) throw new Error("WebM recording is unsupported in test browser");
@@ -1027,7 +1076,7 @@ async function downloadFrom(page, selector) {
         ctx.fillStyle = "#172b46";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "rgb(" + (i * 13 % 255) + ",120,210)";
-        ctx.fillRect(i * 2, 8, 12, 12);
+        ctx.fillRect(i * 18, 80, 120, 120);
         await new Promise(resolve => setTimeout(resolve, 80));
       }
       recorder.stop();
@@ -1042,6 +1091,9 @@ async function downloadFrom(page, selector) {
       return video && Number.isFinite(video.duration) && video.duration > 0;
     }, null, { timeout: 20000 });
     assert.match(await page.locator("#videoFilename").textContent(), /qa-video\.webm/);
+    await page.waitForFunction(() => document.body.dataset.videoProcessingEngine === "worker", null, { timeout: 30000 });
+    assert.equal(await page.locator("#videoOutput").evaluate(canvas => canvas.width >= 1024 && canvas.height >= 890), true,
+      "Video Lab should render high-resolution frames through OffscreenCanvas worker");
     assert.ok(Number(await page.locator("#videoTimeline").getAttribute("max")) > 0, "video timeline should have a duration");
     await page.locator("#videoTimeline").evaluate(el => {
       el.value = String(Math.min(0.3, Number(el.max)));
@@ -1077,6 +1129,8 @@ async function downloadFrom(page, selector) {
 
     // Batch processing should use a stable settings snapshot even if controls change while files are being encoded.
     await page.locator('.topnav [data-mode="batch"]').click();
+    const releasedVideoBuffers = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(releasedVideoBuffers.videoFramePixels, 1, "leaving Video Lab should release its reusable frame buffer");
     await page.locator("#batchInput").setInputFiles([
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
@@ -1119,6 +1173,11 @@ async function downloadFrom(page, selector) {
     assert.match(batchNames[0], /TGRMLither\.png$/);
     assert.match(batchNames[1], /TGRMLither-2\.png$/);
     assert.equal(await page.locator("#downloadBatchZip").isEnabled(), true, "ZIP download should enable after batch processing");
+    const batchResourceState = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(batchResourceState.scratchCanvasOutstanding, 0, "batch processing should release all temporary raster canvases between files");
+    assert.equal(batchResourceState.batchResultCount, 2, "only completed batch blobs should be retained");
+    assert.equal(batchResourceState.batchResultUrls, 2, "each retained PNG should have one live download URL");
+    assert.ok(batchResourceState.batchResultBytes > 0, "the retained batch byte budget should account for output blobs");
     const [batchZipDownload] = await Promise.all([
       page.waitForEvent("download", { timeout: 10000 }),
       page.locator("#downloadBatchZip").click()
@@ -1128,6 +1187,35 @@ async function downloadFrom(page, selector) {
     assert.deepEqual([...batchZipBytes.subarray(0, 4)], [0x50, 0x4b, 0x03, 0x04], "batch archive should have a valid ZIP local-file signature");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither.png")), "batch ZIP should contain the first processed PNG filename");
     assert.ok(batchZipBytes.includes(Buffer.from("batch-fixture-TGRMLither-2.png")), "batch ZIP should contain a collision-free second PNG filename");
+
+    // Large batch files should use the same background worker pipeline.
+    await page.locator("#clearBatch").click();
+    const clearedBatchResources = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(clearedBatchResources.batchResultCount, 0, "clearing a batch should release references to retained blobs");
+    assert.equal(clearedBatchResources.batchResultBytes, 0, "clearing a batch should reset retained output bytes");
+    assert.equal(clearedBatchResources.batchResultUrls, 0, "clearing a batch should revoke all batch object URLs");
+    await page.locator("#batchInput").setInputFiles({
+      name: "worker-batch-fixture.png", mimeType: "image/png", buffer: largeWorkerBuffer
+    });
+    await page.locator("#runBatch").click();
+    await page.waitForFunction(() => document.body.dataset.batchProcessingEngine === "worker", null, { timeout: 15000 });
+    await page.waitForFunction(() =>
+      document.querySelectorAll("#batchResults a[download]").length === 1 &&
+      !document.querySelector("#clearBatch")?.disabled,
+      null, { timeout: 30000 }
+    );
+    assert.match(await page.locator("#batchResults").innerText(), /worker-batch-fixture\.png[\s\S]*Готово/,
+      "large batch output should be returned from worker processing");
+
+    // Restore the three small fixtures so the cancellation test targets the main-thread fallback.
+    await page.locator("#clearBatch").click();
+    await page.locator("#batchInput").setInputFiles([
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
+      { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
+      { name: "broken-image.png", mimeType: "image/png", buffer: Buffer.from("not a valid PNG") }
+    ]);
+    assert.equal(await page.locator("#batchList .fileitem").count(), 3);
+
     // Batch cancellation stops after the in-flight file and keeps partial results downloadable.
     assert.equal(await page.locator("#cancelBatch").isVisible(), false, "batch cancellation should be hidden while idle");
     await page.evaluate(() => {
@@ -1258,6 +1346,305 @@ async function downloadFrom(page, selector) {
       "extreme-ratio ASCII output must stay below the configured pixel budget");
     assert.equal(await page.locator("#asciiLimitWarning").isVisible(), true,
       "the UI should tell the user when the ASCII grid was limited");
+
+    // Failed processing must not replace the last successfully rendered preview.
+    const recoveryPage = await browser.newPage({ viewport: { width: 1100, height: 800 } });
+    const recoveryErrors = [];
+    recoveryPage.on("pageerror", error => recoveryErrors.push(error.stack || error.message));
+    await recoveryPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await recoveryPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const previewBeforeFailure = await recoveryPage.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await recoveryPage.evaluate(() => {
+      window.__nativeGetImageData = CanvasRenderingContext2D.prototype.getImageData;
+      CanvasRenderingContext2D.prototype.getImageData = function () {
+        throw new Error("Simulated canvas readback failure");
+      };
+    });
+    await recoveryPage.locator("#algorithm").selectOption("floyd");
+    await recoveryPage.waitForFunction(() => document.body.dataset.processingError === "true");
+    const previewAfterFailure = await recoveryPage.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.equal(previewAfterFailure, previewBeforeFailure,
+      "a failed render must preserve the previous successful preview");
+    assert.match(await recoveryPage.locator("#toast").textContent(), /Предыдущий результат сохранён/);
+    await recoveryPage.evaluate(() => {
+      CanvasRenderingContext2D.prototype.getImageData = window.__nativeGetImageData;
+      delete window.__nativeGetImageData;
+    });
+
+    // A decoder that never emits load/error must time out and release the loading state.
+    const decodeTimeoutConfigured = await recoveryPage.evaluate(() =>
+      window.__tgrmlitherSetImageDecodeTimeoutForTests?.(700) === true
+    );
+    assert.equal(decodeTimeoutConfigured, true, "local smoke tests should be able to shorten the image decode watchdog");
+    const previousImageName = await recoveryPage.locator("#filename").textContent();
+    await recoveryPage.evaluate(() => {
+      const NativeImage = window.Image;
+      const src = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
+      window.__nativeImageConstructor = NativeImage;
+      window.Image = function () {
+        const image = new NativeImage();
+        Object.defineProperty(image, "src", {
+          configurable: true,
+          get: () => src.get.call(image),
+          set: value => { if (value === "") src.set.call(image, value); }
+        });
+        return image;
+      };
+    });
+    await recoveryPage.locator("#imageInput").setInputFiles({
+      name: "decoder-timeout.png", mimeType: "image/png", buffer: imageBuffer
+    });
+    await recoveryPage.waitForFunction(() =>
+      /Декодирование изображения превысило лимит времени/.test(document.querySelector("#toast")?.textContent || ""),
+      null, { timeout: 10000 }
+    );
+    assert.equal(await recoveryPage.locator("#stage").getAttribute("aria-busy"), "false",
+      "a decoder timeout must clear the loading state");
+    assert.equal(await recoveryPage.locator("#filename").textContent(), previousImageName,
+      "a decoder timeout must leave the previous source image in place");
+    assert.equal(
+      await recoveryPage.locator("#output").evaluate(canvas => canvas.toDataURL("image/png")),
+      previewBeforeFailure,
+      "a decoder timeout must preserve the previous rendered image"
+    );
+    await recoveryPage.evaluate(() => { window.Image = window.__nativeImageConstructor; });
+    assert.deepEqual(recoveryErrors, [], "render and image-decode recovery must not create uncaught page errors");
+    await recoveryPage.close();
+
+    // A worker that stops answering must time out, be terminated, and fall back to the main thread.
+    const fallbackPage = await browser.newPage({ viewport: { width: 1100, height: 800 } });
+    const fallbackErrors = [];
+    fallbackPage.on("pageerror", error => fallbackErrors.push(error.stack || error.message));
+    await fallbackPage.addInitScript(() => {
+      const NativeWorker = window.Worker;
+      window.Worker = function (...args) {
+        const worker = new NativeWorker(...args);
+        const postMessage = worker.postMessage.bind(worker);
+        worker.postMessage = (message, transfer) => {
+          if (message?.type === "render") return; // Simulate a worker that has stopped responding.
+          return postMessage(message, transfer);
+        };
+        return worker;
+      };
+      window.Worker.prototype = NativeWorker.prototype;
+    });
+    await fallbackPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await fallbackPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const watchdogConfigured = await fallbackPage.evaluate(() =>
+      window.__tgrmlitherSetWorkerTimeoutForTests?.(700) === true
+    );
+    assert.equal(watchdogConfigured, true, "local smoke tests should be able to shorten the worker watchdog");
+    await fallbackPage.locator("#imageInput").setInputFiles({
+      name: "worker-timeout-fixture.png", mimeType: "image/png", buffer: largeWorkerBuffer
+    });
+    await fallbackPage.waitForFunction(() =>
+      document.body.dataset.processingWorker === "failed" &&
+      document.body.dataset.processingEngine === "main" &&
+      document.body.dataset.processingPending === "false" &&
+      document.querySelector("#output")?.width > 0,
+      null, { timeout: 15000 }
+    );
+    const fallbackState = await fallbackPage.evaluate(() => ({
+      failed: document.body.dataset.processingWorker,
+      engine: document.body.dataset.processingEngine,
+      pending: document.body.dataset.processingPending,
+      width: document.querySelector("#output")?.width
+    }));
+    assert.deepEqual(fallbackState, {
+      failed: "failed", engine: "main", pending: "false", width: 1024
+    }, "a timed-out worker must leave the preview usable on the main thread");
+    assert.deepEqual(fallbackErrors, [], "worker timeout recovery must not create uncaught page errors");
+    await fallbackPage.close();
+
+    // Storage snapshots must recover a corrupted primary record from the last known-good value.
+    const storagePage = await browser.newPage({ viewport: { width: 1100, height: 800 }, acceptDownloads: true });
+    const storageErrors = [];
+    storagePage.on("pageerror", error => storageErrors.push(error.stack || error.message));
+    await storagePage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await storagePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const setStorageScale = async value => storagePage.locator("#scale").evaluate((el, next) => {
+      el.value = String(next);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }, value);
+    await setStorageScale(8);
+    await storagePage.waitForFunction(() => {
+      try { return JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "null")?.editor?.scale === 8; }
+      catch { return false; }
+    });
+    await setStorageScale(9);
+    await storagePage.waitForFunction(() => {
+      try {
+        const backup = JSON.parse(localStorage.getItem("tgrmlither-backup-v1:tgrmlithering-workspaces") || "null");
+        return backup?.format === "tgrmlither-storage-backup" &&
+          JSON.parse(backup.raw)?.editor?.scale === 8;
+      } catch { return false; }
+    });
+    await storagePage.evaluate(() => localStorage.setItem("tgrmlithering-workspaces", "{ broken json"));
+    await storagePage.reload({ waitUntil: "load" });
+    await storagePage.waitForFunction(() => document.querySelector("#scale")?.value === "8");
+    const recoveredStorage = await storagePage.evaluate(() => ({
+      scale: Number(document.querySelector("#scale").value),
+      raw: localStorage.getItem("tgrmlithering-workspaces"),
+      notice: document.querySelector("#toast")?.textContent || ""
+    }));
+    assert.equal(recoveredStorage.scale, 8, "corrupted workspace settings should recover the previous saved state");
+    assert.doesNotThrow(() => JSON.parse(recoveredStorage.raw), "recovery should rewrite a valid primary storage record");
+    await storagePage.waitForFunction(() => /восстановлены из резервной копии/i.test(document.querySelector("#toast")?.textContent || ""));
+
+    // The full user-data backup must round-trip through export and validated transactional restore.
+    await storagePage.locator("#themeMenu > summary").click();
+    await storagePage.locator("#themePicker").selectOption("terminal");
+    const [userBackupDownload] = await Promise.all([
+      storagePage.waitForEvent("download", { timeout: 15000 }),
+      storagePage.locator("#exportUserBackup").click()
+    ]);
+    const userBackupBuffer = fs.readFileSync(await userBackupDownload.path());
+    const userBackupDoc = JSON.parse(userBackupBuffer.toString("utf8"));
+    assert.equal(userBackupDoc.format, "tgrmlither-user-backup");
+    assert.equal(userBackupDoc.version, 1);
+    assert.ok(userBackupDoc.data["tgrmlithering-workspaces"], "backup should include workspace profiles");
+    assert.ok(userBackupDoc.data["tgrmlither-theme"], "backup should include the current interface theme");
+    await storagePage.locator("#shellPicker").selectOption("studio");
+    await storagePage.waitForFunction(() => JSON.parse(localStorage.getItem("tgrmlither-shell") || "null") === "studio");
+    storagePage.on("dialog", dialog => dialog.accept());
+    await storagePage.locator("#userBackupInput").setInputFiles({
+      name: "TGRMLither-backup.json",
+      mimeType: "application/json",
+      buffer: userBackupBuffer
+    });
+    await storagePage.waitForFunction(() =>
+      document.body.dataset.shell === "xp" &&
+      document.body.dataset.theme === "terminal" &&
+      JSON.parse(localStorage.getItem("tgrmlither-shell") || "null") === "xp" &&
+      document.querySelector("#scale")?.value === "8",
+      null, { timeout: 15000 }
+    );
+    // Recover the primary preview after a restored or permanently lost Canvas 2D context.
+    await storagePage.evaluate(() => {
+      window.__firstCanvasBeforeLoss = document.querySelector("#output");
+      window.__firstCanvasBeforeLoss.dispatchEvent(new Event("contextlost", { cancelable: true }));
+    });
+    await storagePage.waitForFunction(() => document.body.dataset.canvasRecovery === "recovering");
+    assert.equal(await storagePage.evaluate(() => window.__firstCanvasBeforeLoss.isConnected), true,
+      "the original canvas remains mounted while the browser attempts context restoration");
+    await storagePage.evaluate(() => window.__firstCanvasBeforeLoss.dispatchEvent(new Event("contextrestored")));
+    await storagePage.waitForFunction(() =>
+      document.body.dataset.canvasRecovery === "idle" &&
+      document.body.dataset.canvasRecoveryResult === "restored"
+    );
+    await storagePage.evaluate(() => window.__tgrmlitherWaitForPreview());
+    assert.equal(await storagePage.locator("#output").evaluate(canvas => canvas.width > 0 && canvas.height > 0), true,
+      "the preview should be rendered again after context restoration");
+
+    const canvasWatchdogConfigured = await storagePage.evaluate(() =>
+      window.__tgrmlitherSetCanvasRecoveryTimeoutForTests?.(450) === true
+    );
+    assert.equal(canvasWatchdogConfigured, true, "local smoke tests should be able to shorten the canvas recovery watchdog");
+    await storagePage.evaluate(() => {
+      window.__lostCanvasForReplacement = document.querySelector("#output");
+      window.__lostCanvasForReplacement.dispatchEvent(new Event("contextlost", { cancelable: true }));
+    });
+    await storagePage.waitForFunction(() =>
+      document.body.dataset.canvasRecovery === "idle" &&
+      document.body.dataset.canvasRecoveryResult === "recreated" &&
+      document.querySelector("#output") !== window.__lostCanvasForReplacement,
+      null, { timeout: 5000 }
+    );
+    await storagePage.evaluate(() => window.__tgrmlitherWaitForPreview());
+    assert.equal(await storagePage.locator("#output").evaluate(canvas => canvas.width > 0 && canvas.height > 0), true,
+      "a context that never restores should be replaced with a fresh canvas and re-rendered");
+
+    assert.deepEqual(storageErrors, [], "storage and canvas recovery must not create uncaught page errors");
+
+    // A failed storage write during project import must not replace the currently open image.
+    const projectAtomicPage = await browser.newPage({ viewport: { width: 1100, height: 800 } });
+    await projectAtomicPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await projectAtomicPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const previousProjectSource = await projectAtomicPage.locator("#filename").textContent();
+    const validProject = {
+      format: "tgrmlither-project", version: 2, workspace: "editor",
+      sourceName: "must-not-open.png", source: dataURL,
+      settings: { algorithm: "floyd", scale: 11 }
+    };
+    await projectAtomicPage.evaluate(() => {
+      const nativeSetItem = Storage.prototype.setItem;
+      window.__nativeStorageSetItem = nativeSetItem;
+      Storage.prototype.setItem = function (key, value) {
+        if (key === "tgrmlithering-workspaces") throw new DOMException("Quota exceeded", "QuotaExceededError");
+        return nativeSetItem.call(this, key, value);
+      };
+    });
+    await projectAtomicPage.locator("#projectInput").setInputFiles({
+      name: "valid-but-unwritable.tgrmlither.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(validProject))
+    });
+    await projectAtomicPage.waitForFunction(() =>
+      /Проект не открыт/.test(document.querySelector("#toast")?.textContent || ""),
+      null, { timeout: 10000 }
+    );
+    assert.equal(await projectAtomicPage.locator("#filename").textContent(), previousProjectSource,
+      "a project import must leave the active image intact when persistence fails");
+    assert.equal(await projectAtomicPage.locator("body").getAttribute("data-mode"), "editor",
+      "a failed project import must return to the original workspace");
+    await projectAtomicPage.evaluate(() => { Storage.prototype.setItem = window.__nativeStorageSetItem; });
+    await projectAtomicPage.close();
+    await storagePage.close();
+
+    // Long-session resource stress: replace a large Worker source repeatedly and
+    // verify that only the current source bitmap and one output surface remain live.
+    const resourceStressPage = await browser.newPage({ viewport: { width: 1100, height: 800 }, acceptDownloads: true });
+    const resourceStressErrors = [];
+    resourceStressPage.on("pageerror", error => resourceStressErrors.push(error.stack || error.message));
+    await resourceStressPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await resourceStressPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const sourceCycles = 10;
+    for (let cycle = 0; cycle < sourceCycles; cycle++) {
+      const algorithm = ["bayer4", "floyd", "atkinson", "pixel"][cycle % 4];
+      await resourceStressPage.locator("#algorithm").selectOption(algorithm);
+      await resourceStressPage.locator("#imageInput").setInputFiles({
+        name: "resource-cycle-" + cycle + ".png",
+        mimeType: "image/png",
+        buffer: largeWorkerBuffer
+      });
+      await resourceStressPage.waitForFunction(expected =>
+        document.querySelector("#filename")?.textContent.includes(expected) &&
+        document.body.dataset.processingEngine === "worker" &&
+        document.body.dataset.processingPending === "false",
+        "resource-cycle-" + cycle + ".png",
+        { timeout: 30000 }
+      );
+      await resourceStressPage.evaluate(() => window.__tgrmlitherWaitForPreview());
+      const snapshot = await resourceStressPage.evaluate(() => window.__tgrmlitherResourceStatus?.());
+      assert.equal(snapshot.workerResources?.sourceCount, 1, "a long editing session should keep exactly one live Worker source");
+      assert.equal(snapshot.workerResources?.sourcePixels, 1024 * 900, "replacing a source should not accumulate prior ImageBitmap pixels");
+      assert.equal(snapshot.scratchCanvasOutstanding, 0, "each preview must release its temporary Canvas allocations");
+      assert.equal(snapshot.workerResources?.scratchCanvasesCreated, snapshot.workerResources?.scratchCanvasesReleased,
+        "Worker scratch canvases should be fully released after every preview");
+    }
+    const stressSnapshot = await resourceStressPage.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.ok(stressSnapshot.workerResources.sourceBitmapsClosed >= sourceCycles - 1,
+      "replacing the source should close every superseded Worker ImageBitmap");
+    assert.ok(stressSnapshot.sourceCanvasesReleased >= sourceCycles - 1,
+      "replacing the source should release every superseded HTML source canvas");
+
+    const [stressExport] = await Promise.all([
+      resourceStressPage.waitForEvent("download", { timeout: 15000 }),
+      resourceStressPage.locator("#png").click()
+    ]);
+    assert.match(stressExport.suggestedFilename(), /TGRMLither\.png$/);
+    const beforePageHide = await resourceStressPage.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(beforePageHide.transientDownloadUrls, 1, "an export URL should remain available for the browser download handoff");
+    await resourceStressPage.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pagehide", { persisted: false })));
+    const afterPageHide = await resourceStressPage.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(afterPageHide.transientDownloadUrls, 0, "page shutdown should revoke transient download URLs");
+    assert.equal(afterPageHide.batchResultUrls, 0, "page shutdown should revoke batch result URLs");
+    assert.equal(afterPageHide.sourcePixels, 0, "page shutdown should release the current source canvas");
+    assert.equal(afterPageHide.workerSourceCount, 0, "page shutdown should clear Worker source retention");
+    assert.deepEqual(resourceStressErrors, [], "long-session resource cleanup should not create uncaught browser errors");
+    await resourceStressPage.close();
+
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
     console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {

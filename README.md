@@ -108,5 +108,60 @@ MIT. See [LICENSE](LICENSE).
 - Empty effect stacks (including effects set to zero strength) skip the bounded post-processing pass. This removes an unnecessary full-image downscale/upscale and preserves detail when no effects are active.
 - Browser regression tests verify unchanged-size canvas reuse and pixel-identical output when the effect stack is inactive.
 
+## Background processing in v1.3.8
+
+- Large image previews (786,432 source pixels and above) run in a dedicated Web Worker using OffscreenCanvas when the browser supports it. The source ImageBitmap is transferred once and reused across adjustments; the worker returns transferable ImageBitmaps instead of copying full pixel buffers back to the main thread.
+- Large batch items use the same worker pipeline after the existing safe image-size normalization. Large Video Lab frames are processed off the UI thread; frame requests are coalesced so slow frames do not build an unbounded queue.
+- Smaller images and browsers without Worker, OffscreenCanvas, or createImageBitmap keep using the established main-thread renderer. Worker errors automatically fall back to that path.
+- The portable/PWA service-worker cache includes the processing worker for offline use. Browser regression coverage checks the real worker path on a large image, plus the main-thread fallback.
+
 ### Script Slayer · Neo Glow
 Neo Glow includes an adjustable scan-band position, width, brightness, off-band visibility and colour. The band is centered by default, its settings follow the saved Script Slayer profile, and the Animation button moves the band across the symbol canvas.
+
+
+
+## Stability hardening in v1.3.9
+
+- Worker requests now have a 120-second watchdog. A request timeout, worker runtime error, or message-decoding failure terminates the worker, rejects pending operations, clears their timers and returns the current preview to the main-thread renderer.
+- ImageBitmap creation for preview, batch and video processing is also time-bounded. A bitmap that resolves after its caller timed out is immediately closed instead of being retained.
+- Image decoding has a 60-second timeout and releases its temporary object URL if the browser never emits a load/error event. A failed main-thread render leaves the last successful preview in place and reports the failure instead of throwing an uncaught runtime error.
+- Batch processing caps accumulated output blobs at 128 MiB. Completed files remain available for individual download or ZIP export; the app asks the user to split larger batches rather than accumulating unbounded results.
+- Browser smoke tests simulate a worker that accepts its source image but never returns a rendered frame, then verify watchdog activation and a usable main-thread fallback.
+- The offline cache version is advanced so installed PWA copies fetch the updated editor and worker assets.
+
+
+## Persistence and data integrity in v1.3.10
+
+- Writes to the main user-data keys are verified after saving. Before replacing a valid previous record, the app attempts to keep a checksummed last-known-good local snapshot. Backup snapshots are bounded per item and in aggregate so recovery data does not grow without limit; a failed backup must not block the primary save.
+- If a saved JSON record is corrupted, the app validates its snapshot, restores the previous record when possible and notifies the user. If no valid snapshot exists, the app falls back to the normal defaults without crashing.
+- The Theme menu now exports and restores a complete user-data backup: workspace profiles, custom presets, palette libraries, Shape Shifter presets, favourites, custom colours and interface preferences.
+- Backup imports are fully validated before writing. The restore operation verifies each saved record and rolls back already-written keys if any write fails.
+- Project import validates the document and image before changing the active workspace. It commits normalized workspace settings before replacing the active image and leaves the previous image in place when persistence fails. Project reads and image decoding are time-bounded.
+- PWA cache version advances so installed copies pick up the updated persistence and import logic.
+- Browser smoke tests cover corrupted-storage recovery, backup export/restore and project-import rollback on a simulated storage quota failure.
+
+
+## Canvas recovery and cross-browser reliability in v1.3.11
+
+- The visible output Canvas listens for `contextlost` and `contextrestored`. It opts into restoration, suspends rendering during loss and rerenders the retained source after the browser restores the context.
+- If the browser does not restore the 2D context within the recovery window, the app replaces the damaged canvas element, rebinds recovery events and rebuilds the preview from the retained source. The comparison canvas has its own replacement path.
+- Worker results that arrive while the output context is lost are discarded and their ImageBitmap resources are closed; the restored/recreated surface is rendered from the current settings.
+- The recovery timeout is 5 seconds by default. A localhost-only test hook makes the timeout deterministic in automated tests.
+- Browser checks now run on Chromium, Firefox and WebKit. They cover startup, image decoding/rendering, Canvas context loss/restoration/recreation, 60 repeated edits, bounded canvas DOM count, and uncaught runtime errors.
+- The full Chromium regression suite also verifies restored and recreated Canvas paths alongside Worker fallback, persistence recovery and project-import rollback.
+- The Service Worker cache advances to `tgrmlither-v16`.
+
+
+## Performance and memory architecture in v1.3.12
+
+- The main-thread raster pipeline now scopes temporary Canvas allocations to a render pass. Intermediate canvases are zero-sized immediately after the final result is composed; the output surface is retained separately.
+- Superseded source canvases are released after the asynchronous ImageBitmap snapshot is complete, so the Worker never reads a source after its backing canvas has been discarded.
+- The Worker validates image pixel budgets for both retained sources and transient processing requests. Its scratch canvases are tracked and released after composition or output transfer; source and process ImageBitmaps are closed at their lifecycle boundaries.
+- The Worker reports resource counters with its results: retained source count/pixels, scratch Canvas allocations/releases, released pixel capacity and closed/transferred bitmap counts. The local-only QA hook combines these with main-thread Canvas, batch and URL counters.
+- Batch processing releases each decoded input canvas and each output canvas after encoding. Its existing 128 MiB retained-blob budget remains in force; clearing results revokes their object URLs and drops all blob references.
+- Export object URLs now have a bounded handoff lifetime and are explicitly revoked on page shutdown. Batch result URLs have their own cleanup path.
+- Video Lab reuses one bounded frame canvas while active, shrinks its backing store when leaving the workspace, revokes replaced media URLs, and recreates the preview when re-entering the workspace. Recorder streams are stopped and output buffers released when recording completes.
+- SVG and CMYK export surfaces, palette-extraction samples, and Script Slayer text-export canvases are released deterministically instead of relying solely on garbage collection.
+- The page lifecycle handler stops animation loops and media tracks, revokes transient and batch URLs, clears the current source surface, terminates the Worker and rejects outstanding requests before a full page shutdown. It leaves the page intact when the browser places it into the back-forward cache.
+- Regression tests now exercise ten consecutive large-image source replacements, Worker source retention, source bitmap closure, scratch Canvas balance, Batch blob/URL accounting and page-shutdown cleanup. The cross-browser suite runs 60 sequential edits in Chromium, Firefox and WebKit and asserts zero outstanding scratch canvases after processing.
+- The PWA cache advances to `tgrmlither-v17`.
