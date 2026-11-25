@@ -1737,6 +1737,17 @@ async function downloadFrom(page, selector) {
       JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
     ), importedLibraryPaletteId, "importing a palette library should persist the newly selected palette");
 
+    await palettePersistencePage.locator("#paletteLibrarySelect").selectOption(savedPaletteId);
+    await palettePersistencePage.locator("#applyLibraryPalette").click();
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), savedPaletteId, "applying a library palette should persist the new selection");
+    await palettePersistencePage.reload({ waitUntil: "load" });
+    await palettePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), savedPaletteId, "applied library palette should remain active after reload");
+
     const singlePalette = Buffer.from(JSON.stringify({
       name: "Single Import QA", colors: ["#182838", "#587898", "#a8c8e8"]
     }));
@@ -1756,6 +1767,15 @@ async function downloadFrom(page, selector) {
     assert.equal(await palettePersistencePage.evaluate(() =>
       JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
     ), singleImportedPaletteId, "importing a single palette should persist its active workspace selection");
+    await palettePersistencePage.locator("#useCustomPalette").click();
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), "custom", "activating the custom palette should persist its workspace selection");
+    await palettePersistencePage.reload({ waitUntil: "load" });
+    await palettePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    assert.equal(await palettePersistencePage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.palette
+    ), "custom", "active custom palette should remain selected after reload");
     assert.deepEqual(palettePersistenceErrors, [], "palette persistence workflows should not create runtime errors");
     await palettePersistencePage.close();
 
