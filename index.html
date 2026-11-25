@@ -1146,7 +1146,7 @@ function withTrackedScratchCanvases(operation){
  return result;
 }
 function renderProcessingCanvas(image,cfg,renderMode){
- return withTrackedScratchCanvases(()=>renderMode==="script"?makeAscii(image,cfg):rasterPipeline(image,cfg));
+ return withTrackedScratchCanvases(()=>renderMode==="script"||cfg?.algorithm==="ascii"?makeAscii(image,cfg):rasterPipeline(image,cfg));
 }
 function mergeWorkerResourceMetrics(snapshot){
  if(snapshot&&typeof snapshot==="object")resourceMetrics.workerResources={...snapshot};
@@ -2002,7 +2002,14 @@ function updateRenderControls(cfg,renderMode,metadata=null){
  $("smoothingControl").classList.toggle("hidden",["video","script","presets"].includes(renderMode));
  refresh();zoom();updateCompareUI();updateFavoriteButton();bindExactRangeInputs();scheduleHistorySnapshot();
 }
-function loadImage(c,n,isDemo=false){src=c;srcName=n||"image";demo=isDemo;original=false;resultDirty=false;lastExported=false;lastRenderedSignature="";hasRendered=false;compareEnabled=false;setProcessingSource(c);$("empty").style.display="none";out.style.display="block";$("toggleOriginal").textContent="◉ Показать оригинал";refresh();render();say(isDemo?"Демо-изображение готово":imageResizeMessage(c)||"Изображение загружено")}
+function loadImage(c,n,isDemo=false){
+ const previousSource=src;
+ src=c;srcName=n||"image";demo=isDemo;original=false;resultDirty=false;lastExported=false;lastRenderedSignature="";hasRendered=false;compareEnabled=false;
+ setProcessingSource(c);
+ if(previousSource&&previousSource!==c)releaseCanvasBuffer(previousSource,{source:true});
+ $("empty").style.display="none";out.style.display="block";$("toggleOriginal").textContent="◉ Показать оригинал";refresh();render();
+ say(isDemo?"Демо-изображение готово":imageResizeMessage(c)||"Изображение загружено");
+}
 function refresh(){if(!src)return;$("filename").textContent=srcName+" / "+src.width+" × "+src.height;$("dimensions").textContent=src.width+" × "+src.height+" px";$("statAlgorithm").textContent=labels[s.algorithm];$("statPalette").textContent=pal[s.palette].name;$("statScale").textContent="×"+s.scale;const status=$("fileStatus");if(status){status.textContent=resultDirty?"Есть изменения":demo?"Демо-пример":lastExported?"Результат экспортирован":"Исходный файл";status.dataset.state=resultDirty?"dirty":demo?"demo":lastExported?"exported":"source"}}
 function queueRender(){if(renderFrame)return;renderFrame=requestAnimationFrame(()=>{renderFrame=0;render()})}
 function render(){
@@ -2029,16 +2036,17 @@ function render(){
   return;
  }
  pendingWorkerPreview=null;document.body.dataset.processingEngine="main";
- let canvas;
- try{canvas=renderMode==="script"?makeAscii(src,cfg):rasterPipeline(src,cfg)}
- catch(error){
+ let canvas=null;
+ try{
+  canvas=renderProcessingCanvas(src,cfg,renderMode);
+  document.body.dataset.processingError="false";
+  drawRenderedImage(canvas,cfg,renderMode,canvas);
+ }catch(error){
   document.body.dataset.processingError="true";
   settleProcessingPreview();
   say("Не удалось обработать изображение. Предыдущий результат сохранён.");
   return;
- }
- document.body.dataset.processingError="false";
- drawRenderedImage(canvas,cfg,renderMode,canvas);
+ }finally{releaseCanvasBuffer(canvas)}
  settleProcessingPreview();
  if(renderMode==="video")renderVideoFrame();
 }
@@ -2630,7 +2638,7 @@ function renderPresets(){
 function savePreset(){ $("modalTitle").textContent="Сохранить пресет";$("modal").classList.remove("hidden");$("presetName").value="";$("presetName").focus();$("modalSave").onclick=()=>{let name=$("presetName").value.trim();if(!name){say("Введите название");return}const stored=loadStore("ditherlab-presets",[]),base=Array.isArray(stored)?stored.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,99):[],next=[{name:name.slice(0,48),desc:"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",c:cloneSettings(s)},...base];if(!store("ditherlab-presets",next))return;custom=next;$("modal").classList.add("hidden");renderPresets();say("Пресет сохранён")}}
 function renderBatch(){let box=$("batchList");box.innerHTML="";const hasBatchResults=!!$("batchResults")?.querySelector(".fileitem");if($("batchProgressCount")&&!batchRunning&&!hasBatchResults)$("batchProgressCount").textContent=batch.length+" выбрано";if($("batchProgressLabel")&&!batchRunning&&!hasBatchResults){if(!batch.length)$("batchProgressLabel").textContent="Ожидает файлов";else $("batchProgressLabel").textContent="Готово к обработке"}if(!batch.length){box.textContent="Выбранные файлы появятся здесь.";box.style.color="var(--muted)";box.style.fontSize="10px";return}batch.forEach((f,i)=>{let row=document.createElement("div");row.className="fileitem";let icon=document.createElement("div");icon.className="fileicon";icon.textContent="▧";let txt=document.createElement("div");txt.className="filetext";txt.innerHTML="<b></b><small></small>";txt.querySelector("b").textContent=f.name;txt.querySelector("small").textContent=(f.size/1048576).toFixed(2)+" MB";let rm=document.createElement("button");rm.className="btn sm";rm.textContent="×";rm.disabled=batchRunning;rm.onclick=()=>{if(batchRunning)return;batch.splice(i,1);renderBatch()};row.append(icon,txt,rm);box.append(row)})}
 function addBatch(files){if(batchRunning){say("Дождитесь завершения пакетной обработки");return}const images=Array.from(files).filter(f=>f.type.startsWith("image/")),available=Math.max(0,MAX_BATCH_FILES-batch.length),accepted=images.slice(0,available);batch.push(...accepted);$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent=batch.length+" выбрано";$("batchProgressLabel").textContent=batch.length?"Готово к обработке":"Ожидает файлов";renderBatch();if(images.length>accepted.length)say("Ограничение пакетной обработки — "+MAX_BATCH_FILES+" изображений; добавлено "+accepted.length);else say(accepted.length?"Добавлено файлов: "+accepted.length:"Выберите файлы изображений")}
-function revokeBatchDownloadUrls(){for(const url of batchDownloadUrls)URL.revokeObjectURL(url);batchDownloadUrls=[]}
+function revokeBatchDownloadUrls(){for(const url of batchDownloadUrls)URL.revokeObjectURL(url);batchDownloadUrls=[];resourceMetrics.batchResultUrls=0}
 function uniqueBatchFilename(fileName,usedNames){const root=slug(fileName.replace(/\.[^.]+$/,""))+"-TGRMLither";let name=root+".png",suffix=2;while(usedNames.has(name.toLowerCase()))name=root+"-"+suffix++ +".png";usedNames.add(name.toLowerCase());return name}
 function fileCanvas(f,signal){
  return new Promise((resolve,reject)=>{
@@ -2754,7 +2762,7 @@ async function runBatch(){
    if(batchCancelRequested)break;
    const f=files[i];
    try{
-    const image=await fileCanvas(f);let blob=null,width=image.width,height=image.height;
+    let image=null,blob=null,width=0,height=0;image=await fileCanvas(f);width=image.width;height=image.height;
     if(processingWorker&&shouldUseProcessingWorker(image)){
      document.body.dataset.batchProcessingEngine="worker";
      try{
@@ -2767,20 +2775,20 @@ async function runBatch(){
      }
     }
     if(!blob){
-     const canvas=cfg.algorithm==="ascii"?makeAscii(image,cfg):rasterPipeline(image,cfg);
-     blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
-     width=canvas.width;height=canvas.height;
+     const canvas=renderProcessingCanvas(image,cfg,"batch");
+     try{blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));width=canvas.width;height=canvas.height}
+     finally{releaseCanvasBuffer(canvas)}
     }
     if(!blob)throw Error("PNG export failed");
      if(batchResultsBytes+blob.size>MAX_BATCH_RESULT_BYTES){batchCancelRequested=true;throw Error("Пакет превысил лимит результатов 128 МБ. Скачайте готовые файлы и обработайте остаток отдельно.");}
     const name=uniqueBatchFilename(f.name,usedNames),url=URL.createObjectURL(blob),row=document.createElement("div");
-    batchDownloadUrls.push(url);batchResultsData.push({name,blob});batchResultsBytes+=blob.size;row.className="fileitem";
+    batchDownloadUrls.push(url);batchResultsData.push({name,blob});batchResultsBytes+=blob.size;resourceMetrics.batchResultBytes=batchResultsBytes;resourceMetrics.batchResultUrls=batchDownloadUrls.length;row.className="fileitem";
     const a=document.createElement("a");a.className="btn sm";a.textContent="↓ PNG";a.href=url;a.download=name;
     const text=document.createElement("div");text.className="filetext";text.innerHTML="<b></b><small>Готово · "+width+" × "+height+(image.tgrmlitherDownscaled?" · уменьшено для обработки":"")+"</small>";text.querySelector("b").textContent=f.name;
     row.append(text,a);$("batchResults").append(row);succeeded++;
    }catch(error){
     failed++;const row=document.createElement("div"),text=document.createElement("div");row.className="fileitem";text.className="filetext";text.innerHTML="<b></b><small></small>";text.querySelector("b").textContent=f.name;text.querySelector("small").textContent="Ошибка: "+(error&&error.message?String(error.message).slice(0,120):"не удалось обработать файл");row.append(text);$("batchResults").append(row);
-   }
+   }finally{releaseCanvasBuffer(image,{source:true})}
    const progress=Math.round((i+1)/files.length*100);$("batchProgress").style.width=progress+"%";$("batchProgressTrack").setAttribute("aria-valuenow",String(progress));$("batchProgressCount").textContent=(i+1)+" / "+files.length;$("batchProgressLabel").textContent="Обработано "+(i+1)+" из "+files.length;
    await new Promise(resolve=>setTimeout(resolve,10));
    if(batchCancelRequested)break;
