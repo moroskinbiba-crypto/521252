@@ -1836,6 +1836,23 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(palettePersistenceErrors, [], "palette persistence workflows should not create runtime errors");
     await palettePersistencePage.close();
 
+    // Preset thumbnails must handle palettes expanded beyond the original four stops.
+    const presetPalettePage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const presetPaletteErrors = [];
+    presetPalettePage.on("pageerror", error => presetPaletteErrors.push(error.stack || error.message));
+    await presetPalettePage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await presetPalettePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    await presetPalettePage.locator('.palette[data-palette="moss"]').click();
+    for (let index = 0; index < 5; index++) await presetPalettePage.locator("#addPaletteColor").click();
+    assert.match(await presetPalettePage.locator("#activePaletteMeta").textContent(), /9 \/ 16/,
+      "palette editor should allow a built-in palette to expand beyond four colors");
+    await presetPalettePage.locator('.topnav [data-mode="presets"]').click();
+    await presetPalettePage.waitForFunction(() => document.querySelectorAll("#presetGrid .preset").length > 0,
+      null, { timeout: 5000 });
+    assert.deepEqual(presetPaletteErrors, [],
+      "preset preview rendering should not throw when a palette contains more than four colors");
+    await presetPalettePage.close();
+
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
     console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {
