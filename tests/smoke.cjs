@@ -1191,7 +1191,7 @@ async function downloadFrom(page, selector) {
       "Worker and fallback should render the same video dimensions");
     assert.notEqual(workerVideoFingerprint.hash, 0, "Worker Video Lab should render non-empty pixels");
     assert.notEqual(mainThreadVideoFingerprint.hash, 0, "fallback Video Lab should render non-empty pixels");
-    const workerSource = fs.readFileSync(path.join(__dirname, "..", "processing-worker.js"), "utf8");
+    const workerSource = fs.readFileSync(__dirname + "/../processing-worker.js", "utf8");
     assert.match(workerSource, /if\(kind==="video"\)canvas=rasterPipeline\(bitmap,s\);/,
       "Worker Video Lab must use the same complete raster/effect pipeline as the main-thread fallback");
     assert.deepEqual(mainThreadVideoErrors, [], "Video Lab main-thread fallback should not create runtime errors");
