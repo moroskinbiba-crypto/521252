@@ -79,10 +79,16 @@ function sendBitmap(id,result,extra={}){
   try{
     bitmap=result.canvas.transferToImageBitmap();
     releaseWorkerCanvas(result.canvas);
-    self.postMessage({id,type:"result",bitmap,width,height,ascii:result.ascii,
-      asciiRowsLimited:result.asciiRowsLimited,asciiNaturalRows:result.asciiNaturalRows,asciiRows:result.asciiRows,
-      workerResources:workerResourceSnapshot(),...extra},[bitmap]);
-    transferred=true;workerResourceMetrics.outputBitmapsTransferred++;
+    workerResourceMetrics.outputBitmapsTransferred++;
+    try{
+      self.postMessage({id,type:"result",bitmap,width,height,ascii:result.ascii,
+        asciiRowsLimited:result.asciiRowsLimited,asciiNaturalRows:result.asciiNaturalRows,asciiRows:result.asciiRows,
+        workerResources:workerResourceSnapshot(),...extra},[bitmap]);
+      transferred=true;
+    }catch(error){
+      workerResourceMetrics.outputBitmapsTransferred--;
+      throw error;
+    }
   }finally{
     if(bitmap&&!transferred)releaseWorkerBitmap(bitmap,"output");
   }
@@ -119,11 +125,12 @@ async function handleMessage(data){
   }
   if(type==="process"){
     const image=data.bitmap;
-    let task=null;
+    let task=null,inputClosed=false;
     try{
       const pixels=Math.max(0,Number(image?.width)||0)*Math.max(0,Number(image?.height)||0);
       if(!image||!pixels||pixels>MAX_WORKER_IMAGE_PIXELS)throw new Error("Worker processing image exceeds the pixel budget");
       task=runTrackedProcess(image,data.cfg,data.paletteColors,data.kind||"batch");
+      releaseWorkerBitmap(image,"process");inputClosed=true;
       if(data.outputType==="blob"){
         const blob=await task.result.canvas.convertToBlob({type:data.mimeType||"image/png"});
         task.releaseOutput();
@@ -133,7 +140,7 @@ async function handleMessage(data){
       }else sendBitmap(id,task.result,{width:task.result.width,height:task.result.height});
     }finally{
       task?.releaseOutput();
-      releaseWorkerBitmap(image,"process");
+      if(!inputClosed)releaseWorkerBitmap(image,"process");
     }
     return;
   }
