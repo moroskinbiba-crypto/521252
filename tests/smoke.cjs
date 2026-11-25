@@ -1051,6 +1051,12 @@ async function downloadFrom(page, selector) {
       }
     }
 
+    // Start Video Lab from a clean default profile. Earlier smoke scenarios intentionally
+    // mutate editor settings; those are unrelated to Worker/fallback rendering parity.
+    await page.evaluate(() => localStorage.clear());
+    await page.reload({ waitUntil: "load" });
+    await page.waitForFunction(() => document.querySelector("#output")?.width > 0);
+
     // Video workspace should have a separate visible timeline and standard post-processing controls.
     await page.locator('.topnav [data-mode="video"]').click();
     assert.equal(await page.locator("body").getAttribute("data-mode"), "video");
