@@ -1328,6 +1328,70 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#asciiLimitWarning").isVisible(), true,
       "the UI should tell the user when the ASCII grid was limited");
 
+    // Failed processing must not replace the last successfully rendered preview.
+    const recoveryPage = await browser.newPage({ viewport: { width: 1100, height: 800 } });
+    const recoveryErrors = [];
+    recoveryPage.on("pageerror", error => recoveryErrors.push(error.stack || error.message));
+    await recoveryPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await recoveryPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const previewBeforeFailure = await recoveryPage.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    await recoveryPage.evaluate(() => {
+      window.__nativeGetImageData = CanvasRenderingContext2D.prototype.getImageData;
+      CanvasRenderingContext2D.prototype.getImageData = function () {
+        throw new Error("Simulated canvas readback failure");
+      };
+    });
+    await recoveryPage.locator("#algorithm").selectOption("floyd");
+    await recoveryPage.waitForFunction(() => document.body.dataset.processingError === "true");
+    const previewAfterFailure = await recoveryPage.locator("#output").evaluate(canvas => canvas.toDataURL("image/png"));
+    assert.equal(previewAfterFailure, previewBeforeFailure,
+      "a failed render must preserve the previous successful preview");
+    assert.match(await recoveryPage.locator("#toast").textContent(), /Предыдущий результат сохранён/);
+    await recoveryPage.evaluate(() => {
+      CanvasRenderingContext2D.prototype.getImageData = window.__nativeGetImageData;
+      delete window.__nativeGetImageData;
+    });
+
+    // A decoder that never emits load/error must time out and release the loading state.
+    const decodeTimeoutConfigured = await recoveryPage.evaluate(() =>
+      window.__tgrmlitherSetImageDecodeTimeoutForTests?.(700) === true
+    );
+    assert.equal(decodeTimeoutConfigured, true, "local smoke tests should be able to shorten the image decode watchdog");
+    const previousImageName = await recoveryPage.locator("#filename").textContent();
+    await recoveryPage.evaluate(() => {
+      const NativeImage = window.Image;
+      const src = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
+      window.__nativeImageConstructor = NativeImage;
+      window.Image = function () {
+        const image = new NativeImage();
+        Object.defineProperty(image, "src", {
+          configurable: true,
+          get: () => src.get.call(image),
+          set: value => { if (value === "") src.set.call(image, value); }
+        });
+        return image;
+      };
+    });
+    await recoveryPage.locator("#imageInput").setInputFiles({
+      name: "decoder-timeout.png", mimeType: "image/png", buffer: imageBuffer
+    });
+    await recoveryPage.waitForFunction(() =>
+      /Декодирование изображения превысило лимит времени/.test(document.querySelector("#toast")?.textContent || ""),
+      null, { timeout: 10000 }
+    );
+    assert.equal(await recoveryPage.locator("#stage").getAttribute("aria-busy"), "false",
+      "a decoder timeout must clear the loading state");
+    assert.equal(await recoveryPage.locator("#filename").textContent(), previousImageName,
+      "a decoder timeout must leave the previous source image in place");
+    assert.equal(
+      await recoveryPage.locator("#output").evaluate(canvas => canvas.toDataURL("image/png")),
+      previewBeforeFailure,
+      "a decoder timeout must preserve the previous rendered image"
+    );
+    await recoveryPage.evaluate(() => { window.Image = window.__nativeImageConstructor; });
+    assert.deepEqual(recoveryErrors, [], "render and image-decode recovery must not create uncaught page errors");
+    await recoveryPage.close();
+
     // A worker that stops answering must time out, be terminated, and fall back to the main thread.
     const fallbackPage = await browser.newPage({ viewport: { width: 1100, height: 800 } });
     const fallbackErrors = [];
