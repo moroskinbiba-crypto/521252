@@ -3095,7 +3095,7 @@ function init(){initProcessingWorker();bindUserBackupControls();bindCanvasRecove
    workerRequestTimeoutMs=clamp(Math.round(value),100,180000);
    return true;
   };
-  window.__tgrmlitherSetCanvasRecoveryTimeoutForTests=ms=>{if(!isLocalhost)return false;canvasRecoveryTimeoutMs=clamp(Number(ms)||DEFAULT_CANVAS_RECOVERY_TIMEOUT_MS,100,30000);return true};
+  window.__tgrmlitherSetCanvasRecoveryTimeoutForTests=ms=>{const value=Number(ms);if(!Number.isFinite(value))return false;canvasRecoveryTimeoutMs=clamp(Math.round(value),100,30000);return true};
   window.__tgrmlitherCanvasStatus=()=>({recovering:canvasRecoveryActive,timeoutMs:canvasRecoveryTimeoutMs,outputId:out?.id,outputConnected:!!out?.isConnected});
   window.__tgrmlitherSetImageDecodeTimeoutForTests=ms=>{
    const value=Number(ms);
