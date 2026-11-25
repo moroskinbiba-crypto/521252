@@ -1073,10 +1073,12 @@ async function downloadFrom(page, selector) {
       };
       recorder.start();
       for (let i = 0; i < 16; i++) {
+        // Keep every encoded frame visually identical so Worker/fallback parity
+        // compares renderers rather than two different moments in an animated clip.
         ctx.fillStyle = "#172b46";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "rgb(" + (i * 13 % 255) + ",120,210)";
-        ctx.fillRect(i * 18, 80, 120, 120);
+        ctx.fillStyle = "#c080d0";
+        ctx.fillRect(240, 80, 120, 120);
         await new Promise(resolve => setTimeout(resolve, 80));
       }
       recorder.stop();
