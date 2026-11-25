@@ -2958,11 +2958,12 @@ function printAttributes(){
  return {dpi,widthMm:(out.width/dpi*25.4).toFixed(2),heightMm:(out.height/dpi*25.4).toFixed(2)};
 }
 function exportSvg(blackOnly){
+ let tempCanvas=null;
  try{
   if(!src)return false;
   if(original){original=false;render()}
   const dimensions=vectorDimensions();if(!dimensions)return false;
-  const {w,h}=dimensions,c=document.createElement("canvas");c.width=w;c.height=h;
+  const {w,h}=dimensions,c=tempCanvas=document.createElement("canvas");c.width=w;c.height=h;
   const q=c.getContext("2d",{willReadFrequently:true});
   if(!q){say("Не удалось создать холст для SVG-экспорта");return false}
   q.drawImage(out,0,0,w,h);
@@ -2983,15 +2984,17 @@ function exportSvg(blackOnly){
   say((blackOnly?"Чёрный":"Цветной")+" SVG экспортирован · "+dimensions.detail+" px · "+print.dpi+" DPI");
   return true;
  }catch(error){say("Не удалось экспортировать SVG. Уменьшите детализацию или размер изображения.");return false}
+ finally{releaseCanvasBuffer(tempCanvas)}
 }
 function exportCmykSvg(){
+ let tempCanvas=null;
  try{
   if(!src)return false;
   if(original){original=false;render()}
   const dimensions=vectorDimensions();if(!dimensions)return false;
   const {w,h}=dimensions,cell=clamp(Number($("cmykCell")?.value)||8,4,24);
   const estimated=4*Math.ceil(w/cell)*Math.ceil(h/cell)*1.5;if(estimated>450000){say("Слишком много CMYK-точек. Увеличьте размер точки или уменьшите детализацию.");return false}
-  const c=document.createElement("canvas");c.width=w;c.height=h;const q=c.getContext("2d",{willReadFrequently:true});
+  const c=tempCanvas=document.createElement("canvas");c.width=w;c.height=h;const q=c.getContext("2d",{willReadFrequently:true});
   if(!q){say("Не удалось создать холст для CMYK-экспорта");return false}
   q.drawImage(out,0,0,w,h);
   const data=q.getImageData(0,0,w,h).data,cx=w/2,cy=h/2,diagonal=Math.ceil(Math.hypot(w,h)/2+cell),print=printAttributes();
@@ -3013,7 +3016,9 @@ function exportCmykSvg(){
   say("CMYK-экспорт готов · 4 подписанные векторные пластины");
   return true;
  }catch(error){say("Не удалось экспортировать CMYK. Увеличьте размер точки или уменьшите изображение.");return false}
+ finally{releaseCanvasBuffer(tempCanvas)}
 }
+
 let temporalRaf=0,temporalStart=0,temporalBase=null,temporalRecorder=null,temporalChunks=[],temporalTimer=0;
 function startTemporal(recording){
  if(!src){say("Сначала откройте изображение");return}
