@@ -1843,7 +1843,10 @@ function initProcessingWorker(){
 }
 function workerRequest(message,transfer=[],timeoutMs=workerRequestTimeoutMs){
  return new Promise((resolve,reject)=>{
-  if(!processingWorker){reject(new Error("Фоновый обработчик недоступен"));return}
+  if(!processingWorker){
+   if(Array.isArray(transfer))transfer.forEach(item=>closeImageBitmap(item));
+   reject(new Error("Фоновый обработчик недоступен"));return;
+  }
   const id=++processingWorkerRequestSeq;
   const timeout=Math.max(100,Number(timeoutMs)||workerRequestTimeoutMs);
   const pending={resolve,reject,timer:0};
@@ -3195,7 +3198,8 @@ function releasePageResources(){
  try{out.width=1;out.height=1;$("beforeOutput").width=1;$("beforeOutput").height=1}catch(error){}
  if(processingWorker){try{processingWorker.terminate()}catch(error){}processingWorker=null}
  for(const pending of processingWorkerPending.values()){clearTimeout(pending.timer);try{pending.reject(new Error("Страница закрывается"))}catch(error){}}
- processingWorkerPending.clear();processingSourceId=0;processingSourceReadyId=0;processingSourcePending=false;
+ processingWorkerPending.clear();processingSourceId=0;processingSourceReadyId=0;processingSourcePending=false;processingSourceCanvasCopy=null;
+ mergeWorkerResourceMetrics({sourceCount:0,sourcePixels:0});
 }
 window.addEventListener("pagehide",event=>{if(!event.persisted)releasePageResources()});
 function resourceStatus(){
