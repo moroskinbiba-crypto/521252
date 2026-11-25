@@ -1104,6 +1104,60 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 "use strict";
 (function(){
 const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const resourceMetrics={
+ scratchCanvasesCreated:0,scratchCanvasesReleased:0,scratchPixelsReleased:0,sourceCanvasesReleased:0,
+ imageBitmapsCreated:0,imageBitmapsClosed:0,imageBitmapsTransferred:0,lateImageBitmapsClosed:0,
+ workerResources:null,batchResultBytes:0,batchResultUrls:0,transientDownloadUrls:0
+};
+let activeScratchCanvasScope=null;
+const nativeDocumentCreateElement=document.createElement.bind(document);
+document.createElement=function(tag,...args){
+ const element=nativeDocumentCreateElement(tag,...args);
+ if(String(tag).toLowerCase()==="canvas"&&activeScratchCanvasScope){
+  element.__tgrmlitherScratchCanvas=true;
+  resourceMetrics.scratchCanvasesCreated++;
+  activeScratchCanvasScope.push(element);
+ }
+ return element;
+};
+function releaseCanvasBuffer(canvas,{source=false}={}){
+ if(!canvas||canvas===out||canvas.id==="output"||canvas.id==="beforeOutput"||canvas.id==="videoOutput")return false;
+ const pixels=Math.max(0,Number(canvas.width)||0)*Math.max(0,Number(canvas.height)||0);
+ const tracked=canvas.__tgrmlitherScratchCanvas===true&&!canvas.__tgrmlitherScratchReleased;
+ if(tracked)canvas.__tgrmlitherScratchReleased=true;
+ try{canvas.width=0;canvas.height=0}catch(error){return false}
+ if(tracked){resourceMetrics.scratchCanvasesReleased++;resourceMetrics.scratchPixelsReleased+=pixels}
+ if(source)resourceMetrics.sourceCanvasesReleased++;
+ return true;
+}
+function withTrackedScratchCanvases(operation){
+ const parent=activeScratchCanvasScope,allocated=[];
+ activeScratchCanvasScope=allocated;
+ let result;
+ try{result=operation()}
+ catch(error){
+  activeScratchCanvasScope=parent;
+  if(parent)parent.push(...allocated);else for(const canvas of allocated)releaseCanvasBuffer(canvas);
+  throw error;
+ }
+ activeScratchCanvasScope=parent;
+ if(parent)parent.push(...allocated);
+ else for(const canvas of allocated)if(canvas!==result)releaseCanvasBuffer(canvas);
+ return result;
+}
+function renderProcessingCanvas(image,cfg,renderMode){
+ return withTrackedScratchCanvases(()=>renderMode==="script"?makeAscii(image,cfg):rasterPipeline(image,cfg));
+}
+function mergeWorkerResourceMetrics(snapshot){
+ if(snapshot&&typeof snapshot==="object")resourceMetrics.workerResources={...snapshot};
+}
+function closeImageBitmap(bitmap,{late=false}={}){
+ if(!bitmap||typeof bitmap.close!=="function")return false;
+ try{bitmap.close()}catch(error){}
+ resourceMetrics.imageBitmapsClosed++;
+ if(late)resourceMetrics.lateImageBitmapsClosed++;
+ return true;
+}
 const USER_DATA_STORAGE_KEYS=[
  "tgrmlithering-workspaces","ditherlab-presets","tgrmlither-palette-library",
  "tgrmlither-shape-presets","ditherlab-colors","tgrmlither-built-in-palette-overrides",
