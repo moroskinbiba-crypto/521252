@@ -353,17 +353,6 @@ async function downloadFrom(page, selector) {
     await page.locator("#shapeSvgInput").setInputFiles({ name: "custom-triangle.svg", mimeType: "image/svg+xml", buffer: Buffer.from(svgShape) });
     assert.equal(await page.locator("#bandShape0").inputValue(), "custom", "imported SVG should become an available custom band shape");
     assert.match(await page.locator("#shapeSvgStatus").textContent(), /custom-triangle\.svg/);
-    await page.waitForFunction(() => {
-      const shape = JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").shape;
-      return shape?.shapeBands?.[0]?.shape === "custom" &&
-        shape.shapeBands[0].customPath === "M5 0 L10 10 L0 10 Z";
-    }, null, { timeout: 5000 });
-    await page.reload({ waitUntil: "load" });
-    await page.locator('.topnav [data-mode="shape"]').click();
-    await page.waitForFunction(() => document.querySelector("#bandShape0")?.value === "custom",
-      null, { timeout: 5000 });
-    assert.equal(await page.locator("#bandShape0").inputValue(), "custom",
-      "custom SVG shape assignment should survive a reload");
     assert.equal(await page.locator("#shapePresetSelect option").count() >= 7, true, "Shape Lab should include built-in shape presets");
     assert.equal(await page.locator("#bandShape0 option[value=\"star\"]").count(), 1, "bands should expose the expanded shape library");
     await page.locator("#shapePresetSelect").selectOption("starfield");
@@ -1723,6 +1712,33 @@ async function downloadFrom(page, selector) {
     assert.equal(afterPageHide.workerSourceCount, 0, "page shutdown should clear Worker source retention");
     assert.deepEqual(resourceStressErrors, [], "long-session resource cleanup should not create uncaught browser errors");
     await resourceStressPage.close();
+
+    // Verify SVG import persistence in an isolated browser page so the main smoke
+    // scenario keeps its original workspace/effect history.
+    const shapePersistencePage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const shapePersistenceErrors = [];
+    shapePersistencePage.on("pageerror", error => shapePersistenceErrors.push(error.stack || error.message));
+    await shapePersistencePage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await shapePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    await shapePersistencePage.locator('.topnav [data-mode="shape"]').click();
+    const persistedSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M5 0 L10 10 L0 10 Z"/></svg>';
+    await shapePersistencePage.locator("#shapeSvgInput").setInputFiles({
+      name: "persisted-custom-triangle.svg", mimeType: "image/svg+xml", buffer: Buffer.from(persistedSvg)
+    });
+    await shapePersistencePage.waitForFunction(() => {
+      const shape = JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").shape;
+      return shape?.shapeBands?.[0]?.shape === "custom" &&
+        shape.shapeBands[0].customPath === "M5 0 L10 10 L0 10 Z";
+    }, null, { timeout: 5000 });
+    await shapePersistencePage.reload({ waitUntil: "load" });
+    await shapePersistencePage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    await shapePersistencePage.locator('.topnav [data-mode="shape"]').click();
+    await shapePersistencePage.waitForFunction(() => document.querySelector("#bandShape0")?.value === "custom",
+      null, { timeout: 5000 });
+    assert.equal(await shapePersistencePage.locator("#bandShape0").inputValue(), "custom",
+      "custom SVG shape assignment should survive a reload");
+    assert.deepEqual(shapePersistenceErrors, [], "SVG import persistence should not create runtime errors");
+    await shapePersistencePage.close();
 
     // Palette save/import must persist the active workspace selection, including across reloads.
     const palettePersistencePage = await browser.newPage({ viewport: { width: 1280, height: 800 }, acceptDownloads: true });
