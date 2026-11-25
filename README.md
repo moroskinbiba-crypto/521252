@@ -147,6 +147,21 @@ Neo Glow includes an adjustable scan-band position, width, brightness, off-band 
 - If the browser does not restore the 2D context within the recovery window, the app replaces the damaged canvas element, rebinds recovery events and rebuilds the preview from the retained source. The comparison canvas has its own replacement path.
 - Worker results that arrive while the output context is lost are discarded and their ImageBitmap resources are closed; the restored/recreated surface is rendered from the current settings.
 - The recovery timeout is 5 seconds by default. A localhost-only test hook makes the timeout deterministic in automated tests.
-- Browser checks now run on Chromium, Firefox and WebKit. They cover startup, image decoding/rendering, Canvas context loss/restoration/recreation, 24 repeated edits, bounded canvas DOM count, and uncaught runtime errors.
+- Browser checks now run on Chromium, Firefox and WebKit. They cover startup, image decoding/rendering, Canvas context loss/restoration/recreation, 60 repeated edits, bounded canvas DOM count, and uncaught runtime errors.
 - The full Chromium regression suite also verifies restored and recreated Canvas paths alongside Worker fallback, persistence recovery and project-import rollback.
 - The Service Worker cache advances to `tgrmlither-v16`.
+
+
+## Performance and memory architecture in v1.3.12
+
+- The main-thread raster pipeline now scopes temporary Canvas allocations to a render pass. Intermediate canvases are zero-sized immediately after the final result is composed; the output surface is retained separately.
+- Superseded source canvases are released after the asynchronous ImageBitmap snapshot is complete, so the Worker never reads a source after its backing canvas has been discarded.
+- The Worker validates image pixel budgets for both retained sources and transient processing requests. Its scratch canvases are tracked and released after composition or output transfer; source and process ImageBitmaps are closed at their lifecycle boundaries.
+- The Worker reports resource counters with its results: retained source count/pixels, scratch Canvas allocations/releases, released pixel capacity and closed/transferred bitmap counts. The local-only QA hook combines these with main-thread Canvas, batch and URL counters.
+- Batch processing releases each decoded input canvas and each output canvas after encoding. Its existing 128 MiB retained-blob budget remains in force; clearing results revokes their object URLs and drops all blob references.
+- Export object URLs now have a bounded handoff lifetime and are explicitly revoked on page shutdown. Batch result URLs have their own cleanup path.
+- Video Lab reuses one bounded frame canvas while active, shrinks its backing store when leaving the workspace, revokes replaced media URLs, and recreates the preview when re-entering the workspace. Recorder streams are stopped and output buffers released when recording completes.
+- SVG and CMYK export surfaces, palette-extraction samples, and Script Slayer text-export canvases are released deterministically instead of relying solely on garbage collection.
+- The page lifecycle handler stops animation loops and media tracks, revokes transient and batch URLs, clears the current source surface, terminates the Worker and rejects outstanding requests before a full page shutdown. It leaves the page intact when the browser places it into the back-forward cache.
+- Regression tests now exercise ten consecutive large-image source replacements, Worker source retention, source bitmap closure, scratch Canvas balance, Batch blob/URL accounting and page-shutdown cleanup. The cross-browser suite runs 60 sequential edits in Chromium, Firefox and WebKit and asserts zero outstanding scratch canvases after processing.
+- The PWA cache advances to `tgrmlither-v17`.
