@@ -1547,7 +1547,7 @@ function exportUserBackup(){
   data["tgrmlither-inspector-level"]=document.body.dataset.inspectorLevel||"basic";
   data["tgrmlither-favorite-algorithms"]=[...algorithmFavorites];
   data["ditherlab-colors"]=[...(s.customColors||pal.custom.c)];
-  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.3.12",data};
+  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.3.13",data};
   const json=JSON.stringify(doc,null,2);
   if(json.length>MAX_USER_BACKUP_BYTES)throw Error("Резервная копия превышает лимит 10 МБ");
   download(new Blob([json],{type:"application/json;charset=utf-8"}),"TGRMLither-backup.json");
