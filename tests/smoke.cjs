@@ -1327,6 +1327,52 @@ async function downloadFrom(page, selector) {
       "extreme-ratio ASCII output must stay below the configured pixel budget");
     assert.equal(await page.locator("#asciiLimitWarning").isVisible(), true,
       "the UI should tell the user when the ASCII grid was limited");
+
+    // A worker that stops answering must time out, be terminated, and fall back to the main thread.
+    const fallbackPage = await browser.newPage({ viewport: { width: 1100, height: 800 } });
+    const fallbackErrors = [];
+    fallbackPage.on("pageerror", error => fallbackErrors.push(error.stack || error.message));
+    await fallbackPage.addInitScript(() => {
+      const NativeWorker = window.Worker;
+      window.Worker = function (...args) {
+        const worker = new NativeWorker(...args);
+        const postMessage = worker.postMessage.bind(worker);
+        worker.postMessage = (message, transfer) => {
+          if (message?.type === "render") return; // Simulate a worker that has stopped responding.
+          return postMessage(message, transfer);
+        };
+        return worker;
+      };
+      window.Worker.prototype = NativeWorker.prototype;
+    });
+    await fallbackPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await fallbackPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const watchdogConfigured = await fallbackPage.evaluate(() =>
+      window.__tgrmlitherSetWorkerTimeoutForTests?.(700) === true
+    );
+    assert.equal(watchdogConfigured, true, "local smoke tests should be able to shorten the worker watchdog");
+    await fallbackPage.locator("#imageInput").setInputFiles({
+      name: "worker-timeout-fixture.png", mimeType: "image/png", buffer: largeWorkerBuffer
+    });
+    await fallbackPage.waitForFunction(() =>
+      document.body.dataset.processingWorker === "failed" &&
+      document.body.dataset.processingEngine === "main" &&
+      document.body.dataset.processingPending === "false" &&
+      document.querySelector("#output")?.width > 0,
+      null, { timeout: 15000 }
+    );
+    const fallbackState = await fallbackPage.evaluate(() => ({
+      failed: document.body.dataset.processingWorker,
+      engine: document.body.dataset.processingEngine,
+      pending: document.body.dataset.processingPending,
+      width: document.querySelector("#output")?.width
+    }));
+    assert.deepEqual(fallbackState, {
+      failed: "failed", engine: "main", pending: "false", width: 1024
+    }, "a timed-out worker must leave the preview usable on the main thread");
+    assert.deepEqual(fallbackErrors, [], "worker timeout recovery must not create uncaught page errors");
+    await fallbackPage.close();
+
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
     console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {
