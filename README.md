@@ -117,3 +117,13 @@ MIT. See [LICENSE](LICENSE).
 
 ### Script Slayer · Neo Glow
 Neo Glow includes an adjustable scan-band position, width, brightness, off-band visibility and colour. The band is centered by default, its settings follow the saved Script Slayer profile, and the Animation button moves the band across the symbol canvas.
+
+
+
+## Stability hardening in v1.3.9
+
+- Worker requests now have a 120-second watchdog. A request timeout, worker runtime error, or message-decoding failure terminates the worker, rejects pending operations, clears their timers and returns the current preview to the main-thread renderer.
+- ImageBitmap creation for preview, batch and video processing is also time-bounded. A bitmap that resolves after its caller timed out is immediately closed instead of being retained.
+- Batch processing caps accumulated output blobs at 128 MiB. Completed files remain available for individual download or ZIP export; the app asks the user to split larger batches rather than accumulating unbounded results.
+- Browser smoke tests simulate a worker that accepts its source image but never returns a rendered frame, then verify watchdog activation and a usable main-thread fallback.
+- The offline cache version is advanced so installed PWA copies fetch the updated editor and worker assets.
