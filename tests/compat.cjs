@@ -115,6 +115,9 @@ const engines = [
       assert.equal(finalState.canvasCount, 2, name + ": canvas replacement should not leak DOM canvas nodes");
       assert.equal(finalState.recovery, "idle", name + ": recovery state should settle");
       assert.equal(finalState.pending, "false", name + ": no preview request should remain stuck");
+      const resourceState = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
+      assert.ok(resourceState, name + ": resource telemetry should be available in local test runs");
+      assert.equal(resourceState.scratchCanvasOutstanding, 0, name + ": every tracked temporary Canvas should be released after rendering");
       assert.deepEqual(errors, [], name + ": browser compatibility run should not create uncaught exceptions");
 
       console.log(name + " compatibility checks passed (startup, image render, Canvas recovery, 24 repeated edits).");
