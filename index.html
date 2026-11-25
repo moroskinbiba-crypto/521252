@@ -2556,10 +2556,14 @@ function setMode(m){
  if(m!==previousMode){
   if(m!=="script"&&asciiAnimRaf)stopAsciiAnimation();
   if(temporalRaf)stopTemporal();
-  if(m!=="video"&&$("videoSource")){$("videoSource").pause();if(videoRaf)cancelAnimationFrame(videoRaf);videoRaf=0;stopVideoExport(true)}
+  if(m!=="video"&&$("videoSource")){
+    $("videoSource").pause();if(videoRaf)cancelAnimationFrame(videoRaf);videoRaf=0;stopVideoExport(true);
+    releaseVideoFrameBuffers({includeOutput:!videoRecorder||videoRecorder.state==="inactive"});
+   }
  }
  if(WORKSPACE_NAMES.includes(previousMode))saveWorkspaceSettings(previousMode);
  mode=m;
+ if(m==="video"&&previousMode!=="video"&&$("videoSource")?.readyState>=2)requestAnimationFrame(()=>renderVideoFrame());
  if(WORKSPACE_NAMES.includes(m)){
   // Re-read persisted profiles after saving the outgoing workspace. This keeps the UI
   // and localStorage authoritative if another panel or a restored project changed profiles.
@@ -3035,6 +3039,21 @@ function startTemporal(recording){
 }
 function stopTemporal(){if(temporalRaf)cancelAnimationFrame(temporalRaf);temporalRaf=0;clearTimeout(temporalTimer);temporalTimer=0;if(temporalBase){s.threshold=temporalBase.threshold;s.brightness=temporalBase.brightness;s.asciiOffset=temporalBase.asciiOffset;temporalBase=null;sync();render()}$("temporalPlay").disabled=false;$("temporalStop").disabled=true;if(temporalRecorder&&temporalRecorder.state!=="inactive")temporalRecorder.stop()}
 let videoObjectURL="",videoRaf=0,videoRecorder=null,videoChunks=[],videoExportStream=null,videoAudioStream=null,videoExportInterrupted=false,videoExportStarting=false,videoExportGeneration=0,videoFrameCanvas=null,videoFrameContext=null,videoLastRenderAt=0;
+function releaseVideoFrameBuffers({includeOutput=false}={}){
+ videoFrameRevision++;videoFrameQueued=false;
+ if(videoFrameCanvas){videoFrameCanvas.width=1;videoFrameCanvas.height=1}
+ const output=$("videoOutput");
+ if(includeOutput&&output&&(!videoRecorder||videoRecorder.state==="inactive")){output.width=1;output.height=1}
+}
+function releaseVideoSource(){
+ const video=$("videoSource");
+ if(video){
+  video.pause();video.onloadedmetadata=null;video.onerror=null;
+  video.removeAttribute("src");video.load();
+ }
+ if(videoObjectURL){URL.revokeObjectURL(videoObjectURL);videoObjectURL=""}
+ releaseVideoFrameBuffers({includeOutput:true});
+}
 function formatTime(seconds){if(!Number.isFinite(seconds)||seconds<0)seconds=0;const mm=Math.floor(seconds/60),ss=seconds%60;return String(mm).padStart(2,"0")+":"+ss.toFixed(1).padStart(4,"0")}
 async function renderVideoFrame(){
  const video=$("videoSource"),canvas=$("videoOutput");
@@ -3098,7 +3117,21 @@ function drawRenderedImageToCanvas(canvas,image,metadata){
  }finally{closeImageBitmap(image)}
 }
 function videoLoop(now){if(mode!=="video")return;const timestamp=Number.isFinite(now)?now:performance.now();if(timestamp-videoLastRenderAt>=1000/24)renderVideoFrame();if(!$("videoSource").paused&&!$("videoSource").ended)videoRaf=requestAnimationFrame(videoLoop);else videoRaf=0}
-function loadVideo(file){if(videoExportStarting||(videoRecorder&&videoRecorder.state!=="inactive"))stopVideoExport(true);if(!file||!file.type.startsWith("video/")){say("Выберите видеофайл");return}const video=$("videoSource");if(videoObjectURL)URL.revokeObjectURL(videoObjectURL);video.pause();videoObjectURL=URL.createObjectURL(file);$("videoEmpty").style.display="none";$("videoFilename").textContent=file.name;video.src=videoObjectURL;video.onloadedmetadata=()=>{$("videoTimeline").max=String(video.duration||0);$("videoTimeline").value="0";$("videoDurationLabel").textContent=formatTime(video.duration);$("videoPlay").disabled=false;$("videoExport").disabled=false;renderVideoFrame();say("Видео загружено · "+Math.round(video.videoWidth)+" × "+Math.round(video.videoHeight))};video.onerror=()=>say("Не удалось открыть видео. Попробуйте MP4 или WebM.");video.load()}
+function loadVideo(file){
+ if(videoExportStarting||(videoRecorder&&videoRecorder.state!=="inactive"))stopVideoExport(true);
+ if(!file||!file.type.startsWith("video/")){say("Выберите видеофайл");return}
+ releaseVideoSource();
+ const video=$("videoSource");videoObjectURL=URL.createObjectURL(file);
+ $("videoEmpty").style.display="none";$("videoFilename").textContent=file.name;
+ video.src=videoObjectURL;
+ video.onloadedmetadata=()=>{
+  $("videoTimeline").max=String(video.duration||0);$("videoTimeline").value="0";
+  $("videoDurationLabel").textContent=formatTime(video.duration);$("videoPlay").disabled=false;$("videoExport").disabled=false;
+  renderVideoFrame();say("Видео загружено · "+Math.round(video.videoWidth)+" × "+Math.round(video.videoHeight));
+ };
+ video.onerror=()=>say("Не удалось открыть видео. Попробуйте MP4 или WebM.");
+ video.load();
+}
 function stopVideoExport(interrupted=true){
  if(videoExportStarting){
   videoExportGeneration++;videoExportStarting=false;
