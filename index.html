@@ -1799,7 +1799,7 @@ function canvasFromImage(image){const ow=Math.floor(Number(image.naturalWidth||i
 const WORKER_PIXEL_THRESHOLD=786432,WORKER_REQUEST_TIMEOUT_MS=120000;
 let workerRequestTimeoutMs=WORKER_REQUEST_TIMEOUT_MS;
 let processingWorker=null,processingWorkerFailed=false,processingWorkerRequestSeq=0,processingWorkerPending=new Map();
-let processingSourceSeq=0,processingSourceId=0,processingSourceReadyId=0,processingSourcePending=false;
+let processingSourceSeq=0,processingSourceId=0,processingSourceReadyId=0,processingSourcePending=false,processingSourceCanvasCopy=null;
 let previewRevision=0,previewWorkerBusy=false,pendingWorkerPreview=null,previewWaiters=[];
 let videoWorkerBusy=false,videoFrameRevision=0,videoFrameQueued=false;
 
@@ -1901,7 +1901,9 @@ function setProcessingSource(image){
   return;
  }
  processingSourceId=id;processingSourcePending=true;
- createWorkerBitmap(image).then(bitmap=>{
+ const bitmapPromise=createWorkerBitmap(image);
+ processingSourceCanvasCopy=bitmapPromise.then(()=>true,()=>false);
+ bitmapPromise.then(bitmap=>{
   if(id!==processingSourceId){closeImageBitmap(bitmap,{late:true});return null}
   return workerRequest({type:"set-source",sourceId:id,bitmap},[bitmap]);
  }).then(result=>{
@@ -2003,10 +2005,13 @@ function updateRenderControls(cfg,renderMode,metadata=null){
  refresh();zoom();updateCompareUI();updateFavoriteButton();bindExactRangeInputs();scheduleHistorySnapshot();
 }
 function loadImage(c,n,isDemo=false){
- const previousSource=src;
+ const previousSource=src,previousSourceCopy=processingSourceCanvasCopy;
  src=c;srcName=n||"image";demo=isDemo;original=false;resultDirty=false;lastExported=false;lastRenderedSignature="";hasRendered=false;compareEnabled=false;
  setProcessingSource(c);
- if(previousSource&&previousSource!==c)releaseCanvasBuffer(previousSource,{source:true});
+ if(previousSource&&previousSource!==c){
+  const releasePrevious=()=>releaseCanvasBuffer(previousSource,{source:true});
+  if(previousSourceCopy)previousSourceCopy.then(releasePrevious,releasePrevious);else releasePrevious();
+ }
  $("empty").style.display="none";out.style.display="block";$("toggleOriginal").textContent="◉ Показать оригинал";refresh();render();
  say(isDemo?"Демо-изображение готово":imageResizeMessage(c)||"Изображение загружено");
 }
