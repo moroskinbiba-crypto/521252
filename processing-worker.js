@@ -121,6 +121,8 @@ async function handleMessage(data){
     const image=data.bitmap;
     let task=null;
     try{
+      const pixels=Math.max(0,Number(image?.width)||0)*Math.max(0,Number(image?.height)||0);
+      if(!image||!pixels||pixels>MAX_WORKER_IMAGE_PIXELS)throw new Error("Worker processing image exceeds the pixel budget");
       task=runTrackedProcess(image,data.cfg,data.paletteColors,data.kind||"batch");
       if(data.outputType==="blob"){
         const blob=await task.result.canvas.convertToBlob({type:data.mimeType||"image/png"});
