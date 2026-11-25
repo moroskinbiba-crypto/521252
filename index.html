@@ -3203,7 +3203,7 @@ function resourceStatus(){
  return {
   ...resourceMetrics,
   scratchCanvasOutstanding:Math.max(0,resourceMetrics.scratchCanvasesCreated-resourceMetrics.scratchCanvasesReleased),
-  batchResultCount:batchResultsData.length,batchResultBytes,batchResultUrls:batchDownloadUrls.length,
+  batchResultCount:batchResultsData.length,batchResultBytes:batchResultsBytes,batchResultUrls:batchDownloadUrls.length,
   transientDownloadUrls:transientDownloadUrls.size,
   sourcePixels:src?Math.max(0,Number(src.width)||0)*Math.max(0,Number(src.height)||0):0,
   workerSourceCount:worker.sourceCount||0,workerSourcePixels:worker.sourcePixels||0,
