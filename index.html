@@ -1817,7 +1817,8 @@ function initProcessingWorker(){
   processingWorker=new Worker(new URL("./processing-worker.js",document.baseURI));
   processingWorker.onmessage=event=>{
    const data=event.data||{},pending=processingWorkerPending.get(data.id);
-   if(!pending){if(data.bitmap&&data.bitmap.close)data.bitmap.close();return}
+   mergeWorkerResourceMetrics(data.workerResources);
+   if(!pending){closeImageBitmap(data.bitmap);return}
    clearTimeout(pending.timer);
    processingWorkerPending.delete(data.id);
    if(data.type==="error")pending.reject(new Error(data.message||"Фоновая обработка не удалась"));
@@ -1854,8 +1855,10 @@ function workerRequest(message,transfer=[],timeoutMs=workerRequestTimeoutMs){
    disableProcessingWorker(error);
   },timeout);
   processingWorkerPending.set(id,pending);
-  try{processingWorker.postMessage({...message,id},transfer)}
-  catch(error){clearTimeout(pending.timer);processingWorkerPending.delete(id);reject(error)}
+  try{
+   processingWorker.postMessage({...message,id},transfer);
+   if(Array.isArray(transfer)&&typeof ImageBitmap!=="undefined")resourceMetrics.imageBitmapsTransferred+=transfer.filter(item=>item instanceof ImageBitmap).length;
+  }catch(error){clearTimeout(pending.timer);processingWorkerPending.delete(id);reject(error)}
  });
 }
 function createWorkerBitmap(image){
@@ -1864,8 +1867,8 @@ function createWorkerBitmap(image){
   const timeout=workerRequestTimeoutMs;
   const timer=setTimeout(()=>{settled=true;reject(new Error("Подготовка изображения для фоновой обработки превысила лимит времени"))},timeout);
   Promise.resolve().then(()=>createImageBitmap(image)).then(bitmap=>{
-   if(settled){bitmap?.close?.();return}
-   settled=true;clearTimeout(timer);resolve(bitmap);
+   if(settled){closeImageBitmap(bitmap,{late:true});return}
+   settled=true;clearTimeout(timer);resourceMetrics.imageBitmapsCreated++;resolve(bitmap);
   },error=>{
    if(settled)return;
    settled=true;clearTimeout(timer);reject(error);
@@ -1887,6 +1890,7 @@ function disableProcessingWorker(error){
  document.body.dataset.processingWorker="failed";
  document.body.dataset.processingEngine="main";
  document.body.dataset.processingPending="false";
+ mergeWorkerResourceMetrics({sourceCount:0,sourcePixels:0});
  const waiters=previewWaiters.splice(0);waiters.forEach(resolve=>resolve());
 }
 function setProcessingSource(image){
@@ -1958,20 +1962,21 @@ function dispatchWorkerPreview(){
  });
 }
 function drawRenderedImage(image,cfg,renderMode,metadata=null){
- if(canvasRecoveryActive){image?.close?.();return false}
- const width=Number(metadata?.width||image.width),height=Number(metadata?.height||image.height);
- if(!Number.isFinite(width)||!Number.isFinite(height)||width<1||height<1){image?.close?.();throw new Error("Некорректный размер результата")}
- const resized=out.width!==width||out.height!==height;
- if(out.width!==width)out.width=width;
- if(out.height!==height)out.height=height;
- const context=out.getContext("2d");
- if(!context){image?.close?.();throw new Error("Canvas 2D context unavailable")}
- if(!resized)context.clearRect(0,0,width,height);
- context.drawImage(image,0,0);
- if(image&&typeof image.close==="function")image.close();
- out.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(cfg.algorithm)?"pixelated":"auto";
- updateRenderControls(cfg,renderMode,metadata);
- return true;
+ if(canvasRecoveryActive){closeImageBitmap(image);return false}
+ try{
+  const width=Number(metadata?.width||image.width),height=Number(metadata?.height||image.height);
+  if(!Number.isFinite(width)||!Number.isFinite(height)||width<1||height<1)throw new Error("Некорректный размер результата");
+  const resized=out.width!==width||out.height!==height;
+  if(out.width!==width)out.width=width;
+  if(out.height!==height)out.height=height;
+  const context=out.getContext("2d");
+  if(!context)throw new Error("Canvas 2D context unavailable");
+  if(!resized)context.clearRect(0,0,width,height);
+  context.drawImage(image,0,0);
+  out.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(cfg.algorithm)?"pixelated":"auto";
+  updateRenderControls(cfg,renderMode,metadata);
+  return true;
+ }finally{closeImageBitmap(image)}
 }
 function updateRenderControls(cfg,renderMode,metadata=null){
  const asciiWarning=$("asciiLimitWarning");
