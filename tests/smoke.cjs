@@ -353,6 +353,17 @@ async function downloadFrom(page, selector) {
     await page.locator("#shapeSvgInput").setInputFiles({ name: "custom-triangle.svg", mimeType: "image/svg+xml", buffer: Buffer.from(svgShape) });
     assert.equal(await page.locator("#bandShape0").inputValue(), "custom", "imported SVG should become an available custom band shape");
     assert.match(await page.locator("#shapeSvgStatus").textContent(), /custom-triangle\.svg/);
+    await page.waitForFunction(() => {
+      const shape = JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").shape;
+      return shape?.shapeBands?.[0]?.shape === "custom" &&
+        shape.shapeBands[0].customPath === "M5 0 L10 10 L0 10 Z";
+    }, null, { timeout: 5000 });
+    await page.reload({ waitUntil: "load" });
+    await page.locator('.topnav [data-mode="shape"]').click();
+    await page.waitForFunction(() => document.querySelector("#bandShape0")?.value === "custom",
+      null, { timeout: 5000 });
+    assert.equal(await page.locator("#bandShape0").inputValue(), "custom",
+      "custom SVG shape assignment should survive a reload");
     assert.equal(await page.locator("#shapePresetSelect option").count() >= 7, true, "Shape Lab should include built-in shape presets");
     assert.equal(await page.locator("#bandShape0 option[value=\"star\"]").count(), 1, "bands should expose the expanded shape library");
     await page.locator("#shapePresetSelect").selectOption("starfield");
