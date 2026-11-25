@@ -165,3 +165,12 @@ Neo Glow includes an adjustable scan-band position, width, brightness, off-band 
 - The page lifecycle handler stops animation loops and media tracks, revokes transient and batch URLs, clears the current source surface, terminates the Worker and rejects outstanding requests before a full page shutdown. It leaves the page intact when the browser places it into the back-forward cache.
 - Regression tests now exercise ten consecutive large-image source replacements, Worker source retention, source bitmap closure, scratch Canvas balance, Batch blob/URL accounting and page-shutdown cleanup. The cross-browser suite runs 60 sequential edits in Chromium, Firefox and WebKit and asserts zero outstanding scratch canvases after processing.
 - The PWA cache advances to `tgrmlither-v17`.
+
+
+## Functional corrections in v1.3.13
+
+- Video Lab now runs Worker-processed frames through the complete raster pipeline, including algorithm layers and the bounded effects pass. This keeps accelerated processing aligned with the main-thread fallback.
+- Palette save, import and selection workflows persist the active workspace choice. Imported custom SVG shapes also remain assigned to their Shape Lab bands after reload.
+- Preset preview gradients support the full 2–16 colour palette range without invalid gradient stops.
+- Additional browser regressions cover palette reloads, SVG persistence, Video Lab Worker routing and expanded-palette preset previews.
+- The PWA cache advances to `tgrmlither-v18` so installed copies fetch the corrected app and Worker assets.
