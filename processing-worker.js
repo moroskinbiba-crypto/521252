@@ -60,7 +60,7 @@ function configure(cfg,paletteColors){
 function processImage(bitmap,cfg,paletteColors,kind){
   configure(cfg,paletteColors);
   let canvas;
-  if(kind==="video")canvas=raster(bitmap,s);
+  if(kind==="video")canvas=rasterPipeline(bitmap,s);
   else if(kind==="script"||((kind==="batch")&&s.algorithm==="ascii"))canvas=makeAscii(bitmap,s);
   else canvas=rasterPipeline(bitmap,s);
   return {
