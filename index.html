@@ -2394,7 +2394,7 @@ async function runBatch(){
      width=canvas.width;height=canvas.height;
     }
     if(!blob)throw Error("PNG export failed");
-     if(batchResultsBytes+blob.size>MAX_BATCH_RESULT_BYTES)throw Error("Пакет превысил лимит результатов 128 МБ. Скачайте готовые файлы и обработайте остаток отдельно.");
+     if(batchResultsBytes+blob.size>MAX_BATCH_RESULT_BYTES){batchCancelRequested=true;throw Error("Пакет превысил лимит результатов 128 МБ. Скачайте готовые файлы и обработайте остаток отдельно.");}
     const name=uniqueBatchFilename(f.name,usedNames),url=URL.createObjectURL(blob),row=document.createElement("div");
     batchDownloadUrls.push(url);batchResultsData.push({name,blob});batchResultsBytes+=blob.size;row.className="fileitem";
     const a=document.createElement("a");a.className="btn sm";a.textContent="↓ PNG";a.href=url;a.download=name;
