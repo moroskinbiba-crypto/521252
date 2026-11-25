@@ -2641,38 +2641,78 @@ async function runBatch(){
   $("downloadBatchZip").disabled=batchResultsData.length===0;renderBatch();
  }
 }
+let activeProjectReader=null,projectLoadGeneration=0;
 function loadProject(f){
  if(!f)return;
  if(!Number.isFinite(Number(f.size))||f.size>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ");return}
- const r=new FileReader();
- r.onerror=()=>say("Не удалось прочитать файл проекта");
- r.onabort=()=>say("Чтение файла проекта отменено");
+ if(activeProjectReader)try{activeProjectReader.abort()}catch(error){}
+ const generation=++projectLoadGeneration,r=new FileReader();
+ activeProjectReader=r;
+ let finished=false,readTimer=0;
+ const finishRead=()=>{
+  if(finished)return false;
+  finished=true;clearTimeout(readTimer);
+  if(activeProjectReader===r)activeProjectReader=null;
+  r.onload=null;r.onerror=null;r.onabort=null;
+  return true;
+ };
+ r.onerror=()=>{if(finishRead()&&generation===projectLoadGeneration)say("Не удалось прочитать файл проекта")};
+ r.onabort=()=>{if(finishRead()&&generation===projectLoadGeneration)say("Чтение файла проекта отменено")};
  r.onload=()=>{
+  if(!finishRead()||generation!==projectLoadGeneration)return;
+  let p,target,loadedSettings;
   try{
    if(typeof r.result!=="string")throw Error("read");
-   const p=JSON.parse(r.result);
-   if(!["tgrmlither-project","tgrmlithering-project","ditherlab-project"].includes(p.format)||typeof p.source!=="string"||!/^data:image\/(?:png|jpeg|webp);base64,/i.test(p.source))throw Error("project");
-   const target=WORKSPACE_NAMES.includes(p.workspace)?p.workspace:p.settings?.algorithm==="ascii"?"script":p.settings?.algorithm==="shape"?"shape":"editor";
-   const loadedSettings=cloneSettings(p.settings||def);
-   const im=new Image();
-   im.onload=()=>{
-    let c;try{c=canvasFromImage(im)}catch(error){say("Изображение проекта слишком велико или не поддерживается");return}
-    if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
-    setMode("presets");
-    if(p.workspaces&&typeof p.workspaces==="object")workspaceSettings=normaliseWorkspaceSettings(p.workspaces);
-    workspaceSettings[target]=cloneSettings(loadedSettings);
-    if(target==="shape")workspaceSettings[target].algorithm="shape";
-    if(target==="script")workspaceSettings[target].algorithm="ascii";
-    store("tgrmlithering-workspaces",workspaceSettings);
-    const projectName=typeof p.sourceName==="string"&&p.sourceName.trim()?p.sourceName.slice(0,160):"project";
-    loadImage(c,projectName,false);
-    setMode(target);sync();render();say(imageResizeMessage(c)||"Проект открыт");
-   };
-   im.onerror=()=>say("Не удалось открыть изображение проекта");
-   im.src=p.source;
-  }catch(error){say("Неверный файл проекта")}
+   p=JSON.parse(r.result);
+   if(!p||typeof p!=="object"||!["tgrmlither-project","tgrmlithering-project","ditherlab-project"].includes(p.format)||typeof p.source!=="string"||p.source.length>MAX_PROJECT_FILE_BYTES||!/^data:image\/(?:png|jpeg|webp);base64,/i.test(p.source))throw Error("project");
+   target=WORKSPACE_NAMES.includes(p.workspace)?p.workspace:p.settings?.algorithm==="ascii"?"script":p.settings?.algorithm==="shape"?"shape":"editor";
+   loadedSettings=cloneSettings(p.settings||def);
+   if(target==="shape")loadedSettings.algorithm="shape";
+   if(target==="script")loadedSettings.algorithm="ascii";
+  }catch(error){say("Неверный файл проекта или повреждённые настройки");return}
+  const image=new Image();let decodeFinished=false,decodeTimer=0;
+  const finishDecode=()=>{
+   if(decodeFinished)return false;
+   decodeFinished=true;clearTimeout(decodeTimer);
+   image.onload=null;image.onerror=null;
+   return true;
+  };
+  image.onload=()=>{
+   if(!finishDecode()||generation!==projectLoadGeneration)return;
+   let canvas;
+   try{canvas=canvasFromImage(image)}catch(error){say("Изображение проекта слишком велико или не поддерживается");return}
+   const previousMode=mode;
+   if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
+   const currentWorkspaces=workspaceSettings;
+   setMode("presets");
+   const nextWorkspaces=normaliseWorkspaceSettings(p.workspaces&&typeof p.workspaces==="object"?p.workspaces:currentWorkspaces);
+   nextWorkspaces[target]=cloneSettings(loadedSettings);
+   if(!store("tgrmlithering-workspaces",nextWorkspaces)){
+    setMode(previousMode);
+    say("Проект не открыт: настройки не удалось безопасно сохранить");
+    return;
+   }
+   workspaceSettings=nextWorkspaces;
+   const projectName=typeof p.sourceName==="string"&&p.sourceName.trim()?p.sourceName.slice(0,160):"project";
+   loadImage(canvas,projectName,false);
+   setMode(target);sync();render();
+   say(imageResizeMessage(canvas)||"Проект открыт");
+  };
+  image.onerror=()=>{if(finishDecode()&&generation===projectLoadGeneration)say("Не удалось открыть изображение проекта")};
+  decodeTimer=setTimeout(()=>{
+   if(!finishDecode())return;
+   if(generation===projectLoadGeneration)say("Декодирование проекта превысило лимит времени. Текущая работа сохранена.");
+  },imageDecodeTimeoutMs);
+  image.src=p.source;
  };
- try{r.readAsText(f)}catch(error){say("Не удалось прочитать файл проекта")}
+ try{
+  r.readAsText(f);
+  readTimer=setTimeout(()=>{
+   if(!finishRead())return;
+   try{r.abort()}catch(error){}
+   if(generation===projectLoadGeneration)say("Чтение проекта превысило лимит времени");
+  },45000);
+ }catch(error){finishRead();say("Не удалось прочитать файл проекта")}
 }
 async function copyResult(){try{await waitForProcessingPreview();let blob=await new Promise(r=>out.toBlob(r,"image/png"));await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);say("Изображение скопировано")}catch(e){say("Копирование недоступно. Скачайте PNG.")}}
 
