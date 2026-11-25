@@ -1,13 +1,45 @@
 "use strict";
 
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-const MAX_ASCII_OUTPUT_PIXELS=4000000;
+const MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_WORKER_IMAGE_PIXELS=24000000;
+const workerResourceMetrics={scratchCanvasesCreated:0,scratchCanvasesReleased:0,scratchPixelsReleased:0,sourceBitmapsClosed:0,processBitmapsClosed:0,outputBitmapsTransferred:0,outputBitmapsClosed:0};
+let activeCanvasAllocation=null;
 const document={
   createElement(tag){
     if(tag!=="canvas")throw new Error("Unsupported worker element: "+tag);
-    return new OffscreenCanvas(1,1);
+    const canvas=new OffscreenCanvas(1,1);
+    if(activeCanvasAllocation){activeCanvasAllocation.push(canvas);workerResourceMetrics.scratchCanvasesCreated++}
+    return canvas;
   }
 };
+function releaseWorkerCanvas(canvas){
+  if(!canvas)return;
+  const pixels=Math.max(0,Number(canvas.width)||0)*Math.max(0,Number(canvas.height)||0);
+  try{canvas.width=0;canvas.height=0}catch(error){}
+  workerResourceMetrics.scratchCanvasesReleased++;
+  workerResourceMetrics.scratchPixelsReleased+=pixels;
+}
+function releaseWorkerBitmap(bitmap,kind="process"){
+  if(!bitmap||typeof bitmap.close!=="function")return;
+  try{bitmap.close()}catch(error){}
+  const key=kind==="source"?"sourceBitmapsClosed":kind==="output"?"outputBitmapsClosed":"processBitmapsClosed";
+  workerResourceMetrics[key]++;
+}
+function workerResourceSnapshot(){
+  let sourcePixels=0;
+  for(const bitmap of sourceImages.values())sourcePixels+=Math.max(0,Number(bitmap.width)||0)*Math.max(0,Number(bitmap.height)||0);
+  return {...workerResourceMetrics,sourceCount:sourceImages.size,sourcePixels};
+}
+function runTrackedProcess(bitmap,cfg,paletteColors,kind){
+  const previousScope=activeCanvasAllocation,allocated=[];
+  activeCanvasAllocation=allocated;
+  let result=null;
+  try{result=processImage(bitmap,cfg,paletteColors,kind)}
+  catch(error){for(const canvas of allocated)releaseWorkerCanvas(canvas);throw error}
+  finally{activeCanvasAllocation=previousScope}
+  for(const canvas of allocated)if(canvas!==result?.canvas)releaseWorkerCanvas(canvas);
+  return {result,releaseOutput:()=>releaseWorkerCanvas(result?.canvas)};
+}
 let s={},pal={},ascii="";
 const def={shapeBands:[
   {shape:"circle",size:55,color:"#334b2b",rotation:0,customPath:"",customViewBox:[0,0,100,100]},
@@ -40,45 +72,63 @@ function processImage(bitmap,cfg,paletteColors,kind){
   };
 }
 function sendBitmap(id,result,extra={}){
-  const bitmap=result.canvas.transferToImageBitmap();
-  self.postMessage({id,type:"result",bitmap,width:result.width,height:result.height,ascii:result.ascii,
-    asciiRowsLimited:result.asciiRowsLimited,asciiNaturalRows:result.asciiNaturalRows,asciiRows:result.asciiRows,...extra},[bitmap]);
+  const width=result.width||result.canvas.width,height=result.height||result.canvas.height;
+  let bitmap=null,transferred=false;
+  try{
+    bitmap=result.canvas.transferToImageBitmap();
+    self.postMessage({id,type:"result",bitmap,width,height,ascii:result.ascii,
+      asciiRowsLimited:result.asciiRowsLimited,asciiNaturalRows:result.asciiNaturalRows,asciiRows:result.asciiRows,
+      workerResources:workerResourceSnapshot(),...extra},[bitmap]);
+    transferred=true;workerResourceMetrics.outputBitmapsTransferred++;
+  }finally{
+    if(bitmap&&!transferred)releaseWorkerBitmap(bitmap,"output");
+  }
 }
+
 async function handleMessage(data){
   const {id,type}=data||{};
   if(type==="set-source"){
-    for(const [oldId,old] of sourceImages){
-      if(old&&old.close)old.close();
-      sourceImages.delete(oldId);
-    }
-    sourceImages.set(data.sourceId,data.bitmap);
-    self.postMessage({id,type:"source-ready",sourceId:data.sourceId});
+    const bitmap=data.bitmap,pixels=Math.max(0,Number(bitmap?.width)||0)*Math.max(0,Number(bitmap?.height)||0);
+    if(!bitmap||!pixels||pixels>MAX_WORKER_IMAGE_PIXELS){releaseWorkerBitmap(bitmap,"source");throw new Error("Worker source image exceeds the pixel budget")}
+    for(const [oldId,old] of sourceImages){releaseWorkerBitmap(old,"source");sourceImages.delete(oldId)}
+    sourceImages.set(data.sourceId,bitmap);
+    self.postMessage({id,type:"source-ready",sourceId:data.sourceId,workerResources:workerResourceSnapshot()});
     return;
   }
   if(type==="clear-source"){
     const old=sourceImages.get(data.sourceId);
-    if(old&&old.close)old.close();
+    if(old)releaseWorkerBitmap(old,"source");
     sourceImages.delete(data.sourceId);
-    self.postMessage({id,type:"source-cleared",sourceId:data.sourceId});
+    self.postMessage({id,type:"source-cleared",sourceId:data.sourceId,workerResources:workerResourceSnapshot()});
+    return;
+  }
+  if(type==="resources"){
+    self.postMessage({id,type:"resources",workerResources:workerResourceSnapshot()});
     return;
   }
   if(type==="render"){
     const image=sourceImages.get(data.sourceId);
     if(!image)throw new Error("Worker source image is missing");
-    const result=processImage(image,data.cfg,data.paletteColors,data.kind||"preview");
-    sendBitmap(id,result,{sourceId:data.sourceId,renderRevision:data.renderRevision});
+    const task=runTrackedProcess(image,data.cfg,data.paletteColors,data.kind||"preview");
+    try{sendBitmap(id,task.result,{sourceId:data.sourceId,renderRevision:data.renderRevision})}
+    finally{task.releaseOutput()}
     return;
   }
   if(type==="process"){
     const image=data.bitmap;
+    let task=null;
     try{
-      const result=processImage(image,data.cfg,data.paletteColors,data.kind||"batch");
+      task=runTrackedProcess(image,data.cfg,data.paletteColors,data.kind||"batch");
       if(data.outputType==="blob"){
-        const blob=await result.canvas.convertToBlob({type:data.mimeType||"image/png"});
-        self.postMessage({id,type:"result",blob,width:result.width,height:result.height,ascii:result.ascii,
-          asciiRowsLimited:result.asciiRowsLimited,asciiNaturalRows:result.asciiNaturalRows,asciiRows:result.asciiRows});
-      }else sendBitmap(id,result,{width:result.width,height:result.height});
-    }finally{if(image&&image.close)image.close()}
+        const blob=await task.result.canvas.convertToBlob({type:data.mimeType||"image/png"});
+        self.postMessage({id,type:"result",blob,width:task.result.width,height:task.result.height,ascii:task.result.ascii,
+          asciiRowsLimited:task.result.asciiRowsLimited,asciiNaturalRows:task.result.asciiNaturalRows,asciiRows:task.result.asciiRows,
+          workerResources:workerResourceSnapshot()});
+      }else sendBitmap(id,task.result,{width:task.result.width,height:task.result.height});
+    }finally{
+      task?.releaseOutput();
+      releaseWorkerBitmap(image,"process");
+    }
     return;
   }
   throw new Error("Unknown processing worker message: "+type);
