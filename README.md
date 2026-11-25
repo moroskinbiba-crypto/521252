@@ -128,3 +128,14 @@ Neo Glow includes an adjustable scan-band position, width, brightness, off-band 
 - Batch processing caps accumulated output blobs at 128 MiB. Completed files remain available for individual download or ZIP export; the app asks the user to split larger batches rather than accumulating unbounded results.
 - Browser smoke tests simulate a worker that accepts its source image but never returns a rendered frame, then verify watchdog activation and a usable main-thread fallback.
 - The offline cache version is advanced so installed PWA copies fetch the updated editor and worker assets.
+
+
+## Persistence and data integrity in v1.3.10
+
+- Writes to the main user-data keys are verified after saving. Before replacing a valid previous record, the app attempts to keep a checksummed last-known-good local snapshot. Backup snapshots are bounded per item and in aggregate so recovery data does not grow without limit; a failed backup must not block the primary save.
+- If a saved JSON record is corrupted, the app validates its snapshot, restores the previous record when possible and notifies the user. If no valid snapshot exists, the app falls back to the normal defaults without crashing.
+- The Theme menu now exports and restores a complete user-data backup: workspace profiles, custom presets, palette libraries, Shape Shifter presets, favourites, custom colours and interface preferences.
+- Backup imports are fully validated before writing. The restore operation verifies each saved record and rolls back already-written keys if any write fails.
+- Project import validates the document and image before changing the active workspace. It commits normalized workspace settings before replacing the active image and leaves the previous image in place when persistence fails. Project reads and image decoding are time-bounded.
+- PWA cache version advances so installed copies pick up the updated persistence and import logic.
+- Browser smoke tests cover corrupted-storage recovery, backup export/restore and project-import rollback on a simulated storage quota failure.
