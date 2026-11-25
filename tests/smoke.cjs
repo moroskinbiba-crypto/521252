@@ -1592,6 +1592,59 @@ async function downloadFrom(page, selector) {
     await projectAtomicPage.close();
     await storagePage.close();
 
+    // Long-session resource stress: replace a large Worker source repeatedly and
+    // verify that only the current source bitmap and one output surface remain live.
+    const resourceStressPage = await browser.newPage({ viewport: { width: 1100, height: 800 }, acceptDownloads: true });
+    const resourceStressErrors = [];
+    resourceStressPage.on("pageerror", error => resourceStressErrors.push(error.stack || error.message));
+    await resourceStressPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await resourceStressPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const sourceCycles = 10;
+    for (let cycle = 0; cycle < sourceCycles; cycle++) {
+      const algorithm = ["bayer4", "floyd", "atkinson", "pixel"][cycle % 4];
+      await resourceStressPage.locator("#algorithm").selectOption(algorithm);
+      await resourceStressPage.locator("#imageInput").setInputFiles({
+        name: "resource-cycle-" + cycle + ".png",
+        mimeType: "image/png",
+        buffer: largeWorkerBuffer
+      });
+      await resourceStressPage.waitForFunction(expected =>
+        document.querySelector("#filename")?.textContent.includes(expected) &&
+        document.body.dataset.processingEngine === "worker" &&
+        document.body.dataset.processingPending === "false",
+        "resource-cycle-" + cycle + ".png",
+        { timeout: 30000 }
+      );
+      await resourceStressPage.evaluate(() => window.__tgrmlitherWaitForPreview());
+      const snapshot = await resourceStressPage.evaluate(() => window.__tgrmlitherResourceStatus?.());
+      assert.equal(snapshot.workerResources?.sourceCount, 1, "a long editing session should keep exactly one live Worker source");
+      assert.equal(snapshot.workerResources?.sourcePixels, 1024 * 900, "replacing a source should not accumulate prior ImageBitmap pixels");
+      assert.equal(snapshot.scratchCanvasOutstanding, 0, "each preview must release its temporary Canvas allocations");
+      assert.equal(snapshot.workerResources?.scratchCanvasesCreated, snapshot.workerResources?.scratchCanvasesReleased,
+        "Worker scratch canvases should be fully released after every preview");
+    }
+    const stressSnapshot = await resourceStressPage.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.ok(stressSnapshot.workerResources.sourceBitmapsClosed >= sourceCycles - 1,
+      "replacing the source should close every superseded Worker ImageBitmap");
+    assert.ok(stressSnapshot.sourceCanvasesReleased >= sourceCycles - 1,
+      "replacing the source should release every superseded HTML source canvas");
+
+    const [stressExport] = await Promise.all([
+      resourceStressPage.waitForEvent("download", { timeout: 15000 }),
+      resourceStressPage.locator("#png").click()
+    ]);
+    assert.match(stressExport.suggestedFilename(), /TGRMLither\.png$/);
+    const beforePageHide = await resourceStressPage.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(beforePageHide.transientDownloadUrls, 1, "an export URL should remain available for the browser download handoff");
+    await resourceStressPage.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pagehide", { persisted: false })));
+    const afterPageHide = await resourceStressPage.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(afterPageHide.transientDownloadUrls, 0, "page shutdown should revoke transient download URLs");
+    assert.equal(afterPageHide.batchResultUrls, 0, "page shutdown should revoke batch result URLs");
+    assert.equal(afterPageHide.sourcePixels, 0, "page shutdown should release the current source canvas");
+    assert.equal(afterPageHide.workerSourceCount, 0, "page shutdown should clear Worker source retention");
+    assert.deepEqual(resourceStressErrors, [], "long-session resource cleanup should not create uncaught browser errors");
+    await resourceStressPage.close();
+
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
     console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {
