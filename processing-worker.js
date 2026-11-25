@@ -3,6 +3,7 @@
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const MAX_ASCII_OUTPUT_PIXELS=4000000,MAX_WORKER_IMAGE_PIXELS=24000000;
 const workerResourceMetrics={scratchCanvasesCreated:0,scratchCanvasesReleased:0,scratchPixelsReleased:0,sourceBitmapsClosed:0,processBitmapsClosed:0,outputBitmapsTransferred:0,outputBitmapsClosed:0};
+const releasedWorkerCanvases=new WeakSet();
 let activeCanvasAllocation=null;
 const document={
   createElement(tag){
@@ -13,7 +14,8 @@ const document={
   }
 };
 function releaseWorkerCanvas(canvas){
-  if(!canvas)return;
+  if(!canvas||releasedWorkerCanvases.has(canvas))return;
+  releasedWorkerCanvases.add(canvas);
   const pixels=Math.max(0,Number(canvas.width)||0)*Math.max(0,Number(canvas.height)||0);
   try{canvas.width=0;canvas.height=0}catch(error){}
   workerResourceMetrics.scratchCanvasesReleased++;
@@ -76,6 +78,7 @@ function sendBitmap(id,result,extra={}){
   let bitmap=null,transferred=false;
   try{
     bitmap=result.canvas.transferToImageBitmap();
+    releaseWorkerCanvas(result.canvas);
     self.postMessage({id,type:"result",bitmap,width,height,ascii:result.ascii,
       asciiRowsLimited:result.asciiRowsLimited,asciiNaturalRows:result.asciiNaturalRows,asciiRows:result.asciiRows,
       workerResources:workerResourceSnapshot(),...extra},[bitmap]);
@@ -121,6 +124,7 @@ async function handleMessage(data){
       task=runTrackedProcess(image,data.cfg,data.paletteColors,data.kind||"batch");
       if(data.outputType==="blob"){
         const blob=await task.result.canvas.convertToBlob({type:data.mimeType||"image/png"});
+        task.releaseOutput();
         self.postMessage({id,type:"result",blob,width:task.result.width,height:task.result.height,ascii:task.result.ascii,
           asciiRowsLimited:task.result.asciiRowsLimited,asciiNaturalRows:task.result.asciiNaturalRows,asciiRows:task.result.asciiRows,
           workerResources:workerResourceSnapshot()});
