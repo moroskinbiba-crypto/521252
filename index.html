@@ -1276,9 +1276,9 @@ if(!loadStore(neoGlowMigrationKey,false)){
 }
 s=cloneSettings(workspaceSettings.editor);
 function saveWorkspaceSettings(name=mode){
- if(!WORKSPACE_NAMES.includes(name))return;
+ if(!WORKSPACE_NAMES.includes(name))return false;
  workspaceSettings[name]=cloneSettings(s);
- store("tgrmlithering-workspaces",workspaceSettings);
+ return store("tgrmlithering-workspaces",workspaceSettings);
 }
 function effectScopeForMode(name=mode){return WORKSPACE_NAMES.includes(name)?name:null;}
 function buildWorkflowEffectsPanels(){
@@ -1461,12 +1461,19 @@ function normaliseBackupEntry(key,value){
 }
 function exportUserBackup(){
  try{
+  if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
   const data={};
   for(const key of USER_DATA_STORAGE_KEYS){
    const value=loadStore(key,undefined);
    if(value!==undefined)data[key]=value;
   }
-  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.3.9",data};
+  data["tgrmlithering-workspaces"]=workspaceSettings;
+  data["tgrmlither-theme"]={id:document.body.dataset.theme||"night",vars:Object.fromEntries(THEME_KEYS.map(key=>[key,getComputedStyle(document.documentElement).getPropertyValue(key).trim()]))};
+  data["tgrmlither-shell"]=document.body.dataset.shell||"xp";
+  data["tgrmlither-inspector-level"]=document.body.dataset.inspectorLevel||"basic";
+  data["tgrmlither-favorite-algorithms"]=[...algorithmFavorites];
+  data["ditherlab-colors"]=[...(s.customColors||pal.custom.c)];
+  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.3.10",data};
   const json=JSON.stringify(doc,null,2);
   if(json.length>MAX_USER_BACKUP_BYTES)throw Error("Резервная копия превышает лимит 10 МБ");
   download(new Blob([json],{type:"application/json;charset=utf-8"}),"TGRMLither-backup.json");
@@ -1551,10 +1558,10 @@ function shapeStore(){const saved=loadStore("tgrmlither-shape-presets",[]);retur
 function renderShapePresetOptions(){const select=$("shapePresetSelect");if(!select)return;const previous=select.value;select.innerHTML="";const built=document.createElement("optgroup");built.label="Встроенные пресеты";for(const [id,p] of Object.entries(SHAPE_PRESETS)){const o=document.createElement("option");o.value=id;o.textContent=p.name;built.append(o)}select.append(built);const saved=shapeStore();if(saved.length){const group=document.createElement("optgroup");group.label="Мои пресеты";for(const p of saved){const o=document.createElement("option");o.value=p.id;o.textContent=p.name;group.append(o)}select.append(group)}select.value=[...Object.keys(SHAPE_PRESETS),...saved.map(p=>p.id)].includes(previous)?previous:"classic";$("deleteShapePreset").disabled=!select.value.startsWith("user_")}
 function cleanShapeProfile(input){if(!input||typeof input!=="object"||!Array.isArray(input.shapeBands)||input.shapeBands.length!==4)throw Error("shape");const bands=input.shapeBands.map((b)=>{const shape=SHAPE_OPTIONS.includes(b?.shape)?b.shape:"circle",color=/^#[0-9a-f]{6}$/i.test(b?.color||"")?b.color:"#334b2b",vb=Array.isArray(b?.customViewBox)&&b.customViewBox.length===4&&b.customViewBox.every(Number.isFinite)&&b.customViewBox[2]>0&&b.customViewBox[3]>0?b.customViewBox:[0,0,100,100];return {shape,size:clamp(Number(b?.size)||70,20,180),color,rotation:clamp(Number(b?.rotation)||0,-180,180),customPath:typeof b?.customPath==="string"?b.customPath.slice(0,20000):"",customViewBox:vb}});const raw=Array.isArray(input.shapeThresholds)?input.shapeThresholds:[25,50,75],thresholds=raw.slice(0,3).map((v,i)=>clamp(Number(v)||[25,50,75][i],0,100)).sort((a,b)=>a-b);while(thresholds.length<3)thresholds.push([25,50,75][thresholds.length]);return {shape:SHAPE_OPTIONS.includes(input.shape)?input.shape:"circle",jitter:clamp(Number(input.jitter)||0,0,80),shapeDistribution:["uniform","radial","horizontal","vertical","random","wave","edge"].includes(input.shapeDistribution)?input.shapeDistribution:"uniform",shapeRotation:clamp(Number(input.shapeRotation)||0,-180,180),shapeThresholds:thresholds,shapeBands:bands,customShapePath:typeof input.customShapePath==="string"?input.customShapePath.slice(0,20000):"",customShapeViewBox:Array.isArray(input.customShapeViewBox)&&input.customShapeViewBox.length===4&&input.customShapeViewBox.every(Number.isFinite)&&input.customShapeViewBox[2]>0&&input.customShapeViewBox[3]>0?input.customShapeViewBox:[0,0,100,100]}}
 function applyShapeProfile(input,message="Shape Shifter загружен"){try{const profile=cleanShapeProfile(input);if(mode!=="shape")setMode("shape");s.shape=profile.shape;s.jitter=profile.jitter;s.shapeDistribution=profile.shapeDistribution;s.shapeRotation=profile.shapeRotation;s.shapeThresholds=profile.shapeThresholds;s.shapeBands=profile.shapeBands;s.customShapePath=profile.customShapePath;s.customShapeViewBox=profile.customShapeViewBox;s.algorithm="shape";saveWorkspaceSettings("shape");sync();render();say(message);return true}catch(err){say("Настройки Shape Shifter не распознаны");return false}}
-function persistShapePreset(name,profile){const saved=shapeStore();if(saved.length>=50){say("Библиотека Shape Shifter заполнена (50 пресетов)");return null}const id="user_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),entry={id,name:(name||"Shape preset").trim().slice(0,48)||"Shape preset",profile:cleanShapeProfile(profile)};saved.unshift(entry);store("tgrmlither-shape-presets",saved);renderShapePresetOptions();$("shapePresetSelect").value=id;$("deleteShapePreset").disabled=false;return entry}
+function persistShapePreset(name,profile){const saved=shapeStore();if(saved.length>=50){say("Библиотека Shape Shifter заполнена (50 пресетов)");return null}const id="user_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),entry={id,name:(name||"Shape preset").trim().slice(0,48)||"Shape preset",profile:cleanShapeProfile(profile)},next=[entry,...saved];if(!store("tgrmlither-shape-presets",next))return null;renderShapePresetOptions();$("shapePresetSelect").value=id;$("deleteShapePreset").disabled=false;return entry}
 function applyShapePreset(){const id=$("shapePresetSelect").value,entry=SHAPE_PRESETS[id]||shapeStore().find(p=>p.id===id),input=entry?.profile||entry;if(!input){say("Выберите пресет форм");return}try{const profile=cleanShapeProfile(input);if(mode!=="shape")setMode("shape");Object.assign(s,profile,{algorithm:"shape"});workspaceSettings.shape=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);$("shapePresetSelect").value=id;$("deleteShapePreset").disabled=!id.startsWith("user_");sync();render();say("Пресет: "+entry.name)}catch(err){say("Не удалось применить пресет Shape Shifter")}}
 function saveShapePreset(){const name=$("shapePresetName").value.trim();if(!name){say("Введите название пресета");$("shapePresetName").focus();return}const entry=persistShapePreset(name,shapeProfile());if(entry){$("shapePresetName").value="";say("Shape Shifter сохранён: "+entry.name)}}
-function deleteShapePreset(){const id=$("shapePresetSelect").value,saved=shapeStore(),i=saved.findIndex(p=>p.id===id);if(i<0){say("Встроенные пресеты удалить нельзя");return}const name=saved[i].name;saved.splice(i,1);store("tgrmlither-shape-presets",saved);renderShapePresetOptions();say("Пресет удалён: "+name)}
+function deleteShapePreset(){const id=$("shapePresetSelect").value,saved=shapeStore(),i=saved.findIndex(p=>p.id===id);if(i<0){say("Встроенные пресеты удалить нельзя");return}const name=saved[i].name,next=saved.filter(p=>p.id!==id);if(!store("tgrmlither-shape-presets",next))return;renderShapePresetOptions();say("Пресет удалён: "+name)}
 function exportShapePreset(){const name=$("shapePresetName").value.trim()||SHAPE_PRESETS[$("shapePresetSelect").value]?.name||shapeStore().find(p=>p.id===$("shapePresetSelect").value)?.name||"Shape Shifter";download(new Blob([JSON.stringify({format:"tgrmlither-shape-preset",version:1,name,profile:shapeProfile()},null,2)],{type:"application/json"}),slug(name)+"-TGRMLither-shape.json");say("Пресет Shape Shifter экспортирован")}
 async function importShapePreset(file){try{const doc=JSON.parse(await readLimitedText(file,MAX_IMPORT_JSON_BYTES,"Файл JSON-формы слишком большой")),profile=doc.profile||doc.shape||doc;cleanShapeProfile(profile);if(doc.name)persistShapePreset(String(doc.name).slice(0,48),profile);applyShapeProfile(profile,"Пресет Shape Shifter импортирован")}catch(err){say("Не удалось импортировать JSON-форму")}}
 function encodeShareCode(prefix,data){const bytes=new TextEncoder().encode(JSON.stringify(data));let binary="";for(const b of bytes)binary+=String.fromCharCode(b);return prefix+btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
@@ -2287,9 +2294,24 @@ function persistActivePaletteColors(key,values){
  const safe=values.map(v=>String(v).toLowerCase()).filter(v=>/^#[0-9a-f]{6}$/i.test(v)).slice(0,16);
  if(safe.length<2||safe.length!==values.length)return false;
  const palette=pal[key];if(!palette)return false;
+ const oldPalette=[...palette.c],oldCustom=[...(s.customColors||[])];
+ let persisted=false;
+ if(key==="custom"){
+  s.customColors=[...safe];persisted=store("ditherlab-colors",s.customColors);
+ }else{
+  const entry=paletteLibrary.find(p=>p.id===key);
+  if(entry){
+   const oldColors=[...entry.colors];entry.colors=[...safe];
+   persisted=store("tgrmlither-palette-library",paletteLibrary);
+   if(!persisted)entry.colors=oldColors;
+  }else if(Object.prototype.hasOwnProperty.call(pal,key)){
+   const overrides=loadStore("tgrmlither-built-in-palette-overrides",{});
+   const next={...(overrides&&typeof overrides==="object"?overrides:{})};next[key]=[...safe];
+   persisted=store("tgrmlither-built-in-palette-overrides",next);
+  }
+ }
+ if(!persisted){palette.c=oldPalette;s.customColors=oldCustom;return false}
  palette.c=[...safe];
- if(key==="custom"){s.customColors=[...safe];store("ditherlab-colors",s.customColors)}
- else {const entry=paletteLibrary.find(p=>p.id===key);if(entry){entry.colors=[...safe];store("tgrmlither-palette-library",paletteLibrary)}else if(Object.prototype.hasOwnProperty.call(pal,key)&&key!=="custom"){const overrides=loadStore("tgrmlither-built-in-palette-overrides",{});overrides[key]=[...safe];store("tgrmlither-built-in-palette-overrides",overrides)}}
  if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
  return true;
 }
@@ -2344,9 +2366,10 @@ function savePaletteToLibrary(){
  const active=pal[s.palette]||pal.moss,rawName=$("paletteLibraryName").value.trim(),name=(rawName||active.name||("Моя палитра "+(paletteLibrary.length+1))).slice(0,48);
  const colors=active.c.map(v=>typeof v==="string"?v:"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""));
  if(colors.length<2||colors.length>16||!colors.every(c=>/^#[0-9a-f]{6}$/i.test(c))){say("В палитре должно быть от 2 до 16 цветов");return}
- const id="lib_"+Date.now().toString(36);
- const entry={id,name,colors:colors.map(c=>c.toLowerCase())};paletteLibrary.push(entry);pal[id]={name,c:[...entry.colors]};s.palette=id;
- store("tgrmlither-palette-library",paletteLibrary);$("paletteLibraryName").value="";initPalettes();renderPaletteLibrary();sync();render();say("Палитра «"+name+"» сохранена");
+ const id="lib_"+Date.now().toString(36),entry={id,name,colors:colors.map(c=>c.toLowerCase())},next=[...paletteLibrary,entry];
+ if(!store("tgrmlither-palette-library",next))return;
+ paletteLibrary.push(entry);pal[id]={name,c:[...entry.colors]};s.palette=id;
+ $("paletteLibraryName").value="";initPalettes();renderPaletteLibrary();sync();render();say("Палитра «"+name+"» сохранена");
 }
 function deletePaletteFromLibrary(){
  const id=$("paletteLibrarySelect").value,index=paletteLibrary.findIndex(p=>p.id===id);if(index<0){say("Выберите палитру");return}
@@ -2471,11 +2494,11 @@ function renderPresets(){
    workspaceSettings[target]=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Пресет применён");
   };
   const del=document.createElement("button");del.className="btn sm";del.textContent="×";del.title="Удалить пользовательский пресет";
-  del.onclick=()=>{custom.splice(i,1);store("ditherlab-presets",custom);renderPresets()};
+  del.onclick=()=>{const next=custom.filter((item,index)=>index!==i);if(!store("ditherlab-presets",next))return;custom=next;renderPresets()};
   row.append(txt,use,del);box.append(row);
  });
 }
-function savePreset(){ $("modalTitle").textContent="Сохранить пресет";$("modal").classList.remove("hidden");$("presetName").value="";$("presetName").focus();$("modalSave").onclick=()=>{let name=$("presetName").value.trim();if(!name){say("Введите название");return}const stored=loadStore("ditherlab-presets",[]);custom=Array.isArray(stored)?stored.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,99):[];custom.unshift({name,desc:"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",c:cloneSettings(s)});store("ditherlab-presets",custom);$("modal").classList.add("hidden");renderPresets();say("Пресет сохранён")}}
+function savePreset(){ $("modalTitle").textContent="Сохранить пресет";$("modal").classList.remove("hidden");$("presetName").value="";$("presetName").focus();$("modalSave").onclick=()=>{let name=$("presetName").value.trim();if(!name){say("Введите название");return}const stored=loadStore("ditherlab-presets",[]),base=Array.isArray(stored)?stored.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,99):[],next=[{name:name.slice(0,48),desc:"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",c:cloneSettings(s)},...base];if(!store("ditherlab-presets",next))return;custom=next;$("modal").classList.add("hidden");renderPresets();say("Пресет сохранён")}}
 function renderBatch(){let box=$("batchList");box.innerHTML="";const hasBatchResults=!!$("batchResults")?.querySelector(".fileitem");if($("batchProgressCount")&&!batchRunning&&!hasBatchResults)$("batchProgressCount").textContent=batch.length+" выбрано";if($("batchProgressLabel")&&!batchRunning&&!hasBatchResults){if(!batch.length)$("batchProgressLabel").textContent="Ожидает файлов";else $("batchProgressLabel").textContent="Готово к обработке"}if(!batch.length){box.textContent="Выбранные файлы появятся здесь.";box.style.color="var(--muted)";box.style.fontSize="10px";return}batch.forEach((f,i)=>{let row=document.createElement("div");row.className="fileitem";let icon=document.createElement("div");icon.className="fileicon";icon.textContent="▧";let txt=document.createElement("div");txt.className="filetext";txt.innerHTML="<b></b><small></small>";txt.querySelector("b").textContent=f.name;txt.querySelector("small").textContent=(f.size/1048576).toFixed(2)+" MB";let rm=document.createElement("button");rm.className="btn sm";rm.textContent="×";rm.disabled=batchRunning;rm.onclick=()=>{if(batchRunning)return;batch.splice(i,1);renderBatch()};row.append(icon,txt,rm);box.append(row)})}
 function addBatch(files){if(batchRunning){say("Дождитесь завершения пакетной обработки");return}const images=Array.from(files).filter(f=>f.type.startsWith("image/")),available=Math.max(0,MAX_BATCH_FILES-batch.length),accepted=images.slice(0,available);batch.push(...accepted);$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent=batch.length+" выбрано";$("batchProgressLabel").textContent=batch.length?"Готово к обработке":"Ожидает файлов";renderBatch();if(images.length>accepted.length)say("Ограничение пакетной обработки — "+MAX_BATCH_FILES+" изображений; добавлено "+accepted.length);else say(accepted.length?"Добавлено файлов: "+accepted.length:"Выберите файлы изображений")}
 function revokeBatchDownloadUrls(){for(const url of batchDownloadUrls)URL.revokeObjectURL(url);batchDownloadUrls=[]}
