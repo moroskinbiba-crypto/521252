@@ -85,6 +85,14 @@ async function downloadFrom(page, selector) {
     assert.equal(workerPreview.engine, "worker", "large image processing should run in the worker");
     assert.ok(workerPreview.width > 0 && workerPreview.height > 0, "the worker should return a drawable preview bitmap");
     await page.evaluate(() => window.__tgrmlitherWaitForPreview());
+    const workerResources = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.ok(workerResources, "localhost QA should expose resource counters");
+    assert.equal(workerResources.scratchCanvasOutstanding, 0, "main-thread scratch canvases should be released after rendering");
+    assert.ok(workerResources.workerResources?.scratchCanvasesCreated > 0, "the Worker should report tracked scratch canvas allocations");
+    assert.equal(workerResources.workerResources.scratchCanvasesCreated, workerResources.workerResources.scratchCanvasesReleased,
+      "all worker scratch canvases, including the output surface, should be released after transferring the frame");
+    assert.equal(workerResources.workerResources.sourceCount, 1, "the Worker should retain only the current source bitmap");
+    assert.equal(workerResources.workerResources.sourcePixels, 1024 * 900, "worker source retention should match the bounded input image");
     const unrelatedCachePreserved = await page.evaluate(async () => {
       if (!("serviceWorker" in navigator) || !("caches" in window)) return true;
       await navigator.serviceWorker.ready;
@@ -1121,6 +1129,8 @@ async function downloadFrom(page, selector) {
 
     // Batch processing should use a stable settings snapshot even if controls change while files are being encoded.
     await page.locator('.topnav [data-mode="batch"]').click();
+    const releasedVideoBuffers = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(releasedVideoBuffers.videoFramePixels, 1, "leaving Video Lab should release its reusable frame buffer");
     await page.locator("#batchInput").setInputFiles([
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
       { name: "batch-fixture.png", mimeType: "image/png", buffer: imageBuffer },
@@ -1163,6 +1173,11 @@ async function downloadFrom(page, selector) {
     assert.match(batchNames[0], /TGRMLither\.png$/);
     assert.match(batchNames[1], /TGRMLither-2\.png$/);
     assert.equal(await page.locator("#downloadBatchZip").isEnabled(), true, "ZIP download should enable after batch processing");
+    const batchResourceState = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(batchResourceState.scratchCanvasOutstanding, 0, "batch processing should release all temporary raster canvases between files");
+    assert.equal(batchResourceState.batchResultCount, 2, "only completed batch blobs should be retained");
+    assert.equal(batchResourceState.batchResultUrls, 2, "each retained PNG should have one live download URL");
+    assert.ok(batchResourceState.batchResultBytes > 0, "the retained batch byte budget should account for output blobs");
     const [batchZipDownload] = await Promise.all([
       page.waitForEvent("download", { timeout: 10000 }),
       page.locator("#downloadBatchZip").click()
@@ -1175,6 +1190,10 @@ async function downloadFrom(page, selector) {
 
     // Large batch files should use the same background worker pipeline.
     await page.locator("#clearBatch").click();
+    const clearedBatchResources = await page.evaluate(() => window.__tgrmlitherResourceStatus?.());
+    assert.equal(clearedBatchResources.batchResultCount, 0, "clearing a batch should release references to retained blobs");
+    assert.equal(clearedBatchResources.batchResultBytes, 0, "clearing a batch should reset retained output bytes");
+    assert.equal(clearedBatchResources.batchResultUrls, 0, "clearing a batch should revoke all batch object URLs");
     await page.locator("#batchInput").setInputFiles({
       name: "worker-batch-fixture.png", mimeType: "image/png", buffer: largeWorkerBuffer
     });
