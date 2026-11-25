@@ -1991,6 +1991,7 @@ function replaceLostCanvas(canvas){
  replacement.width=canvas.width;replacement.height=canvas.height;
  replacement.style.cssText=canvas.style.cssText;
  canvas.replaceWith(replacement);
+ replacement.removeAttribute("data-recovery-bound");
  if(canvas===out)out=replacement;
  bindCanvasRecoveryEvents(replacement);
  return replacement;
