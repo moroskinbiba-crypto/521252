@@ -1475,6 +1475,7 @@ async function downloadFrom(page, selector) {
 
     // The full user-data backup must round-trip through export and validated transactional restore.
     await storagePage.locator("#themeMenu > summary").click();
+    await storagePage.locator("#themePicker").selectOption("terminal");
     const [userBackupDownload] = await Promise.all([
       storagePage.waitForEvent("download", { timeout: 15000 }),
       storagePage.locator("#exportUserBackup").click()
@@ -1495,6 +1496,7 @@ async function downloadFrom(page, selector) {
     });
     await storagePage.waitForFunction(() =>
       document.body.dataset.shell === "xp" &&
+      document.body.dataset.theme === "terminal" &&
       localStorage.getItem("tgrmlither-shell") === "xp" &&
       document.querySelector("#scale")?.value === "8",
       null, { timeout: 15000 }
