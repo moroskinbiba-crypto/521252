@@ -2760,9 +2760,9 @@ async function runBatch(){
  try{
   for(let i=0;i<files.length;i++){
    if(batchCancelRequested)break;
-   const f=files[i];
+   const f=files[i];let image=null;
    try{
-    let image=null,blob=null,width=0,height=0;image=await fileCanvas(f);width=image.width;height=image.height;
+    let blob=null,width=0,height=0;image=await fileCanvas(f);width=image.width;height=image.height;
     if(processingWorker&&shouldUseProcessingWorker(image)){
      document.body.dataset.batchProcessingEngine="worker";
      try{
@@ -3044,14 +3044,15 @@ async function renderVideoFrame(){
   try{
    const bitmap=await createWorkerBitmap(videoFrameCanvas);
    const result=await workerRequest({type:"process",kind:"video",bitmap,cfg,paletteColors:paletteColorsFor(cfg)},[bitmap]);
-   if(revision!==videoFrameRevision||mode!=="video"){result.bitmap?.close?.();return false}
+   if(revision!==videoFrameRevision||mode!=="video"){closeImageBitmap(result.bitmap);return false}
    drawRenderedImageToCanvas(canvas,result.bitmap,result);
    document.body.dataset.videoProcessingEngine="worker";
   }catch(error){
    if(processingWorker)disableProcessingWorker(error);
    if(revision!==videoFrameRevision||mode!=="video")return false;
-   const fallback=raster(videoFrameCanvas,cfg);
-   drawRenderedImageToCanvas(canvas,fallback,fallback);
+   const fallback=renderProcessingCanvas(videoFrameCanvas,cfg,"video");
+   try{drawRenderedImageToCanvas(canvas,fallback,fallback)}
+   finally{releaseCanvasBuffer(fallback)}
    document.body.dataset.videoProcessingEngine="main";
   }finally{
    videoWorkerBusy=false;
@@ -3063,9 +3064,11 @@ async function renderVideoFrame(){
  }else{
   document.body.dataset.videoProcessingEngine="main";
   const revision=++videoFrameRevision;
-  const result=raster(videoFrameCanvas,cfg);
-  if(revision!==videoFrameRevision)return false;
-  drawRenderedImageToCanvas(canvas,result,result);
+  const result=renderProcessingCanvas(videoFrameCanvas,cfg,"video");
+  try{
+   if(revision!==videoFrameRevision)return false;
+   drawRenderedImageToCanvas(canvas,result,result);
+  }finally{releaseCanvasBuffer(result)}
  }
  canvas.style.imageRendering=["floyd","atkinson","bayer2","bayer4","bayer8","pixel"].includes(cfg.algorithm)?"pixelated":"auto";
  $("videoTimeLabel").textContent=formatTime(video.currentTime);$("videoTimeline").value=String(video.currentTime);
@@ -3073,14 +3076,16 @@ async function renderVideoFrame(){
  return true;
 }
 function drawRenderedImageToCanvas(canvas,image,metadata){
- const width=Number(metadata?.width||image.width),height=Number(metadata?.height||image.height);
- const resized=canvas.width!==width||canvas.height!==height;
- if(canvas.width!==width)canvas.width=width;
- if(canvas.height!==height)canvas.height=height;
- const context=canvas.getContext("2d");
- if(!resized)context.clearRect(0,0,width,height);
- context.drawImage(image,0,0);
- if(typeof image.close==="function")image.close();
+ try{
+  const width=Number(metadata?.width||image.width),height=Number(metadata?.height||image.height);
+  const resized=canvas.width!==width||canvas.height!==height;
+  if(canvas.width!==width)canvas.width=width;
+  if(canvas.height!==height)canvas.height=height;
+  const context=canvas.getContext("2d");
+  if(!context)throw new Error("Canvas 2D context unavailable");
+  if(!resized)context.clearRect(0,0,width,height);
+  context.drawImage(image,0,0);
+ }finally{closeImageBitmap(image)}
 }
 function videoLoop(now){if(mode!=="video")return;const timestamp=Number.isFinite(now)?now:performance.now();if(timestamp-videoLastRenderAt>=1000/24)renderVideoFrame();if(!$("videoSource").paused&&!$("videoSource").ended)videoRaf=requestAnimationFrame(videoLoop);else videoRaf=0}
 function loadVideo(file){if(videoExportStarting||(videoRecorder&&videoRecorder.state!=="inactive"))stopVideoExport(true);if(!file||!file.type.startsWith("video/")){say("Выберите видеофайл");return}const video=$("videoSource");if(videoObjectURL)URL.revokeObjectURL(videoObjectURL);video.pause();videoObjectURL=URL.createObjectURL(file);$("videoEmpty").style.display="none";$("videoFilename").textContent=file.name;video.src=videoObjectURL;video.onloadedmetadata=()=>{$("videoTimeline").max=String(video.duration||0);$("videoTimeline").value="0";$("videoDurationLabel").textContent=formatTime(video.duration);$("videoPlay").disabled=false;$("videoExport").disabled=false;renderVideoFrame();say("Видео загружено · "+Math.round(video.videoWidth)+" × "+Math.round(video.videoHeight))};video.onerror=()=>say("Не удалось открыть видео. Попробуйте MP4 или WebM.");video.load()}
