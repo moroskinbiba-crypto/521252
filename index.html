@@ -2430,7 +2430,40 @@ document.querySelectorAll("[data-effect-strength]").forEach(e=>{
 });document.querySelectorAll(".palette").forEach(e=>e.classList.toggle("active",e.dataset.palette===s.palette));(s.customColors||pal.custom.c).forEach((c,i)=>{const el=$("customColor"+(i+1));if(el)el.value=c});pal.custom.c=s.customColors||pal.custom.c;for(let i=0;i<4;i++)if($("bandShape"+i)){const b=(s.shapeBands||def.shapeBands)[i];$("bandShape"+i).value=b.shape;$("bandSize"+i).value=b.size;$("bandColor"+i).value=b.color;$("bandRotation"+i).value=b.rotation??0;$("bandRotation"+i+"V").textContent=(b.rotation??0)+"°"}const ts=s.shapeThresholds||def.shapeThresholds;for(let i=0;i<3;i++){$("shapeThreshold"+i).value=ts[i];$("shapeThreshold"+i+"V").textContent=ts[i]+"%"}renderAlgorithmStackUI();syncEffectOrderPanels()}
 let paletteScrollPreview=null,paletteScrollBase=null;
 function initPalettes(){const paletteContainer=$("palettes");if(paletteContainer.dataset.wheelPreview!=="enabled"){paletteContainer.dataset.wheelPreview="enabled";paletteContainer.addEventListener("wheel",event=>{if(!event.deltaY&&!event.deltaX)return;event.preventDefault();const keys=Object.keys(pal);if(!paletteScrollPreview)paletteScrollBase=s.palette;const current=paletteScrollPreview||s.palette,index=Math.max(0,keys.indexOf(current)),direction=(event.deltaY||event.deltaX)>0?1:-1;paletteScrollPreview=keys[(index+direction+keys.length)%keys.length];s.palette=paletteScrollPreview;sync();renderActivePaletteEditor();render()},{passive:false});paletteContainer.addEventListener("pointerleave",()=>{if(!paletteScrollPreview)return;const prior=paletteScrollBase||"moss";paletteScrollPreview=null;paletteScrollBase=null;if(s.palette!==prior){s.palette=prior;sync();renderActivePaletteEditor();render()}})}paletteContainer.innerHTML="";for(const [key,p] of Object.entries(pal)){let b=document.createElement("button");b.className="palette";b.dataset.palette=key;b.title=p.name;let sw=document.createElement("span");sw.className="swatches";p.c.forEach(c=>{let i=document.createElement("i");i.style.background=c;sw.append(i)});let nm=document.createElement("span");nm.className="pname";nm.textContent=p.name;b.append(sw,nm);b.onclick=()=>{paletteScrollPreview=null;paletteScrollBase=null;s.palette=key;sync();renderActivePaletteEditor();render();if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode)};paletteContainer.append(b)}renderActivePaletteEditor()}
-function extractPalette(){if(!src){say("Сначала откройте изображение");return}const c=document.createElement("canvas");c.width=72;c.height=72;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0,72,72);const d=x.getImageData(0,0,72,72).data,p=[];for(let i=0;i<d.length;i+=4)if(d[i+3]>16)p.push([d[i],d[i+1],d[i+2]]);if(!p.length){say("В изображении нет доступных цветов");return}const count=clamp(Number(s.levels)||4,2,16);p.sort((a,b)=>lumin(...a)-lumin(...b));let centers=Array.from({length:count},(_,k)=>[...(p[Math.min(p.length-1,Math.floor((k+.5)*p.length/count))]||[0,0,0])]);for(let pass=0;pass<9;pass++){const sum=centers.map(()=>[0,0,0,0]);for(const v of p){let win=0,dist=Infinity;centers.forEach((cc,i)=>{const q=(v[0]-cc[0])**2+(v[1]-cc[1])**2+(v[2]-cc[2])**2;if(q<dist){dist=q;win=i}});for(let k=0;k<3;k++)sum[win][k]+=v[k];sum[win][3]++}centers=centers.map((cc,i)=>sum[i][3]?sum[i].slice(0,3).map(v=>Math.round(v/sum[i][3])):cc)}s.customColors=centers.sort((a,b)=>lumin(...a)-lumin(...b)).map(v=>"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""));pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);initPalettes();renderActivePaletteEditor();sync();render();say("Из фото извлечено цветов: "+count)}
+function extractPalette(){
+ if(!src){say("Сначала откройте изображение");return}
+ const sample=document.createElement("canvas");sample.width=72;sample.height=72;
+ let pixels=[];
+ try{
+  const context=sample.getContext("2d",{willReadFrequently:true});
+  if(!context)throw new Error("Canvas 2D context unavailable");
+  context.drawImage(src,0,0,72,72);
+  const data=context.getImageData(0,0,72,72).data;
+  for(let i=0;i<data.length;i+=4)if(data[i+3]>16)pixels.push([data[i],data[i+1],data[i+2]]);
+ }catch(error){say("Не удалось извлечь цвета из изображения");return}
+ finally{releaseCanvasBuffer(sample)}
+ if(!pixels.length){say("В изображении нет доступных цветов");return}
+ const count=clamp(Number(s.levels)||4,2,16);
+ pixels.sort((a,b)=>lumin(...a)-lumin(...b));
+ let centers=Array.from({length:count},(_,k)=>[...(pixels[Math.min(pixels.length-1,Math.floor((k+.5)*pixels.length/count))]||[0,0,0])]);
+ for(let pass=0;pass<9;pass++){
+  const sum=centers.map(()=>[0,0,0,0]);
+  for(const value of pixels){
+   let win=0,dist=Infinity;
+   centers.forEach((center,index)=>{
+    const distance=(value[0]-center[0])**2+(value[1]-center[1])**2+(value[2]-center[2])**2;
+    if(distance<dist){dist=distance;win=index}
+   });
+   for(let channel=0;channel<3;channel++)sum[win][channel]+=value[channel];
+   sum[win][3]++;
+  }
+  centers=centers.map((center,index)=>sum[index][3]?sum[index].slice(0,3).map(value=>Math.round(value/sum[index][3])):center);
+ }
+ s.customColors=centers.sort((a,b)=>lumin(...a)-lumin(...b)).map(value=>"#"+value.map(channel=>Math.round(channel).toString(16).padStart(2,"0")).join(""));
+ pal.custom.c=s.customColors;s.palette="custom";store("ditherlab-colors",s.customColors);
+ if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
+ initPalettes();renderActivePaletteEditor();sync();render();say("Из фото извлечено цветов: "+count);
+}
 function exportPalette(){const active=pal[s.palette]||pal.custom;download(new Blob([JSON.stringify({format:"tgrmlither-palette",version:1,name:active.name||"My Colors",colors:active.c.map(v=>typeof v==="string"?v:"#"+v.map(n=>Math.round(n).toString(16).padStart(2,"0")).join(""))},null,2)],{type:"application/json"}),"TGRMLither-palette.json")}
 
 function persistActivePaletteColors(key,values){
