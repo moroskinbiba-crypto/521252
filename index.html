@@ -3584,10 +3584,12 @@ function initAnimationStudio(){
 }
 function shuffleUnlockedPalette(){
  const key=pal[s.palette]?s.palette:"custom",current=(pal[key]?.c||[]).map(value=>typeof value==="string"?value:"#"+value.map(channel=>Math.round(channel).toString(16).padStart(2,"0")).join(""));
- const locks=Array.isArray(paletteLocks[key])?paletteLocks[key]:[];
- if(!current.length){say("Нет активной палитры");return}if(current.every((value,index)=>locks[index])){say("Все цвета заблокированы");return}
- const next=current.map((color,index)=>locks[index]?color:"#"+Array.from({length:3},()=>Math.floor(32+Math.random()*208).toString(16).padStart(2,"0")).join(""));
- if(!persistActivePaletteColors(key,next)){say("Не удалось сохранить новую палитру");return}
+ const locks=Array.isArray(paletteLocks[key])?paletteLocks[key]:[],indices=current.map((value,index)=>index).filter(index=>!locks[index]);
+ if(!current.length){say("Нет активной палитры");return}if(!indices.length){say("Все цвета заблокированы");return}
+ const shuffled=indices.map(index=>current[index]);
+ for(let index=shuffled.length-1;index>0;index--){const swap=Math.floor(Math.random()*(index+1));[shuffled[index],shuffled[swap]]=[shuffled[swap],shuffled[index]]}
+ const next=[...current];indices.forEach((index,position)=>next[index]=shuffled[position]);
+ if(!persistActivePaletteColors(key,next)){say("Не удалось сохранить палитру");return}
  initPalettes();renderActivePaletteEditor();renderPaletteLibrary();sync();render();say("Перемешаны незаблокированные цвета");
 }
 async function safeSvgFileCanvas(file,signal){
