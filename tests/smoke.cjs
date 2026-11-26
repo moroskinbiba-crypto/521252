@@ -1853,6 +1853,132 @@ async function downloadFrom(page, selector) {
       "preset preview rendering should not throw when a palette contains more than four colors");
     await presetPalettePage.close();
 
+    // Animation Studio: keyframe interpolation, reload/project persistence and PNG-sequence ZIP.
+    const animationPage = await browser.newPage({
+      viewport: { width: 1280, height: 900 }, acceptDownloads: true
+    });
+    const animationErrors = [];
+    animationPage.on("pageerror", error => animationErrors.push(error.stack || error.message));
+    await animationPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await animationPage.waitForFunction(() =>
+      document.querySelector("#output")?.width > 0 &&
+      typeof window.TGRMAnimationEngine === "object" &&
+      typeof window.__tgrmAnimationStatus === "function"
+    );
+    assert.equal(await animationPage.locator("#animationDock").isVisible(), true,
+      "the universal animation timeline should be available in the Editor");
+    await animationPage.locator("#animationTrack").selectOption("threshold");
+    const setAnimationTime = async value => {
+      await animationPage.locator("#animationScrub").evaluate((el, next) => {
+        el.value = String(next);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      }, value);
+      await animationPage.waitForTimeout(120);
+    };
+    await setAnimationTime(0);
+    await animationPage.locator("#animationAddKeyframe").click();
+    await animationPage.waitForFunction(() =>
+      window.__tgrmAnimationStatus().clip.tracks.threshold?.keyframes.length === 1
+    );
+    await animationPage.locator("#threshold").evaluate(el => {
+      el.value = "40";
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await setAnimationTime(1000);
+    await animationPage.locator("#animationAddKeyframe").click();
+    await animationPage.waitForFunction(() =>
+      window.__tgrmAnimationStatus().clip.tracks.threshold?.keyframes.length === 2
+    );
+    await setAnimationTime(500);
+    await animationPage.waitForFunction(() =>
+      Number(document.querySelector("#threshold")?.value) === 20
+    );
+    assert.deepEqual(animationErrors, [],
+      "keyframe creation and interpolation should not throw browser runtime errors");
+
+    await animationPage.reload({ waitUntil: "load" });
+    await animationPage.waitForFunction(() =>
+      document.querySelector("#output")?.width > 0 &&
+      typeof window.__tgrmAnimationStatus === "function"
+    );
+    assert.equal(await animationPage.evaluate(() =>
+      window.__tgrmAnimationStatus().clip.tracks.threshold?.keyframes.length
+    ), 2, "animation clips should survive a browser reload");
+
+    const animationProjectDownload = await downloadFrom(animationPage, "#saveProjectMenu");
+    const animationProject = JSON.parse(animationProjectDownload.bytes.toString("utf8"));
+    assert.equal(animationProject.animation.tracks.threshold.keyframes.length, 2,
+      "project JSON should include the animation clip");
+    await animationPage.locator("#projectInput").setInputFiles({
+      name: "animation-roundtrip.tgrmlither.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(animationProject))
+    });
+    await animationPage.waitForFunction(() =>
+      document.querySelector("#filename")?.textContent.includes("demo-image") &&
+      window.__tgrmAnimationStatus().clip.tracks.threshold?.keyframes.length === 2,
+      null, { timeout: 15000 }
+    );
+
+    await animationPage.locator("#animationDuration").fill("0.25");
+    await animationPage.locator("#animationFps").selectOption("12");
+    const sequenceDownload = await downloadFrom(animationPage, "#animationExportFrames");
+    assert.match(sequenceDownload.download.suggestedFilename(), /animation-frames\.zip$/i);
+    assert.equal(sequenceDownload.bytes.subarray(0, 4).toString("binary"), "PK\x03\x04",
+      "PNG sequence export should produce a valid ZIP local-file header");
+    assert.deepEqual(animationErrors, [],
+      "animation project restore and frame-sequence export should not throw runtime errors");
+    await animationPage.close();
+
+    // Palette colour locks must survive a shuffle and reload; source palette mode must remain valid.
+    const paletteLockPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const paletteLockErrors = [];
+    paletteLockPage.on("pageerror", error => paletteLockErrors.push(error.stack || error.message));
+    await paletteLockPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await paletteLockPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const lockedColour = await paletteLockPage.locator('#activePaletteEditor input[data-palette-color="0"]').inputValue();
+    await paletteLockPage.locator(".active-palette-lock").first().click();
+    await paletteLockPage.locator("#shuffleUnlockedPalette").click();
+    assert.equal(
+      await paletteLockPage.locator('#activePaletteEditor input[data-palette-color="0"]').inputValue(),
+      lockedColour,
+      "locked swatches should not change when unlocked colours are shuffled"
+    );
+    await paletteLockPage.reload({ waitUntil: "load" });
+    await paletteLockPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    assert.equal(
+      await paletteLockPage.locator(".active-palette-lock").first().getAttribute("aria-pressed"),
+      "true",
+      "palette locks should survive reload"
+    );
+    await paletteLockPage.locator("#colorMode").selectOption("source");
+    assert.equal(await paletteLockPage.locator("#colorMode").inputValue(), "source",
+      "source palette mode should remain a valid workspace setting");
+    assert.deepEqual(paletteLockErrors, [],
+      "palette lock, shuffle and source palette workflows should not throw runtime errors");
+    await paletteLockPage.close();
+
+    // Main editor SVG import sanitizes script and event-handler content before rasterization.
+    const svgSafetyPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const svgSafetyErrors = [];
+    svgSafetyPage.on("pageerror", error => svgSafetyErrors.push(error.stack || error.message));
+    await svgSafetyPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await svgSafetyPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    await svgSafetyPage.locator("#imageInput").setInputFiles({
+      name: "sanitized-vector.svg",
+      mimeType: "image/svg+xml",
+      buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="100" onload="window.__tgrmSvgPwned=1"><script>window.__tgrmSvgPwned=2</script><rect width="160" height="100" fill="#cafa6a"/></svg>')
+    });
+    await svgSafetyPage.waitForFunction(() =>
+      document.querySelector("#filename")?.textContent.includes("sanitized-vector.svg")
+    );
+    assert.equal(await svgSafetyPage.evaluate(() => window.__tgrmSvgPwned), undefined,
+      "SVG scripts and event handlers must not execute during import");
+    assert.deepEqual(svgSafetyErrors, [],
+      "safe SVG import should not throw runtime errors");
+    await svgSafetyPage.close();
+
     assert.deepEqual(errors, [], "the app should not throw uncaught browser runtime errors");
     console.log("TGRMLither smoke tests passed: workspace isolation, click-tested effects, responsive layout, every algorithm, project/palette/image exports, video timeline/WebM export, and batch processing.");
   } finally {
