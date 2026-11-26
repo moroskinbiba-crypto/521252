@@ -1938,6 +1938,7 @@ async function downloadFrom(page, selector) {
     await paletteLockPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
     await paletteLockPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
     const lockedColour = await paletteLockPage.locator('#activePaletteEditor input[data-palette-color="0"]').inputValue();
+    const unlockedBefore = await paletteLockPage.locator('#activePaletteEditor input[data-palette-color]:not([data-palette-color="0"])').evaluateAll(nodes => nodes.map(node => node.value).sort());
     await paletteLockPage.locator(".active-palette-lock").first().click();
     await paletteLockPage.locator("#shuffleUnlockedPalette").click();
     assert.equal(
@@ -1945,6 +1946,9 @@ async function downloadFrom(page, selector) {
       lockedColour,
       "locked swatches should not change when unlocked colours are shuffled"
     );
+    const unlockedAfter = await paletteLockPage.locator('#activePaletteEditor input[data-palette-color]:not([data-palette-color="0"])').evaluateAll(nodes => nodes.map(node => node.value).sort());
+    assert.deepEqual(unlockedAfter, unlockedBefore,
+      "shuffle should permute unlocked swatches without inventing or losing colours");
     await paletteLockPage.reload({ waitUntil: "load" });
     await paletteLockPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
     assert.equal(
