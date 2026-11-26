@@ -2062,7 +2062,7 @@ function loadImage(c,n,isDemo=false){
 }
 function refresh(){if(!src)return;$("filename").textContent=srcName+" / "+src.width+" × "+src.height;$("dimensions").textContent=src.width+" × "+src.height+" px";$("statAlgorithm").textContent=labels[s.algorithm];$("statPalette").textContent=pal[s.palette].name;$("statScale").textContent="×"+s.scale;const status=$("fileStatus");if(status){status.textContent=resultDirty?"Есть изменения":demo?"Демо-пример":lastExported?"Результат экспортирован":"Исходный файл";status.dataset.state=resultDirty?"dirty":demo?"demo":lastExported?"exported":"source"}}
 function queueRender(){if(renderFrame)return;renderFrame=requestAnimationFrame(()=>{renderFrame=0;render()})}
-function render(){
+function renderImmediate(){
  if(renderFrame){cancelAnimationFrame(renderFrame);renderFrame=0}
  if(!src)return;
  if(canvasRecoveryActive){setProcessingPending(false);return}
@@ -2100,6 +2100,7 @@ function render(){
  settleProcessingPreview();
  if(renderMode==="video")renderVideoFrame();
 }
+function render(){if(animationPlaying||animationExporting||animationPreviewActive||previewBehaviour==="live"){if(previewRenderTimer){clearTimeout(previewRenderTimer);previewRenderTimer=0}renderImmediate();return}if(previewRenderTimer)clearTimeout(previewRenderTimer);const delay=previewBehaviour==="still"?180:48;previewRenderTimer=setTimeout(()=>{previewRenderTimer=0;renderImmediate()},delay)}
 function zoom(){if($("zoom").value==="fit"){out.style.width="auto";out.style.height="auto";out.style.maxWidth="100%";out.style.maxHeight="100%"}else{let z=Number($("zoom").value)/100;out.style.maxWidth="none";out.style.maxHeight="none";out.style.width=Math.round(out.width*z)+"px";out.style.height=Math.round(out.height*z)+"px"}updateCompareUI()}
 function replaceLostCanvas(canvas){
  if(!canvas?.parentNode)return null;
@@ -3379,6 +3380,233 @@ async function exportProcessedVideo(){
  }
 }
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
+const ANIMATION_STORAGE_KEY="tgrmlither-animation";
+const PREVIEW_BEHAVIOUR_KEY="tgrmlither-preview-behaviour";
+const PALETTE_LOCKS_KEY="tgrmlither-palette-locks";
+const AnimationEngine=window.TGRMAnimationEngine;
+let animationClip=AnimationEngine.normalise(loadStore(ANIMATION_STORAGE_KEY,null));
+let animationScrubBase=null,animationCurrentMs=0,animationPlaying=false,animationRaf=0,animationPlayBase=null,animationPlayEpoch=0,animationLastFrameAt=0,animationFrameBusy=false,animationPreviewActive=false,animationExporting=false,animationCancelRequested=false,animationScrubRequest=0;
+let paletteLocks=loadStore(PALETTE_LOCKS_KEY,{});
+let previewBehaviour=loadStore(PREVIEW_BEHAVIOUR_KEY,"live");
+if(!["live","balanced","still"].includes(previewBehaviour))previewBehaviour="live";
+let previewRenderTimer=0;
+const ANIMATION_EXPORT_MAX_FRAMES=600,ANIMATION_EXPORT_MAX_BYTES=48*1024*1024;
+function animationTrackLabel(path){
+ const labels={algorithm:"Алгоритм",scale:"Шаг дизеринга",markScale:"Размер паттерна",blend:"Смешивание с оригиналом",smoothing:"Сглаживание",levels:"Количество цветов",threshold:"Порог",patternAngle:"Угол паттерна",patternShape:"Форма точки",depth:"Глубина",contrast:"Контраст",brightness:"Яркость",midtones:"Средние тона",highlights:"Света",blur:"Размытие",invert:"Инверсия",palette:"Палитра",colorMode:"Цветовой режим",qualityMode:"Качество",serpentine:"Serpentine",shape:"Форма Shape Lab",jitter:"Вариативность формы",shapeDistribution:"Распределение формы",shapeRotation:"Поворот Shape Lab",asciiWidth:"Ширина ASCII",asciiDepth:"Глубина ASCII",asciiCellSize:"Размер ячейки ASCII",asciiOffset:"Смещение ASCII",neoGlowLength:"Длина Neo Glow",neoGlowBrightness:"Яркость Neo Glow",neoGlowVisibility:"Видимость Neo Glow",neoGlowPhase:"Фаза Neo Glow"};
+ if(path.startsWith("effectStrength."))return "Эффект · "+path.slice(15);
+ if(path.startsWith("algorithmLayers."))return "Слой алгоритма · "+path.split(".")[1]+" · opacity";
+ if(path.startsWith("shapeBands.")){const parts=path.split(".");return "Полоса "+(Number(parts[1])+1)+" · "+(parts[2]==="size"?"размер":"поворот")}
+ return labels[path]||path;
+}
+function animationPersist(){
+ animationClip=AnimationEngine.normalise(animationClip);
+ if(!store(ANIMATION_STORAGE_KEY,animationClip)){animationSetStatus("Не удалось сохранить клип. Экспортируйте резервную копию.");return false}
+ return true;
+}
+function animationSelectedPath(){return $("animationTrack")?.value||"threshold"}
+function animationFormatTime(ms){const n=Math.max(0,Number(ms)||0);return String(Math.floor(n/60000)).padStart(2,"0")+":"+((n%60000)/1000).toFixed(1).padStart(4,"0")}
+function animationSetStatus(message){const node=$("animationSelectedTrackInfo");if(node)node.textContent=message}
+function animationRefreshTrackOptions(){
+ const select=$("animationTrack");if(!select)return;
+ const prior=select.value,paths=AnimationEngine.listPaths(s);select.innerHTML="";
+ paths.forEach(path=>{const option=document.createElement("option");option.value=path;option.textContent=animationTrackLabel(path);select.append(option)});
+ select.value=paths.includes(prior)?prior:paths.includes("threshold")?"threshold":paths[0]||"";
+ animationRefreshSelectedTrack();
+}
+function animationRefreshSelectedTrack(){
+ const path=animationSelectedPath(),track=animationClip.tracks[path],osc=track?.oscillator;
+ $("animationWave").value=osc?.wave||"sine";$("animationAmplitude").value=String(osc?.amount??12);$("animationFrequency").value=String(osc?.frequency??1);
+ $("animationOscillator").textContent=osc?"− Убрать осциллятор":"＋ Осциллятор";
+ const frames=track?.keyframes?.length||0;
+ animationSetStatus(path?animationTrackLabel(path)+" · "+frames+" ключевых кадров"+(osc?" · Temporal Variation включён":""):"Параметры недоступны для анимации.");
+}
+function animationRenderLanes(){
+ const box=$("animationLanes");if(!box)return;box.innerHTML="";
+ const entries=Object.entries(animationClip.tracks).filter(([,track])=>track.keyframes.length||track.oscillator);
+ if(!entries.length){const empty=document.createElement("div");empty.className="animation-empty";empty.textContent="Добавьте ключевой кадр для создания первой дорожки.";box.append(empty);return}
+ for(const [path,track] of entries){
+  const row=document.createElement("div");row.className="animation-lane";
+  const name=document.createElement("button");name.type="button";name.className="animation-lane-name"+(path===animationSelectedPath()?" active":"");name.textContent=animationTrackLabel(path);name.title=path;name.onclick=()=>{$("animationTrack").value=path;animationRefreshSelectedTrack();animationRenderLanes()};
+  const bar=document.createElement("div");bar.className="animation-lane-track";
+  track.keyframes.forEach(frame=>{const pin=document.createElement("button");pin.type="button";pin.className="animation-key";pin.style.left=(frame.timeMs/animationClip.durationMs*100)+"%";pin.title=animationFormatTime(frame.timeMs)+" · "+String(frame.value);pin.setAttribute("aria-label","Ключевой кадр "+animationFormatTime(frame.timeMs));pin.onclick=()=>{$("animationTrack").value=path;animationRefreshSelectedTrack();animationSetTime(frame.timeMs,true);animationRenderLanes()};bar.append(pin)});
+  if(track.oscillator){const mark=document.createElement("span");mark.className="animation-oscillator";mark.title="Temporal Variation";bar.append(mark)}
+  row.append(name,bar);box.append(row);
+ }
+}
+function animationRefreshUI(){
+ if(!$("animationScrub"))return;
+ $("animationDuration").value=String(animationClip.durationMs/1000);$("animationFps").value=String(animationClip.fps);$("animationLoop").checked=animationClip.loop;
+ $("animationScrub").max=String(animationClip.durationMs);$("animationScrub").value=String(animationCurrentMs);
+ $("animationTimeLabel").textContent=animationFormatTime(animationCurrentMs);$("animationEndLabel").textContent=animationFormatTime(animationClip.durationMs);
+ animationRenderLanes();animationRefreshSelectedTrack();
+}
+function animationSetTime(timeMs,apply=true,baseOverride=null){
+ animationCurrentMs=Math.max(0,Math.min(animationClip.durationMs,Math.round(Number(timeMs)||0)));
+ $("animationScrub").value=String(animationCurrentMs);$("animationTimeLabel").textContent=animationFormatTime(animationCurrentMs);
+ if(!apply||!src)return Promise.resolve(false);
+ const base=baseOverride||animationScrubBase||cloneSettings(s);
+ s=cloneSettings(AnimationEngine.evaluate(base,animationClip,animationCurrentMs));
+ animationPreviewActive=true;sync();render();animationPreviewActive=false;
+ return waitForProcessingPreview().then(()=>true).catch(()=>false);
+}
+function animationCaptureBase(){if(!src){say("Сначала откройте изображение");return}animationScrubBase=cloneSettings(s);animationSetStatus("Базовые настройки текущего рабочего пространства сохранены.");say("База анимации обновлена")}
+function animationAddKeyframe(){
+ if(!src){say("Сначала откройте изображение");return}
+ const path=animationSelectedPath();if(!path)return;
+ const value=AnimationEngine.getPath(s,path);if(value===undefined){say("Этот параметр сейчас недоступен");return}
+ animationScrubBase=cloneSettings(s);
+ try{animationClip=AnimationEngine.setKeyframe(animationClip,path,animationCurrentMs,value,$("animationEasing").value)}catch(error){say(error.message||"Не удалось добавить ключевой кадр");return}
+ if(!animationPersist())return;animationRefreshUI();animationSetStatus(animationTrackLabel(path)+" · ключевой кадр "+animationFormatTime(animationCurrentMs));say("Ключевой кадр сохранён");
+}
+function animationDeleteKeyframe(){
+ const path=animationSelectedPath(),track=animationClip.tracks[path];if(!track?.keyframes?.length){say("На выбранной дорожке нет ключевых кадров");return}
+ const nearest=track.keyframes.reduce((best,item)=>Math.abs(item.timeMs-animationCurrentMs)<Math.abs(best.timeMs-animationCurrentMs)?item:best,track.keyframes[0]);
+ if(Math.abs(nearest.timeMs-animationCurrentMs)>Math.max(100,animationClip.durationMs*.05)){say("Рядом с курсором нет ключевого кадра");return}
+ animationClip=AnimationEngine.removeKeyframe(animationClip,path,nearest.timeMs);if(!animationPersist())return;animationRefreshUI();say("Ключевой кадр удалён");
+}
+function animationToggleOscillator(){
+ const path=animationSelectedPath();if(!path)return;
+ const existing=animationClip.tracks[path]?.oscillator;
+ try{animationClip=AnimationEngine.setOscillator(animationClip,path,existing?null:{wave:$("animationWave").value,amount:Number($("animationAmplitude").value),frequency:Number($("animationFrequency").value)})}catch(error){say(error.message||"Неверные параметры осциллятора");return}
+ if(!animationPersist())return;animationRefreshUI();say(existing?"Temporal Variation выключен":"Temporal Variation включён");
+}
+function animationUpdateOscillator(){
+ const path=animationSelectedPath();if(!animationClip.tracks[path]?.oscillator)return;
+ try{animationClip=AnimationEngine.setOscillator(animationClip,path,{wave:$("animationWave").value,amount:Number($("animationAmplitude").value),frequency:Number($("animationFrequency").value)});animationPersist();animationRefreshUI()}catch(error){say(error.message||"Неверные параметры осциллятора")}
+}
+function animationStopPlayback(restore=true){
+ if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;animationFrameBusy=false;
+ if(animationPlayBase&&restore){s=cloneSettings(animationPlayBase);animationScrubBase=cloneSettings(animationPlayBase);animationPreviewActive=false;sync();render()}
+ animationPlayBase=null;$("animationPlay").disabled=false;$("animationStop").disabled=true;
+}
+function animationPlay(){
+ if(animationPlaying){animationStopPlayback(true);return}
+ if(!src){say("Сначала откройте изображение");return}
+ const hasContent=Object.values(animationClip.tracks).some(track=>track.keyframes.length||track.oscillator);
+ if(!hasContent){say("Сначала добавьте ключевые кадры или Temporal Variation");return}
+ animationPlayBase=cloneSettings(animationScrubBase||s);animationPlaying=true;animationCurrentMs=0;animationPlayEpoch=performance.now();animationLastFrameAt=0;animationFrameBusy=false;
+ $("animationPlay").disabled=true;$("animationStop").disabled=false;
+ const tick=now=>{
+  if(!animationPlaying)return;
+  const interval=1000/animationClip.fps,elapsed=now-animationPlayEpoch;let time=elapsed;
+  if(time>=animationClip.durationMs){if(animationClip.loop){animationPlayEpoch+=animationClip.durationMs;time=elapsed%animationClip.durationMs}else{time=animationClip.durationMs;animationSetTime(time,true,animationPlayBase).finally(()=>animationStopPlayback(true));return}}
+  if(!animationFrameBusy&&now-animationLastFrameAt>=interval){animationFrameBusy=true;animationLastFrameAt=now;animationSetTime(time,true,animationPlayBase).finally(()=>{animationFrameBusy=false})}
+  animationRaf=requestAnimationFrame(tick);
+ };
+ animationRaf=requestAnimationFrame(tick);say("Воспроизведение анимации");
+}
+async function animationRenderFrameAt(timeMs,base){
+ animationCurrentMs=Math.max(0,Math.min(animationClip.durationMs,Math.round(timeMs)));
+ s=cloneSettings(AnimationEngine.evaluate(base,animationClip,animationCurrentMs));
+ animationPreviewActive=true;sync();render();animationPreviewActive=false;await waitForProcessingPreview();
+ if(!out||!out.width||!out.height)throw Error("Предпросмотр не готов к экспорту");
+}
+function animationRestoreAfterExport(base){
+ s=cloneSettings(base);animationScrubBase=cloneSettings(base);animationCurrentMs=0;animationPreviewActive=false;animationExporting=false;sync();render();animationRefreshUI();
+ $("animationExportFrames").disabled=false;$("animationExportVideo").disabled=false;$("animationCancelExport").disabled=true;
+}
+async function animationExportSequence(){
+ if(animationExporting||animationPlaying)return;if(!src){say("Сначала откройте изображение");return}
+ const frames=Math.ceil(animationClip.durationMs/1000*animationClip.fps);
+ if(frames<2){say("Для последовательности нужно минимум два кадра");return}if(frames>ANIMATION_EXPORT_MAX_FRAMES){say("Слишком много кадров. Максимум 600; уменьшите FPS или длительность.");return}
+ const base=cloneSettings(animationScrubBase||s),entries=[];let totalBytes=0,completed=0;
+ animationExporting=true;animationCancelRequested=false;$("animationExportFrames").disabled=true;$("animationExportVideo").disabled=true;$("animationCancelExport").disabled=false;
+ try{
+  for(let index=0;index<frames;index++){
+   if(animationCancelRequested)break;
+   const time=Math.min(animationClip.durationMs-1,Math.round(index*1000/animationClip.fps));await animationRenderFrameAt(time,base);
+   const blob=await new Promise(resolve=>out.toBlob(resolve,"image/png"));if(!blob)throw Error("Не удалось получить PNG кадра");
+   totalBytes+=blob.size;if(totalBytes>ANIMATION_EXPORT_MAX_BYTES)throw Error("Последовательность превысила лимит 48 МБ. Уменьшите FPS, длительность или размер исходника.");
+   entries.push({name:"frame_"+String(index+1).padStart(5,"0")+".png",blob});completed++;
+   $("animationProgress").style.width=Math.round(completed/frames*100)+"%";$("animationExportStatus").textContent="PNG · "+completed+" / "+frames;
+   await new Promise(resolve=>setTimeout(resolve,0));
+  }
+  if(!entries.length)throw Error("Экспорт отменён до создания первого кадра");
+  const zip=await buildZipArchive(entries);download(zip,slug(srcName)+"-animation-frames.zip");
+  $("animationExportStatus").textContent=(animationCancelRequested?"Частичный архив · ":"Готово · ")+completed+" PNG";say((animationCancelRequested?"Частичный PNG Sequence экспортирован":"PNG Sequence экспортирован")+" · "+completed+" кадров");
+ }catch(error){$("animationExportStatus").textContent=error.message||"Ошибка экспорта";say(error.message||"Не удалось экспортировать кадры")}
+ finally{animationRestoreAfterExport(base);$("animationProgress").style.width="0%"}
+}
+async function animationExportVideo(){
+ if(animationExporting||animationPlaying)return;if(!src){say("Сначала откройте изображение");return}
+ if(typeof MediaRecorder==="undefined"||typeof out.captureStream!=="function"){say("Запись видео этим браузером не поддерживается");return}
+ const frames=Math.ceil(animationClip.durationMs/1000*animationClip.fps);
+ if(frames<2||frames>ANIMATION_EXPORT_MAX_FRAMES){say("Количество кадров должно быть от 2 до 600");return}
+ const candidates=["video/mp4;codecs=avc1.42E01E","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=candidates.find(type=>MediaRecorder.isTypeSupported(type));
+ if(!mime){say("Браузер не предоставляет поддерживаемый MP4/WebM кодек");return}
+ const base=cloneSettings(animationScrubBase||s);let stream=null,recorder=null,chunks=[];
+ animationExporting=true;animationCancelRequested=false;$("animationExportFrames").disabled=true;$("animationExportVideo").disabled=true;$("animationCancelExport").disabled=false;
+ try{
+  stream=out.captureStream(0);const track=stream.getVideoTracks()[0],manualFrames=!!track?.requestFrame;
+  if(!manualFrames){stream.getTracks().forEach(item=>item.stop());stream=out.captureStream(animationClip.fps)}
+  recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8000000});
+  const stopped=new Promise((resolve,reject)=>{recorder.ondataavailable=event=>{if(event.data&&event.data.size)chunks.push(event.data)};recorder.onerror=()=>reject(new Error("Ошибка кодирования видео"));recorder.onstop=resolve});
+  recorder.start(250);const frameInterval=1000/animationClip.fps;
+  for(let index=0;index<frames;index++){
+   if(animationCancelRequested)break;
+   const started=performance.now(),time=Math.min(animationClip.durationMs-1,Math.round(index*frameInterval));await animationRenderFrameAt(time,base);
+   if(manualFrames)track.requestFrame();const remaining=frameInterval-(performance.now()-started);if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
+   $("animationProgress").style.width=Math.round((index+1)/frames*100)+"%";$("animationExportStatus").textContent="Видео · "+(index+1)+" / "+frames;
+  }
+  if(recorder.state!=="inactive")recorder.stop();await stopped;
+  const blob=new Blob(chunks,{type:recorder.mimeType||mime});if(!blob.size)throw Error("Видеофайл пуст");
+  const mp4=(recorder.mimeType||mime).toLowerCase().includes("mp4"),extension=mp4?"mp4":"webm";download(blob,slug(srcName)+"-animation."+extension);
+  $("animationExportStatus").textContent=(animationCancelRequested?"Частичное видео · ":"Готово · ")+extension.toUpperCase();say((mp4?"MP4":"WebM")+(animationCancelRequested?" · частичный экспорт":" экспортирован"));
+ }catch(error){if(recorder&&recorder.state!=="inactive")try{recorder.stop()}catch(stopError){}$("animationExportStatus").textContent=error.message||"Ошибка записи";say(error.message||"Не удалось записать видео")}
+ finally{if(stream)stream.getTracks().forEach(track=>track.stop());chunks=[];animationRestoreAfterExport(base);$("animationProgress").style.width="0%"}
+}
+function initAnimationStudio(){
+ if(!$("animationDock")||!AnimationEngine)return;
+ animationClip=AnimationEngine.normalise(loadStore(ANIMATION_STORAGE_KEY,animationClip));animationScrubBase=cloneSettings(s);
+ $("animationPreviewMode").value=previewBehaviour;animationRefreshTrackOptions();animationRefreshUI();
+ $("animationTrack").onchange=()=>{animationRefreshSelectedTrack();animationRenderLanes()};
+ $("animationAddKeyframe").onclick=animationAddKeyframe;$("animationDeleteKeyframe").onclick=animationDeleteKeyframe;$("animationCaptureBase").onclick=animationCaptureBase;$("animationOscillator").onclick=animationToggleOscillator;
+ ["animationWave","animationAmplitude","animationFrequency"].forEach(id=>$(id).onchange=animationUpdateOscillator);
+ $("animationDuration").onchange=()=>{animationClip.durationMs=Math.round(clamp(Number($("animationDuration").value)||5,.25,60)*1000);animationClip=AnimationEngine.normalise(animationClip);animationCurrentMs=Math.min(animationCurrentMs,animationClip.durationMs);animationPersist();animationRefreshUI()};
+ $("animationFps").onchange=()=>{animationClip.fps=clamp(Number($("animationFps").value)||24,1,60);animationPersist();animationRefreshUI()};
+ $("animationLoop").onchange=()=>{animationClip.loop=$("animationLoop").checked;animationPersist()};
+ $("animationScrub").oninput=()=>{const value=Number($("animationScrub").value);animationCurrentMs=value;$("animationTimeLabel").textContent=animationFormatTime(value);if(animationPlaying)return;if(animationScrubRequest)cancelAnimationFrame(animationScrubRequest);animationScrubRequest=requestAnimationFrame(()=>{animationScrubRequest=0;animationSetTime(value,true)})};
+ $("animationPlay").onclick=animationPlay;$("animationStop").onclick=()=>animationStopPlayback(true);
+ $("animationExportFrames").onclick=animationExportSequence;$("animationExportVideo").onclick=animationExportVideo;$("animationCancelExport").onclick=()=>{animationCancelRequested=true;$("animationExportStatus").textContent="Остановка после текущего кадра…"};
+ $("animationPreviewMode").onchange=()=>{previewBehaviour=$("animationPreviewMode").value;store(PREVIEW_BEHAVIOUR_KEY,previewBehaviour);say("Предпросмотр: "+previewBehaviour)};
+ $("animationDock").classList.toggle("hidden",!["editor","shape","script"].includes(mode));
+ window.__tgrmAnimationStatus=()=>({clip:AnimationEngine.normalise(animationClip),timeMs:animationCurrentMs,playing:animationPlaying,previewBehaviour});
+ window.addEventListener("pagehide",()=>{if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false});
+}
+function shuffleUnlockedPalette(){
+ const key=pal[s.palette]?s.palette:"custom",current=(pal[key]?.c||[]).map(value=>typeof value==="string"?value:"#"+value.map(channel=>Math.round(channel).toString(16).padStart(2,"0")).join(""));
+ const locks=Array.isArray(paletteLocks[key])?paletteLocks[key]:[];
+ if(!current.length){say("Нет активной палитры");return}if(current.every((value,index)=>locks[index])){say("Все цвета заблокированы");return}
+ const next=current.map((color,index)=>locks[index]?color:"#"+Array.from({length:3},()=>Math.floor(32+Math.random()*208).toString(16).padStart(2,"0")).join(""));
+ if(!persistActivePaletteColors(key,next)){say("Не удалось сохранить новую палитру");return}
+ initPalettes();renderActivePaletteEditor();renderPaletteLibrary();sync();render();say("Перемешаны незаблокированные цвета");
+}
+async function safeSvgFileCanvas(file,signal){
+ const text=await readLimitedText(file,MAX_SHAPE_SVG_BYTES,"SVG-файл больше 500 КБ");if(signal?.aborted)throw new DOMException("Загрузка отменена","AbortError");
+ const documentXml=new DOMParser().parseFromString(text,"image/svg+xml"),root=documentXml.documentElement;
+ if(documentXml.querySelector("parsererror")||!root||root.localName.toLowerCase()!=="svg")throw Error("Некорректный SVG-документ");
+ root.querySelectorAll("script,foreignObject,iframe,object,embed,audio,video").forEach(node=>node.remove());
+ for(const node of [root,...root.querySelectorAll("*")])for(const attribute of Array.from(node.attributes||[])){
+  const name=attribute.name.toLowerCase(),value=attribute.value.trim();
+  if(name.startsWith("on")||name==="src"||name==="formaction"){node.removeAttribute(attribute.name);continue}
+  if(name==="href"||name==="xlink:href"){if(!value.startsWith("#"))node.removeAttribute(attribute.name);continue}
+  if(/javascript:|https?:|\/\//i.test(value)||(/url\s*\(/i.test(value)&&!/url\(\s*['"]?#[-\w:.]+['"]?\s*\)/i.test(value)))node.removeAttribute(attribute.name);
+ }
+ root.querySelectorAll("style").forEach(node=>{if(/@import|https?:|url\s*\(\s*['"]?(?!#)/i.test(node.textContent||""))node.remove()});
+ const viewBox=(root.getAttribute("viewBox")||"0 0 300 150").trim().split(/[\s,]+/).map(Number);
+ if(viewBox.length!==4||!viewBox.every(Number.isFinite)||viewBox[2]<=0||viewBox[3]<=0)throw Error("Некорректный SVG viewBox");
+ if(!root.hasAttribute("width"))root.setAttribute("width",String(viewBox[2]));if(!root.hasAttribute("height"))root.setAttribute("height",String(viewBox[3]));
+ const serialized=new XMLSerializer().serializeToString(root),blob=new Blob([serialized],{type:"image/svg+xml"}),url=URL.createObjectURL(blob),image=new Image();
+ return new Promise((resolve,reject)=>{
+  let settled=false,timer=0;const cleanup=()=>{if(settled)return false;settled=true;clearTimeout(timer);image.onload=null;image.onerror=null;signal?.removeEventListener("abort",abort);URL.revokeObjectURL(url);return true};
+  const abort=()=>{if(cleanup()){image.src="";reject(new DOMException("Загрузка отменена","AbortError"))};
+  if(signal)signal.addEventListener("abort",abort,{once:true});
+  image.onload=()=>{if(!cleanup())return;try{resolve(canvasFromImage(image))}catch(error){reject(error)}};
+  image.onerror=()=>{if(cleanup())reject(Error("Не удалось растрировать SVG"))};
+  timer=setTimeout(()=>{if(cleanup()){image.src="";reject(Error("SVG не удалось декодировать за отведённое время"))}},imageDecodeTimeoutMs);image.src=url;
+ });
+}
+
 function init(){initProcessingWorker();bindUserBackupControls();bindCanvasRecovery();window.__tgrmlitherWaitForPreview=waitForProcessingPreview;window.__tgrmlitherWorkerStatus=()=>({available:!!processingWorker,failed:processingWorkerFailed,threshold:WORKER_PIXEL_THRESHOLD,timeoutMs:workerRequestTimeoutMs});
  if(["localhost","127.0.0.1","::1"].includes(location.hostname)){
   window.__tgrmlitherSetWorkerTimeoutForTests=ms=>{
