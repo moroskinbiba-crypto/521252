@@ -1,6 +1,6 @@
 const CACHE_PREFIX = "tgrmlither-";
-const CACHE = "tgrmlither-v18";
-const ASSETS = ["./", "./index.html", "./processing-worker.js", "./manifest.webmanifest", "./icon.svg"];
+const CACHE = "tgrmlither-v19";
+const ASSETS = ["./", "./index.html", "./processing-worker.js", "./animation-engine.js", "./manifest.webmanifest", "./icon.svg"];
 
 function inScope(url) {
   return url.origin === self.location.origin && url.href.startsWith(self.registration.scope);
