@@ -5,11 +5,13 @@
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const clone = value => JSON.parse(JSON.stringify(value));
   const RESERVED = new Set(["__proto__", "prototype", "constructor"]);
+  const EFFECT_KEYS = new Set(["scanlines", "glow", "chromatic", "vignette", "noise", "epsilon", "jpeg", "lick", "stress", "modlines"]);
 
   function safePath(path, settings) {
     if (typeof path !== "string" || !path || path.length > 120) return false;
     const parts = path.split(".");
     if (parts.some(part => !part || RESERVED.has(part))) return false;
+    if (parts.length === 2 && parts[0] === "effects" && EFFECT_KEYS.has(parts[1])) return Array.isArray(settings.effects);
     let cursor = settings;
     for (const part of parts) {
       if (cursor === null || typeof cursor !== "object" || !Object.prototype.hasOwnProperty.call(cursor, part)) return false;
@@ -20,11 +22,17 @@
 
   function getPath(settings, path) {
     if (!safePath(path, settings)) return undefined;
+    if (path.startsWith("effects.")) return settings.effects.includes(path.slice(8));
     return path.split(".").reduce((value, part) => value[part], settings);
   }
 
   function setPath(settings, path, value) {
     if (!safePath(path, settings)) return false;
+    if (path.startsWith("effects.")) {
+      const effect = path.slice(8), enabled = Boolean(value);
+      settings.effects = enabled ? [...new Set([...settings.effects, effect])] : settings.effects.filter(item => item !== effect);
+      return true;
+    }
     const parts = path.split(".");
     let target = settings;
     for (let i = 0; i < parts.length - 1; i++) target = target[parts[i]];
@@ -46,6 +54,7 @@
 
   function listPaths(settings) {
     const paths = [];
+    if (Array.isArray(settings.effects)) for (const effect of EFFECT_KEYS) paths.push("effects." + effect);
     const visit = (value, prefix) => {
       if (!value || typeof value !== "object") return;
       for (const [key, child] of Object.entries(value)) {
@@ -56,11 +65,16 @@
         else if (typeof child === "string" && ["algorithm", "palette", "colorMode", "patternShape", "qualityMode", "shapeDistribution", "asciiSet", "asciiColorMode", "neoGlowDirection"].includes(path)) paths.push(path);
         else if (child && typeof child === "object" && !Array.isArray(child)) visit(child, path);
         else if (Array.isArray(child) && path === "algorithmLayers") child.forEach((layer, index) => {
-          if (layer && Number.isFinite(layer.opacity)) paths.push(path + "." + index + ".opacity");
+          if (!layer) return;
+          for (const property of ["opacity", "enabled", "algorithm", "blend"]) {
+            if (Object.prototype.hasOwnProperty.call(layer, property) && (typeof layer[property] === "boolean" || typeof layer[property] === "string" || Number.isFinite(layer[property]))) paths.push(path + "." + index + "." + property);
+          }
         });
         else if (Array.isArray(child) && path === "shapeBands") child.forEach((band, index) => {
           if (!band) return;
-          for (const property of ["size", "rotation"]) if (Number.isFinite(band[property])) paths.push(path + "." + index + "." + property);
+          for (const property of ["size", "rotation", "shape", "color"]) {
+            if (Object.prototype.hasOwnProperty.call(band, property) && (typeof band[property] === "boolean" || typeof band[property] === "string" || Number.isFinite(band[property]))) paths.push(path + "." + index + "." + property);
+          }
         });
       }
     };
