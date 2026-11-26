@@ -1122,6 +1122,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <input class="hidden" type="file" id="projectInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteInput" accept=".json,application/json"><input class="hidden" type="file" id="presetInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteLibraryInput" accept=".json,application/json"><input class="hidden" type="file" id="userBackupInput" accept=".json,application/json">
 <div class="toast" id="toast" role="status"></div>
 <div class="modalbg hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle"><div class="modal export-modal"><h2 id="exportModalTitle">Экспорт результата</h2><p>Выберите формат и проверьте параметры перед сохранением файла.</p><div class="export-fields"><div><label for="exportFormat">Что экспортировать</label><select id="exportFormat" class="select full"><option value="png">PNG — изображение с прозрачностью</option><option value="jpeg">JPEG — фотография, сжатие</option><option value="svgColor">SVG — цветной вектор</option><option value="svgBlack">SVG — чёрно-белый вектор</option><option value="svgCmyk">SVG — CMYK-пластины</option><option value="project">Проект TGRMLither (JSON)</option><option value="copy">Копировать результат</option></select></div><div class="hidden" id="exportJpegSettings"><label for="exportJpegQuality">Качество JPEG · <output id="exportJpegQualityValue">94%</output></label><input type="range" id="exportJpegQuality" min="70" max="100" value="94"></div><div class="export-note" id="exportSummary">Локальная обработка · файл не загружается на сервер.</div></div><div class="modalactions"><button class="btn" id="exportCancel" type="button">Отмена</button><button class="btn primary" id="exportConfirm" type="button">Экспортировать</button></div></div></div><div class="modalbg hidden" id="modal"><div class="modal"><h2 id="modalTitle">Сохранить пресет</h2><p>Название будет сохранено локально в браузере.</p><input id="presetName" maxlength="48" placeholder="Например, Moss print"><div class="modalactions"><button class="btn" id="modalCancel">Отмена</button><button class="btn primary" id="modalSave">Сохранить</button></div></div></div>
+<script src="./animation-engine.js"></script>
 <script>
 "use strict";
 (function(){
@@ -1183,7 +1184,7 @@ function closeImageBitmap(bitmap,{late=false}={}){
 const USER_DATA_STORAGE_KEYS=[
  "tgrmlithering-workspaces","ditherlab-presets","tgrmlither-palette-library",
  "tgrmlither-shape-presets","ditherlab-colors","tgrmlither-built-in-palette-overrides",
- "tgrmlither-favorite-algorithms","tgrmlither-theme","tgrmlither-shell","tgrmlither-inspector-level"
+ "tgrmlither-favorite-algorithms","tgrmlither-theme","tgrmlither-shell","tgrmlither-inspector-level","tgrmlither-animation","tgrmlither-preview-behaviour","tgrmlither-palette-locks"
 ];
 const USER_DATA_STORAGE_KEY_SET=new Set(USER_DATA_STORAGE_KEYS);
 const STORAGE_BACKUP_PREFIX="tgrmlither-backup-v1:";
@@ -1494,6 +1495,9 @@ function storeTransaction(entries){
 function say(m){$("toast").textContent=m;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2400)}
 
 function normaliseBackupEntry(key,value){
+ if(key===ANIMATION_STORAGE_KEY)return AnimationEngine.normalise(value);
+ if(key===PREVIEW_BEHAVIOUR_KEY){if(!["live","balanced","still"].includes(value))throw Error("Некорректный режим предпросмотра");return value}
+ if(key===PALETTE_LOCKS_KEY){if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Некорректные блокировки палитры");const clean={};for(const [palette,flags] of Object.entries(value)){if(!Array.isArray(flags)||flags.length>16||!flags.every(flag=>typeof flag==="boolean"))throw Error("Некорректные блокировки цвета");clean[palette.slice(0,64)]=[...flags]}return clean}
  if(key==="tgrmlithering-workspaces"){
   if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Структура рабочих пространств повреждена");
   return normaliseWorkspaceSettings(value);
@@ -1569,7 +1573,8 @@ function exportUserBackup(){
   data["tgrmlither-inspector-level"]=document.body.dataset.inspectorLevel||"basic";
   data["tgrmlither-favorite-algorithms"]=[...algorithmFavorites];
   data["ditherlab-colors"]=[...(s.customColors||pal.custom.c)];
-  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.3.13",data};
+  data[ANIMATION_STORAGE_KEY]=animationClip;data[PREVIEW_BEHAVIOUR_KEY]=previewBehaviour;data[PALETTE_LOCKS_KEY]=paletteLocks;
+  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.4.0",data};
   const json=JSON.stringify(doc,null,2);
   if(json.length>MAX_USER_BACKUP_BYTES)throw Error("Резервная копия превышает лимит 10 МБ");
   download(new Blob([json],{type:"application/json;charset=utf-8"}),"TGRMLither-backup.json");
@@ -2748,6 +2753,7 @@ function setMode(m){
   $("algorithm").value=s.algorithm;sync();renderVideoFrame();
  }else if(m==="presets")renderPresets();
  if(WORKSPACE_NAMES.includes(m))saveWorkspaceSettings(m);
+ if(["editor","shape","script"].includes(m)){animationScrubBase=cloneSettings(s);animationCurrentMs=0;animationRefreshTrackOptions();animationRefreshUI()}
 }
 function makeCard(p){let b=document.createElement("button");b.className="preset";let art=document.createElement("div");art.className="previewart";let c=document.createElement("canvas");c.width=300;c.height=145;let x=c.getContext("2d"),cs=(pal[p.c.palette||"moss"]||pal.moss).c;let g=x.createLinearGradient(0,0,300,145);cs.forEach((col,i)=>g.addColorStop(i/Math.max(1,cs.length-1),col));x.fillStyle=g;x.fillRect(0,0,300,145);x.fillStyle=cs[cs.length-1];x.beginPath();x.arc(210,38,25,0,7);x.fill();x.fillStyle=cs[Math.floor((cs.length-1)/2)];x.beginPath();x.moveTo(0,110);x.lineTo(62,52);x.lineTo(128,115);x.lineTo(195,72);x.lineTo(265,120);x.lineTo(300,93);x.lineTo(300,145);x.lineTo(0,145);x.closePath();x.fill();for(let yy=0;yy<145;yy+=p.c.scale||5)for(let xx=0;xx<300;xx+=p.c.scale||5){if((xx+yy)%17<4){x.fillStyle=cs[0];x.fillRect(xx,yy,2,2)}}art.append(c);let info=document.createElement("div");info.className="presetinfo";info.innerHTML='<span class="ptag"></span><div class="presetname"></div><div class="presetdesc"></div>';info.querySelector(".ptag").textContent=p.tag||"MY PRESET";info.querySelector(".presetname").textContent=p.name;info.querySelector(".presetdesc").textContent=p.desc||"Моя конфигурация";b.append(art,info);b.onclick=()=>{setMode("editor");s=cloneSettings({...def,...p.c});if(["shape","ascii"].includes(s.algorithm))s.algorithm="bayer4";workspaceSettings.editor=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Пресет: "+p.name)};return b}
 function renderPresets(){
@@ -2836,7 +2842,7 @@ function formatFileSize(bytes){
 }
 async function loadImageFile(file,successMessage=""){
  if(!file)return false;
- if(!String(file.type||"").startsWith("image/")){say("Выберите файл изображения (PNG, JPEG, WebP, GIF или BMP)");return false}
+ const isSvg=file.type==="image/svg+xml"||/\.svg$/i.test(file.name||"");if(!String(file.type||"").startsWith("image/")&&!isSvg){say("Выберите файл изображения (PNG, JPEG, WebP, GIF, BMP или SVG)");return false}
  if(!Number.isFinite(Number(file.size))||file.size>MAX_IMAGE_FILE_BYTES){say("Файл изображения больше 128 МБ. Уменьшите файл и повторите загрузку.");return false}
  if(imageLoadController)imageLoadController.abort();
  const controller=new AbortController(),generation=++imageLoadGeneration;
@@ -2845,7 +2851,7 @@ async function loadImageFile(file,successMessage=""){
  setImageLoading(true,"Открываем "+name+"…",formatFileSize(file.size)+" · декодирование на устройстве");
  await new Promise(resolve=>requestAnimationFrame(()=>resolve()));
  try{
-  const canvas=await fileCanvas(file,controller.signal);
+  const canvas=isSvg?await safeSvgFileCanvas(file,controller.signal):await fileCanvas(file,controller.signal);
   if(controller.signal.aborted||generation!==imageLoadGeneration)return false;
   loadImage(canvas,name,false);
   if(successMessage)say(successMessage);
@@ -2976,7 +2982,7 @@ function loadProject(f){
    p=JSON.parse(r.result);
    if(!p||typeof p!=="object"||!["tgrmlither-project","tgrmlithering-project","ditherlab-project"].includes(p.format)||typeof p.source!=="string"||p.source.length>MAX_PROJECT_FILE_BYTES||!/^data:image\/(?:png|jpeg|webp);base64,/i.test(p.source))throw Error("project");
    target=WORKSPACE_NAMES.includes(p.workspace)?p.workspace:p.settings?.algorithm==="ascii"?"script":p.settings?.algorithm==="shape"?"shape":"editor";
-   loadedSettings=cloneSettings(p.settings||def);
+   loadedSettings=cloneSettings(p.settings||def);loadedAnimation=p.animation===undefined?AnimationEngine.createClip():AnimationEngine.normalise(p.animation);
    if(target==="shape")loadedSettings.algorithm="shape";
    if(target==="script")loadedSettings.algorithm="ascii";
   }catch(error){say("Неверный файл проекта");return}
@@ -2997,15 +3003,15 @@ function loadProject(f){
    setMode("presets");
    const nextWorkspaces=normaliseWorkspaceSettings(p.workspaces&&typeof p.workspaces==="object"?p.workspaces:currentWorkspaces);
    nextWorkspaces[target]=cloneSettings(loadedSettings);
-   if(!store("tgrmlithering-workspaces",nextWorkspaces)){
+   if(!storeTransaction([["tgrmlithering-workspaces",nextWorkspaces],[ANIMATION_STORAGE_KEY,loadedAnimation]])){
     setMode(previousMode);
-    say("Проект не открыт: настройки не удалось безопасно сохранить");
+    say("Проект не открыт: настройки или анимацию не удалось безопасно сохранить");
     return;
    }
-   workspaceSettings=nextWorkspaces;
+   animationClip=loadedAnimation;workspaceSettings=nextWorkspaces;
    const projectName=typeof p.sourceName==="string"&&p.sourceName.trim()?p.sourceName.slice(0,160):"project";
    loadImage(canvas,projectName,false);
-   setMode(target);sync();render();
+   setMode(target);sync();render();animationScrubBase=cloneSettings(s);animationCurrentMs=0;animationRefreshTrackOptions();animationRefreshUI();
    say(imageResizeMessage(canvas)||"Проект открыт");
   };
   image.onerror=()=>{if(finishDecode()&&generation===projectLoadGeneration)say("Не удалось открыть изображение проекта")};
