@@ -78,3 +78,33 @@ Acceptance: complete CI pass; no live deployment claim unless GitHub Pages deplo
 - The UI is responsive and touch-operable; no timeline interaction requires drag-and-drop.
 - ZIP and recording exports are bounded; the app must fail with an actionable message rather than exhaust memory.
 - Main-thread fallback remains functional when Worker/OffscreenCanvas is unavailable.
+
+
+## Implementation status — 2026-11-26
+
+All six implementation stages above are present on `feat/animation-studio-1.4.0`. The branch is proposed in PR #23; it is not merged into `main`.
+
+- Stage 0: existing app guardrails retained; the new engine is isolated and no server/runtime dependency was added.
+- Stage 1: keyframe engine supports numeric, toggle and enumerated parameters, easing, bounded track/keyframe counts, safe paths and per-track oscillators.
+- Stage 2: responsive timeline added to Editor, Shape Lab and Script Slayer. Clips survive reloads, project import/export and user-data backup/restore. Legacy projects without an animation field remain valid.
+- Stage 3: deterministic temporal phase is passed through both Worker and main renderer for scanline motion and grain. PNG Sequence ZIP and browser-supported MP4/WebM video exports have cancellation, progress and memory/frame limits.
+- Stage 4: palette swatch locks persist; shuffle permutes unlocked colours only; Source mode extracts a palette from the open image.
+- Stage 5: SVG can be opened as an editor source after local sanitization and rasterization. Shape Lab's custom SVG geometry import remains separate.
+- Stage 6: Live/Balanced/Still preview scheduling, PWA cache v19, standalone HTML engine bundling, package metadata 1.4.0, README and CI tests are updated.
+
+### Validated in CI
+
+Workflow run [#295](https://github.com/moroskinbiba-crypto/521252/actions/runs/45869374371) completed successfully on 2026-11-26.
+
+- Inline app JavaScript, the Worker, portable launchers, smoke-test scripts and animation engine tests passed.
+- Animation engine unit tests passed for interpolation, easing, discrete tracks, nested paths, oscillators, limits and unsafe path rejection.
+- Full browser smoke tests passed, including animation clip interpolation and reload, project round-trip, PNG ZIP export, palette locking/shuffle and SVG sanitization.
+- Chromium, Firefox and WebKit compatibility checks passed, including startup, image rendering, Canvas recovery and 60 repeated edits.
+
+### Deliberate scope limits
+
+- MP4 is emitted only where the active browser advertises an MP4 MediaRecorder codec; otherwise the export is WebM.
+- The current Animation Studio animates image/workspace parameters in Editor, Shape Lab and Script Slayer. Video Lab remains its separate source-video processing workspace.
+- The first temporal renderer exposes animated scanline offset and deterministic grain; other visual effects can be animated through keyframes/oscillators, while additional procedural temporal patterns remain future work.
+- PNG Sequence export is bounded to 600 frames and 48 MiB of PNG data; video recording is bounded to 128 MiB.
+- The SVG importer rasterizes imported SVG as an image source. It does not preserve the source SVG as editable vector layers.
