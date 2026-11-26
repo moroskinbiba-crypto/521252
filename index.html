@@ -3605,7 +3605,7 @@ async function safeSvgFileCanvas(file,signal){
  const serialized=new XMLSerializer().serializeToString(root),blob=new Blob([serialized],{type:"image/svg+xml"}),url=URL.createObjectURL(blob),image=new Image();
  return new Promise((resolve,reject)=>{
   let settled=false,timer=0;const cleanup=()=>{if(settled)return false;settled=true;clearTimeout(timer);image.onload=null;image.onerror=null;signal?.removeEventListener("abort",abort);URL.revokeObjectURL(url);return true};
-  const abort=()=>{if(cleanup()){image.src="";reject(new DOMException("Загрузка отменена","AbortError"))};
+  const abort=()=>{if(cleanup()){image.src="";reject(new DOMException("Загрузка отменена","AbortError"))}};
   if(signal)signal.addEventListener("abort",abort,{once:true});
   image.onload=()=>{if(!cleanup())return;try{resolve(canvasFromImage(image))}catch(error){reject(error)}};
   image.onerror=()=>{if(cleanup())reject(Error("Не удалось растрировать SVG"))};
