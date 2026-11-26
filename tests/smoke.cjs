@@ -1880,12 +1880,12 @@ async function downloadFrom(page, selector) {
     await animationPage.waitForFunction(() =>
       window.__tgrmAnimationStatus().clip.tracks.threshold?.keyframes.length === 1
     );
+    await setAnimationTime(1000);
     await animationPage.locator("#threshold").evaluate(el => {
       el.value = "40";
       el.dispatchEvent(new Event("input", { bubbles: true }));
       el.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    await setAnimationTime(1000);
     await animationPage.locator("#animationAddKeyframe").click();
     await animationPage.waitForFunction(() =>
       window.__tgrmAnimationStatus().clip.tracks.threshold?.keyframes.length === 2
