@@ -99,7 +99,7 @@
           else deduped.push(frame);
         }
         totalFrames += deduped.length;
-        if (deduped.length) {
+        if (deduped.length || (source.oscillator && typeof source.oscillator === "object")) {
           const sourceOscillator = source.oscillator && typeof source.oscillator === "object" ? source.oscillator : null;
           let oscillator = null;
           if (sourceOscillator) {
