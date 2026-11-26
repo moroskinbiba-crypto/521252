@@ -35,6 +35,7 @@ jobs:
           Path('/tmp/tgrmlither-inline.js').write_text(scripts[-1], encoding='utf-8')
           PY
           node --check /tmp/tgrmlither-inline.js
+          node --check animation-engine.js
       - name: Validate processing worker
         run: node --check processing-worker.js
       - name: Validate Portable launcher
@@ -62,6 +63,8 @@ jobs:
         run: |
           node --check tests/smoke.cjs
           node --check tests/compat.cjs
+          node --check tests/animation-engine.test.cjs
+          node tests/animation-engine.test.cjs
       - name: Install cross-browser smoke-test dependencies
         run: |
           npm install --prefix /tmp/tgrmlither-qa playwright@1.55.0
