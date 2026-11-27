@@ -73,3 +73,8 @@ body:not([data-inspector-level="advanced"]) #exportControl .advanced-export-grou
  .inspector-collapsible>summary{min-height:38px}
  .advanced-export-group,.temporal-motion-group{padding:7px}
 }
+
+/* Theme contrast feedback is advisory: custom palettes stay creative and are never blocked. */
+.theme-contrast-warning{display:block;margin-top:4px;color:var(--acid);font-size:9px;line-height:1.45;overflow-wrap:anywhere}
+.theme-contrast-warning:empty{display:none}
+.theme-contrast-warning[data-state="warning"]{color:var(--acid)}
