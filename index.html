@@ -1217,7 +1217,7 @@ function trapAccessibleDialogFocus(event){
  if(!items.length){event.preventDefault();return true}
  const first=items[0],last=items[items.length-1];
  if(event.shiftKey&&(document.activeElement===first||!overlay.contains(document.activeElement))){event.preventDefault();last.focus()}
- else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+ else if(!event.shiftKey&&(document.activeElement===last||!overlay.contains(document.activeElement))){event.preventDefault();first.focus()}
  return true;
 }
 function refreshInspectorNavigation(){
