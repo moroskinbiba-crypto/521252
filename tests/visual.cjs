@@ -151,6 +151,39 @@ async function switchMode(page, mode) {
       }
     }
 
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await switchMode(page, "shape");
+    const shapeGroups = page.locator("#shapeControl details.inspector-collapsible");
+    assert.equal(await shapeGroups.count(), 3, "Shape Lab should group its thresholds, tonal bands and preset library");
+    for (let i = 0; i < await shapeGroups.count(); i++) {
+      assert.equal(await shapeGroups.nth(i).getAttribute("open"), null,
+        "specialist Shape Lab groups should start collapsed to keep the common controls in view");
+    }
+    await shapeGroups.nth(0).locator("summary").click();
+    assert.notEqual(await shapeGroups.nth(0).getAttribute("open"), null,
+      "Shape Lab detail groups should open with a keyboard/touch accessible summary");
+
+    await switchMode(page, "script");
+    const glowOptions = page.locator("#asciiControl details.ascii-neoglow-options");
+    assert.equal(await glowOptions.count(), 1, "Neo Glow should expose a separate settings group");
+    await glowOptions.locator("summary").click();
+    assert.notEqual(await glowOptions.getAttribute("open"), null,
+      "Neo Glow settings should expand without hiding the master switch");
+
+    await switchMode(page, "editor");
+    const advancedToggle = page.locator("#advancedToggle");
+    await advancedToggle.click();
+    assert.equal(await advancedToggle.getAttribute("aria-pressed"), "true");
+    const vectorGroup = page.locator("#exportControl details.advanced-export-group");
+    assert.equal(await vectorGroup.isVisible(), true,
+      "advanced Inspector mode should reveal vector and print settings");
+    assert.equal(await page.locator("#exportControl details.temporal-motion-group").count(), 1,
+      "procedural motion should be a separate, clearly named group");
+    await vectorGroup.locator("summary").click();
+    assert.notEqual(await vectorGroup.getAttribute("open"), null,
+      "vector and print controls should expand on demand");
+
     // Dialogs must name themselves, take focus, trap keyboard navigation and return focus.
     await page.setViewportSize({ width: 390, height: 844 });
     await switchMode(page, "presets");
