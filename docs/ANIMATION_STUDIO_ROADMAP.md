@@ -134,3 +134,12 @@ A second pass against the actual renderer, persistence paths, and import boundar
 ### Current scope boundary
 
 The timeline currently targets the Editor, Shape Lab, and Script Slayer workspaces. Video Lab remains its separate source-video processing/recording workspace; it does not yet have a per-video keyframe timeline. Procedural temporal motion is currently implemented for scanline phase and deterministic grain, while other existing settings can be animated through keyframes and oscillators. This is intentionally documented as follow-up work rather than claiming full feature parity with Dither Boy's timeline/video animation workflow.
+
+## Random-style effect locks — 2026-11-27
+
+- Every effect row now has a lock button beside its enable checkbox in Editor, Shape Lab, Script Slayer, Batch and Video workspaces.
+- Locking preserves the effect's current enabled/disabled state when the random-style action generates a new effect selection. Locked-on effects stay on; locked-off effects stay off.
+- The checkbox remains manually editable while locked; the latest manual selection is the state that subsequent random styles preserve.
+- Lock preferences are scoped per workspace, saved locally, and included in user backup/restore.
+- Both the main Random Style action and the Shuffle fallback that generates an effect selection respect the same lock map.
+- Browser smoke coverage checks locked-on and locked-off effects across repeated randomizations, reload and backup export.
