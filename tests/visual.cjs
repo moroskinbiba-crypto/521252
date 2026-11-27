@@ -55,6 +55,13 @@ async function switchMode(page, mode) {
       return canvas && canvas.width > 0 && canvas.height > 0;
     }, null, { timeout: 15000 });
 
+    const contextualEffectTargets = {
+      editor: "generalEffectsControl",
+      shape: "shapeEffectsControl",
+      script: "scriptEffectsControl",
+      batch: "batchEffectsControl",
+      video: "videoEffectsControl"
+    };
     for (const mode of modes) {
       await switchMode(page, mode);
 
@@ -121,6 +128,13 @@ async function switchMode(page, mode) {
             mode + "/" + viewport.width + ": inspector should fit the viewport");
           assert.equal(layout.quickNavVisible, true, mode + ": quick navigation should be available");
           assert.ok(layout.quickNavButtons > 0, mode + ": quick navigation should expose relevant sections");
+          if (contextualEffectTargets[mode]) {
+            assert.equal(
+              await page.locator('#inspectorJumpNav button[data-inspector-target="' + contextualEffectTargets[mode] + '"]').isVisible(),
+              true,
+              mode + ": quick navigation should point to the active workspace's effect controls"
+            );
+          }
           assert.match(layout.resetText, /Сбросить пространство/,
             "Reset action should describe the scope it actually resets");
         }
