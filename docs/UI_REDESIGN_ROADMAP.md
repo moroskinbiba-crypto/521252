@@ -29,23 +29,25 @@
 
 ## Stage 1 — CSS and component foundation
 
-**Status: local CSS assets extracted in original cascade order; semantic consolidation remains staged.**
+**Status: local CSS assets extracted byte-for-byte in original cascade order; selector/responsive consolidation remains staged.**
 
 - Split the ordered CSS layers into local assets (base, XP shell, action priority, Animation Studio, and UI foundation) without changing declaration order. The XP theme link retains its id/media behavior.
 - Add shared UI primitives for control sizing, sticky offsets, focus behavior, scroll targets and visually-hidden labels.
 - Add a compact, contextual inspector jump bar so long Shape Lab and Script Slayer sections are navigable without changing control state.
 - Keep all current theme and shell tokens intact.
-- Preserve the existing style cascade for now. The current document has several ordered style blocks and many responsive overrides; moving them before screenshots have been reviewed would create unnecessary risk.
+- The CSS declarations and cascade order are preserved byte-for-byte; only the asset boundaries changed. The base sheet still contains accumulated responsive overrides that need a separate, screenshot-guided cleanup.
 - Keep consolidating CSS into a documented order — tokens, reset/base, layout, shared components, workspace components, shell themes, responsive rules — one cascade group at a time. Compare screenshots after each group; never change declaration order casually. The standalone HTML bundler must inline every marked local stylesheet, and the PWA must precache them.
 
 **Acceptance:** no functional control changes; all theme/shell choices remain selectable; no visual drift in reviewed screenshots; standalone HTML export contains all required styling.
 
 ## Stage 2 — Header, inspector and workspace ergonomics
 
-**Status: contextual navigation, collapsible specialist groups and a clearer quick-export hierarchy implemented.**
+**Status: foundational navigation and inspector/export ergonomics implemented; source-aware preset previews and deeper header restructuring remain.**
 
 - Keep image loading as a prominent primary action and group secondary actions by frequency.
-- Use contextual quick navigation for long inspector panels.\n- Collapse specialist Shape Lab threshold/band/preset groups and Neo Glow detail controls behind native, keyboard-operable disclosures. Keep the Neo Glow master switch visible.\n- Keep common PNG/JPEG/project shortcuts in the Inspector, put SVG/CMYK/print parameters in an advanced disclosure, and separate procedural motion from static export actions.
+- Use contextual quick navigation for long inspector panels.
+- Collapse specialist Shape Lab threshold/band/preset groups and Neo Glow detail controls behind native, keyboard-operable disclosures. Keep the Neo Glow master switch visible.
+- Keep common PNG/JPEG/project shortcuts in the Inspector, put SVG/CMYK/print parameters in an advanced disclosure, and separate procedural motion from static export actions.
 - Separate common controls from advanced controls without changing the saved settings model.
 - Make section resets explicit and scoped; the current workspace reset must never be labelled as a group-only reset.
 - Replace synthetic-only preset cards with source-aware previews in a later pass. Previews must be rendered off the main interaction path and cached with strict memory limits.
