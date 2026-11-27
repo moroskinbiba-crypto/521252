@@ -29,13 +29,14 @@
 
 ## Stage 1 — CSS and component foundation
 
-**Status: first safe foundation pass implemented; stylesheet consolidation is deliberately staged.**
+**Status: local CSS assets extracted in original cascade order; semantic consolidation remains staged.**
 
+- Split the ordered CSS layers into local assets (base, XP shell, action priority, Animation Studio, and UI foundation) without changing declaration order. The XP theme link retains its id/media behavior.
 - Add shared UI primitives for control sizing, sticky offsets, focus behavior, scroll targets and visually-hidden labels.
 - Add a compact, contextual inspector jump bar so long Shape Lab and Script Slayer sections are navigable without changing control state.
 - Keep all current theme and shell tokens intact.
 - Preserve the existing style cascade for now. The current document has several ordered style blocks and many responsive overrides; moving them before screenshots have been reviewed would create unnecessary risk.
-- Next: consolidate CSS into a documented order — tokens, reset/base, layout, shared components, workspace components, shell themes, responsive rules — while keeping the standalone HTML export self-contained. Do this one cascade group at a time and compare screenshots after each group.
+- Keep consolidating CSS into a documented order — tokens, reset/base, layout, shared components, workspace components, shell themes, responsive rules — one cascade group at a time. Compare screenshots after each group; never change declaration order casually. The standalone HTML bundler must inline every marked local stylesheet, and the PWA must precache them.
 
 **Acceptance:** no functional control changes; all theme/shell choices remain selectable; no visual drift in reviewed screenshots; standalone HTML export contains all required styling.
 
