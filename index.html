@@ -344,6 +344,9 @@ body[data-theme="paper"] .btn,body[data-theme="paper"] .select,body[data-theme="
 .effect-control .effect-toggle[role="checkbox"][aria-checked="true"]{background:color-mix(in srgb,var(--acid) 20%,var(--panel));border-color:var(--acid)}
 .effect-control .effect-toggle[role="checkbox"][aria-checked="true"]::after{content:"✓";font:700 13px/1 var(--ui-font);color:var(--acid);position:absolute;left:2px;top:1px}
 .effect-control .effect-toggle:focus-visible{outline:2px solid var(--acid);outline-offset:2px}
+.effect-control .effect-lock{display:inline-flex;align-items:center;justify-content:center;flex:0 0 25px;width:25px;height:24px;margin:0 1px 0 0;padding:0;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--muted);font:12px/1 var(--ui-font);cursor:pointer;pointer-events:auto}
+.effect-control .effect-lock[aria-pressed="true"]{border-color:var(--acid);background:color-mix(in srgb,var(--acid) 12%,var(--panel));color:var(--acid)}
+.effect-control .effect-lock:focus-visible{outline:2px solid var(--acid);outline-offset:2px}
 .effect-control .effect small{margin-left:auto;color:var(--muted);font:500 9px/1.3 var(--mono-font)}
 .effect-control .effect-order-actions{position:relative;z-index:4;display:inline-flex;margin:0 0 5px auto;gap:3px}
 .effect-order-actions button{background:var(--panel);border:1px solid var(--line);border-radius:5px;color:var(--text);padding:2px 6px;font:500 10px/1.2 var(--ui-font);cursor:pointer}
@@ -422,7 +425,7 @@ body[data-theme="paper"] .btn,body[data-theme="paper"] .select,body[data-theme="
   .stageactions .btn,.stageactions .select{min-height:34px}
   .layout main .select,.layout aside.right .select,.layout aside.right input:not([type=range]){min-height:36px}
   .layout aside.right input[type=range],#compareRange,#videoTimeline{height:32px;min-height:32px;touch-action:pan-x}
-  .layout aside.right .effect-toggle,.layout aside.right .effect-order-actions button{min-width:32px;min-height:32px}
+  .layout aside.right .effect-toggle,.layout aside.right .effect-order-actions button,.layout aside.right .effect-lock{min-width:32px;min-height:32px}
   .layout aside.right .switch{width:38px;height:22px;min-width:38px}
   .layout aside.right .switch:before{width:14px;height:14px;top:4px;left:4px}
   .layout aside.right .switch[aria-checked="true"]:before{left:20px}
@@ -707,6 +710,8 @@ body[data-shell="xp"] .effect-control .effect-toggle[role="checkbox"][aria-check
 body[data-shell="xp"] .effect-control .effect-toggle[role="checkbox"][aria-checked="true"]::after{
   color:#003c74;
 }
+body[data-shell="xp"] .effect-control .effect-lock{border:1px solid #8fa5be;border-radius:0;background:linear-gradient(#fff,#e1e8f0);color:#5f7389}
+body[data-shell="xp"] .effect-control .effect-lock[aria-pressed="true"]{border-color:#4b88c9;background:linear-gradient(#edf6ff,#cfe4ff);color:#003c74}
 body[data-shell="xp"] .effect small{color:#5f7389}
 body[data-shell="xp"] .effect-order-actions button{
   border:1px solid #8fa5be;border-radius:0;background:linear-gradient(#fff,#e1e8f0);
@@ -973,6 +978,21 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
   .stageactions .action-group+.action-group{border-left:0;padding-left:0}
 }
 </style>
+<style id="animationStudioStyles">
+.animation-dock{margin:18px 0 24px;padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel);min-width:0}
+.animation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.animation-title strong{display:block;font-size:12px;letter-spacing:.08em}.animation-title small{display:block;margin-top:3px;color:var(--muted);font-size:9px}
+.animation-actions,.animation-options,.animation-export{display:flex;flex-wrap:wrap;gap:7px;align-items:center}.animation-toolbar{display:grid;grid-template-columns:minmax(180px,1.4fr) repeat(3,minmax(90px,.65fr));gap:8px;align-items:end}
+.animation-field{min-width:0;display:grid;gap:4px}.animation-field label{font-size:9px;color:var(--muted)}.animation-field select,.animation-field input:not([type=checkbox]){min-width:0;width:100%;height:34px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--text);font-size:11px}
+.animation-options{margin-top:9px}.animation-check{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}
+.animation-scrub{display:grid;grid-template-columns:62px minmax(0,1fr) 62px;gap:9px;align-items:center;margin-top:13px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}.animation-scrub output{font:600 10px/1.2 ui-monospace,monospace;color:var(--acid);text-align:center}.animation-scrub input{width:100%;min-width:0;accent-color:var(--acid);touch-action:pan-x}
+.animation-lanes{display:grid;gap:6px;margin-top:9px;max-height:210px;overflow:auto}.animation-empty{padding:14px;border:1px dashed var(--line);border-radius:8px;text-align:center;color:var(--muted);font-size:10px}.animation-lane{display:grid;grid-template-columns:minmax(115px,180px) minmax(0,1fr);gap:8px;align-items:center}
+.animation-lane-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;background:transparent;color:var(--text);text-align:left;font-size:10px;padding:6px}.animation-lane-name.active{color:var(--acid)}.animation-lane-track{height:28px;position:relative;border:1px solid var(--line);border-radius:6px;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(25% - 1px),var(--line) 25%)}
+.animation-key{position:absolute;top:50%;width:11px;height:11px;padding:0;transform:translate(-50%,-50%) rotate(45deg);border:1px solid var(--acid);border-radius:2px;background:var(--acid)}.animation-oscillator{position:absolute;right:5px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--purple)}
+.animation-modulators{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}.animation-modulators .animation-field{width:110px}.animation-status{min-width:0;flex:1;color:var(--muted);font-size:9px}
+.animation-progress{width:100%;height:5px;margin-top:9px;overflow:hidden;border-radius:5px;background:var(--panel2)}.animation-progress>span{display:block;width:0;height:100%;background:var(--acid);transition:width .1s linear}.animation-export{margin-top:10px}.animation-export .btn{min-height:34px}
+@media(max-width:740px){.animation-dock{padding:10px;margin:12px 0 18px}.animation-head{align-items:flex-start;flex-direction:column}.animation-toolbar{grid-template-columns:1fr 1fr}.animation-track-field{grid-column:1/-1}.animation-modulators .animation-field{flex:1 1 90px;width:auto}.animation-lane{grid-template-columns:100px minmax(0,1fr);gap:5px}.animation-scrub{grid-template-columns:48px minmax(0,1fr) 48px;padding:7px}.animation-lanes{max-height:180px}}
+.active-palette-row{grid-template-columns:24px minmax(0,1fr) 64px 30px 30px!important}.active-palette-lock[aria-pressed=true]{border-color:var(--acid);color:var(--acid)}
+</style>
 </head>
 <body data-mode="editor" data-shell="xp" data-inspector-level="basic">
 <header>
@@ -990,6 +1010,13 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <div class="stagefoot"><div class="stats"><span>Режим <b id="statAlgorithm">Bayer 4×4</b></span><span>Палитра <b id="statPalette">Moss Green</b></span><span>Шаг <b id="statScale">×5</b></span><span class="file-status" id="fileStatus" data-state="demo">Демо-пример</span></div><div><button class="textbtn" id="compareToggle" aria-pressed="false">↔ До / после</button><button class="textbtn" id="toggleOriginal">◉ Показать оригинал</button><label class="compare-controls hidden" id="compareControls"><span>Оригинал</span><input type="range" id="compareRange" min="0" max="100" value="50" aria-label="Граница сравнения до и после"><output id="compareValue">50%</output><span>Результат</span></label><span id="dimensions">960 × 620 px</span></div></div>
 <details class="ascii hidden" id="asciiDetails"><summary>Открыть ASCII-текст · TXT</summary><pre id="asciiText"></pre></details>
 </section>
+<section id="animationDock" class="animation-dock" aria-label="Animation timeline">
+<div class="animation-head"><div class="animation-title"><strong>ANIMATION STUDIO / KEYFRAMES</strong><small>Анимируйте параметры обработки, эффекты, палитры и формы. Клип хранится локально вместе с проектом.</small></div><div class="animation-actions"><button class="btn sm primary" id="animationPlay" type="button">▶ Воспроизвести</button><button class="btn sm" id="animationStop" type="button" disabled>■ Стоп</button></div></div>
+<div class="animation-toolbar"><div class="animation-field animation-track-field"><label for="animationTrack">Анимируемый параметр</label><select id="animationTrack"></select></div><div class="animation-field"><label for="animationDuration">Длительность · сек</label><input id="animationDuration" type="number" min="0.25" max="60" step="0.25" value="5"></div><div class="animation-field"><label for="animationFps">Кадров в секунду</label><select id="animationFps"><option>12</option><option>15</option><option selected>24</option><option>25</option><option>30</option><option>50</option><option>60</option></select></div><div class="animation-field"><label for="animationEasing">Переход к следующему ключу</label><select id="animationEasing"><option value="linear">Linear</option><option value="easeIn">Ease In</option><option value="easeOut">Ease Out</option><option value="easeInOut">Ease In-Out</option><option value="step">Hold / Step</option></select></div></div>
+<div class="animation-options"><label class="animation-check"><input id="animationLoop" type="checkbox" checked> Зациклить клип</label><label class="animation-check">Предпросмотр <select id="animationPreviewMode" class="select"><option value="live">Live</option><option value="balanced">Balanced</option><option value="still">Still</option></select></label><button class="btn sm" id="animationAddKeyframe" type="button">＋ Ключевой кадр</button><button class="btn sm" id="animationDeleteKeyframe" type="button">− Удалить на позиции</button><button class="btn sm" id="animationCaptureBase" type="button">Снять базу настроек</button></div>
+<div class="animation-scrub"><output id="animationTimeLabel">00:00.0</output><input id="animationScrub" type="range" min="0" max="5000" step="1" value="0" aria-label="Позиция в клипе"><output id="animationEndLabel">00:05.0</output></div><div id="animationLanes" class="animation-lanes"><div class="animation-empty">Добавьте ключевой кадр для создания первой дорожки.</div></div>
+<div class="animation-modulators"><div class="animation-status" id="animationSelectedTrackInfo">Выберите параметр и добавьте ключевые кадры.</div><div class="animation-field"><label for="animationWave">Temporal Variation</label><select id="animationWave"><option value="sine">Sine</option><option value="triangle">Triangle</option><option value="saw">Saw</option><option value="square">Square</option></select></div><div class="animation-field"><label for="animationAmplitude">Амплитуда</label><input id="animationAmplitude" type="number" min="-100" max="100" step="1" value="12"></div><div class="animation-field"><label for="animationFrequency">Частота · Hz</label><input id="animationFrequency" type="number" min="0.1" max="8" step="0.1" value="1"></div><button class="btn sm" id="animationOscillator" type="button">＋ Осциллятор</button></div>
+<div class="animation-export"><button class="btn sm" id="animationExportFrames" type="button">↓ PNG Sequence · ZIP</button><button class="btn sm" id="animationExportVideo" type="button">↓ Видео · MP4 / WebM</button><button class="btn sm" id="animationCancelExport" type="button" disabled>Отмена экспорта</button><span class="animation-status" id="animationExportStatus" role="status">Экспорт выполняется локально в браузере.</span></div><div class="animation-progress" aria-hidden="true"><span id="animationProgress"></span></div></section>
 <section id="presetsView" class="hidden"><div class="heading"><div><div class="eyebrow">КАТАЛОГ / ПРЕСЕТЫ</div><h1>Библиотека пресетов<span style="color:var(--acid)">.</span></h1><p>Выберите стиль и продолжайте редактировать настройки.</p></div><div class="preset-toolbar"><input class="select preset-search" id="presetSearch" type="search" placeholder="Поиск пресетов…" aria-label="Поиск пресетов"><button class="btn sm" id="savePresetLibrary">＋ Мой пресет</button><button class="btn sm" id="exportPresets">↓ JSON</button><button class="btn sm" id="importPresets">↑ Импорт</button></div></div><div class="presetgrid" id="presetGrid"></div><div class="card" style="margin-top:17px"><h2>Мои пресеты</h2><p>Ваши конфигурации сохраняются в этом браузере.</p><div class="filelist" id="customPresets"></div></div></section>
 <section id="batchView" class="hidden"><div class="heading"><div><div class="eyebrow">РАБОЧЕЕ ПРОСТРАНСТВО / ПАКЕТЫ</div><h1>Пакетная обработка<span style="color:var(--acid)">.</span></h1><p>Одна конфигурация — несколько файлов. Локальная обработка.</p></div></div><div class="card"><h2>01 / Добавьте изображения</h2><p>Текущие параметры будут применены к каждому выбранному файлу.</p><div class="drop" id="batchDrop"><div style="font-size:25px;color:var(--acid)">⇧</div><strong>Перетащите файлы сюда</strong><p>PNG · JPG · WEBP · несколько изображений</p><button class="btn" id="batchBrowse">Выбрать файлы</button></div><div class="filelist" id="batchList"></div><div class="batch-progress-meta"><span id="batchProgressLabel" role="status" aria-live="polite">Ожидает файлов</span><span id="batchProgressCount">0 / 0</span></div><div class="progress" id="batchProgressTrack" role="progressbar" aria-label="Прогресс пакетной обработки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="batchProgress"></i></div><div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" id="runBatch">▶ Обработать всё</button><button class="btn" id="cancelBatch" type="button" hidden>Отменить</button><button class="btn" id="downloadBatchZip" disabled>↓ Скачать всё ZIP</button><button class="btn" id="clearBatch">Очистить</button></div></div><div class="card"><h2>02 / Результаты</h2><p>Скачивайте PNG по отдельности или соберите все готовые изображения в один ZIP-архив.</p><div class="filelist" id="batchResults"><span style="font-size:10px;color:var(--muted)">Пока нет результатов.</span></div></div></section>
 <section id="videoView" class="hidden">
@@ -1027,7 +1054,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <label class="switchrow">Инвертировать яркость <input type="checkbox" class="switch" id="invert"></label>
 </section>
 <section class="control" id="paletteControl"><div class="controltitle"><span>03 / Палитра</span><small>COLOR SYSTEM</small></div><div class="palettes" id="palettes"></div><small id="paletteWheelHint" style="display:block;color:var(--muted);font-size:9px;margin:6px 0 10px">Колесо мыши — временный предпросмотр палитры. Клик закрепляет выбор.</small>
-<div class="field" style="margin-top:12px"><div class="fieldtop"><label for="colorMode">Цветовой режим</label></div><select class="select full" id="colorMode"><option value="color">Цветная палитра</option><option value="mono">Монохром</option><option value="duo">Два тона</option></select></div>
+<div class="field" style="margin-top:12px"><div class="fieldtop"><label for="colorMode">Цветовой режим</label></div><select class="select full" id="colorMode"><option value="color">Цветная палитра</option><option value="source">Палитра исходника</option><option value="mono">Монохром</option><option value="duo">Два тона</option></select></div>
 <div class="custom-colors"><div class="custom-colors-head"><span>Собственные цвета</span><span>4 цвета</span></div><div class="color-grid">
 <label class="color-pick">Тень<input type="color" id="customColor1" value="#10160f"></label><label class="color-pick">Тёмный<input type="color" id="customColor2" value="#334b2b"></label><label class="color-pick">Светлый<input type="color" id="customColor3" value="#7a9a47"></label><label class="color-pick">Свет<input type="color" id="customColor4" value="#d9efad"></label>
 </div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px"><button class="btn sm" id="useCustomPalette">Моя палитра</button><button class="btn sm" id="extractPalette">Извлечь из фото</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px"><button class="btn sm" id="exportPalette">↓ Палитра JSON</button><button class="btn sm" id="importPalette">↑ Палитра JSON</button></div></div>
@@ -1039,7 +1066,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
  <div class="palette-library-grid"><button class="btn sm" id="applyLibraryPalette" type="button">Применить</button><button class="btn sm" id="deleteLibraryPalette" type="button">Удалить</button></div>
  <div class="palette-library-grid"><button class="btn sm" id="exportPaletteLibrary" type="button">↓ Экспорт набора</button><button class="btn sm" id="importPaletteLibrary" type="button">↑ Импорт набора</button></div>
 </div>
-<div class="active-palette-editor"><div class="palette-library-head"><strong>Редактор активной палитры</strong><small id="activePaletteMeta">4 / 16 цветов</small></div><p>Изменяйте цвета по отдельности, добавляйте оттенки или удаляйте лишние. Всего доступно 2–16 цветов.</p><div id="activePaletteEditor" class="active-palette-colors"></div><button class="btn sm full" id="addPaletteColor" type="button">＋ Добавить цвет</button></div>
+<div class="active-palette-editor"><div class="palette-library-head"><strong>Редактор активной палитры</strong><small id="activePaletteMeta">4 / 16 цветов</small></div><p>Изменяйте цвета по отдельности, добавляйте оттенки или удаляйте лишние. Всего доступно 2–16 цветов.</p><div id="activePaletteEditor" class="active-palette-colors"></div><button class="btn sm full" id="addPaletteColor" type="button">＋ Добавить цвет</button><button class="btn sm full" id="shuffleUnlockedPalette" type="button">⇄ Перемешать незаблокированные</button></div>
 </section>
 <section class="control" id="generalEffectsControl"><div class="controltitle"><span>04 / Эффекты</span><small>INTENSITY</small></div><div class="effects">
 <div class="effect-control"><div class="effect"><button type="button" class="effect-toggle" role="checkbox" aria-checked="false" id="effect-scanlines" data-effect="scanlines" aria-label="Включить эффект scanlines"></button><label for="effect-scanlines">CRT scanlines</label><small>RETRO</small></div><div class="effect-intensity"><input type="range" min="0" max="100" value="50" data-effect-strength="scanlines" aria-label="scanlines intensity"><output id="strength-scanlines">50%</output></div></div>
@@ -1092,7 +1119,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px"><button class="btn sm" id="temporalPlay">▶ Motion</button><button class="btn sm" id="temporalStop">■ Stop</button><button class="btn sm" id="temporalRecord" style="grid-column:1/-1">↓ Record WebM · 6 sec</button></div><p style="font-size:9px;color:var(--muted);margin:9px 0 0">SVG хранит векторные контуры; CMYK — отдельные именованные пластины. DPI задаёт физический размер на печати.</p></section>
 </aside>
 </div>
-<input class="hidden" type="file" id="imageInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
+<input class="hidden" type="file" id="imageInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/svg+xml,.svg">
 <input class="hidden" type="file" id="videoInput" accept="video/mp4,video/webm,video/quicktime,video/ogg">
 <input class="hidden" type="file" id="shapeSvgInput" accept=".svg,image/svg+xml"><input class="hidden" type="file" id="shapePresetInput" accept=".json,application/json">
 <video id="videoSource" class="hidden" playsinline preload="metadata"></video>
@@ -1100,6 +1127,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <input class="hidden" type="file" id="projectInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteInput" accept=".json,application/json"><input class="hidden" type="file" id="presetInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteLibraryInput" accept=".json,application/json"><input class="hidden" type="file" id="userBackupInput" accept=".json,application/json">
 <div class="toast" id="toast" role="status"></div>
 <div class="modalbg hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle"><div class="modal export-modal"><h2 id="exportModalTitle">Экспорт результата</h2><p>Выберите формат и проверьте параметры перед сохранением файла.</p><div class="export-fields"><div><label for="exportFormat">Что экспортировать</label><select id="exportFormat" class="select full"><option value="png">PNG — изображение с прозрачностью</option><option value="jpeg">JPEG — фотография, сжатие</option><option value="svgColor">SVG — цветной вектор</option><option value="svgBlack">SVG — чёрно-белый вектор</option><option value="svgCmyk">SVG — CMYK-пластины</option><option value="project">Проект TGRMLither (JSON)</option><option value="copy">Копировать результат</option></select></div><div class="hidden" id="exportJpegSettings"><label for="exportJpegQuality">Качество JPEG · <output id="exportJpegQualityValue">94%</output></label><input type="range" id="exportJpegQuality" min="70" max="100" value="94"></div><div class="export-note" id="exportSummary">Локальная обработка · файл не загружается на сервер.</div></div><div class="modalactions"><button class="btn" id="exportCancel" type="button">Отмена</button><button class="btn primary" id="exportConfirm" type="button">Экспортировать</button></div></div></div><div class="modalbg hidden" id="modal"><div class="modal"><h2 id="modalTitle">Сохранить пресет</h2><p>Название будет сохранено локально в браузере.</p><input id="presetName" maxlength="48" placeholder="Например, Moss print"><div class="modalactions"><button class="btn" id="modalCancel">Отмена</button><button class="btn primary" id="modalSave">Сохранить</button></div></div></div>
+<script src="./animation-engine.js"></script>
 <script>
 "use strict";
 (function(){
@@ -1161,7 +1189,7 @@ function closeImageBitmap(bitmap,{late=false}={}){
 const USER_DATA_STORAGE_KEYS=[
  "tgrmlithering-workspaces","ditherlab-presets","tgrmlither-palette-library",
  "tgrmlither-shape-presets","ditherlab-colors","tgrmlither-built-in-palette-overrides",
- "tgrmlither-favorite-algorithms","tgrmlither-theme","tgrmlither-shell","tgrmlither-inspector-level"
+ "tgrmlither-favorite-algorithms","tgrmlither-theme","tgrmlither-shell","tgrmlither-inspector-level","tgrmlither-animation","tgrmlither-preview-behaviour","tgrmlither-palette-locks","tgrmlither-effect-locks"
 ];
 const USER_DATA_STORAGE_KEY_SET=new Set(USER_DATA_STORAGE_KEYS);
 const STORAGE_BACKUP_PREFIX="tgrmlither-backup-v1:";
@@ -1250,7 +1278,7 @@ function cloneSettings(input){
  next.blur=safeNumber(raw.blur,def.blur,0,5);
  next.invert=raw.invert===true;
  next.palette=typeof raw.palette==="string"&&Object.prototype.hasOwnProperty.call(pal,raw.palette)?raw.palette:def.palette;
- next.colorMode=["color","mono","duo"].includes(raw.colorMode)?raw.colorMode:def.colorMode;
+ next.colorMode=["color","source","mono","duo"].includes(raw.colorMode)?raw.colorMode:def.colorMode;
  next.effects=Array.isArray(raw.effects)?[...new Set(raw.effects.filter(k=>EFFECT_KEYS.includes(k)))]:[];
  next.effectOrder=[...new Set([...(Array.isArray(raw.effectOrder)?raw.effectOrder:[]),...def.effectOrder].filter(k=>EFFECT_KEYS.includes(k)))];
  const strengths=raw.effectStrength&&typeof raw.effectStrength==="object"&&!Array.isArray(raw.effectStrength)?raw.effectStrength:{};
@@ -1332,13 +1360,29 @@ if(!loadStore(neoGlowMigrationKey,false)){
 s=cloneSettings(workspaceSettings.editor);
 function saveWorkspaceSettings(name=mode){
  if(!WORKSPACE_NAMES.includes(name))return false;
- const previous=workspaceSettings[name],next=cloneSettings(s);
+ const previous=workspaceSettings[name];
+ const useAnimationBase=name===mode&&(animationScrubPreviewed||animationExporting)&&animationScrubBase;
+ const next=cloneSettings(useAnimationBase?animationScrubBase:s);
  workspaceSettings[name]=next;
  if(store("tgrmlithering-workspaces",workspaceSettings))return true;
  workspaceSettings[name]=previous;
  return false;
 }
 function effectScopeForMode(name=mode){return WORKSPACE_NAMES.includes(name)?name:null;}
+function randomEffectSelection(probability=.68){
+ const locked=effectLocks[mode]||{},currentlyEnabled=new Set(s.effects||[]);
+ return EFFECT_KEYS.filter(key=>Object.prototype.hasOwnProperty.call(locked,key)?currentlyEnabled.has(key):Math.random()>probability);
+}
+function syncEffectLockButtons(){
+ document.querySelectorAll(".effect-lock[data-effect-lock]").forEach(button=>{
+  const scope=button.closest("[data-effect-scope]")?.dataset.effectScope,key=button.dataset.effectLock;
+  const locked=!!effectLocks[scope]?.[key],label=button.closest(".effect-control")?.querySelector("label")?.textContent.trim()||key;
+  button.setAttribute("aria-pressed",String(locked));
+  button.textContent=locked?"🔒":"🔓";
+  button.title=locked?"Состояние эффекта зафиксировано для случайных стилей":"Зафиксировать текущее состояние для случайных стилей";
+  button.setAttribute("aria-label",(locked?"Снять блокировку":"Зафиксировать состояние")+" · "+label);
+ });
+}
 function buildWorkflowEffectsPanels(){
  const base=$("generalEffectsControl");
  if(!base||base.dataset.panelsBuilt==="true")return;
@@ -1472,6 +1516,10 @@ function storeTransaction(entries){
 function say(m){$("toast").textContent=m;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2400)}
 
 function normaliseBackupEntry(key,value){
+ if(key===ANIMATION_STORAGE_KEY)return AnimationEngine.normalise(value);
+ if(key===PREVIEW_BEHAVIOUR_KEY){if(!["live","balanced","still"].includes(value))throw Error("Некорректный режим предпросмотра");return value}
+ if(key===PALETTE_LOCKS_KEY){if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Некорректные блокировки палитры");const clean={};for(const [palette,flags] of Object.entries(value)){if(!Array.isArray(flags)||flags.length>16||!flags.every(flag=>typeof flag==="boolean"))throw Error("Некорректные блокировки цвета");clean[palette.slice(0,64)]=[...flags]}return clean}
+ if(key===EFFECT_LOCKS_STORAGE_KEY)return normaliseEffectLocks(value,true);
  if(key==="tgrmlithering-workspaces"){
   if(!value||typeof value!=="object"||Array.isArray(value))throw Error("Структура рабочих пространств повреждена");
   return normaliseWorkspaceSettings(value);
@@ -1534,6 +1582,7 @@ function normaliseBackupEntry(key,value){
  throw Error("Неизвестный раздел резервной копии");
 }
 function exportUserBackup(){
+ if(animationExporting||animationPlaying){say("Остановите анимацию перед созданием резервной копии");return}
  try{
   if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
   const data={};
@@ -1547,7 +1596,8 @@ function exportUserBackup(){
   data["tgrmlither-inspector-level"]=document.body.dataset.inspectorLevel||"basic";
   data["tgrmlither-favorite-algorithms"]=[...algorithmFavorites];
   data["ditherlab-colors"]=[...(s.customColors||pal.custom.c)];
-  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.3.13",data};
+  data[ANIMATION_STORAGE_KEY]=animationClip;data[PREVIEW_BEHAVIOUR_KEY]=previewBehaviour;data[PALETTE_LOCKS_KEY]=paletteLocks;
+  const doc={format:"tgrmlither-user-backup",version:1,createdAt:new Date().toISOString(),appVersion:"1.4.0",data};
   const json=JSON.stringify(doc,null,2);
   if(json.length>MAX_USER_BACKUP_BYTES)throw Error("Резервная копия превышает лимит 10 МБ");
   download(new Blob([json],{type:"application/json;charset=utf-8"}),"TGRMLither-backup.json");
@@ -1645,7 +1695,7 @@ async function makeShapeCode(){const code=encodeShareCode("TGRMSHAPE1:",{format:
 function applyShapeCode(){try{const doc=decodeShareCode($("shapeShareCode").value,"TGRMSHAPE1:");if(doc.format!=="tgrmlither-shape-profile"||doc.version!==1)throw Error("format");applyShapeProfile(doc.profile,"Код Shape Shifter применён")}catch(err){say("Код формы неверный или повреждён")}}
 function bindShapePresetControls(){renderShapePresetOptions();$("shapePresetSelect").onchange=()=>{$("deleteShapePreset").disabled=!$("shapePresetSelect").value.startsWith("user_")};$("applyShapePreset").onclick=applyShapePreset;$("saveShapePreset").onclick=saveShapePreset;$("deleteShapePreset").onclick=deleteShapePreset;$("exportShapePreset").onclick=exportShapePreset;$("importShapePreset").onclick=()=>$("shapePresetInput").click();$("shapePresetInput").onchange=async e=>{const file=e.target.files[0];if(file)await importShapePreset(file);e.target.value=""};$("makeShapeCode").onclick=makeShapeCode;$("applyShapeCode").onclick=applyShapeCode}
 
-function colors(){let base=(pal[s.palette]||pal.moss).c.map(hex).sort((a,b)=>lumin(...a)-lumin(...b));if(s.colorMode==="mono")base=[[0,0,0],[255,255,255]];if(s.colorMode==="duo")base=[base[0],base[base.length-1]];const count=s.colorMode==="duo"?2:clamp(Number(s.levels)||4,2,16);if(count===base.length)return base;const result=[];for(let i=0;i<count;i++){const pos=i*(base.length-1)/(count-1),lo=Math.floor(pos),hi=Math.min(base.length-1,Math.ceil(pos)),t=pos-lo;result.push(base[lo].map((v,k)=>Math.round(v*(1-t)+base[hi][k]*t)))}return result}
+function colors(){let base=(s.colorMode==="source"?(s.customColors||pal.custom.c):(pal[s.palette]||pal.moss).c).map(hex).sort((a,b)=>lumin(...a)-lumin(...b));if(s.colorMode==="mono")base=[[0,0,0],[255,255,255]];if(s.colorMode==="duo")base=[base[0],base[base.length-1]];const count=s.colorMode==="duo"?2:clamp(Number(s.levels)||4,2,16);if(count===base.length)return base;const result=[];for(let i=0;i<count;i++){const pos=i*(base.length-1)/(count-1),lo=Math.floor(pos),hi=Math.min(base.length-1,Math.ceil(pos)),t=pos-lo;result.push(base[lo].map((v,k)=>Math.round(v*(1-t)+base[hi][k]*t)))}return result}
 function nearest(r,g,b,cs){let best=cs[0],dist=Infinity;for(const c of cs){let d=(r-c[0])**2+(g-c[1])**2+(b-c[2])**2;if(d<dist){dist=d;best=c}}return best}
 const bayerMatrixCache=new Map();
 function getBayer(n,x,y){let m=bayerMatrixCache.get(n);if(!m){m=[[0]];while(m.length<n){const a=m,nn=a.length,next=Array.from({length:nn*2},()=>Array(nn*2).fill(0));for(let yy=0;yy<nn;yy++)for(let xx=0;xx<nn;xx++){const v=a[yy][xx]*4;next[yy][xx]=v;next[yy][xx+nn]=v+2;next[yy+nn][xx]=v+3;next[yy+nn][xx+nn]=v+1}m=next}bayerMatrixCache.set(n,m)}return (m[((y%n)+n)%n][((x%n)+n)%n]+.5)/(n*n)}
@@ -1703,9 +1753,9 @@ const patternAlgorithms=["halftone","shape","crosshatch","diagonal","waves","con
 const glitchAlgorithms=["glitch_jpeg","glitch_chromatic","glitch_scanlines","glitch_rows","glitch_pixels","glitch_blocks","glitch_tearing","glitch_static","glitch_bitcrush","glitch_interlace","glitch_vhs","glitch_wave","glitch_sort","glitch_mosh","glitch_color","glitch_negative","glitch_shift"];
 const specialAlgorithms=["special_cmyk","special_threshold","special_posterize","special_edges","special_emboss","special_contour","special_mosaic","special_stipple","special_thermal","special_xray","special_relief","special_ditherMask","special_grainMap","special_invertBands","special_woodcut","special_outline"];
 function downsample(image,cfg){const budget=cfg.qualityMode==="ultra"?8294400:cfg.qualityMode==="max"?2400000:cfg.qualityMode==="detail"?1200000:480000;let step=Math.max(Number(cfg.scale)||1,Math.sqrt(image.width*image.height/budget)),w=Math.max(1,Math.ceil(image.width/step)),h=Math.max(1,Math.ceil(image.height/step));while(w*h>budget){step*=Math.sqrt((w*h)/budget)*1.01;w=Math.max(1,Math.ceil(image.width/step));h=Math.max(1,Math.ceil(image.height/step))}const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d",{willReadFrequently:true});if(cfg.blur)x.filter="blur("+cfg.blur+"px)";x.drawImage(image,0,0,w,h);x.filter="none";const im=x.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4)for(let j=0;j<3;j++){let v=clamp((d[i+j]-128)*cfg.contrast/100+128+cfg.brightness+Number(cfg.threshold||0)*1.25,0,255)/255;v=Math.pow(v,Math.pow(2,(50-clamp(Number(cfg.midtones??50),0,100))/50));const hi=(Number(cfg.highlights??50)-50)/50;v=clamp(v+hi*Math.max(0,v-.5)*Math.max(0,v-.5)*1.4,0,1);if(cfg.invert)v=1-v;d[i+j]=Math.round(v*255)}return {w,h,step,im,d}}
-function applyEffects(c,cfg,step){const order=[...(cfg.effectOrder||Object.keys(cfg.effectStrength||{}))];for(const k of Object.keys(cfg.effectStrength||{}))if(!order.includes(k))order.push(k);for(const key of order){if(!(cfg.effects||[]).includes(key))continue;const a=clamp(Number((cfg.effectStrength||{})[key]??50),0,100)/100;if(a)applyEffectLayer(c,key,a,step)}}
+function applyEffects(c,cfg,step){const order=[...(cfg.effectOrder||Object.keys(cfg.effectStrength||{}))];for(const k of Object.keys(cfg.effectStrength||{}))if(!order.includes(k))order.push(k);for(const key of order){if(!(cfg.effects||[]).includes(key))continue;const a=clamp(Number((cfg.effectStrength||{})[key]??50),0,100)/100;if(a)applyEffectLayer(c,key,a,step,cfg)}}
 function applyEffectsBounded(image,cfg,step){const activeEffects=(Array.isArray(cfg.effects)?cfg.effects:[]).some(key=>clamp(Number((cfg.effectStrength||{})[key]??50),0,100)>0);if(!activeEffects)return;const budget=cfg.qualityMode==="ultra"?8294400:cfg.qualityMode==="max"?2400000:cfg.qualityMode==="detail"?1200000:480000;let factor=Math.max(1,Math.sqrt(image.width*image.height/budget)),w=Math.max(1,Math.ceil(image.width/factor)),h=Math.max(1,Math.ceil(image.height/factor));while(w*h>budget){factor*=Math.sqrt((w*h)/budget)*1.01;w=Math.max(1,Math.ceil(image.width/factor));h=Math.max(1,Math.ceil(image.height/factor))}if(factor<=1){applyEffects(image,cfg,step);return}const work=document.createElement("canvas");work.width=w;work.height=h;const wx=work.getContext("2d",{willReadFrequently:true});wx.imageSmoothingEnabled=false;wx.drawImage(image,0,0,w,h);applyEffects(work,cfg,Math.max(1,step/factor));const ctx=image.getContext("2d");ctx.clearRect(0,0,image.width,image.height);ctx.imageSmoothingEnabled=false;ctx.drawImage(work,0,0,image.width,image.height)}
-function applyEffectLayer(c,key,a,step){const x=c.getContext("2d"),w=c.width,h=c.height;if(key==="chromatic"){const im=x.getImageData(0,0,w,h),d=im.data,s=new Uint8ClampedArray(d),sh=Math.max(1,Math.round(step*a));for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){let i=(y*w+xx)*4,l=(y*w+Math.max(0,xx-sh))*4,r=(y*w+Math.min(w-1,xx+sh))*4;d[i]=s[l];d[i+2]=s[r+2]}x.putImageData(im,0,0);return}if(key==="glow"||key==="epsilon"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);if(key==="epsilon"){const q=t.getContext("2d",{willReadFrequently:true}),im=q.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){const l=(d[i]*.2126+d[i+1]*.7152+d[i+2]*.0722)/255;d[i+3]=Math.round(d[i+3]*clamp((l-.18)*3.2,0,1))}q.putImageData(im,0,0)}x.save();x.globalCompositeOperation="screen";x.globalAlpha=(key==="epsilon"?.7:.5)*a;x.filter="blur("+Math.max(1,step*(key==="epsilon"?2:1.2)*a)+"px)";x.drawImage(t,0,0);x.restore();x.filter="none";return}if(key==="scanlines"||key==="modlines"){x.save();x.globalAlpha=(key==="scanlines"?.34:.45)*a;x.fillStyle="#030403";const gap=Math.max(3,Math.round(step*(key==="modlines"?.65:.9)));for(let y=0;y<h;y+=gap)x.fillRect(0,y+(key==="modlines"?Math.sin(y/Math.max(4,step*3))*step*a:0),w,Math.max(1,gap*.2));x.restore();return}if(key==="vignette"){const g=x.createRadialGradient(w/2,h/2,Math.min(w,h)*.18,w/2,h/2,Math.max(w,h)*.75);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,"+(.9*a)+")");x.fillStyle=g;x.fillRect(0,0,w,h);return}if(key==="noise"){const im=x.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){const n=(Math.random()-.5)*34*a;for(let k=0;k<3;k++)d[i+k]=clamp(d[i+k]+n,0,255)}x.putImageData(im,0,0);return}if(key==="jpeg"){const t=document.createElement("canvas"),q=Math.max(2,Math.round(step*(1+a*2)));t.width=Math.max(1,w/q|0);t.height=Math.max(1,h/q|0);t.getContext("2d").drawImage(c,0,0,t.width,t.height);x.save();x.globalAlpha=.8*a;x.imageSmoothingEnabled=false;x.drawImage(t,0,0,w,h);x.restore();return}if(key==="stress"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);x.clearRect(0,0,w,h);const row=Math.max(2,Math.round(step*.7));for(let y=0;y<h;y+=row){const sh=Math.round(Math.sin(y*.13)*step*3*a);x.drawImage(t,0,y,w,Math.min(row,h-y),sh,y,w,Math.min(row,h-y))}return}if(key==="lick"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);const q=t.getContext("2d",{willReadFrequently:true}),pixels=q.getImageData(0,0,w,h).data;x.save();x.globalAlpha=.5*a;x.lineCap="round";const stride=Math.max(4,Math.round(step*1.5));for(let y=0;y<h;y+=stride)for(let xx=0;xx<w;xx+=stride){const i=(y*w+xx)*4;x.strokeStyle="rgb("+pixels[i]+","+pixels[i+1]+","+pixels[i+2]+")";x.lineWidth=Math.max(1,stride*.22);x.beginPath();x.moveTo(xx,y);x.lineTo(xx+stride*.7,y+stride*.25);x.stroke()}x.restore();return}}
+function applyEffectLayer(c,key,a,step,cfg={}){const x=c.getContext("2d"),w=c.width,h=c.height;if(key==="chromatic"){const im=x.getImageData(0,0,w,h),d=im.data,s=new Uint8ClampedArray(d),sh=Math.max(1,Math.round(step*a));for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){let i=(y*w+xx)*4,l=(y*w+Math.max(0,xx-sh))*4,r=(y*w+Math.min(w-1,xx+sh))*4;d[i]=s[l];d[i+2]=s[r+2]}x.putImageData(im,0,0);return}if(key==="glow"||key==="epsilon"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);if(key==="epsilon"){const q=t.getContext("2d",{willReadFrequently:true}),im=q.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){const l=(d[i]*.2126+d[i+1]*.7152+d[i+2]*.0722)/255;d[i+3]=Math.round(d[i+3]*clamp((l-.18)*3.2,0,1))}q.putImageData(im,0,0)}x.save();x.globalCompositeOperation="screen";x.globalAlpha=(key==="epsilon"?.7:.5)*a;x.filter="blur("+Math.max(1,step*(key==="epsilon"?2:1.2)*a)+"px)";x.drawImage(t,0,0);x.restore();x.filter="none";return}if(key==="scanlines"||key==="modlines"){x.save();x.globalAlpha=(key==="scanlines"?.34:.45)*a;x.fillStyle="#030403";const gap=Math.max(3,Math.round(step*(key==="modlines"?.65:.9)));const offset=Number.isFinite(Number(cfg.temporalPhase))?Math.floor((((Number(cfg.temporalPhase)*2)%1)+1)%1*gap):0;for(let y=-offset;y<h;y+=gap)x.fillRect(0,y+(key==="modlines"?Math.sin((y+offset)/Math.max(4,step*3))*step*a:0),w,Math.max(1,gap*.2));x.restore();return}if(key==="vignette"){const g=x.createRadialGradient(w/2,h/2,Math.min(w,h)*.18,w/2,h/2,Math.max(w,h)*.75);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,"+(.9*a)+")");x.fillStyle=g;x.fillRect(0,0,w,h);return}if(key==="noise"){const im=x.getImageData(0,0,w,h),d=im.data;let seed=Number(cfg.temporalSeed);const hasSeed=Number.isFinite(seed);const random=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return (seed>>>0)/4294967296};for(let i=0;i<d.length;i+=4){const n=((hasSeed?random():Math.random())-.5)*34*a;for(let k=0;k<3;k++)d[i+k]=clamp(d[i+k]+n,0,255)}x.putImageData(im,0,0);return}if(key==="jpeg"){const t=document.createElement("canvas"),q=Math.max(2,Math.round(step*(1+a*2)));t.width=Math.max(1,w/q|0);t.height=Math.max(1,h/q|0);t.getContext("2d").drawImage(c,0,0,t.width,t.height);x.save();x.globalAlpha=.8*a;x.imageSmoothingEnabled=false;x.drawImage(t,0,0,w,h);x.restore();return}if(key==="stress"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);x.clearRect(0,0,w,h);const row=Math.max(2,Math.round(step*.7));for(let y=0;y<h;y+=row){const sh=Math.round(Math.sin(y*.13)*step*3*a);x.drawImage(t,0,y,w,Math.min(row,h-y),sh,y,w,Math.min(row,h-y))}return}if(key==="lick"){const t=document.createElement("canvas");t.width=w;t.height=h;t.getContext("2d").drawImage(c,0,0);const q=t.getContext("2d",{willReadFrequently:true}),pixels=q.getImageData(0,0,w,h).data;x.save();x.globalAlpha=.5*a;x.lineCap="round";const stride=Math.max(4,Math.round(step*1.5));for(let y=0;y<h;y+=stride)for(let xx=0;xx<w;xx+=stride){const i=(y*w+xx)*4;x.strokeStyle="rgb("+pixels[i]+","+pixels[i+1]+","+pixels[i+2]+")";x.lineWidth=Math.max(1,stride*.22);x.beginPath();x.moveTo(xx,y);x.lineTo(xx+stride*.7,y+stride*.25);x.stroke()}x.restore();return}}
 function drawShapeGlyph(x,shape,size,step){
  const r=Math.max(.5,size/2);
  x.beginPath();
@@ -2028,6 +2078,9 @@ function updateRenderControls(cfg,renderMode,metadata=null){
  refresh();zoom();updateCompareUI();updateFavoriteButton();bindExactRangeInputs();scheduleHistorySnapshot();
 }
 function loadImage(c,n,isDemo=false){
+ if(animationExporting){say("Сначала завершите или отмените экспорт анимации");return false}
+ if(animationPlaying)animationStopPlayback(true);
+ else if(animationScrubPreviewed&&animationScrubBase){s=cloneSettings(animationScrubBase);animationScrubPreviewed=false;animationPreviewFrame=null;animationCurrentMs=0;sync();render();animationRefreshUI()}
  const previousSource=src,previousSourceCopy=processingSourceCanvasCopy;
  src=c;srcName=n||"image";demo=isDemo;original=false;resultDirty=false;lastExported=false;lastRenderedSignature="";hasRendered=false;compareEnabled=false;
  setProcessingSource(c);
@@ -2040,14 +2093,14 @@ function loadImage(c,n,isDemo=false){
 }
 function refresh(){if(!src)return;$("filename").textContent=srcName+" / "+src.width+" × "+src.height;$("dimensions").textContent=src.width+" × "+src.height+" px";$("statAlgorithm").textContent=labels[s.algorithm];$("statPalette").textContent=pal[s.palette].name;$("statScale").textContent="×"+s.scale;const status=$("fileStatus");if(status){status.textContent=resultDirty?"Есть изменения":demo?"Демо-пример":lastExported?"Результат экспортирован":"Исходный файл";status.dataset.state=resultDirty?"dirty":demo?"demo":lastExported?"exported":"source"}}
 function queueRender(){if(renderFrame)return;renderFrame=requestAnimationFrame(()=>{renderFrame=0;render()})}
-function render(){
+function renderImmediate(){
  if(renderFrame){cancelAnimationFrame(renderFrame);renderFrame=0}
  if(!src)return;
  if(canvasRecoveryActive){setProcessingPending(false);return}
  const signature=JSON.stringify(s);
  if(hasRendered&&signature!==lastRenderedSignature){resultDirty=true;lastExported=false}
  lastRenderedSignature=signature;hasRendered=true;
- const cfg=cloneSettings(s),renderMode=mode,revision=++previewRevision;
+ const cfg=cloneSettings(s);if(animationPreviewActive){cfg.temporalPhase=animationCurrentMs/1000;cfg.temporalSeed=Math.floor(animationCurrentMs*animationClip.fps/1000)+1}const renderMode=mode,revision=++previewRevision;
  if(original){
   pendingWorkerPreview=null;document.body.dataset.processingEngine="main";
   drawRenderedImage(src,cfg,renderMode,null);settleProcessingPreview();
@@ -2078,6 +2131,7 @@ function render(){
  settleProcessingPreview();
  if(renderMode==="video")renderVideoFrame();
 }
+function render(){if(animationPlaying||animationExporting||animationPreviewActive||previewBehaviour==="live"){if(previewRenderTimer){clearTimeout(previewRenderTimer);previewRenderTimer=0}renderImmediate();return}if(previewRenderTimer)clearTimeout(previewRenderTimer);const delay=previewBehaviour==="still"?180:48;previewRenderTimer=setTimeout(()=>{previewRenderTimer=0;renderImmediate()},delay)}
 function zoom(){if($("zoom").value==="fit"){out.style.width="auto";out.style.height="auto";out.style.maxWidth="100%";out.style.maxHeight="100%"}else{let z=Number($("zoom").value)/100;out.style.maxWidth="none";out.style.maxHeight="none";out.style.width=Math.round(out.width*z)+"px";out.style.height=Math.round(out.height*z)+"px"}updateCompareUI()}
 function replaceLostCanvas(canvas){
  if(!canvas?.parentNode)return null;
@@ -2315,7 +2369,7 @@ async function confirmExport(){
  else if(format==="copy")copyResult();
 }
 
-function controls(){document.addEventListener("change",event=>{const target=event.target;if(!WORKSPACE_NAMES.includes(mode)||!target.matches("input,select,textarea")||!target.closest("#inspector"))return;saveWorkspaceSettings(mode)});const binds=[["scale","scale"," px"],["markScale","markScale","%"],["blend","blend","%"],["smoothing","smoothing","%"],["levels","levels",""],["threshold","threshold",""],["patternAngle","patternAngle","°"],["depth","depth","%"],["contrast","contrast","%"],["brightness","brightness",""],["midtones","midtones","%"],["highlights","highlights","%"],["shapeRotation","shapeRotation","°"],["blur","blur"," px"],["jitter","jitter","%"],["asciiWidth","asciiWidth",""],["asciiDepth","asciiDepth",""],["asciiCellSize","asciiCellSize"," px"],["asciiOffset","asciiOffset",""],["neoGlowLength","neoGlowLength","%"],["neoGlowBrightness","neoGlowBrightness","%"],["neoGlowVisibility","neoGlowVisibility","%"],["neoGlowPhase","neoGlowPhase","%"]];for(const [id,key,suffix] of binds)$(id).addEventListener("input",()=>{s[key]=Number($(id).value);$(id+"V").textContent=$(id).value+suffix;queueRender()});$("jpegQuality").addEventListener("input",()=>{s.jpegQuality=Number($("jpegQuality").value);$("jpegQualityV").textContent=s.jpegQuality+"%"});$("jpegQuality").onchange=()=>{if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode)};$("qualityMode").onchange=()=>{s.qualityMode=$("qualityMode").value;saveWorkspaceSettings(mode);render();say("Точность обработки: "+$("qualityMode").selectedOptions[0].textContent)};$("serpentine").onchange=()=>{s.serpentine=$("serpentine").checked;if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);render()};$("serpentineControl").addEventListener("click",event=>{event.preventDefault();s.serpentine=!s.serpentine;$("serpentine").checked=s.serpentine;if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);render()});$("algorithm").onchange=()=>{const next=$("algorithm").value;if(next==="shape"){setMode("shape");return}if(next==="ascii"){setMode("script");return}s.algorithm=next;if(mode==="shape"||mode==="script")setMode("editor");else{sync();render()}};$("invert").onchange=()=>{s.invert=$("invert").checked;render()};$("colorMode").onchange=()=>{s.colorMode=$("colorMode").value;render()};$("patternShape").onchange=()=>{s.patternShape=$("patternShape").value;render()};$("shape").onchange=()=>{s.shape=$("shape").value;render()};$("asciiSet").onchange=()=>{s.asciiSet=$("asciiSet").value;updateGlyphPreview();render()};$("asciiCustomChars").addEventListener("input",()=>{s.asciiCustomChars=Array.from($("asciiCustomChars").value).slice(0,10).join("");$("asciiCustomCount").textContent=Array.from(s.asciiCustomChars).length+" / 10";queueRender()});["asciiColorMode","asciiBgMode","neoGlowDirection"].forEach(id=>$(id).onchange=()=>{s[id]=$(id).value;render()});["asciiBgColor","asciiTextColor","neoGlowColor"].forEach(id=>$(id).oninput=()=>{s[id]=$(id).value;queueRender()});$("neoGlowEnabled").onclick=()=>{s.neoGlowEnabled=!s.neoGlowEnabled;const toggle=$("neoGlowEnabled");toggle.setAttribute("aria-checked",String(s.neoGlowEnabled));if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);render();toggle.setAttribute("aria-checked",String(s.neoGlowEnabled))};$("shapeDistribution").onchange=()=>{s.shapeDistribution=$("shapeDistribution").value;render()};for(let i=0;i<4;i++)for(const [cap,key] of [["Shape","shape"],["Size","size"],["Color","color"]]){const el=$("band"+cap+i);el.addEventListener(key==="size"?"input":"change",()=>{s.shapeBands=s.shapeBands||def.shapeBands.map(b=>({...b}));s.shapeBands[i][key]=key==="size"?Number(el.value):el.value;key==="size"?queueRender():render()})}for(let i=0;i<4;i++)$("bandRotation"+i).addEventListener("input",()=>{s.shapeBands=s.shapeBands||def.shapeBands.map(b=>({...b}));s.shapeBands[i].rotation=Number($("bandRotation"+i).value);$("bandRotation"+i+"V").textContent=s.shapeBands[i].rotation+"°";queueRender()});for(let i=0;i<3;i++)$("shapeThreshold"+i).addEventListener("input",()=>{const t=[...(s.shapeThresholds||def.shapeThresholds)],v=Number($("shapeThreshold"+i).value);if(i===0)t[i]=clamp(v,5,t[1]-5);else if(i===1)t[i]=clamp(v,t[0]+5,t[2]-5);else t[i]=clamp(v,t[1]+5,95);s.shapeThresholds=t;sync();queueRender()});for(let i=0;i<4;i++)$("customColor"+(i+1)).oninput=()=>{s.customColors=Array.isArray(s.customColors)?[...s.customColors]:[...def.customColors];while(s.customColors.length<4)s.customColors.push(def.customColors[s.customColors.length]);for(let j=0;j<4;j++)s.customColors[j]=$("customColor"+(j+1)).value;pal.custom.c=s.customColors;store("ditherlab-colors",s.customColors);const pb=document.querySelector('.palette[data-palette="custom"]');if(pb)pb.querySelectorAll(".swatches i").forEach((el,j)=>{if(s.customColors[j])el.style.background=s.customColors[j]});renderActivePaletteEditor();queueRender()};$("useCustomPalette").onclick=()=>{const colors=[1,2,3,4].map(i=>$("customColor"+i).value),nextWorkspaces={...workspaceSettings},entries=[["ditherlab-colors",colors]];if(WORKSPACE_NAMES.includes(mode)){nextWorkspaces[mode]={...s,palette:"custom",customColors:colors};entries.push(["tgrmlithering-workspaces",nextWorkspaces])}if(!storeTransaction(entries))return;s.customColors=[...colors];pal.custom.c=[...colors];s.palette="custom";if(WORKSPACE_NAMES.includes(mode))workspaceSettings=nextWorkspaces;sync();render();say("Собственная палитра включена")};$("extractPalette").onclick=extractPalette;$("exportPalette").onclick=exportPalette;$("importPalette").onclick=()=>$("paletteInput").click();
+function controls(){$("shuffleUnlockedPalette").onclick=shuffleUnlockedPalette;document.addEventListener("change",event=>{const target=event.target;if(!WORKSPACE_NAMES.includes(mode)||!target.matches("input,select,textarea")||!target.closest("#inspector"))return;saveWorkspaceSettings(mode)});const binds=[["scale","scale"," px"],["markScale","markScale","%"],["blend","blend","%"],["smoothing","smoothing","%"],["levels","levels",""],["threshold","threshold",""],["patternAngle","patternAngle","°"],["depth","depth","%"],["contrast","contrast","%"],["brightness","brightness",""],["midtones","midtones","%"],["highlights","highlights","%"],["shapeRotation","shapeRotation","°"],["blur","blur"," px"],["jitter","jitter","%"],["asciiWidth","asciiWidth",""],["asciiDepth","asciiDepth",""],["asciiCellSize","asciiCellSize"," px"],["asciiOffset","asciiOffset",""],["neoGlowLength","neoGlowLength","%"],["neoGlowBrightness","neoGlowBrightness","%"],["neoGlowVisibility","neoGlowVisibility","%"],["neoGlowPhase","neoGlowPhase","%"]];for(const [id,key,suffix] of binds)$(id).addEventListener("input",()=>{s[key]=Number($(id).value);$(id+"V").textContent=$(id).value+suffix;queueRender()});$("jpegQuality").addEventListener("input",()=>{s.jpegQuality=Number($("jpegQuality").value);$("jpegQualityV").textContent=s.jpegQuality+"%"});$("jpegQuality").onchange=()=>{if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode)};$("qualityMode").onchange=()=>{s.qualityMode=$("qualityMode").value;saveWorkspaceSettings(mode);render();say("Точность обработки: "+$("qualityMode").selectedOptions[0].textContent)};$("serpentine").onchange=()=>{s.serpentine=$("serpentine").checked;if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);render()};$("serpentineControl").addEventListener("click",event=>{event.preventDefault();s.serpentine=!s.serpentine;$("serpentine").checked=s.serpentine;if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);render()});$("algorithm").onchange=()=>{const next=$("algorithm").value;if(next==="shape"){setMode("shape");return}if(next==="ascii"){setMode("script");return}s.algorithm=next;if(mode==="shape"||mode==="script")setMode("editor");else{sync();render()}};$("invert").onchange=()=>{s.invert=$("invert").checked;render()};$("colorMode").onchange=()=>{s.colorMode=$("colorMode").value;if(s.colorMode==="source"){if(!src){s.colorMode="color";$("colorMode").value="color";say("Сначала откройте изображение для извлечения исходной палитры")}else extractPalette()}render()};$("patternShape").onchange=()=>{s.patternShape=$("patternShape").value;render()};$("shape").onchange=()=>{s.shape=$("shape").value;render()};$("asciiSet").onchange=()=>{s.asciiSet=$("asciiSet").value;updateGlyphPreview();render()};$("asciiCustomChars").addEventListener("input",()=>{s.asciiCustomChars=Array.from($("asciiCustomChars").value).slice(0,10).join("");$("asciiCustomCount").textContent=Array.from(s.asciiCustomChars).length+" / 10";queueRender()});["asciiColorMode","asciiBgMode","neoGlowDirection"].forEach(id=>$(id).onchange=()=>{s[id]=$(id).value;render()});["asciiBgColor","asciiTextColor","neoGlowColor"].forEach(id=>$(id).oninput=()=>{s[id]=$(id).value;queueRender()});$("neoGlowEnabled").onclick=()=>{s.neoGlowEnabled=!s.neoGlowEnabled;const toggle=$("neoGlowEnabled");toggle.setAttribute("aria-checked",String(s.neoGlowEnabled));if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);render();toggle.setAttribute("aria-checked",String(s.neoGlowEnabled))};$("shapeDistribution").onchange=()=>{s.shapeDistribution=$("shapeDistribution").value;render()};for(let i=0;i<4;i++)for(const [cap,key] of [["Shape","shape"],["Size","size"],["Color","color"]]){const el=$("band"+cap+i);el.addEventListener(key==="size"?"input":"change",()=>{s.shapeBands=s.shapeBands||def.shapeBands.map(b=>({...b}));s.shapeBands[i][key]=key==="size"?Number(el.value):el.value;key==="size"?queueRender():render()})}for(let i=0;i<4;i++)$("bandRotation"+i).addEventListener("input",()=>{s.shapeBands=s.shapeBands||def.shapeBands.map(b=>({...b}));s.shapeBands[i].rotation=Number($("bandRotation"+i).value);$("bandRotation"+i+"V").textContent=s.shapeBands[i].rotation+"°";queueRender()});for(let i=0;i<3;i++)$("shapeThreshold"+i).addEventListener("input",()=>{const t=[...(s.shapeThresholds||def.shapeThresholds)],v=Number($("shapeThreshold"+i).value);if(i===0)t[i]=clamp(v,5,t[1]-5);else if(i===1)t[i]=clamp(v,t[0]+5,t[2]-5);else t[i]=clamp(v,t[1]+5,95);s.shapeThresholds=t;sync();queueRender()});for(let i=0;i<4;i++)$("customColor"+(i+1)).oninput=()=>{s.customColors=Array.isArray(s.customColors)?[...s.customColors]:[...def.customColors];while(s.customColors.length<4)s.customColors.push(def.customColors[s.customColors.length]);for(let j=0;j<4;j++)s.customColors[j]=$("customColor"+(j+1)).value;pal.custom.c=s.customColors;store("ditherlab-colors",s.customColors);const pb=document.querySelector('.palette[data-palette="custom"]');if(pb)pb.querySelectorAll(".swatches i").forEach((el,j)=>{if(s.customColors[j])el.style.background=s.customColors[j]});renderActivePaletteEditor();queueRender()};$("useCustomPalette").onclick=()=>{const colors=[1,2,3,4].map(i=>$("customColor"+i).value),nextWorkspaces={...workspaceSettings},entries=[["ditherlab-colors",colors]];if(WORKSPACE_NAMES.includes(mode)){nextWorkspaces[mode]={...s,palette:"custom",customColors:colors};entries.push(["tgrmlithering-workspaces",nextWorkspaces])}if(!storeTransaction(entries))return;s.customColors=[...colors];pal.custom.c=[...colors];s.palette="custom";if(WORKSPACE_NAMES.includes(mode))workspaceSettings=nextWorkspaces;sync();render();say("Собственная палитра включена")};$("extractPalette").onclick=extractPalette;$("exportPalette").onclick=exportPalette;$("importPalette").onclick=()=>$("paletteInput").click();
 $("savePaletteToLibrary").onclick=savePaletteToLibrary;
 $("applyLibraryPalette").onclick=()=>{const id=$("paletteLibrarySelect").value;if(!pal[id]){say("Выберите палитру");return}const previous=s.palette;s.palette=id;if(WORKSPACE_NAMES.includes(mode)&&!saveWorkspaceSettings(mode)){s.palette=previous;return}sync();renderActivePaletteEditor();render();say("Активна палитра «"+pal[id].name+"")};
 $("deleteLibraryPalette").onclick=deletePaletteFromLibrary;
@@ -2337,6 +2391,24 @@ $("paletteLibraryInput").onchange=async e=>{const f=e.target.files[0];if(f)await
  };
  el.addEventListener("click",toggleEffect);
  el.addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();toggleEffect()}});
+ const panelScope=el.closest("[data-effect-scope]")?.dataset.effectScope,key=el.dataset.effect;
+ const lockButton=document.createElement("button");
+ lockButton.type="button";lockButton.className="effect-lock";lockButton.dataset.effectLock=key;
+ lockButton.setAttribute("aria-pressed",String(!!effectLocks[panelScope]?.[key]));
+ lockButton.textContent=effectLocks[panelScope]?.[key]?"🔒":"🔓";
+ lockButton.title="Зафиксировать текущее состояние для случайных стилей";
+ lockButton.setAttribute("aria-label","Зафиксировать состояние · "+(el.closest(".effect-control")?.querySelector("label")?.textContent.trim()||key));
+ lockButton.addEventListener("click",event=>{
+  event.preventDefault();event.stopPropagation();
+  if(panelScope!==mode||!WORKSPACE_NAMES.includes(panelScope))return;
+  const next=normaliseEffectLocks(effectLocks),scopeLocks={...(next[panelScope]||{})};
+  if(scopeLocks[key])delete scopeLocks[key];else scopeLocks[key]=true;
+  if(Object.keys(scopeLocks).length)next[panelScope]=scopeLocks;else delete next[panelScope];
+  if(!store(EFFECT_LOCKS_STORAGE_KEY,next)){say("Не удалось сохранить блокировку эффекта");return}
+  effectLocks=next;syncEffectLockButtons();
+  say(scopeLocks[key]?"Состояние эффекта зафиксировано":"Блокировка эффекта снята");
+ });
+ el.insertAdjacentElement("afterend",lockButton);
 }
 document.querySelectorAll(".effect-control").forEach(row=>{
  const panel=row.closest("[data-effect-scope]"),effect=row.querySelector("[data-effect]");
@@ -2443,6 +2515,7 @@ document.querySelectorAll('.effect-control .effect-toggle[role="checkbox"][data-
  const checked=(profile.effects||[]).includes(e.dataset.effect);
  e.setAttribute("aria-checked",String(checked));e.closest(".effect-control")?.classList.toggle("is-active",checked);
 });
+syncEffectLockButtons();
 document.querySelectorAll("[data-effect-strength]").forEach(e=>{
  const scope=e.closest("[data-effect-scope]")?.dataset.effectScope;
  if(!WORKSPACE_NAMES.includes(scope))return;
@@ -2539,7 +2612,7 @@ function renderActivePaletteEditor(){
    if(latest.length<=2){say("В палитре должно остаться хотя бы два цвета");return}
    latest.splice(index,1);persistActivePaletteColors(key,latest);initPalettes();renderPaletteLibrary();renderActivePaletteEditor();sync();render();say("Цвет удалён из палитры");
   });
-  row.append(label,input,code,remove);box.append(row);
+  const lock=document.createElement("button");lock.type="button";lock.className="btn sm active-palette-lock";const locked=Array.isArray(paletteLocks[key])&&paletteLocks[key][index]===true;lock.setAttribute("aria-pressed",String(locked));lock.textContent=locked?"🔒":"○";lock.title=locked?"Разблокировать цвет":"Заблокировать цвет";lock.setAttribute("aria-label",lock.title+" "+(index+1));lock.addEventListener("click",()=>{const next={...(paletteLocks&&typeof paletteLocks==="object"?paletteLocks:{})},flags=Array.isArray(next[key])?[...next[key]]:[];flags[index]=!flags[index];next[key]=flags;if(!store(PALETTE_LOCKS_KEY,next))return;paletteLocks=next;renderActivePaletteEditor()});row.append(label,input,code,remove,lock);box.append(row);
  });
 }
 function bindPaletteEditorControls(){
@@ -2660,12 +2733,14 @@ function download(blob,name){
  transientDownloadUrls.set(url,timer);resourceMetrics.transientDownloadUrls=transientDownloadUrls.size;
 }
 async function exportImage(type="png"){if(!src){say("Сначала загрузите изображение");return}if(original){original=false;render()}await waitForProcessingPreview();const quality=clamp(Number($("jpegQuality")?.value??s.jpegQuality??94)/100,.7,1);out.toBlob(b=>{if(!b){say("Экспорт не удался");return}download(b,slug(srcName)+"-TGRMLither."+(type==="jpeg"?"jpg":type));markResultExported();say(type==="jpeg"?"JPEG экспортирован":"PNG экспортирован")},type==="jpeg"?"image/jpeg":"image/png",type==="jpeg"?quality:undefined)}
-function project(){if(!src){say("Сначала загрузите изображение");return}try{if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);const source=src.toDataURL("image/png");if(source.length>MAX_PROJECT_FILE_BYTES){say("Проект слишком велик для сохранения. Уменьшите изображение и повторите экспорт.");return}const p={format:"tgrmlither-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source,settings:cloneSettings(s),workspaces:workspaceSettings},json=JSON.stringify(p);if(json.length>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ. Уменьшите изображение и повторите экспорт.");return}download(new Blob([json],{type:"application/json"}),slug(srcName)+".tgrmlither.json");say("Проект сохранён")}catch(error){say("Не удалось сохранить проект. Попробуйте уменьшить изображение и повторить экспорт.")}}
-function saveStandalone(){let html="<!doctype html>\n"+document.documentElement.outerHTML;download(new Blob([html],{type:"text/html;charset=utf-8"}),"TGRMLither-offline.html");say("Автономная HTML-версия скачана")}
+function project(){if(animationExporting||animationPlaying){say("Сначала остановите анимацию или завершите экспорт");return}if(!src){say("Сначала загрузите изображение");return}try{if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);const source=src.toDataURL("image/png");if(source.length>MAX_PROJECT_FILE_BYTES){say("Проект слишком велик для сохранения. Уменьшите изображение и повторите экспорт.");return}const projectSettings=cloneSettings(animationScrubPreviewed&&animationScrubBase?animationScrubBase:s);const p={format:"tgrmlither-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source,settings:projectSettings,workspaces:workspaceSettings,animation:animationClip},json=JSON.stringify(p);if(json.length>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ. Уменьшите изображение и повторите экспорт.");return}download(new Blob([json],{type:"application/json"}),slug(srcName)+".tgrmlither.json");say("Проект сохранён")}catch(error){say("Не удалось сохранить проект. Попробуйте уменьшить изображение и повторить экспорт.")}}
+async function saveStandalone(){try{let html="<!doctype html>\n"+document.documentElement.outerHTML;const closeTag="<"+"/script>",scriptTag="<"+"script src=\"./animation-engine.js\">"+closeTag;if(html.includes(scriptTag)){const response=await fetch(new URL("./animation-engine.js",document.baseURI));if(!response.ok)throw Error("Не удалось встроить Animation Engine в автономный файл");const source=await response.text();html=html.replace(scriptTag,"<"+"script>\n"+source+"\n"+closeTag)}download(new Blob([html],{type:"text/html;charset=utf-8"}),"TGRMLither-offline.html");say("Автономная HTML-версия скачана")}catch(error){say(error?.message||"Не удалось создать автономный HTML-файл")}}
 function openImage(){ $("imageInput").click() }
 function setMode(m){
  if(!["editor","presets","shape","script","batch","video"].includes(m))m="editor";
  const previousMode=mode;
+ if(m!==previousMode&&animationExporting){say("Сначала завершите или отмените экспорт анимации");return}
+ if(m!==previousMode&&animationPlaying)animationStopPlayback(true);
  if(m!==previousMode){
   if(m!=="script"&&asciiAnimRaf)stopAsciiAnimation();
   if(temporalRaf)stopTemporal();
@@ -2675,6 +2750,9 @@ function setMode(m){
    }
  }
  if(WORKSPACE_NAMES.includes(previousMode))saveWorkspaceSettings(previousMode);
+ if(WORKSPACE_NAMES.includes(previousMode)&&animationScrubPreviewed&&animationScrubBase){
+  s=cloneSettings(animationScrubBase);animationScrubPreviewed=false;animationPreviewFrame=null;animationCurrentMs=0;
+ }
  mode=m;
  if(m==="video"&&previousMode!=="video"&&$("videoSource")?.readyState>=2)requestAnimationFrame(()=>renderVideoFrame());
  if(WORKSPACE_NAMES.includes(m)){
@@ -2725,6 +2803,7 @@ function setMode(m){
   $("algorithm").value=s.algorithm;sync();renderVideoFrame();
  }else if(m==="presets")renderPresets();
  if(WORKSPACE_NAMES.includes(m))saveWorkspaceSettings(m);
+ if(["editor","shape","script"].includes(m)){animationScrubBase=cloneSettings(s);animationCurrentMs=0;animationScrubPreviewed=false;animationPreviewFrame=null;animationRefreshTrackOptions();animationRefreshUI()}
 }
 function makeCard(p){let b=document.createElement("button");b.className="preset";let art=document.createElement("div");art.className="previewart";let c=document.createElement("canvas");c.width=300;c.height=145;let x=c.getContext("2d"),cs=(pal[p.c.palette||"moss"]||pal.moss).c;let g=x.createLinearGradient(0,0,300,145);cs.forEach((col,i)=>g.addColorStop(i/Math.max(1,cs.length-1),col));x.fillStyle=g;x.fillRect(0,0,300,145);x.fillStyle=cs[cs.length-1];x.beginPath();x.arc(210,38,25,0,7);x.fill();x.fillStyle=cs[Math.floor((cs.length-1)/2)];x.beginPath();x.moveTo(0,110);x.lineTo(62,52);x.lineTo(128,115);x.lineTo(195,72);x.lineTo(265,120);x.lineTo(300,93);x.lineTo(300,145);x.lineTo(0,145);x.closePath();x.fill();for(let yy=0;yy<145;yy+=p.c.scale||5)for(let xx=0;xx<300;xx+=p.c.scale||5){if((xx+yy)%17<4){x.fillStyle=cs[0];x.fillRect(xx,yy,2,2)}}art.append(c);let info=document.createElement("div");info.className="presetinfo";info.innerHTML='<span class="ptag"></span><div class="presetname"></div><div class="presetdesc"></div>';info.querySelector(".ptag").textContent=p.tag||"MY PRESET";info.querySelector(".presetname").textContent=p.name;info.querySelector(".presetdesc").textContent=p.desc||"Моя конфигурация";b.append(art,info);b.onclick=()=>{setMode("editor");s=cloneSettings({...def,...p.c});if(["shape","ascii"].includes(s.algorithm))s.algorithm="bayer4";workspaceSettings.editor=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Пресет: "+p.name)};return b}
 function renderPresets(){
@@ -2813,7 +2892,7 @@ function formatFileSize(bytes){
 }
 async function loadImageFile(file,successMessage=""){
  if(!file)return false;
- if(!String(file.type||"").startsWith("image/")){say("Выберите файл изображения (PNG, JPEG, WebP, GIF или BMP)");return false}
+ const isSvg=file.type==="image/svg+xml"||/\.svg$/i.test(file.name||"");if(!String(file.type||"").startsWith("image/")&&!isSvg){say("Выберите файл изображения (PNG, JPEG, WebP, GIF, BMP или SVG)");return false}
  if(!Number.isFinite(Number(file.size))||file.size>MAX_IMAGE_FILE_BYTES){say("Файл изображения больше 128 МБ. Уменьшите файл и повторите загрузку.");return false}
  if(imageLoadController)imageLoadController.abort();
  const controller=new AbortController(),generation=++imageLoadGeneration;
@@ -2822,7 +2901,7 @@ async function loadImageFile(file,successMessage=""){
  setImageLoading(true,"Открываем "+name+"…",formatFileSize(file.size)+" · декодирование на устройстве");
  await new Promise(resolve=>requestAnimationFrame(()=>resolve()));
  try{
-  const canvas=await fileCanvas(file,controller.signal);
+  const canvas=isSvg?await safeSvgFileCanvas(file,controller.signal):await fileCanvas(file,controller.signal);
   if(controller.signal.aborted||generation!==imageLoadGeneration)return false;
   loadImage(canvas,name,false);
   if(successMessage)say(successMessage);
@@ -2931,6 +3010,8 @@ async function runBatch(){
 let activeProjectReader=null,projectLoadGeneration=0;
 function loadProject(f){
  if(!f)return;
+ if(animationExporting){say("Сначала завершите или отмените экспорт анимации");return}
+ if(animationPlaying)animationStopPlayback(true);
  if(!Number.isFinite(Number(f.size))||f.size>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ");return}
  if(activeProjectReader)try{activeProjectReader.abort()}catch(error){}
  const generation=++projectLoadGeneration,r=new FileReader();
@@ -2947,13 +3028,13 @@ function loadProject(f){
  r.onabort=()=>{if(finishRead()&&generation===projectLoadGeneration)say("Чтение файла проекта отменено")};
  r.onload=()=>{
   if(!finishRead()||generation!==projectLoadGeneration)return;
-  let p,target,loadedSettings;
+  let p,target,loadedSettings,loadedAnimation;
   try{
    if(typeof r.result!=="string")throw Error("read");
    p=JSON.parse(r.result);
    if(!p||typeof p!=="object"||!["tgrmlither-project","tgrmlithering-project","ditherlab-project"].includes(p.format)||typeof p.source!=="string"||p.source.length>MAX_PROJECT_FILE_BYTES||!/^data:image\/(?:png|jpeg|webp);base64,/i.test(p.source))throw Error("project");
    target=WORKSPACE_NAMES.includes(p.workspace)?p.workspace:p.settings?.algorithm==="ascii"?"script":p.settings?.algorithm==="shape"?"shape":"editor";
-   loadedSettings=cloneSettings(p.settings||def);
+   loadedSettings=cloneSettings(p.settings||def);loadedAnimation=p.animation===undefined?AnimationEngine.createClip():AnimationEngine.normalise(p.animation);
    if(target==="shape")loadedSettings.algorithm="shape";
    if(target==="script")loadedSettings.algorithm="ascii";
   }catch(error){say("Неверный файл проекта");return}
@@ -2974,15 +3055,15 @@ function loadProject(f){
    setMode("presets");
    const nextWorkspaces=normaliseWorkspaceSettings(p.workspaces&&typeof p.workspaces==="object"?p.workspaces:currentWorkspaces);
    nextWorkspaces[target]=cloneSettings(loadedSettings);
-   if(!store("tgrmlithering-workspaces",nextWorkspaces)){
+   if(!storeTransaction([["tgrmlithering-workspaces",nextWorkspaces],[ANIMATION_STORAGE_KEY,loadedAnimation]])){
     setMode(previousMode);
-    say("Проект не открыт: настройки не удалось безопасно сохранить");
+    say("Проект не открыт: настройки или анимацию не удалось безопасно сохранить");
     return;
    }
-   workspaceSettings=nextWorkspaces;
+   animationClip=loadedAnimation;workspaceSettings=nextWorkspaces;
    const projectName=typeof p.sourceName==="string"&&p.sourceName.trim()?p.sourceName.slice(0,160):"project";
    loadImage(canvas,projectName,false);
-   setMode(target);sync();render();
+   setMode(target);sync();render();animationScrubBase=cloneSettings(s);animationCurrentMs=0;animationRefreshTrackOptions();animationRefreshUI();
    say(imageResizeMessage(canvas)||"Проект открыт");
   };
   image.onerror=()=>{if(finishDecode()&&generation===projectLoadGeneration)say("Не удалось открыть изображение проекта")};
@@ -3357,6 +3438,273 @@ async function exportProcessedVideo(){
  }
 }
 function videoName(){return ($("videoFilename").textContent||"video").replace(/\.[^.]+$/,"")}
+const ANIMATION_STORAGE_KEY="tgrmlither-animation";
+const PREVIEW_BEHAVIOUR_KEY="tgrmlither-preview-behaviour";
+const PALETTE_LOCKS_KEY="tgrmlither-palette-locks";
+const EFFECT_LOCKS_STORAGE_KEY="tgrmlither-effect-locks";
+function normaliseEffectLocks(input,strict=false){
+ if(!input||typeof input!=="object"||Array.isArray(input)){if(strict)throw Error("Некорректные блокировки эффектов");return{}}
+ const clean={};
+ for(const [scope,entries] of Object.entries(input)){
+  if(!WORKSPACE_NAMES.includes(scope)||!entries||typeof entries!=="object"||Array.isArray(entries)){
+   if(strict)throw Error("Некорректная область блокировок эффектов");continue;
+  }
+  const flags={};
+  for(const [effect,locked] of Object.entries(entries)){
+   if(!EFFECT_KEYS.includes(effect)||typeof locked!=="boolean"){
+    if(strict)throw Error("Некорректная блокировка эффекта");continue;
+   }
+   if(locked)flags[effect]=true;
+  }
+  if(Object.keys(flags).length)clean[scope]=flags;
+ }
+ return clean;
+}
+const AnimationEngine=window.TGRMAnimationEngine;
+let animationClip=AnimationEngine.normalise(loadStore(ANIMATION_STORAGE_KEY,null));
+let animationScrubBase=null,animationCurrentMs=0,animationPlaying=false,animationRaf=0,animationPlayBase=null,animationPlayEpoch=0,animationLastFrameAt=0,animationFrameBusy=false,animationPreviewActive=false,animationScrubPreviewed=false,animationPreviewFrame=null,animationExporting=false,animationCancelRequested=false,animationScrubRequest=0;
+let paletteLocks=loadStore(PALETTE_LOCKS_KEY,{});
+let effectLocks=normaliseEffectLocks(loadStore(EFFECT_LOCKS_STORAGE_KEY,{}));
+let previewBehaviour=loadStore(PREVIEW_BEHAVIOUR_KEY,"live");
+if(!["live","balanced","still"].includes(previewBehaviour))previewBehaviour="live";
+let previewRenderTimer=0;
+const ANIMATION_EXPORT_MAX_FRAMES=600,ANIMATION_EXPORT_MAX_BYTES=48*1024*1024,ANIMATION_VIDEO_MAX_BYTES=128*1024*1024;
+function animationTrackLabel(path){
+ const labels={algorithm:"Алгоритм",scale:"Шаг дизеринга",markScale:"Размер паттерна",blend:"Смешивание с оригиналом",smoothing:"Сглаживание",levels:"Количество цветов",threshold:"Порог",patternAngle:"Угол паттерна",patternShape:"Форма точки",depth:"Глубина",contrast:"Контраст",brightness:"Яркость",midtones:"Средние тона",highlights:"Света",blur:"Размытие",invert:"Инверсия",palette:"Палитра",colorMode:"Цветовой режим",qualityMode:"Качество",serpentine:"Serpentine",shape:"Форма Shape Lab",jitter:"Вариативность формы",shapeDistribution:"Распределение формы",shapeRotation:"Поворот Shape Lab",asciiWidth:"Ширина ASCII",asciiDepth:"Глубина ASCII",asciiCellSize:"Размер ячейки ASCII",asciiOffset:"Смещение ASCII",neoGlowLength:"Длина Neo Glow",neoGlowBrightness:"Яркость Neo Glow",neoGlowVisibility:"Видимость Neo Glow",neoGlowPhase:"Фаза Neo Glow"};
+ if(path.startsWith("effectStrength."))return "Интенсивность · "+path.slice(15);
+ if(path.startsWith("effects."))return "Эффект · "+path.slice(8)+" · вкл/выкл";
+ if(path.startsWith("algorithmLayers.")){const parts=path.split(".");return "Слой "+(Number(parts[1])+1)+" · "+({opacity:"непрозрачность",enabled:"включён",algorithm:"алгоритм",blend:"смешивание"}[parts[2]]||parts[2])}
+ if(path.startsWith("shapeBands.")){const parts=path.split(".");return "Полоса "+(Number(parts[1])+1)+" · "+({size:"размер",rotation:"поворот",shape:"форма",color:"цвет"}[parts[2]]||parts[2])}
+ return labels[path]||path;
+}
+function animationPersist(){
+ const candidate=AnimationEngine.normalise(animationClip);
+ if(!store(ANIMATION_STORAGE_KEY,candidate)){animationClip=AnimationEngine.normalise(loadStore(ANIMATION_STORAGE_KEY,null));animationRefreshUI();animationSetStatus("Не удалось сохранить клип. Предыдущая версия восстановлена.");return false}
+ animationClip=candidate;return true;
+}
+function animationSelectedPath(){return $("animationTrack")?.value||"threshold"}
+function animationFormatTime(ms){const n=Math.max(0,Number(ms)||0);return String(Math.floor(n/60000)).padStart(2,"0")+":"+((n%60000)/1000).toFixed(1).padStart(4,"0")}
+function animationSetStatus(message){const node=$("animationSelectedTrackInfo");if(node)node.textContent=message}
+function animationRefreshTrackOptions(){
+ const select=$("animationTrack");if(!select)return;
+ const prior=select.value,paths=AnimationEngine.listPaths(s);select.innerHTML="";
+ paths.forEach(path=>{const option=document.createElement("option");option.value=path;option.textContent=animationTrackLabel(path);select.append(option)});
+ select.value=paths.includes(prior)?prior:paths.includes("threshold")?"threshold":paths[0]||"";
+ animationRefreshSelectedTrack();
+}
+function animationRefreshSelectedTrack(){
+ const path=animationSelectedPath(),track=animationClip.tracks[path],osc=track?.oscillator;
+ $("animationWave").value=osc?.wave||"sine";$("animationAmplitude").value=String(osc?.amount??12);$("animationFrequency").value=String(osc?.frequency??1);
+ $("animationOscillator").textContent=osc?"− Убрать осциллятор":"＋ Осциллятор";
+ const frames=track?.keyframes?.length||0;
+ animationSetStatus(path?animationTrackLabel(path)+" · "+frames+" ключевых кадров"+(osc?" · Temporal Variation включён":""):"Параметры недоступны для анимации.");
+}
+function animationRenderLanes(){
+ const box=$("animationLanes");if(!box)return;box.innerHTML="";
+ const entries=Object.entries(animationClip.tracks).filter(([,track])=>track.keyframes.length||track.oscillator);
+ if(!entries.length){const empty=document.createElement("div");empty.className="animation-empty";empty.textContent="Добавьте ключевой кадр для создания первой дорожки.";box.append(empty);return}
+ for(const [path,track] of entries){
+  const row=document.createElement("div");row.className="animation-lane";
+  const name=document.createElement("button");name.type="button";name.className="animation-lane-name"+(path===animationSelectedPath()?" active":"");name.textContent=animationTrackLabel(path);name.title=path;name.onclick=()=>{$("animationTrack").value=path;animationRefreshSelectedTrack();animationRenderLanes()};
+  const bar=document.createElement("div");bar.className="animation-lane-track";
+  track.keyframes.forEach(frame=>{const pin=document.createElement("button");pin.type="button";pin.className="animation-key";pin.style.left=(frame.timeMs/animationClip.durationMs*100)+"%";pin.title=animationFormatTime(frame.timeMs)+" · "+String(frame.value);pin.setAttribute("aria-label","Ключевой кадр "+animationFormatTime(frame.timeMs));pin.onclick=()=>{$("animationTrack").value=path;animationRefreshSelectedTrack();animationSetTime(frame.timeMs,true);animationRenderLanes()};bar.append(pin)});
+  if(track.oscillator){const mark=document.createElement("span");mark.className="animation-oscillator";mark.title="Temporal Variation";bar.append(mark)}
+  row.append(name,bar);box.append(row);
+ }
+}
+function animationRefreshUI(){
+ if(!$("animationScrub"))return;
+ $("animationDuration").value=String(animationClip.durationMs/1000);$("animationFps").value=String(animationClip.fps);$("animationLoop").checked=animationClip.loop;
+ $("animationScrub").max=String(animationClip.durationMs);$("animationScrub").value=String(animationCurrentMs);
+ $("animationTimeLabel").textContent=animationFormatTime(animationCurrentMs);$("animationEndLabel").textContent=animationFormatTime(animationClip.durationMs);
+ animationRenderLanes();animationRefreshSelectedTrack();
+}
+function animationSetTime(timeMs,apply=true,baseOverride=null){
+ animationCurrentMs=Math.max(0,Math.min(animationClip.durationMs,Math.round(Number(timeMs)||0)));
+ $("animationScrub").value=String(animationCurrentMs);$("animationTimeLabel").textContent=animationFormatTime(animationCurrentMs);
+ if(!apply||!src)return Promise.resolve(false);
+ const base=baseOverride||animationScrubBase||cloneSettings(s);
+ s=cloneSettings(AnimationEngine.evaluate(base,animationClip,animationCurrentMs));
+ if(!animationPlaying&&!animationExporting&&!baseOverride){animationScrubPreviewed=true;animationPreviewFrame=cloneSettings(s)}
+ animationPreviewActive=true;sync();render();animationPreviewActive=false;
+ return waitForProcessingPreview().then(()=>true).catch(()=>false);
+}
+function animationCommitManualEdit(target,persist=false){
+ if(!animationScrubPreviewed||animationPlaying||animationExporting||!WORKSPACE_NAMES.includes(mode)||
+    !target||target.closest("#animationDock")||!animationPreviewFrame||
+    JSON.stringify(s)===JSON.stringify(animationPreviewFrame))return false;
+ animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;animationPreviewFrame=null;
+ if(persist)saveWorkspaceSettings(mode);
+ return true;
+}
+function animationCaptureBase(){if(!src){say("Сначала откройте изображение");return}animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;animationPreviewFrame=null;animationSetStatus("Базовые настройки текущего рабочего пространства сохранены.");say("База анимации обновлена")}
+function animationAddKeyframe(){
+ if(!src){say("Сначала откройте изображение");return}
+ const path=animationSelectedPath();if(!path)return;
+ const value=AnimationEngine.getPath(s,path);if(value===undefined){say("Этот параметр сейчас недоступен");return}
+ animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;animationPreviewFrame=null;
+ try{animationClip=AnimationEngine.setKeyframe(animationClip,path,animationCurrentMs,value,$("animationEasing").value)}catch(error){say(error.message||"Не удалось добавить ключевой кадр");return}
+ if(!animationPersist())return;animationRefreshUI();animationSetStatus(animationTrackLabel(path)+" · ключевой кадр "+animationFormatTime(animationCurrentMs));say("Ключевой кадр сохранён");
+}
+function animationDeleteKeyframe(){
+ const path=animationSelectedPath(),track=animationClip.tracks[path];if(!track?.keyframes?.length){say("На выбранной дорожке нет ключевых кадров");return}
+ const nearest=track.keyframes.reduce((best,item)=>Math.abs(item.timeMs-animationCurrentMs)<Math.abs(best.timeMs-animationCurrentMs)?item:best,track.keyframes[0]);
+ if(Math.abs(nearest.timeMs-animationCurrentMs)>Math.max(100,animationClip.durationMs*.05)){say("Рядом с курсором нет ключевого кадра");return}
+ animationClip=AnimationEngine.removeKeyframe(animationClip,path,nearest.timeMs);if(!animationPersist())return;animationRefreshUI();say("Ключевой кадр удалён");
+}
+function animationToggleOscillator(){
+ const path=animationSelectedPath();if(!path)return;
+ const existing=animationClip.tracks[path]?.oscillator;
+ if(!existing&&typeof AnimationEngine.getPath(s,path)!=="number"){say("Temporal Variation можно добавить только к числовому параметру");return}
+ try{animationClip=AnimationEngine.setOscillator(animationClip,path,existing?null:{wave:$("animationWave").value,amount:Number($("animationAmplitude").value),frequency:Number($("animationFrequency").value)})}catch(error){say(error.message||"Неверные параметры осциллятора");return}
+ if(!animationPersist())return;animationRefreshUI();say(existing?"Temporal Variation выключен":"Temporal Variation включён");
+}
+function animationUpdateOscillator(){
+ const path=animationSelectedPath();if(!animationClip.tracks[path]?.oscillator)return;
+ try{animationClip=AnimationEngine.setOscillator(animationClip,path,{wave:$("animationWave").value,amount:Number($("animationAmplitude").value),frequency:Number($("animationFrequency").value)});animationPersist();animationRefreshUI()}catch(error){say(error.message||"Неверные параметры осциллятора")}
+}
+function animationStopPlayback(restore=true){
+ if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;animationFrameBusy=false;
+ if(animationPlayBase&&restore){s=cloneSettings(animationPlayBase);animationScrubBase=cloneSettings(animationPlayBase);animationPreviewActive=false;animationScrubPreviewed=false;animationPreviewFrame=null;sync();render()}
+ animationPlayBase=null;animationCurrentMs=0;animationRefreshUI();$("animationPlay").disabled=false;$("animationStop").disabled=true;
+}
+function animationPlay(){
+ if(animationPlaying){animationStopPlayback(true);return}
+ if(!src){say("Сначала откройте изображение");return}
+ const hasContent=Object.values(animationClip.tracks).some(track=>track.keyframes.length||track.oscillator);
+ if(!hasContent){say("Сначала добавьте ключевые кадры или Temporal Variation");return}
+ animationPlayBase=cloneSettings(animationScrubBase||s);animationPlaying=true;animationCurrentMs=0;animationPlayEpoch=performance.now();animationLastFrameAt=0;animationFrameBusy=false;
+ $("animationPlay").disabled=true;$("animationStop").disabled=false;
+ const tick=now=>{
+  if(!animationPlaying)return;
+  const interval=1000/animationClip.fps,elapsed=now-animationPlayEpoch;let time=elapsed;
+  if(time>=animationClip.durationMs){if(animationClip.loop){animationPlayEpoch+=animationClip.durationMs;time=elapsed%animationClip.durationMs}else{time=animationClip.durationMs;animationSetTime(time,true,animationPlayBase).finally(()=>animationStopPlayback(true));return}}
+  if(!animationFrameBusy&&now-animationLastFrameAt>=interval){animationFrameBusy=true;animationLastFrameAt=now;animationSetTime(time,true,animationPlayBase).finally(()=>{animationFrameBusy=false})}
+  animationRaf=requestAnimationFrame(tick);
+ };
+ animationRaf=requestAnimationFrame(tick);say("Воспроизведение анимации");
+}
+async function animationRenderFrameAt(timeMs,base){
+ animationCurrentMs=Math.max(0,Math.min(animationClip.durationMs,Math.round(timeMs)));
+ s=cloneSettings(AnimationEngine.evaluate(base,animationClip,animationCurrentMs));
+ animationPreviewActive=true;sync();render();animationPreviewActive=false;await waitForProcessingPreview();
+ if(!out||!out.width||!out.height)throw Error("Предпросмотр не готов к экспорту");
+}
+function animationRestoreAfterExport(base){
+ s=cloneSettings(base);animationScrubBase=cloneSettings(base);animationCurrentMs=0;animationPreviewActive=false;animationScrubPreviewed=false;animationPreviewFrame=null;animationExporting=false;sync();render();animationRefreshUI();
+ $("animationExportFrames").disabled=false;$("animationExportVideo").disabled=false;$("animationCancelExport").disabled=true;
+}
+async function animationExportSequence(){
+ if(animationExporting||animationPlaying)return;if(!src){say("Сначала откройте изображение");return}
+ if(!Object.values(animationClip.tracks).some(track=>track.keyframes.length||track.oscillator)){say("Добавьте ключевые кадры или Temporal Variation перед экспортом");return}
+ const frames=Math.ceil(animationClip.durationMs/1000*animationClip.fps);
+ if(frames<2){say("Для последовательности нужно минимум два кадра");return}if(frames>ANIMATION_EXPORT_MAX_FRAMES){say("Слишком много кадров. Максимум 600; уменьшите FPS или длительность.");return}
+ const base=cloneSettings(animationScrubBase||s),entries=[];let totalBytes=0,completed=0;
+ animationExporting=true;animationCancelRequested=false;$("animationExportFrames").disabled=true;$("animationExportVideo").disabled=true;$("animationCancelExport").disabled=false;
+ try{
+  for(let index=0;index<frames;index++){
+   if(animationCancelRequested)break;
+   const time=Math.min(animationClip.durationMs-1,Math.round(index*1000/animationClip.fps));await animationRenderFrameAt(time,base);
+   const blob=await new Promise(resolve=>out.toBlob(resolve,"image/png"));if(!blob)throw Error("Не удалось получить PNG кадра");
+   totalBytes+=blob.size;if(totalBytes>ANIMATION_EXPORT_MAX_BYTES)throw Error("Последовательность превысила лимит 48 МБ. Уменьшите FPS, длительность или размер исходника.");
+   entries.push({name:"frame_"+String(index+1).padStart(5,"0")+".png",blob});completed++;
+   $("animationProgress").style.width=Math.round(completed/frames*100)+"%";$("animationExportStatus").textContent="PNG · "+completed+" / "+frames;
+   await new Promise(resolve=>setTimeout(resolve,0));
+  }
+  if(!entries.length)throw Error("Экспорт отменён до создания первого кадра");
+  const zip=await buildZipArchive(entries);download(zip,slug(srcName)+"-animation-frames.zip");
+  $("animationExportStatus").textContent=(animationCancelRequested?"Частичный архив · ":"Готово · ")+completed+" PNG";say((animationCancelRequested?"Частичный PNG Sequence экспортирован":"PNG Sequence экспортирован")+" · "+completed+" кадров");
+ }catch(error){$("animationExportStatus").textContent=error.message||"Ошибка экспорта";say(error.message||"Не удалось экспортировать кадры")}
+ finally{animationRestoreAfterExport(base);$("animationProgress").style.width="0%"}
+}
+async function animationExportVideo(){
+ if(animationExporting||animationPlaying)return;if(!src){say("Сначала откройте изображение");return}
+ if(typeof MediaRecorder==="undefined"||typeof out.captureStream!=="function"){say("Запись видео этим браузером не поддерживается");return}
+ const frames=Math.ceil(animationClip.durationMs/1000*animationClip.fps);
+ if(frames<2||frames>ANIMATION_EXPORT_MAX_FRAMES){say("Количество кадров должно быть от 2 до 600");return}
+ const candidates=["video/mp4;codecs=avc1.42E01E","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=candidates.find(type=>MediaRecorder.isTypeSupported(type));
+ if(!mime){say("Браузер не предоставляет поддерживаемый MP4/WebM кодек");return}
+ const base=cloneSettings(animationScrubBase||s);let stream=null,recorder=null,chunks=[],videoOutputBytes=0,videoOutputLimit=false;
+ animationExporting=true;animationCancelRequested=false;$("animationExportFrames").disabled=true;$("animationExportVideo").disabled=true;$("animationCancelExport").disabled=false;
+ try{
+  stream=out.captureStream(0);const track=stream.getVideoTracks()[0],manualFrames=!!track?.requestFrame;
+  if(!manualFrames){stream.getTracks().forEach(item=>item.stop());stream=out.captureStream(animationClip.fps)}
+  recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8000000});
+  const stopped=new Promise((resolve,reject)=>{recorder.ondataavailable=event=>{if(event.data&&event.data.size){videoOutputBytes+=event.data.size;if(videoOutputBytes>ANIMATION_VIDEO_MAX_BYTES){videoOutputLimit=true;animationCancelRequested=true;return}chunks.push(event.data)}};recorder.onerror=()=>reject(new Error("Ошибка кодирования видео"));recorder.onstop=resolve});
+  recorder.start(250);const frameInterval=1000/animationClip.fps;
+  for(let index=0;index<frames;index++){
+   if(animationCancelRequested)break;
+   const started=performance.now(),time=Math.min(animationClip.durationMs-1,Math.round(index*frameInterval));await animationRenderFrameAt(time,base);
+   if(manualFrames)track.requestFrame();const remaining=frameInterval-(performance.now()-started);if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
+   $("animationProgress").style.width=Math.round((index+1)/frames*100)+"%";$("animationExportStatus").textContent="Видео · "+(index+1)+" / "+frames;
+  }
+  if(recorder.state!=="inactive")recorder.stop();await stopped;if(videoOutputLimit)throw Error("Видео превысило лимит 128 МБ. Уменьшите длительность, FPS или размер изображения.");
+  const blob=new Blob(chunks,{type:recorder.mimeType||mime});if(!blob.size)throw Error("Видеофайл пуст");
+  const mp4=(recorder.mimeType||mime).toLowerCase().includes("mp4"),extension=mp4?"mp4":"webm";download(blob,slug(srcName)+"-animation."+extension);
+  $("animationExportStatus").textContent=(animationCancelRequested?"Частичное видео · ":"Готово · ")+extension.toUpperCase();say((mp4?"MP4":"WebM")+(animationCancelRequested?" · частичный экспорт":" экспортирован"));
+ }catch(error){if(recorder&&recorder.state!=="inactive")try{recorder.stop()}catch(stopError){}$("animationExportStatus").textContent=error.message||"Ошибка записи";say(error.message||"Не удалось записать видео")}
+ finally{if(stream)stream.getTracks().forEach(track=>track.stop());chunks=[];animationRestoreAfterExport(base);$("animationProgress").style.width="0%"}
+}
+function initAnimationStudio(){
+ if(!$("animationDock")||!AnimationEngine)return;
+ animationClip=AnimationEngine.normalise(loadStore(ANIMATION_STORAGE_KEY,animationClip));animationScrubBase=cloneSettings(s);
+ $("animationPreviewMode").value=previewBehaviour;animationRefreshTrackOptions();animationRefreshUI();
+ $("animationTrack").onchange=()=>{animationRefreshSelectedTrack();animationRenderLanes()};
+ $("animationAddKeyframe").onclick=animationAddKeyframe;$("animationDeleteKeyframe").onclick=animationDeleteKeyframe;$("animationCaptureBase").onclick=animationCaptureBase;$("animationOscillator").onclick=animationToggleOscillator;
+ ["animationWave","animationAmplitude","animationFrequency"].forEach(id=>$(id).onchange=animationUpdateOscillator);
+ $("animationDuration").onchange=()=>{animationClip.durationMs=Math.round(clamp(Number($("animationDuration").value)||5,.25,60)*1000);animationClip=AnimationEngine.normalise(animationClip);animationCurrentMs=Math.min(animationCurrentMs,animationClip.durationMs);animationPersist();animationRefreshUI()};
+ $("animationFps").onchange=()=>{animationClip.fps=clamp(Number($("animationFps").value)||24,1,60);animationPersist();animationRefreshUI()};
+ $("animationLoop").onchange=()=>{animationClip.loop=$("animationLoop").checked;animationPersist()};
+ $("animationScrub").oninput=()=>{const value=Number($("animationScrub").value);animationCurrentMs=value;$("animationTimeLabel").textContent=animationFormatTime(value);if(animationPlaying)return;if(animationScrubRequest)cancelAnimationFrame(animationScrubRequest);animationScrubRequest=requestAnimationFrame(()=>{animationScrubRequest=0;animationSetTime(value,true)})};
+ $("animationPlay").onclick=animationPlay;$("animationStop").onclick=()=>animationStopPlayback(true);
+ $("animationExportFrames").onclick=animationExportSequence;$("animationExportVideo").onclick=animationExportVideo;$("animationCancelExport").onclick=()=>{animationCancelRequested=true;$("animationExportStatus").textContent="Остановка после текущего кадра…"};
+ $("animationPreviewMode").onchange=()=>{const previous=previewBehaviour,next=$("animationPreviewMode").value;if(!store(PREVIEW_BEHAVIOUR_KEY,next)){previewBehaviour=previous;$("animationPreviewMode").value=previous;say("Не удалось сохранить режим предпросмотра")}else{previewBehaviour=next;say("Предпросмотр: "+previewBehaviour)}};
+ document.addEventListener("input",event=>animationCommitManualEdit(event.target,false));
+ document.addEventListener("change",event=>animationCommitManualEdit(event.target,true));
+ document.addEventListener("click",event=>{
+  const target=event.target.closest(".effect-toggle, #neoGlowEnabled, #randomize, #shuffle, #reset, #undo, #redo, #addAlgorithmLayer, #applyLibraryPalette, #useCustomPalette, #deleteLibraryPalette, #shuffleUnlockedPalette, #applyShapeCode, #applyShapePreset");
+  if(target)animationCommitManualEdit(target,true);
+ });
+ $("animationDock").classList.toggle("hidden",!["editor","shape","script"].includes(mode));
+ window.__tgrmAnimationStatus=()=>({clip:AnimationEngine.normalise(animationClip),timeMs:animationCurrentMs,playing:animationPlaying,previewBehaviour});
+ window.addEventListener("pagehide",()=>{if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;animationCancelRequested=true;if(previewRenderTimer)clearTimeout(previewRenderTimer);previewRenderTimer=0});
+}
+function shuffleUnlockedPalette(){
+ const key=pal[s.palette]?s.palette:"custom",current=(pal[key]?.c||[]).map(value=>typeof value==="string"?value:"#"+value.map(channel=>Math.round(channel).toString(16).padStart(2,"0")).join(""));
+ const locks=Array.isArray(paletteLocks[key])?paletteLocks[key]:[],indices=current.map((value,index)=>index).filter(index=>!locks[index]);
+ if(!current.length){say("Нет активной палитры");return}if(!indices.length){say("Все цвета заблокированы");return}
+ const shuffled=indices.map(index=>current[index]);
+ for(let index=shuffled.length-1;index>0;index--){const swap=Math.floor(Math.random()*(index+1));[shuffled[index],shuffled[swap]]=[shuffled[swap],shuffled[index]]}
+ const next=[...current];indices.forEach((index,position)=>next[index]=shuffled[position]);
+ if(!persistActivePaletteColors(key,next)){say("Не удалось сохранить палитру");return}
+ initPalettes();renderActivePaletteEditor();renderPaletteLibrary();sync();render();say("Перемешаны незаблокированные цвета");
+}
+async function safeSvgFileCanvas(file,signal){
+ const text=await readLimitedText(file,MAX_SHAPE_SVG_BYTES,"SVG-файл больше 500 КБ");if(signal?.aborted)throw new DOMException("Загрузка отменена","AbortError");
+ const documentXml=new DOMParser().parseFromString(text,"image/svg+xml"),root=documentXml.documentElement;
+ if(documentXml.querySelector("parsererror")||!root||root.localName.toLowerCase()!=="svg")throw Error("Некорректный SVG-документ");
+ root.querySelectorAll("script,foreignObject,iframe,object,embed,audio,video").forEach(node=>node.remove());
+ for(const node of [root,...root.querySelectorAll("*")])for(const attribute of Array.from(node.attributes||[])){
+  const name=attribute.name.toLowerCase(),value=attribute.value.trim();
+  if(name.startsWith("on")||name==="src"||name==="formaction"){node.removeAttribute(attribute.name);continue}
+  if(name==="href"||name==="xlink:href"){if(!value.startsWith("#"))node.removeAttribute(attribute.name);continue}
+  if(/javascript:|https?:|\/\//i.test(value)||(/url\s*\(/i.test(value)&&!/url\(\s*['"]?#[-\w:.]+['"]?\s*\)/i.test(value)))node.removeAttribute(attribute.name);
+ }
+ root.querySelectorAll("style").forEach(node=>{if(/@import|https?:|url\s*\(\s*['"]?(?!#)/i.test(node.textContent||""))node.remove()});
+ const viewBox=(root.getAttribute("viewBox")||"0 0 300 150").trim().split(/[\s,]+/).map(Number);
+ if(viewBox.length!==4||!viewBox.every(Number.isFinite)||viewBox[2]<=0||viewBox[3]<=0)throw Error("Некорректный SVG viewBox");
+ if(!root.hasAttribute("width"))root.setAttribute("width",String(viewBox[2]));if(!root.hasAttribute("height"))root.setAttribute("height",String(viewBox[3]));
+ const serialized=new XMLSerializer().serializeToString(root),blob=new Blob([serialized],{type:"image/svg+xml"}),url=URL.createObjectURL(blob),image=new Image();
+ return new Promise((resolve,reject)=>{
+  let settled=false,timer=0;const cleanup=()=>{if(settled)return false;settled=true;clearTimeout(timer);image.onload=null;image.onerror=null;signal?.removeEventListener("abort",abort);URL.revokeObjectURL(url);return true};
+  const abort=()=>{if(cleanup()){image.src="";reject(new DOMException("Загрузка отменена","AbortError"))}};
+  if(signal)signal.addEventListener("abort",abort,{once:true});
+  image.onload=()=>{if(!cleanup())return;try{resolve(canvasFromImage(image))}catch(error){reject(error)}};
+  image.onerror=()=>{if(cleanup())reject(Error("Не удалось растрировать SVG"))};
+  timer=setTimeout(()=>{if(cleanup()){image.src="";reject(Error("SVG не удалось декодировать за отведённое время"))}},imageDecodeTimeoutMs);image.src=url;
+ });
+}
+
 function init(){initProcessingWorker();bindUserBackupControls();bindCanvasRecovery();window.__tgrmlitherWaitForPreview=waitForProcessingPreview;window.__tgrmlitherWorkerStatus=()=>({available:!!processingWorker,failed:processingWorkerFailed,threshold:WORKER_PIXEL_THRESHOLD,timeoutMs:workerRequestTimeoutMs});
  if(["localhost","127.0.0.1","::1"].includes(location.hostname)){
   window.__tgrmlitherSetWorkerTimeoutForTests=ms=>{
@@ -3374,7 +3722,7 @@ function init(){initProcessingWorker();bindUserBackupControls();bindCanvasRecove
    imageDecodeTimeoutMs=clamp(Math.round(value),100,180000);
    return true;
   };
- }buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();bindShellControls();bindInspectorLevel();initAlgorithmSearch();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);recordHistorySnapshot();presets.forEach(p=>{});renderPresets();renderBatch();
+ }buildWorkflowEffectsPanels();initPalettes();initAlgorithmStack();renderPaletteLibrary();controls();bindPaletteEditorControls();bindShapePresetControls();bindThemeControls();bindShellControls();bindInspectorLevel();initAlgorithmSearch();sync();updateGlyphPreview();$("temporalStop").disabled=true;loadImage(drawDemo(),"demo-image",true);recordHistorySnapshot();initAnimationStudio();presets.forEach(p=>{});renderPresets();renderBatch();
 $("openImage").onclick=$("emptyOpen").onclick=openImage;$("shapeSvgImportBtn").onclick=()=>$("shapeSvgInput").click();$("shapeSvgInput").onchange=async e=>{const file=e.target.files[0];if(file)try{const text=await readLimitedText(file,MAX_SHAPE_SVG_BYTES,"SVG слишком большой");const doc=new DOMParser().parseFromString(text,"image/svg+xml"),root=doc.documentElement,path=doc.querySelector("path[d]");if(doc.querySelector("parsererror")||!path)throw Error("В SVG должен быть элемент path с атрибутом d");const raw=(root.getAttribute("viewBox")||"0 0 100 100").trim().split(/[\s,]+/).map(Number);if(raw.length!==4||raw.some(v=>!Number.isFinite(v))||raw[2]<=0||raw[3]<=0)throw Error("Некорректный viewBox");const index=clamp(Number($("shapeImportBand").value)||0,0,3),customPath=path.getAttribute("d").slice(0,20000);s.shapeBands=(s.shapeBands||def.shapeBands).map((b,i)=>i===index?({...b,shape:"custom",customPath,customViewBox:raw}):({...b}));s.customShapePath=customPath;s.customShapeViewBox=raw;const saved=WORKSPACE_NAMES.includes(mode)&&saveWorkspaceSettings(mode);$("shapeSvgStatus").textContent=file.name+" · SVG → диапазон "+(index+1);sync();render();say(saved?"SVG назначен диапазону "+(index+1):"SVG назначен, но не удалось сохранить профиль. Проверьте свободное место в хранилище.")}catch(err){$("shapeSvgStatus").textContent=err.message||"SVG не распознан";say("Не удалось импортировать SVG-форму")}e.target.value=""};$("videoOpen").onclick=$("videoEmptyOpen").onclick=()=>$("videoInput").click();$("videoInput").onchange=e=>{const file=e.target.files[0];if(file)loadVideo(file);e.target.value=""};$("videoSource").addEventListener("loadeddata",renderVideoFrame);$("videoSource").addEventListener("seeked",renderVideoFrame);$("videoSource").addEventListener("timeupdate",()=>{if(mode==="video"&&$("videoSource").paused)renderVideoFrame()});$("videoTimeline").oninput=e=>{const v=$("videoSource");if(v.duration){v.currentTime=Number(e.target.value);renderVideoFrame()}};$("videoPlay").onclick=()=>{const v=$("videoSource");if(videoExportStarting){v.pause();stopVideoExport(true);return}if(!v.src){$("videoInput").click();return}if(videoRecorder&&videoRecorder.state!=="inactive"){v.pause();stopVideoExport(true);$("videoPlay").textContent="▶ Воспроизвести";return}if(v.paused){if(v.ended)v.currentTime=0;v.play().then(()=>{if(!videoRaf)videoRaf=requestAnimationFrame(videoLoop);$("videoPlay").textContent="Ⅱ Пауза"}).catch(()=>say("Не удалось запустить видео"))}else{v.pause();$("videoPlay").textContent="▶ Воспроизвести";renderVideoFrame()}};$("videoExport").onclick=exportProcessedVideo;$("videoPlay").disabled=true;$("videoExport").disabled=true;$("imageInput").onchange=async e=>{const f=e.target.files?.[0];if(f)await loadImageFile(f);e.target.value=""};
 window.addEventListener("paste",async e=>{
  const items=Array.from(e.clipboardData?.items||[]),item=items.find(entry=>String(entry.type||"").startsWith("image/"));
@@ -3394,7 +3742,7 @@ $("fullscreenBtn").onclick=async()=>{
 document.addEventListener("fullscreenchange",updateFullscreenButton);
 updateFullscreenButton();
 $("reset").onclick=()=>{if(!WORKSPACE_NAMES.includes(mode))return;if(!confirm("Сбросить настройки только текущего пространства? Остальные пространства и пресеты не изменятся."))return;const previous=cloneSettings(s),algo=mode==="shape"?"shape":mode==="script"?"ascii":"bayer4";s=cloneSettings({...def,algorithm:algo,effects:[]});if(!saveWorkspaceSettings(mode)){s=previous;sync();render();return}sync();render();say("Настройки текущего пространства сброшены")};
-$("randomize").onclick=()=>{if(!WORKSPACE_NAMES.includes(mode))return;const previous=cloneSettings(s),a=Object.keys(labels).filter(k=>k!=="ascii"&&k!=="shape"),p=Object.keys(pal);s.algorithm=a[Math.floor(Math.random()*a.length)];s.palette=p[Math.floor(Math.random()*p.length)];s.scale=2+Math.floor(Math.random()*15);s.levels=2+Math.floor(Math.random()*15);s.contrast=80+Math.floor(Math.random()*70);s.threshold=-25+Math.floor(Math.random()*51);s.effects=EFFECT_KEYS.filter(()=>Math.random()>.68);if(!saveWorkspaceSettings(mode)){s=previous;sync();render();return}sync();render();say("Случайная комбинация готова")};$("shuffle").onclick=()=>{if(!WORKSPACE_NAMES.includes(mode))return;const previous=cloneSettings(s),rnd=(a,b)=>Math.round(a+Math.random()*(b-a));s.scale=rnd(2,16);s.levels=rnd(2,16);s.threshold=rnd(-50,50);s.contrast=rnd(70,160);s.brightness=rnd(-35,35);s.midtones=rnd(20,80);s.highlights=rnd(20,80);s.blur=rnd(0,3);s.depth=rnd(25,100);s.patternAngle=rnd(0,180);s.jitter=rnd(0,70);s.effectStrength=Object.fromEntries(EFFECT_KEYS.map(k=>[k,rnd(10,100)]));if(!s.effects?.length)s.effects=EFFECT_KEYS.filter(()=>Math.random()>.78);if(!saveWorkspaceSettings(mode)){s=previous;sync();render();return}sync();render();say("Параметры перемешаны")};
+$("randomize").onclick=()=>{if(!WORKSPACE_NAMES.includes(mode))return;const previous=cloneSettings(s),a=Object.keys(labels).filter(k=>k!=="ascii"&&k!=="shape"),p=Object.keys(pal);s.algorithm=a[Math.floor(Math.random()*a.length)];s.palette=p[Math.floor(Math.random()*p.length)];s.scale=2+Math.floor(Math.random()*15);s.levels=2+Math.floor(Math.random()*15);s.contrast=80+Math.floor(Math.random()*70);s.threshold=-25+Math.floor(Math.random()*51);s.effects=randomEffectSelection(.68);if(!saveWorkspaceSettings(mode)){s=previous;sync();render();return}sync();render();say("Случайная комбинация готова")};$("shuffle").onclick=()=>{if(!WORKSPACE_NAMES.includes(mode))return;const previous=cloneSettings(s),rnd=(a,b)=>Math.round(a+Math.random()*(b-a));s.scale=rnd(2,16);s.levels=rnd(2,16);s.threshold=rnd(-50,50);s.contrast=rnd(70,160);s.brightness=rnd(-35,35);s.midtones=rnd(20,80);s.highlights=rnd(20,80);s.blur=rnd(0,3);s.depth=rnd(25,100);s.patternAngle=rnd(0,180);s.jitter=rnd(0,70);s.effectStrength=Object.fromEntries(EFFECT_KEYS.map(k=>[k,rnd(10,100)]));if(!s.effects?.length)s.effects=randomEffectSelection(.78);if(!saveWorkspaceSettings(mode)){s=previous;sync();render();return}sync();render();say("Параметры перемешаны")};
 $("toggleOriginal").onclick=()=>{original=!original;$("toggleOriginal").textContent=original?"◉ Показать результат":"◉ Показать оригинал";updateCompareUI();render()};$("compareToggle").onclick=()=>{const wasOriginal=original;compareEnabled=!compareEnabled;if(compareEnabled)original=false;$("toggleOriginal").textContent=original?"◉ Показать результат":"◉ Показать оригинал";if(wasOriginal)render();else updateCompareUI()};$("compareRange").oninput=e=>{comparePosition=clamp(Number(e.target.value)||0,0,100);updateCompareUI()};window.addEventListener("resize",()=>requestAnimationFrame(updateCompareUI));$("zoom").onchange=zoom;$("undo").onclick=undoAction;$("redo").onclick=redoAction;
 $("png").onclick=()=>exportImage("png");$("topExport").onclick=openExportModal;$("exportCancel").onclick=closeExportModal;$("exportConfirm").onclick=confirmExport;$("exportFormat").onchange=updateExportFormatUI;$("exportJpegQuality").oninput=e=>{$("exportJpegQualityValue").textContent=e.target.value+"%";$("jpegQuality").value=e.target.value;$("jpegQuality").dispatchEvent(new Event("input",{bubbles:true}))};$("exportJpegQuality").onchange=()=>$("jpegQuality").dispatchEvent(new Event("change",{bubbles:true}));$("exportModal").onclick=e=>{if(e.target===$("exportModal"))closeExportModal()};$("jpg").onclick=()=>exportImage("jpeg");$("copy").onclick=copyResult;$("svgColor").onclick=async()=>{await waitForProcessingPreview();if(exportSvg(false))markResultExported()};$("svgBlack").onclick=async()=>{await waitForProcessingPreview();if(exportSvg(true))markResultExported()};$("svgCmyk").onclick=async()=>{await waitForProcessingPreview();if(exportCmykSvg())markResultExported()};
 $("vectorDetail").onchange=()=>say("Детализация SVG: "+$("vectorDetail").selectedOptions[0].textContent);

@@ -20,16 +20,24 @@ No installer, account, or backend is required. Image processing takes place in t
 - Shape Lab with four luminance bands, per-band geometry, size and colour, placement distribution and rotation.
 - Independent, adjustable and reorderable effect stacks for Editor, Shape Lab, Script Slayer, Batch and Video Lab.
 - Script Slayer with 48 character families, live glyph preview, editable glyphs, depth/cell sizing, offset, palette/source/mono colour, transparent backgrounds, TXT export and animation.
-- User presets, project JSON, batch processing with individual PNGs or a one-click ZIP bundle, PNG/JPEG, SVG pixel-grid export, WebM motion export, standalone HTML and PWA/offline cache.
+- Animation Studio with a universal keyframe timeline, parameter tracks, Linear/Ease/Hold curves, temporal oscillators (sine, triangle, saw and square), looped playback, PNG frame-sequence ZIP export, and browser-supported MP4 or WebM recording.
+- Per-colour palette locks, shuffle-unlocked-colours, source-derived palette mode, and secure local SVG raster import.
+- User presets, project JSON with animation clips, batch processing with individual PNGs or a one-click ZIP bundle, PNG/JPEG, SVG pixel-grid export, WebM motion export, standalone HTML and PWA/offline cache.
 
 
 ## Mobile and tablet support
 
 The web editor adapts to phones and tablets. On narrow screens, the workspace switcher becomes a horizontally scrollable touch bar; the preview and contextual controls use separate vertical scroll panes. The desktop layout keeps the preview and settings side by side. Use the latest version of a mobile browser for the best Canvas and WebM support.
 
+## Animation Studio
+
+The Animation Studio is available in Editor, Shape Lab and Script Slayer. Capture keyframes for numeric controls, toggles, algorithms, palettes, effect strengths, algorithm-layer opacity, and Shape Lab band geometry. Choose duration, frame rate, easing and looping; add a per-track temporal oscillator to modulate supported numeric values. Animation clips persist locally and are stored inside project JSON and user-data backups. Export a numbered PNG sequence as ZIP, or record a video using a format actually supported by the browser MediaRecorder (MP4 when available, otherwise WebM).
+
+Timeline playback and export use a fixed settings snapshot and restore the original workspace settings when complete. The PNG sequence exporter is capped at 600 frames and 48 MiB of image data. Video codec availability varies by browser.
+
 ## Workstation interface
 
-The editor opens in a clean studio layout with the preview as the main focus and contextual controls in the inspector. Use **Дополнительно** to reveal technical parameters, search algorithms by name, or keep frequently used algorithms in favourites. **До / после** overlays the original image with an adjustable comparison divider. Undo and redo are available through the toolbar and Ctrl/Cmd+Z or Ctrl/Cmd+Shift+Z. The export dialog brings PNG, JPEG, SVG, CMYK plates, project JSON and copy-to-clipboard actions together. The editor now opens in a full Windows XP Luna-inspired shell by default: vivid blue title bars, silver-gray window chrome, classic beveled controls, square pixel-crisp borders, and the green primary image-loading button. The modern studio remains available in the appearance menu. The preset catalogue includes search across built-in and saved presets.
+The editor opens in a clean studio layout with the preview as the main focus and contextual controls in the inspector. Use **Дополнительно** to reveal technical parameters, search algorithms by name, or keep frequently used algorithms in favourites. **До / после** overlays the original image with an adjustable comparison divider. Undo and redo are available through the toolbar and Ctrl/Cmd+Z or Ctrl/Cmd+Shift+Z. The export dialog brings PNG, JPEG, SVG, CMYK plates, project JSON and copy-to-clipboard actions together. The Animation Studio adds keyframe-based parameter animation and frame/video export. The editor now opens in a full Windows XP Luna-inspired shell by default: vivid blue title bars, silver-gray window chrome, classic beveled controls, square pixel-crisp borders, and the green primary image-loading button. The modern studio remains available in the appearance menu. The preset catalogue includes search across built-in and saved presets.
 
 ## Run from source
 
@@ -37,7 +45,7 @@ Open `index.html`, or run `python -m http.server 8080` in the repository folder 
 
 ## Compatibility note
 
-TGRMLither is an independent implementation inspired by the publicly described feature set of Dither Boy, not a pixel-identical copy of its proprietary implementation. Some creative modes are approximations and may produce different results. SVG export traces the rendered pixel grid rather than reconstructing arbitrary smooth contours; Video Lab provides frame processing and WebM export rather than a full keyframe timeline.
+TGRMLither is an independent implementation inspired by the publicly described feature set of Dither Boy, not a pixel-identical copy of its proprietary implementation. Some creative modes are approximations and may produce different results. SVG export traces the rendered pixel grid rather than reconstructing arbitrary smooth contours. Video Lab remains a source-video frame processor, while Animation Studio animates still-image and workspace settings; video codec support is determined by the browser.
 
 ## License
 
@@ -51,14 +59,14 @@ MIT. See [LICENSE](LICENSE).
 - Independent dot/mark scale for pattern modes, adjustable blend between the original image and the processed result, and a separate post-processing smoothing control.
 - Print output: choose SVG detail (compact, 1024 px, 2048 px or source resolution), black-vector threshold and DPI. CMYK export creates four labelled vector plates.
 - Pattern dithering: eight pattern modes including Spiral Dither, adjustable screen angle and halftone mark shape.
-- Palette library: save and name up to 100 four-colour palettes, apply or delete them, and import/export a collection as one JSON file.
+- Palette library: save and name up to 100 palettes with 2–16 colours, apply or delete them, and import/export a collection as one JSON file. Individual palette colours can be locked during shuffle.
 - Workflow helpers: paste images directly from the clipboard and toggle the editor into browser full-screen mode.
 
 
 ## Performance and format limits
 
 - Source images are limited to 24 megapixels and a maximum edge of 32,767 px. Larger images are proportionally reduced before canvas allocation and the UI shows a warning; the same safeguard applies to images embedded in imported projects.
-- Video Lab processes up to 2.4 megapixels per frame to keep preview and WebM recording responsive. Full HD frames are processed at their original size; larger frames are scaled down.
+- Video Lab processes up to 2.4 megapixels per frame to keep preview and WebM recording responsive. Full HD frames are processed at their original size; larger frames are scaled down. Animation exports are capped at 600 frames; PNG sequence pixel data is capped at 48 MiB before ZIP packaging.
 - The built-in batch ZIP writer uses the classic ZIP format and limits each archive to 64 MB and 65,535 files. Split larger batches into smaller exports.
 - The browser-based editor keeps image processing local. Imported project files must contain a self-contained PNG, JPEG, or WebP data URL; remote image URLs are not loaded from project files.
 - The offline service worker only clears old caches whose names use the `tgrmlither-` prefix. It does not remove caches belonging to other apps on the same origin.
