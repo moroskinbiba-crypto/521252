@@ -69,11 +69,11 @@
 
 ## Stage 4 — Accessibility, reliability and release discipline
 
-**Status: dialog semantics, visible labels, focus trap/restore and inspector keyboard navigation implemented in this branch.**
+**Status: dialog semantics, visible labels, focus containment/restore, inspector navigation and advisory custom-theme contrast checks implemented.**
 
 - Every modal must have dialog semantics, a programmatic name, initial focus, focus containment, Escape behavior and focus restoration.
 - Every form field must have a label or an accessible name; don't rely on placeholder text.
-- Test keyboard-only use, reduced-motion settings, touch target size and custom-theme contrast.
+- Test keyboard-only use, reduced-motion settings, touch target size and custom-theme contrast. Custom colors remain unrestricted, but the UI now reports WCAG contrast failures for text/surfaces and accent visibility instead of silently accepting unreadable combinations.
 - Add automated screenshot comparison only after reviewed reference images are committed.
 - Keep browser compatibility coverage on Chromium, Firefox and WebKit and add new rendering tests only when they are deterministic across engines.
 
