@@ -64,6 +64,7 @@ jobs:
           node --check tests/smoke.cjs
           node --check tests/compat.cjs
           node --check tests/animation-engine.test.cjs
+          node --check tests/visual.cjs
           node tests/animation-engine.test.cjs
       - name: Install cross-browser smoke-test dependencies
         run: |
@@ -81,6 +82,15 @@ jobs:
           done
           PLAYWRIGHT_MODULE=/tmp/tgrmlither-qa/node_modules/playwright node tests/smoke.cjs
           PLAYWRIGHT_MODULE=/tmp/tgrmlither-qa/node_modules/playwright node tests/compat.cjs
+          PLAYWRIGHT_MODULE=/tmp/tgrmlither-qa/node_modules/playwright node tests/visual.cjs
+      - name: Upload UI audit screenshots
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: tgrmlither-ui-audit-${{ github.run_number }}
+          path: artifacts/ui-audit/
+          if-no-files-found: warn
+          retention-days: 14
       - name: Configure Pages
         if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v6
