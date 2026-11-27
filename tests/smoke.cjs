@@ -2040,6 +2040,13 @@ async function downloadFrom(page, selector) {
     const effectLock = key => effectLockPage.locator(
       '#generalEffectsControl .effect-lock[data-effect-lock="' + key + '"]'
     );
+    const lockVisual = await effectLock("scanlines").evaluate(button => {
+      const rect = button.getBoundingClientRect();
+      const style = getComputedStyle(button);
+      return { width: rect.width, height: rect.height, display: style.display, svg: !!button.querySelector("svg") };
+    });
+    assert.ok(lockVisual.width >= 24 && lockVisual.height >= 24 && lockVisual.display !== "none" && lockVisual.svg,
+      "effect lock must have a visible vector icon and a usable click target");
 
     await effectToggle("scanlines").click(); // ON, then lock ON.
     await effectLock("scanlines").click();
@@ -2076,6 +2083,35 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(effectLockErrors, [],
       "effect locking and randomized-style flows should not throw runtime errors");
     await effectLockPage.close();
+
+    // Mobile header must retain a full-width text label on the image upload button.
+    const mobileUiPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
+    const mobileUiErrors = [];
+    mobileUiPage.on("pageerror", error => mobileUiErrors.push(error.stack || error.message));
+    await mobileUiPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await mobileUiPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    const mobileUpload = await mobileUiPage.locator("#openImage").evaluate(button => {
+      const rect = button.getBoundingClientRect();
+      const style = getComputedStyle(button);
+      return {
+        width: rect.width, height: rect.height, fontSize: parseFloat(style.fontSize),
+        text: button.textContent, right: rect.right,
+        rightControlsLeft: document.querySelector(".topright").getBoundingClientRect().left
+      };
+    });
+    assert.ok(mobileUpload.text.includes("Загрузить") && mobileUpload.fontSize > 0 && mobileUpload.width >= 85,
+      "mobile image upload button must show its full text label");
+    assert.ok(mobileUpload.right <= mobileUpload.rightControlsLeft,
+      "mobile upload button must not overlap the right-side controls");
+    await mobileUiPage.locator("#generalEffectsControl .effect-lock").first().scrollIntoViewIfNeeded();
+    const mobileLock = await mobileUiPage.locator("#generalEffectsControl .effect-lock").first().evaluate(button => {
+      const rect = button.getBoundingClientRect();
+      return { width: rect.width, height: rect.height, visible: getComputedStyle(button).visibility !== "hidden" && !!button.querySelector("svg") };
+    });
+    assert.ok(mobileLock.width >= 32 && mobileLock.height >= 32 && mobileLock.visible,
+      "mobile effect lock must be clearly visible and touch-sized");
+    assert.deepEqual(mobileUiErrors, [], "mobile header and effect-lock UI should not throw runtime errors");
+    await mobileUiPage.close();
 
     // Main editor SVG import sanitizes script and event-handler content before rasterization.
     const svgSafetyPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
