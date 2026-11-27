@@ -196,6 +196,24 @@ async function switchMode(page, mode) {
     await temporalGroup.locator("summary").click();
     assert.notEqual(await temporalGroup.getAttribute("open"), null);
 
+
+    const themeMenu = page.locator("#themeMenu");
+    await themeMenu.locator("summary").click();
+    await page.locator("#themePicker").selectOption("custom");
+    await page.evaluate(() => {
+      document.querySelector("#themeColorBg").value = "#ffffff";
+      document.querySelector("#themeColorText").value = "#ffffff";
+    });
+    await page.locator("#applyCustomTheme").click();
+    const contrastNotice = page.locator("#themeContrastWarning");
+    await page.waitForFunction(() => document.querySelector("#themeContrastWarning")?.textContent.includes("Низкий контраст"));
+    assert.match(await contrastNotice.innerText(), /текст \/ фон 1,0:1/,
+      "custom themes with unreadable text contrast should be warned about, not silently accepted");
+    await page.locator("#themePicker").selectOption("night");
+    assert.equal(await contrastNotice.innerText(), "",
+      "switching to a built-in accessible theme should clear custom contrast warnings");
+    await themeMenu.evaluate(element => { element.open = false; });
+
     // Dialogs must name themselves, take focus, trap keyboard navigation and return focus.
     await page.setViewportSize({ width: 390, height: 844 });
     await switchMode(page, "presets");
