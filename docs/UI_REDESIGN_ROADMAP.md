@@ -18,9 +18,9 @@
 **Status: implemented in this branch; screenshot review remains a human checkpoint.**
 
 - Record the current UI across Editor, Presets, Shape Lab, Script Slayer, Batch and Video Lab.
-- Exercise 320, 360, 390, 430, 768, 1024, 1280 and 1440 px viewport widths.
+- Exercise 320, 360, 390, 430, 768, 1024, 1280 and 1440 px viewport widths in the default shell, and 320, 390, 768 and 1280 px in the alternate Studio shell.
 - Assert page width, primary upload action bounds, header overlap, inspector visibility and workspace switching.
-- Capture workspace and inspector screenshots as GitHub Actions artifacts for review.
+- Capture workspace and inspector screenshots as GitHub Actions artifacts for review across both shells.
 - Keep existing Chromium smoke tests and Chromium/Firefox/WebKit compatibility tests.
 
 **Important boundary:** these screenshots are audit captures, not yet pixel-diff golden snapshots. Do not promote screenshots to golden baselines until they have been visually reviewed on the intended browsers; otherwise a broken layout could be blessed as correct.
