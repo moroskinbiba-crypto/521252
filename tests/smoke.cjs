@@ -1944,7 +1944,12 @@ async function downloadFrom(page, selector) {
       JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.threshold
     );
     await setAnimationTime(125);
-    await animationPage.waitForFunction(() => Number(document.querySelector("#threshold")?.value) === 20);
+    await animationPage.waitForFunction(() => window.__tgrmAnimationStatus().timeMs === 125);
+    const transientEditorThreshold = await animationPage.evaluate(() =>
+      Number(document.querySelector("#threshold")?.value)
+    );
+    assert.notEqual(transientEditorThreshold, editorBaseThreshold,
+      "scrubbing should render a transient value different from the saved Editor base");
     await animationPage.locator('.topnav [data-mode="shape"]').click();
     await animationPage.waitForFunction(() => document.body.dataset.mode === "shape");
     const persistedEditorThreshold = await animationPage.evaluate(() =>
@@ -1967,7 +1972,7 @@ async function downloadFrom(page, selector) {
     // A real inspector edit made while a scrubbed preview is visible becomes
     // the new base, rather than being discarded on the next workspace change.
     await setAnimationTime(125);
-    await animationPage.waitForFunction(() => Number(document.querySelector("#threshold")?.value) === 20);
+    await animationPage.waitForFunction(() => window.__tgrmAnimationStatus().timeMs === 125);
     await animationPage.locator("#threshold").evaluate(el => {
       el.value = "30";
       el.dispatchEvent(new Event("input", { bubbles: true }));
