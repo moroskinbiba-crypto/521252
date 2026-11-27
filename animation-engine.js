@@ -7,14 +7,36 @@
   const RESERVED = new Set(["__proto__", "prototype", "constructor"]);
   const EFFECT_KEYS = new Set(["scanlines", "glow", "chromatic", "vignette", "noise", "epsilon", "jpeg", "lick", "stress", "modlines"]);
 
-  function safePath(path, settings) {
+  const ARRAY_PATHS = new Set(["algorithmLayers", "shapeBands"]);
+
+  function validPathSyntax(path) {
     if (typeof path !== "string" || !path || path.length > 120) return false;
     const parts = path.split(".");
-    if (parts.some(part => !part || RESERVED.has(part))) return false;
-    if (parts.length === 2 && parts[0] === "effects" && EFFECT_KEYS.has(parts[1])) return Array.isArray(settings.effects);
+    if (parts.some(part => !/^[a-zA-Z][a-zA-Z0-9]*$/.test(part) && !/^[0-9]+$/.test(part))) return false;
+    return !parts.some(part => RESERVED.has(part));
+  }
+
+  function safePath(path, settings) {
+    if (!validPathSyntax(path) || !settings || typeof settings !== "object") return false;
+    const parts = path.split(".");
+    if (parts.length === 2 && parts[0] === "effects" && EFFECT_KEYS.has(parts[1])) {
+      return Array.isArray(settings.effects);
+    }
     let cursor = settings;
-    for (const part of parts) {
-      if (cursor === null || typeof cursor !== "object" || !Object.prototype.hasOwnProperty.call(cursor, part)) return false;
+    for (let index = 0; index < parts.length; index++) {
+      const part = parts[index];
+      if (Array.isArray(cursor)) {
+        const parentPath = parts.slice(0, index).join(".");
+        // Only the two deliberately supported structured arrays may be traversed.
+        // In particular, never treat Array#length as an animatable scalar.
+        if (!ARRAY_PATHS.has(parentPath) || !/^(0|[1-9][0-9]*)$/.test(part)) return false;
+        const arrayIndex = Number(part);
+        if (!Number.isSafeInteger(arrayIndex) || arrayIndex > 15 ||
+            arrayIndex >= cursor.length || !Object.prototype.hasOwnProperty.call(cursor, part)) return false;
+      } else if (cursor === null || typeof cursor !== "object" ||
+                 !Object.prototype.hasOwnProperty.call(cursor, part)) {
+        return false;
+      }
       cursor = cursor[part];
     }
     return cursor === null || ["number", "string", "boolean"].includes(typeof cursor);
@@ -90,11 +112,11 @@
     const raw = input && typeof input === "object" ? input : {};
     const durationMs = clamp(Math.round(Number(raw.durationMs) || 5000), 250, 60000);
     const fps = clamp(Math.round(Number(raw.fps) || 24), 1, 60);
-    const tracks = {};
+    const tracks = Object.create(null);
     let totalFrames = 0;
     if (raw.tracks && typeof raw.tracks === "object" && !Array.isArray(raw.tracks)) {
       for (const [path, source] of Object.entries(raw.tracks).slice(0, 100)) {
-        if (!source || typeof source !== "object" || !Array.isArray(source.keyframes)) continue;
+        if (!validPathSyntax(path) || !source || typeof source !== "object" || !Array.isArray(source.keyframes)) continue;
         const frames = [];
         for (const frame of source.keyframes.slice(0, 200)) {
           const timeMs = clamp(Math.round(Number(frame && frame.timeMs) || 0), 0, durationMs);
@@ -142,7 +164,7 @@
 
   function setKeyframe(clipInput, path, timeMs, value, easing) {
     const clip = normalise(clipInput);
-    if (typeof path !== "string" || !/^[a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9]+)*$/.test(path)) throw new Error("Недопустимый параметр анимации");
+    if (!validPathSyntax(path)) throw new Error("Недопустимый параметр анимации");
     if (!["number", "string", "boolean"].includes(typeof value) || (typeof value === "number" && !Number.isFinite(value))) throw new Error("Недопустимое значение ключевого кадра");
     const time = clamp(Math.round(Number(timeMs) || 0), 0, clip.durationMs);
     const track = clip.tracks[path] || { keyframes: [], oscillator: null };
@@ -158,6 +180,7 @@
 
   function removeKeyframe(clipInput, path, timeMs) {
     const clip = normalise(clipInput);
+    if (!validPathSyntax(path)) return clip;
     const track = clip.tracks[path];
     if (!track) return clip;
     track.keyframes = track.keyframes.filter(frame => frame.timeMs !== Math.round(Number(timeMs)));
@@ -167,6 +190,7 @@
 
   function setOscillator(clipInput, path, oscillator) {
     const clip = normalise(clipInput);
+    if (!validPathSyntax(path)) throw new Error("Недопустимый параметр анимации");
     if (!clip.tracks[path]) clip.tracks[path] = { keyframes: [], oscillator: null };
     if (!oscillator) clip.tracks[path].oscillator = null;
     else {
