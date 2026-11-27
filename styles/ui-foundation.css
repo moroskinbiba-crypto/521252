@@ -1,0 +1,44 @@
+
+/*
+ * UI foundation — additive layer.
+ * Keep these shared primitives last in the cascade until visual baselines exist;
+ * future CSS extraction must preserve the standalone HTML export path.
+ */
+:root{
+ --ui-control-height:34px;
+ --ui-focus-offset:3px;
+ --ui-panel-gap:8px;
+ --ui-sticky-offset:64px;
+}
+.sr-only{
+ position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+ overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+.inspector-jump-nav{
+ position:sticky;top:var(--ui-sticky-offset);z-index:4;
+ display:flex;gap:5px;align-items:center;overflow-x:auto;overscroll-behavior-x:contain;
+ margin:-5px 0 15px;padding:7px;
+ border:1px solid var(--line);border-radius:9px;
+ background:var(--panel);box-shadow:0 5px 16px #00000012;
+ scrollbar-width:thin;scrollbar-color:var(--muted) transparent;
+}
+.inspector-jump-nav button{
+ flex:0 0 auto;min-height:30px;padding:5px 9px;
+ border:1px solid transparent;border-radius:6px;background:transparent;
+ color:var(--muted);font-size:9px;font-weight:650;white-space:nowrap;
+}
+.inspector-jump-nav button:hover,
+.inspector-jump-nav button[aria-current="location"]{
+ border-color:var(--line);background:var(--panel2);color:var(--text);
+}
+#inspector .control,#inspector #exportControl{scroll-margin-top:82px}
+#modal[role="dialog"],#exportModal[role="dialog"]{overscroll-behavior:contain}
+.modalbg[role="dialog"] .modal{max-height:min(90dvh,720px);overflow:auto}
+@media(max-width:740px){
+ .inspector-jump-nav{top:58px;margin:-3px 0 12px;padding:5px}
+ .inspector-jump-nav button{min-height:32px;padding:6px 10px}
+ #inspector .control,#inspector #exportControl{scroll-margin-top:70px}
+}
+@media(prefers-reduced-motion:reduce){
+ .inspector-jump-nav{scroll-behavior:auto}
+}
