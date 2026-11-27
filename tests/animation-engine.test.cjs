@@ -66,7 +66,7 @@ assert.deepEqual(editable.tracks.threshold.keyframes[1],
   "a selected keyframe can be retimed and edited without replacing the other keys");
 assert.throws(
   () => Engine.updateKeyframe(editable, "threshold", 1250, 0, 70, "linear"),
-  /already exists/,
+  /уже есть/,
   "moving a keyframe onto another key must fail rather than overwrite it"
 );
 assert.equal(editable.tracks.threshold.keyframes[0].value, 10,
