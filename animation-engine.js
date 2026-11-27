@@ -204,8 +204,9 @@
         (typeof value === "number" && !Number.isFinite(value))) {
       throw new Error("Тип или значение ключевого кадра некорректны");
     }
-    const nextTime = clamp(Math.round(Number(nextTimeMs)), 0, clip.durationMs);
-    if (!Number.isFinite(nextTime)) throw new Error("Время ключевого кадра должно быть числом");
+    const requestedTime = Number(nextTimeMs);
+    if (!Number.isFinite(requestedTime)) throw new Error("Время ключевого кадра должно быть числом");
+    const nextTime = clamp(Math.round(requestedTime), 0, clip.durationMs);
     if (track.keyframes.some((frame, frameIndex) => frameIndex !== index && frame.timeMs === nextTime)) {
       throw new Error("На этой позиции уже есть ключевой кадр");
     }
@@ -324,7 +325,8 @@
   function playbackTime(elapsedMs, startMs, durationMs, loopMode) {
     const duration = Math.max(1, clamp(Math.round(Number(durationMs) || 1), 1, 60000));
     const start = clamp(Number(startMs) || 0, 0, duration);
-    const elapsed = Math.max(0, Number(elapsedMs) || 0);
+    const elapsedValue = Number(elapsedMs);
+    const elapsed = Number.isFinite(elapsedValue) ? Math.max(0, elapsedValue) : 0;
     const absolute = start + elapsed;
     const mode = ["none", "loop", "pingpong"].includes(loopMode) ? loopMode : "loop";
     if (mode === "none") return Math.min(duration, absolute);
