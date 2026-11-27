@@ -1026,7 +1026,15 @@ async function downloadFrom(page, selector) {
 
     const offline = await downloadFrom(page, "#offlineBtn");
     assert.match(offline.download.suggestedFilename(), /TGRMLither-offline\.html$/);
-    assert.ok(offline.bytes.toString("utf8").includes("TGRMLither — Browser Image Studio"));
+    const offlineHtml = offline.bytes.toString("utf8");
+    assert.ok(offlineHtml.includes("TGRMLither — Browser Image Studio"));
+    assert.match(offlineHtml, /<style id="xpShellStyles"/, "standalone export should inline the XP theme stylesheet");
+    assert.match(offlineHtml, /<style id="uiFoundationStyles"/, "standalone export should inline the latest UI foundation");
+    assert.match(offlineHtml, /\.inspector-jump-nav\s*\{/, "standalone export should include Inspector navigation styles");
+    assert.equal((offlineHtml.match(/<link[^>]*data-standalone-inline/g) || []).length, 0,
+      "standalone export must not depend on external local CSS files");
+    assert.equal((offlineHtml.match(/href=["']\.\/styles\//g) || []).length, 0,
+      "all app stylesheets should be embedded into the standalone file");
     assert.equal(await page.locator("#fullscreenBtn").count(), 1, "editor should provide an explicit full-screen control");
     assert.match(await page.locator("#fullscreenBtn").getAttribute("aria-label"), /весь экран/i);
     if (await page.evaluate(() => !!document.fullscreenEnabled && typeof document.documentElement.requestFullscreen === "function")) {
