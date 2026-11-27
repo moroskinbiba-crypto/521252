@@ -1929,6 +1929,25 @@ async function downloadFrom(page, selector) {
       "PNG sequence export should produce a valid ZIP local-file header");
     assert.deepEqual(animationErrors, [],
       "animation project restore and frame-sequence export should not throw runtime errors");
+
+    // Switching workspaces during playback must stop the clip and persist the
+    // unanimated Editor settings, never a transient frame value.
+    const editorBaseThreshold = await animationPage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.threshold
+    );
+    await animationPage.locator("#animationPlay").click();
+    await animationPage.waitForFunction(() => window.__tgrmAnimationStatus().playing === true);
+    await animationPage.locator('.topnav [data-mode="shape"]').click();
+    await animationPage.waitForFunction(() =>
+      document.body.dataset.mode === "shape" && window.__tgrmAnimationStatus().playing === false
+    );
+    const persistedEditorThreshold = await animationPage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.threshold
+    );
+    assert.equal(persistedEditorThreshold, editorBaseThreshold,
+      "workspace navigation must restore and persist the pre-playback Editor settings");
+    assert.deepEqual(animationErrors, [],
+      "stopping playback during workspace navigation should not create runtime errors");
     await animationPage.close();
 
     // Palette colour locks must survive a shuffle and reload; source palette mode must remain valid.
