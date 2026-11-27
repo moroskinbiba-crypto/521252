@@ -2762,7 +2762,7 @@ function animationAddKeyframe(){
 function animationApplyKeyframeEdits(){
  const selected=animationCurrentKeyframe();if(!selected){say("Сначала выберите ключевой кадр");return}
  const seconds=Number($("animationKeyTime").value),nextTime=Math.round(seconds*1000);
- if(!Number.isFinite(seconds)||seconds<0){say("Укажите корректное время ключевого кадра");return}
+ if(!Number.isFinite(seconds)||seconds<0||seconds>animationClip.durationMs/1000){say("Время должно находиться внутри длительности клипа");return}
  let value;
  if(typeof selected.frame.value==="boolean")value=$("animationKeyBoolean").value==="true";
  else if(typeof selected.frame.value==="number"){value=Number($("animationKeyValue").value);if(!Number.isFinite(value)){say("Значение должно быть числом");return}}
@@ -2878,7 +2878,7 @@ async function animationExportVideo(){
  animationExporting=true;animationCancelRequested=false;animationRefreshUI();
  try{
   stream=out.captureStream(0);const track=stream.getVideoTracks()[0],manualFrames=!!track?.requestFrame;
-  if(!manualFrames){stream.getTracks().forEach(item=>item.stop());stream=out.captureStream(animationClip.fps)}
+  if(!manualFrames){stream.getTracks().forEach(item=>item.stop());stream=out.captureStream(clip.fps)}
   recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8000000});
   const stopped=new Promise((resolve,reject)=>{recorder.ondataavailable=event=>{if(event.data&&event.data.size){videoOutputBytes+=event.data.size;if(videoOutputBytes>ANIMATION_VIDEO_MAX_BYTES){videoOutputLimit=true;animationCancelRequested=true;return}chunks.push(event.data)}};recorder.onerror=()=>reject(new Error("Ошибка кодирования видео"));recorder.onstop=resolve});
   recorder.start(250);const frameInterval=1000/clip.fps;
