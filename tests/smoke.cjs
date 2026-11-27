@@ -332,6 +332,8 @@ async function downloadFrom(page, selector) {
     await page.locator("#qualityMode").selectOption("balanced");
 
     // Mode navigation, glyph controls, and preset application.
+    await page.locator('#shapeControl details.shape-bands > summary').click();
+    await page.locator('#shapeControl details.shape-preset-panel > summary').click();
     await page.locator('.topnav [data-mode="shape"]').click();
     assert.equal(await page.locator("body").getAttribute("data-mode"), "shape");
     assert.equal(await page.locator("#algorithmPickerField").isVisible(), false, "Shape Lab uses its own workspace, not the standard algorithm picker");
