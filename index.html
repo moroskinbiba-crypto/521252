@@ -767,8 +767,10 @@ function updateThemeContrastWarning(vars){
  const checks=[
   ["текст / фон",vars["--text"],vars["--bg"],4.5],
   ["текст / панель",vars["--text"],vars["--panel"],4.5],
+  ["текст / вложенная панель",vars["--text"],vars["--panel2"],4.5],
   ["вторичный текст / фон",vars["--muted"],vars["--bg"],4.5],
   ["вторичный текст / панель",vars["--muted"],vars["--panel"],4.5],
+  ["вторичный текст / вложенная панель",vars["--muted"],vars["--panel2"],4.5],
   ["акцент / фон",vars["--acid"],vars["--bg"],3],
   ["второй акцент / панель",vars["--purple"],vars["--panel"],3]
  ];
@@ -776,7 +778,7 @@ function updateThemeContrastWarning(vars){
   .filter(item=>item.ratio<item.minimum);
  notice.dataset.state=failures.length?"warning":"ok";
  notice.textContent=failures.length
-  ?"Низкий контраст: "+failures.map(item=>item.name+" "+item.ratio.toFixed(1)+":1 (нужно ≥"+String(item.minimum).replace(".",",")+")").join("; ")+". Мелкий текст или акценты могут читаться хуже."
+  ?"Низкий контраст: "+failures.map(item=>item.name+" "+item.ratio.toFixed(1).replace(".",",")+":1 (нужно ≥"+String(item.minimum).replace(".",",")+")").join("; ")+". Мелкий текст или акценты могут читаться хуже."
   :"";
  return failures;
 }
