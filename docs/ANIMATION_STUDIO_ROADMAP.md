@@ -108,3 +108,29 @@ Workflow run [#295](https://github.com/moroskinbiba-crypto/521252/actions/runs/4
 - The first temporal renderer exposes animated scanline offset and deterministic grain; other visual effects can be animated through keyframes/oscillators, while additional procedural temporal patterns remain future work.
 - PNG Sequence export is bounded to 600 frames and 48 MiB of PNG data; video recording is bounded to 128 MiB.
 - The SVG importer rasterizes imported SVG as an image source. It does not preserve the source SVG as editable vector layers.
+
+## Post-implementation audit — 2026-11-27
+
+A second pass against the actual renderer, persistence paths, and import boundaries found two issues that were not covered by the first implementation review.
+
+### Corrective work
+
+- Animation track paths now reject array length mutation, prototype-related names, non-canonical array indexes, and traversal into nested arrays such as a custom Shape Lab viewBox. Only indexed algorithmLayers and shapeBands properties are traversable.
+- Imported clips are normalized into a prototype-free track map. Unsupported or hostile track paths are discarded before they can be evaluated.
+- Switching workspaces stops active playback before the outgoing workspace is saved.
+- Timeline scrubbing is treated as a preview, not as a permanent workspace edit. A deliberate inspector edit while scrubbing establishes a new base; leaving a workspace, changing the source image, exporting a project, or creating a user backup preserves the base rather than the transient frame.
+- Project files now store the animation clip together with its non-animated workspace base.
+- Workspace/source changes are guarded during animation exports so an export cannot silently switch its source midway through a frame sequence or recording.
+
+### Added regression coverage
+
+- Reject writes to effects.length, shapeBands.length, and algorithmLayers.length.
+- Reject nested-array traversal and prototype-related paths.
+- Verify malformed imported tracks do not expand application arrays or pollute object prototypes.
+- Verify a project saved while the timeline is scrubbed contains the base settings and the clip.
+- Verify scrubbed frames are not persisted when leaving a workspace.
+- Verify playback is stopped and the base restored during workspace navigation.
+
+### Current scope boundary
+
+The timeline currently targets the Editor, Shape Lab, and Script Slayer workspaces. Video Lab remains its separate source-video processing/recording workspace; it does not yet have a per-video keyframe timeline. Procedural temporal motion is currently implemented for scanline phase and deterministic grain, while other existing settings can be animated through keyframes and oscillators. This is intentionally documented as follow-up work rather than claiming full feature parity with Dither Boy's timeline/video animation workflow.
