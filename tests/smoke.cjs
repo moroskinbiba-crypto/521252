@@ -2016,6 +2016,59 @@ async function downloadFrom(page, selector) {
       "palette lock, shuffle and source palette workflows should not throw runtime errors");
     await paletteLockPage.close();
 
+    // Effect locks preserve both enabled and disabled states across random styles.
+    const effectLockPage = await browser.newPage({
+      viewport: { width: 1280, height: 800 }, acceptDownloads: true
+    });
+    const effectLockErrors = [];
+    effectLockPage.on("pageerror", error => effectLockErrors.push(error.stack || error.message));
+    await effectLockPage.goto(baseURL, { waitUntil: "load", timeout: 30000 });
+    await effectLockPage.waitForFunction(() =>
+      document.querySelector("#output")?.width > 0 &&
+      document.querySelectorAll("#generalEffectsControl .effect-lock").length === 10
+    );
+    const effectToggle = key => effectLockPage.locator(
+      '#generalEffectsControl .effect-toggle[data-effect="' + key + '"]'
+    );
+    const effectLock = key => effectLockPage.locator(
+      '#generalEffectsControl .effect-lock[data-effect-lock="' + key + '"]'
+    );
+
+    await effectToggle("scanlines").click(); // ON, then lock ON.
+    await effectLock("scanlines").click();
+    await effectLock("glow").click(); // Initially OFF, lock OFF.
+    assert.equal(await effectToggle("scanlines").getAttribute("aria-checked"), "true");
+    assert.equal(await effectToggle("glow").getAttribute("aria-checked"), "false");
+    assert.equal(await effectLock("scanlines").getAttribute("aria-pressed"), "true");
+    assert.equal(await effectLock("glow").getAttribute("aria-pressed"), "true");
+
+    for (let attempt = 0; attempt < 8; attempt++) {
+      await effectLockPage.locator("#randomize").click();
+      assert.equal(await effectToggle("scanlines").getAttribute("aria-checked"), "true",
+        "a locked enabled effect must remain enabled in every random style");
+      assert.equal(await effectToggle("glow").getAttribute("aria-checked"), "false",
+        "a locked disabled effect must remain disabled in every random style");
+    }
+
+    await effectLockPage.reload({ waitUntil: "load" });
+    await effectLockPage.waitForFunction(() => document.querySelector("#output")?.width > 0);
+    assert.equal(await effectLock("scanlines").getAttribute("aria-pressed"), "true",
+      "effect locks should survive reload");
+    assert.equal(await effectLock("glow").getAttribute("aria-pressed"), "true",
+      "disabled-effect locks should survive reload");
+    await effectLockPage.locator("#randomize").click();
+    assert.equal(await effectToggle("scanlines").getAttribute("aria-checked"), "true");
+    assert.equal(await effectToggle("glow").getAttribute("aria-checked"), "false");
+
+    const effectBackup = await downloadFrom(effectLockPage, "#exportUserBackup");
+    const effectBackupJson = JSON.parse(effectBackup.bytes.toString("utf8"));
+    assert.deepEqual(effectBackupJson.data["tgrmlither-effect-locks"].editor,
+      { scanlines: true, glow: true },
+      "effect-lock preferences should be included in user backups");
+    assert.deepEqual(effectLockErrors, [],
+      "effect locking and randomized-style flows should not throw runtime errors");
+    await effectLockPage.close();
+
     // Main editor SVG import sanitizes script and event-handler content before rasterization.
     const svgSafetyPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     const svgSafetyErrors = [];
