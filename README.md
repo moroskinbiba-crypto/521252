@@ -20,7 +20,7 @@ No installer, account, or backend is required. Image processing takes place in t
 - Shape Lab with four luminance bands, per-band geometry, size and colour, placement distribution and rotation.
 - Independent, adjustable and reorderable effect stacks for Editor, Shape Lab, Script Slayer, Batch and Video Lab.
 - Script Slayer with 48 character families, live glyph preview, editable glyphs, depth/cell sizing, offset, palette/source/mono colour, transparent backgrounds, TXT export and animation.
-- Animation Studio with a universal keyframe timeline, parameter tracks, Linear/Ease/Hold curves, temporal oscillators (sine, triangle, saw and square), looped playback, PNG frame-sequence ZIP export, and browser-supported MP4 or WebM recording.
+- Animation Studio with exact keyframe editing, Linear/Ease/Hold curves, temporal oscillators with phase control, playhead-relative one-shot/loop/ping-pong playback, PNG sequence ZIPs with metadata, and browser-supported MP4 or WebM recording.
 - Per-colour palette locks, shuffle-unlocked-colours, source-derived palette mode, and secure local SVG raster import.
 - User presets, project JSON with animation clips, batch processing with individual PNGs or a one-click ZIP bundle, PNG/JPEG, SVG pixel-grid export, WebM motion export, standalone HTML and PWA/offline cache.
 
