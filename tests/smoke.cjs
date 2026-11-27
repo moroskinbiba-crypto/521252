@@ -1963,6 +1963,25 @@ async function downloadFrom(page, selector) {
     );
     assert.deepEqual(animationErrors, [],
       "stopping playback during workspace navigation should not create runtime errors");
+
+    // A real inspector edit made while a scrubbed preview is visible becomes
+    // the new base, rather than being discarded on the next workspace change.
+    await setAnimationTime(125);
+    await animationPage.waitForFunction(() => Number(document.querySelector("#threshold")?.value) === 20);
+    await animationPage.locator("#threshold").evaluate(el => {
+      el.value = "30";
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await animationPage.locator('.topnav [data-mode="shape"]').click();
+    await animationPage.waitForFunction(() => document.body.dataset.mode === "shape");
+    const manuallyEditedBase = await animationPage.evaluate(() =>
+      JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.threshold
+    );
+    assert.equal(manuallyEditedBase, 30,
+      "manual inspector edits during scrubbing should be promoted to the saved animation base");
+    assert.deepEqual(animationErrors, [],
+      "manual edits during a scrubbed preview should not cause runtime errors");
     await animationPage.close();
 
     // Palette colour locks must survive a shuffle and reload; source palette mode must remain valid.
