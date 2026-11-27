@@ -185,6 +185,8 @@ async function switchMode(page, mode) {
       "vector and print controls should expand on demand");
 
 
+    assert.equal(await page.locator('label[for="paletteLibraryName"]').count(), 1,
+      "palette library name input should have a programmatic label");
     const exportTitle = await page.locator("#exportControl .controltitle").innerText();
     assert.match(exportTitle, /БЫСТРЫЕ ДЕЙСТВИЯ/,
       "Inspector export actions should be identified as shortcuts, not a second full export center");
