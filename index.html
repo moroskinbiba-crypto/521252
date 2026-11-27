@@ -2675,7 +2675,8 @@ function animationRefreshKeyEditor(){
   bool.value=String(selected.frame.value);
  }else{
   $("animationKeyBooleanField").classList.add("hidden");$("animationKeyValueField").classList.remove("hidden");
-  value.type=selected&&typeof selected.frame.value==="number"?"number":"text";
+  value.type=selected&&typeof selected.frame.value==="number"?"number":
+   selected?.path.startsWith("shapeBands.")&&selected.path.endsWith(".color")?"color":"text";
   value.step="any";value.value=selected?String(selected.frame.value):"";
  }
  if(selected)easing.value=selected.frame.easing;
@@ -2770,7 +2771,7 @@ function animationApplyKeyframeEdits(){
  try{
   animationClip=AnimationEngine.updateKeyframe(animationClip,selected.path,selected.frame.timeMs,nextTime,value,$("animationKeyEasing").value);
  }catch(error){say(error.message||"Не удалось изменить ключевой кадр");return}
- animationSelectedKeyTime=nextTime;
+ animationSelectedKeyTime=nextTime;animationCurrentMs=nextTime;
  if(!animationPersist())return;
  animationRefreshUI();
  if(src)animationSetTime(animationCurrentMs,true);
