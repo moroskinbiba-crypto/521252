@@ -8,7 +8,7 @@ const settings = {
   algorithm: "bayer4",
   effectStrength: { noise: 20 },
   effects: ["noise"],
-  shapeBands: [{ size: 40, rotation: 0, shape: "circle", color: "#ffffff" }],
+  shapeBands: [{ size: 40, rotation: 0, shape: "circle", color: "#ffffff", customViewBox: [0, 0, 100, 100] }],
   algorithmLayers: [{ opacity: 30, enabled: true, algorithm: "bayer4", blend: "normal" }]
 };
 
