@@ -1910,6 +1910,10 @@ async function downloadFrom(page, selector) {
     const animationProject = JSON.parse(animationProjectDownload.bytes.toString("utf8"));
     assert.equal(animationProject.animation.tracks.threshold.keyframes.length, 2,
       "project JSON should include the animation clip");
+    assert.equal(animationProject.settings.threshold, 40,
+      "project JSON must preserve the non-animated workspace base, not the current scrubbed frame");
+    assert.equal(animationProject.workspaces.editor.threshold, 40,
+      "project workspace profiles must not persist a transient animation frame");
     await animationPage.locator("#projectInput").setInputFiles({
       name: "animation-roundtrip.tgrmlither.json",
       mimeType: "application/json",
@@ -1930,22 +1934,29 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(animationErrors, [],
       "animation project restore and frame-sequence export should not throw runtime errors");
 
-    // Switching workspaces during playback must stop the clip and persist the
-    // unanimated Editor settings, never a transient frame value.
+    // Scrubbing is a preview, not a workspace edit. Leaving the workspace must
+    // persist the base settings while retaining the clip for the next visit.
     const editorBaseThreshold = await animationPage.evaluate(() =>
       JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.threshold
     );
-    await animationPage.locator("#animationPlay").click();
-    await animationPage.waitForFunction(() => window.__tgrmAnimationStatus().playing === true);
+    await setAnimationTime(125);
+    await animationPage.waitForFunction(() => Number(document.querySelector("#threshold")?.value) === 20);
     await animationPage.locator('.topnav [data-mode="shape"]').click();
-    await animationPage.waitForFunction(() =>
-      document.body.dataset.mode === "shape" && window.__tgrmAnimationStatus().playing === false
-    );
+    await animationPage.waitForFunction(() => document.body.dataset.mode === "shape");
     const persistedEditorThreshold = await animationPage.evaluate(() =>
       JSON.parse(localStorage.getItem("tgrmlithering-workspaces") || "{}").editor?.threshold
     );
     assert.equal(persistedEditorThreshold, editorBaseThreshold,
-      "workspace navigation must restore and persist the pre-playback Editor settings");
+      "workspace navigation must not persist a transient scrubbed frame");
+
+    // Switching workspaces during playback must stop the clip and persist the
+    // unanimated Shape Lab settings, never a transient frame value.
+    await animationPage.locator("#animationPlay").click();
+    await animationPage.waitForFunction(() => window.__tgrmAnimationStatus().playing === true);
+    await animationPage.locator('.topnav [data-mode="editor"]').click();
+    await animationPage.waitForFunction(() =>
+      document.body.dataset.mode === "editor" && window.__tgrmAnimationStatus().playing === false
+    );
     assert.deepEqual(animationErrors, [],
       "stopping playback during workspace navigation should not create runtime errors");
     await animationPage.close();
