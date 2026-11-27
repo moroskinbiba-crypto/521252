@@ -1560,6 +1560,7 @@ function normaliseBackupEntry(key,value){
  throw Error("Неизвестный раздел резервной копии");
 }
 function exportUserBackup(){
+ if(animationExporting||animationPlaying){say("Остановите анимацию перед созданием резервной копии");return}
  try{
   if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);
   const data={};
@@ -2055,6 +2056,8 @@ function updateRenderControls(cfg,renderMode,metadata=null){
  refresh();zoom();updateCompareUI();updateFavoriteButton();bindExactRangeInputs();scheduleHistorySnapshot();
 }
 function loadImage(c,n,isDemo=false){
+ if(animationExporting){say("Сначала завершите или отмените экспорт анимации");return false}
+ if(animationPlaying)animationStopPlayback(true);
  const previousSource=src,previousSourceCopy=processingSourceCanvasCopy;
  src=c;srcName=n||"image";demo=isDemo;original=false;resultDirty=false;lastExported=false;lastRenderedSignature="";hasRendered=false;compareEnabled=false;
  setProcessingSource(c);
@@ -2688,12 +2691,14 @@ function download(blob,name){
  transientDownloadUrls.set(url,timer);resourceMetrics.transientDownloadUrls=transientDownloadUrls.size;
 }
 async function exportImage(type="png"){if(!src){say("Сначала загрузите изображение");return}if(original){original=false;render()}await waitForProcessingPreview();const quality=clamp(Number($("jpegQuality")?.value??s.jpegQuality??94)/100,.7,1);out.toBlob(b=>{if(!b){say("Экспорт не удался");return}download(b,slug(srcName)+"-TGRMLither."+(type==="jpeg"?"jpg":type));markResultExported();say(type==="jpeg"?"JPEG экспортирован":"PNG экспортирован")},type==="jpeg"?"image/jpeg":"image/png",type==="jpeg"?quality:undefined)}
-function project(){if(!src){say("Сначала загрузите изображение");return}try{if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);const source=src.toDataURL("image/png");if(source.length>MAX_PROJECT_FILE_BYTES){say("Проект слишком велик для сохранения. Уменьшите изображение и повторите экспорт.");return}const p={format:"tgrmlither-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source,settings:cloneSettings(s),workspaces:workspaceSettings,animation:animationClip},json=JSON.stringify(p);if(json.length>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ. Уменьшите изображение и повторите экспорт.");return}download(new Blob([json],{type:"application/json"}),slug(srcName)+".tgrmlither.json");say("Проект сохранён")}catch(error){say("Не удалось сохранить проект. Попробуйте уменьшить изображение и повторить экспорт.")}}
+function project(){if(animationExporting||animationPlaying){say("Сначала остановите анимацию или завершите экспорт");return}if(!src){say("Сначала загрузите изображение");return}try{if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);const source=src.toDataURL("image/png");if(source.length>MAX_PROJECT_FILE_BYTES){say("Проект слишком велик для сохранения. Уменьшите изображение и повторите экспорт.");return}const p={format:"tgrmlither-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source,settings:cloneSettings(s),workspaces:workspaceSettings,animation:animationClip},json=JSON.stringify(p);if(json.length>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ. Уменьшите изображение и повторите экспорт.");return}download(new Blob([json],{type:"application/json"}),slug(srcName)+".tgrmlither.json");say("Проект сохранён")}catch(error){say("Не удалось сохранить проект. Попробуйте уменьшить изображение и повторить экспорт.")}}
 async function saveStandalone(){try{let html="<!doctype html>\n"+document.documentElement.outerHTML;const closeTag="<"+"/script>",scriptTag="<"+"script src=\"./animation-engine.js\">"+closeTag;if(html.includes(scriptTag)){const response=await fetch(new URL("./animation-engine.js",document.baseURI));if(!response.ok)throw Error("Не удалось встроить Animation Engine в автономный файл");const source=await response.text();html=html.replace(scriptTag,"<"+"script>\n"+source+"\n"+closeTag)}download(new Blob([html],{type:"text/html;charset=utf-8"}),"TGRMLither-offline.html");say("Автономная HTML-версия скачана")}catch(error){say(error?.message||"Не удалось создать автономный HTML-файл")}}
 function openImage(){ $("imageInput").click() }
 function setMode(m){
  if(!["editor","presets","shape","script","batch","video"].includes(m))m="editor";
  const previousMode=mode;
+ if(m!==previousMode&&animationExporting){say("Сначала завершите или отмените экспорт анимации");return}
+ if(m!==previousMode&&animationPlaying)animationStopPlayback(true);
  if(m!==previousMode){
   if(m!=="script"&&asciiAnimRaf)stopAsciiAnimation();
   if(temporalRaf)stopTemporal();
@@ -2960,6 +2965,8 @@ async function runBatch(){
 let activeProjectReader=null,projectLoadGeneration=0;
 function loadProject(f){
  if(!f)return;
+ if(animationExporting){say("Сначала завершите или отмените экспорт анимации");return}
+ if(animationPlaying)animationStopPlayback(true);
  if(!Number.isFinite(Number(f.size))||f.size>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ");return}
  if(activeProjectReader)try{activeProjectReader.abort()}catch(error){}
  const generation=++projectLoadGeneration,r=new FileReader();
