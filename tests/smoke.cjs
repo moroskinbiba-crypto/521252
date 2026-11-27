@@ -394,6 +394,7 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#asciiControl").isVisible(), true, "Script Slayer controls should be visible in Script Slayer");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "standard effect stack must not appear in Script Slayer");
     assert.equal(await page.locator("#scriptEffectsControl").isVisible(), true, "Script Slayer has its own effect stack");
+    await page.locator("#asciiControl details.ascii-neoglow-options > summary").click();
     assert.equal(await page.locator("#shapeEffectsControl").isVisible(), false, "Shape Lab effects must stay hidden in Script Slayer");
     assert.equal(await page.locator("#batchEffectsControl").isVisible(), false);
     assert.equal(await page.locator("#videoEffectsControl").isVisible(), false);
