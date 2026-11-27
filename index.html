@@ -2060,7 +2060,7 @@ function updateRenderControls(cfg,renderMode,metadata=null){
 function loadImage(c,n,isDemo=false){
  if(animationExporting){say("Сначала завершите или отмените экспорт анимации");return false}
  if(animationPlaying)animationStopPlayback(true);
- else if(animationScrubPreviewed&&animationScrubBase){s=cloneSettings(animationScrubBase);animationScrubPreviewed=false;animationCurrentMs=0;sync();render();animationRefreshUI()}
+ else if(animationScrubPreviewed&&animationScrubBase){s=cloneSettings(animationScrubBase);animationScrubPreviewed=false;animationPreviewFrame=null;animationCurrentMs=0;sync();render();animationRefreshUI()}
  const previousSource=src,previousSourceCopy=processingSourceCanvasCopy;
  src=c;srcName=n||"image";demo=isDemo;original=false;resultDirty=false;lastExported=false;lastRenderedSignature="";hasRendered=false;compareEnabled=false;
  setProcessingSource(c);
@@ -2712,7 +2712,7 @@ function setMode(m){
  }
  if(WORKSPACE_NAMES.includes(previousMode))saveWorkspaceSettings(previousMode);
  if(WORKSPACE_NAMES.includes(previousMode)&&animationScrubPreviewed&&animationScrubBase){
-  s=cloneSettings(animationScrubBase);animationScrubPreviewed=false;animationCurrentMs=0;
+  s=cloneSettings(animationScrubBase);animationScrubPreviewed=false;animationPreviewFrame=null;animationCurrentMs=0;
  }
  mode=m;
  if(m==="video"&&previousMode!=="video"&&$("videoSource")?.readyState>=2)requestAnimationFrame(()=>renderVideoFrame());
@@ -2764,7 +2764,7 @@ function setMode(m){
   $("algorithm").value=s.algorithm;sync();renderVideoFrame();
  }else if(m==="presets")renderPresets();
  if(WORKSPACE_NAMES.includes(m))saveWorkspaceSettings(m);
- if(["editor","shape","script"].includes(m)){animationScrubBase=cloneSettings(s);animationCurrentMs=0;animationScrubPreviewed=false;animationRefreshTrackOptions();animationRefreshUI()}
+ if(["editor","shape","script"].includes(m)){animationScrubBase=cloneSettings(s);animationCurrentMs=0;animationScrubPreviewed=false;animationPreviewFrame=null;animationRefreshTrackOptions();animationRefreshUI()}
 }
 function makeCard(p){let b=document.createElement("button");b.className="preset";let art=document.createElement("div");art.className="previewart";let c=document.createElement("canvas");c.width=300;c.height=145;let x=c.getContext("2d"),cs=(pal[p.c.palette||"moss"]||pal.moss).c;let g=x.createLinearGradient(0,0,300,145);cs.forEach((col,i)=>g.addColorStop(i/Math.max(1,cs.length-1),col));x.fillStyle=g;x.fillRect(0,0,300,145);x.fillStyle=cs[cs.length-1];x.beginPath();x.arc(210,38,25,0,7);x.fill();x.fillStyle=cs[Math.floor((cs.length-1)/2)];x.beginPath();x.moveTo(0,110);x.lineTo(62,52);x.lineTo(128,115);x.lineTo(195,72);x.lineTo(265,120);x.lineTo(300,93);x.lineTo(300,145);x.lineTo(0,145);x.closePath();x.fill();for(let yy=0;yy<145;yy+=p.c.scale||5)for(let xx=0;xx<300;xx+=p.c.scale||5){if((xx+yy)%17<4){x.fillStyle=cs[0];x.fillRect(xx,yy,2,2)}}art.append(c);let info=document.createElement("div");info.className="presetinfo";info.innerHTML='<span class="ptag"></span><div class="presetname"></div><div class="presetdesc"></div>';info.querySelector(".ptag").textContent=p.tag||"MY PRESET";info.querySelector(".presetname").textContent=p.name;info.querySelector(".presetdesc").textContent=p.desc||"Моя конфигурация";b.append(art,info);b.onclick=()=>{setMode("editor");s=cloneSettings({...def,...p.c});if(["shape","ascii"].includes(s.algorithm))s.algorithm="bayer4";workspaceSettings.editor=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Пресет: "+p.name)};return b}
 function renderPresets(){
@@ -3404,7 +3404,7 @@ const PREVIEW_BEHAVIOUR_KEY="tgrmlither-preview-behaviour";
 const PALETTE_LOCKS_KEY="tgrmlither-palette-locks";
 const AnimationEngine=window.TGRMAnimationEngine;
 let animationClip=AnimationEngine.normalise(loadStore(ANIMATION_STORAGE_KEY,null));
-let animationScrubBase=null,animationCurrentMs=0,animationPlaying=false,animationRaf=0,animationPlayBase=null,animationPlayEpoch=0,animationLastFrameAt=0,animationFrameBusy=false,animationPreviewActive=false,animationScrubPreviewed=false,animationExporting=false,animationCancelRequested=false,animationScrubRequest=0;
+let animationScrubBase=null,animationCurrentMs=0,animationPlaying=false,animationRaf=0,animationPlayBase=null,animationPlayEpoch=0,animationLastFrameAt=0,animationFrameBusy=false,animationPreviewActive=false,animationScrubPreviewed=false,animationPreviewFrame=null,animationExporting=false,animationCancelRequested=false,animationScrubRequest=0;
 let paletteLocks=loadStore(PALETTE_LOCKS_KEY,{});
 let previewBehaviour=loadStore(PREVIEW_BEHAVIOUR_KEY,"live");
 if(!["live","balanced","still"].includes(previewBehaviour))previewBehaviour="live";
@@ -3465,24 +3465,25 @@ function animationSetTime(timeMs,apply=true,baseOverride=null){
  $("animationScrub").value=String(animationCurrentMs);$("animationTimeLabel").textContent=animationFormatTime(animationCurrentMs);
  if(!apply||!src)return Promise.resolve(false);
  const base=baseOverride||animationScrubBase||cloneSettings(s);
- if(!animationPlaying&&!animationExporting&&!baseOverride)animationScrubPreviewed=true;
  s=cloneSettings(AnimationEngine.evaluate(base,animationClip,animationCurrentMs));
+ if(!animationPlaying&&!animationExporting&&!baseOverride){animationScrubPreviewed=true;animationPreviewFrame=cloneSettings(s)}
  animationPreviewActive=true;sync();render();animationPreviewActive=false;
  return waitForProcessingPreview().then(()=>true).catch(()=>false);
 }
 function animationCommitManualEdit(target,persist=false){
  if(!animationScrubPreviewed||animationPlaying||animationExporting||!WORKSPACE_NAMES.includes(mode)||
-    !target||target.closest("#animationDock")||!target.closest("#inspector"))return false;
- animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;
+    !target||target.closest("#animationDock")||!animationPreviewFrame||
+    JSON.stringify(s)===JSON.stringify(animationPreviewFrame))return false;
+ animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;animationPreviewFrame=null;
  if(persist)saveWorkspaceSettings(mode);
  return true;
 }
-function animationCaptureBase(){if(!src){say("Сначала откройте изображение");return}animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;animationSetStatus("Базовые настройки текущего рабочего пространства сохранены.");say("База анимации обновлена")}
+function animationCaptureBase(){if(!src){say("Сначала откройте изображение");return}animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;animationPreviewFrame=null;animationSetStatus("Базовые настройки текущего рабочего пространства сохранены.");say("База анимации обновлена")}
 function animationAddKeyframe(){
  if(!src){say("Сначала откройте изображение");return}
  const path=animationSelectedPath();if(!path)return;
  const value=AnimationEngine.getPath(s,path);if(value===undefined){say("Этот параметр сейчас недоступен");return}
- animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;
+ animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;animationPreviewFrame=null;
  try{animationClip=AnimationEngine.setKeyframe(animationClip,path,animationCurrentMs,value,$("animationEasing").value)}catch(error){say(error.message||"Не удалось добавить ключевой кадр");return}
  if(!animationPersist())return;animationRefreshUI();animationSetStatus(animationTrackLabel(path)+" · ключевой кадр "+animationFormatTime(animationCurrentMs));say("Ключевой кадр сохранён");
 }
@@ -3505,7 +3506,7 @@ function animationUpdateOscillator(){
 }
 function animationStopPlayback(restore=true){
  if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;animationFrameBusy=false;
- if(animationPlayBase&&restore){s=cloneSettings(animationPlayBase);animationScrubBase=cloneSettings(animationPlayBase);animationPreviewActive=false;animationScrubPreviewed=false;sync();render()}
+ if(animationPlayBase&&restore){s=cloneSettings(animationPlayBase);animationScrubBase=cloneSettings(animationPlayBase);animationPreviewActive=false;animationScrubPreviewed=false;animationPreviewFrame=null;sync();render()}
  animationPlayBase=null;animationCurrentMs=0;animationRefreshUI();$("animationPlay").disabled=false;$("animationStop").disabled=true;
 }
 function animationPlay(){
@@ -3531,7 +3532,7 @@ async function animationRenderFrameAt(timeMs,base){
  if(!out||!out.width||!out.height)throw Error("Предпросмотр не готов к экспорту");
 }
 function animationRestoreAfterExport(base){
- s=cloneSettings(base);animationScrubBase=cloneSettings(base);animationCurrentMs=0;animationPreviewActive=false;animationScrubPreviewed=false;animationExporting=false;sync();render();animationRefreshUI();
+ s=cloneSettings(base);animationScrubBase=cloneSettings(base);animationCurrentMs=0;animationPreviewActive=false;animationScrubPreviewed=false;animationPreviewFrame=null;animationExporting=false;sync();render();animationRefreshUI();
  $("animationExportFrames").disabled=false;$("animationExportVideo").disabled=false;$("animationCancelExport").disabled=true;
 }
 async function animationExportSequence(){
@@ -3602,7 +3603,7 @@ function initAnimationStudio(){
  document.addEventListener("input",event=>animationCommitManualEdit(event.target,false));
  document.addEventListener("change",event=>animationCommitManualEdit(event.target,true));
  document.addEventListener("click",event=>{
-  const target=event.target.closest("#inspector .effect-toggle, #inspector #neoGlowEnabled, #inspector #randomize, #inspector #shuffle");
+  const target=event.target.closest(".effect-toggle, #neoGlowEnabled, #randomize, #shuffle, #reset, #undo, #redo, #addAlgorithmLayer, #applyLibraryPalette, #useCustomPalette, #deleteLibraryPalette, #shuffleUnlockedPalette, #applyShapeCode, #applyShapePreset");
   if(target)animationCommitManualEdit(target,true);
  });
  $("animationDock").classList.toggle("hidden",!["editor","shape","script"].includes(mode));
