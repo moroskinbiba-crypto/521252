@@ -1973,6 +1973,12 @@ async function downloadFrom(page, selector) {
     assert.match(sequenceDownload.download.suggestedFilename(), /animation-frames\.zip$/i);
     assert.equal(sequenceDownload.bytes.subarray(0, 4).toString("binary"), "PK\x03\x04",
       "PNG sequence export should produce a valid ZIP local-file header");
+    assert.ok(sequenceDownload.bytes.includes(Buffer.from('"format": "tgrmlither-animation-sequence"')),
+      "PNG sequence ZIP should include a machine-readable animation manifest");
+    assert.ok(sequenceDownload.bytes.includes(Buffer.from('"loopMode": "pingpong"')),
+      "sequence metadata should record the selected playback mode");
+    assert.ok(sequenceDownload.bytes.includes(Buffer.from('"frameCount": 6')),
+      "ping-pong sequence export should contain a complete forward-and-reverse cycle");
     assert.deepEqual(animationErrors, [],
       "animation project restore and frame-sequence export should not throw runtime errors");
 
