@@ -184,6 +184,16 @@ async function switchMode(page, mode) {
     assert.notEqual(await vectorGroup.getAttribute("open"), null,
       "vector and print controls should expand on demand");
 
+
+    const exportTitle = await page.locator("#exportControl .controltitle").innerText();
+    assert.match(exportTitle, /БЫСТРЫЕ ДЕЙСТВИЯ/,
+      "Inspector export actions should be identified as shortcuts, not a second full export center");
+    const temporalGroup = page.locator("#exportControl details.temporal-motion-group");
+    assert.equal(await temporalGroup.getAttribute("open"), null,
+      "procedural motion should be available without taking permanent space in the export panel");
+    await temporalGroup.locator("summary").click();
+    assert.notEqual(await temporalGroup.getAttribute("open"), null);
+
     // Dialogs must name themselves, take focus, trap keyboard navigation and return focus.
     await page.setViewportSize({ width: 390, height: 844 });
     await switchMode(page, "presets");
