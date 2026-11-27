@@ -1356,7 +1356,7 @@ s=cloneSettings(workspaceSettings.editor);
 function saveWorkspaceSettings(name=mode){
  if(!WORKSPACE_NAMES.includes(name))return false;
  const previous=workspaceSettings[name];
- const useAnimationBase=name===mode&&!animationExporting&&animationScrubPreviewed&&animationScrubBase;
+ const useAnimationBase=name===mode&&(animationScrubPreviewed||animationExporting)&&animationScrubBase;
  const next=cloneSettings(useAnimationBase?animationScrubBase:s);
  workspaceSettings[name]=next;
  if(store("tgrmlithering-workspaces",workspaceSettings))return true;
