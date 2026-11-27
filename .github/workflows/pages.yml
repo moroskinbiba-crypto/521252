@@ -65,7 +65,9 @@ jobs:
           node --check tests/compat.cjs
           node --check tests/animation-engine.test.cjs
           node --check tests/visual.cjs
+          node --check tests/css-assets.test.cjs
           node tests/animation-engine.test.cjs
+          node tests/css-assets.test.cjs
       - name: Install cross-browser smoke-test dependencies
         run: |
           npm install --prefix /tmp/tgrmlither-qa playwright@1.55.0
