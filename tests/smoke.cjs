@@ -1931,6 +1931,23 @@ async function downloadFrom(page, selector) {
       Number(document.querySelector("#threshold")?.value) === 20
     );
 
+    await animationPage.locator("#animationLanes .animation-key").nth(1).click();
+    assert.equal(await animationPage.locator("#animationKeyApply").isEnabled(), true,
+      "selecting a timeline marker should enable exact keyframe editing");
+    await animationPage.locator("#animationKeyTime").fill("1.25");
+    await animationPage.locator("#animationKeyValue").fill("50");
+    await animationPage.locator("#animationKeyEasing").selectOption("easeInOut");
+    await animationPage.locator("#animationKeyApply").click();
+    await animationPage.waitForFunction(() => {
+      const keys = window.__tgrmAnimationStatus().clip.tracks.threshold?.keyframes || [];
+      return keys.some(frame => frame.timeMs === 1250 && frame.value === 50 && frame.easing === "easeInOut");
+    });
+    await animationPage.locator("#animationLoopMode").selectOption("pingpong");
+    assert.equal(await animationPage.evaluate(() => window.__tgrmAnimationStatus().clip.loopMode),
+      "pingpong", "the ping-pong mode should be stored in the clip");
+    assert.deepEqual(animationErrors, [],
+      "keyframe editing and loop-mode selection should not throw browser runtime errors");
+
     const animationProjectDownload = await downloadFrom(animationPage, "#saveProjectMenu");
     const animationProject = JSON.parse(animationProjectDownload.bytes.toString("utf8"));
     assert.equal(animationProject.animation.tracks.threshold.keyframes.length, 2,
@@ -1950,14 +1967,43 @@ async function downloadFrom(page, selector) {
       null, { timeout: 15000 }
     );
 
-    await animationPage.locator("#animationDuration").fill("0.25");
+    await animationPage.locator("#animationDuration").evaluate(el => {
+      el.value = "0.25";
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
     await animationPage.locator("#animationFps").selectOption("12");
+    assert.deepEqual(await animationPage.evaluate(() => {
+      const clip = window.__tgrmAnimationStatus().clip;
+      return { durationMs: clip.durationMs, fps: clip.fps, loopMode: clip.loopMode };
+    }), { durationMs: 250, fps: 12, loopMode: "pingpong" },
+    "the short ping-pong export fixture should be applied before encoding");
     const sequenceDownload = await downloadFrom(animationPage, "#animationExportFrames");
     assert.match(sequenceDownload.download.suggestedFilename(), /animation-frames\.zip$/i);
     assert.equal(sequenceDownload.bytes.subarray(0, 4).toString("binary"), "PK\x03\x04",
       "PNG sequence export should produce a valid ZIP local-file header");
+    assert.ok(sequenceDownload.bytes.includes(Buffer.from('"format": "tgrmlither-animation-sequence"')),
+      "PNG sequence ZIP should include a machine-readable animation manifest");
+    assert.ok(sequenceDownload.bytes.includes(Buffer.from('"loopMode": "pingpong"')),
+      "sequence metadata should record the selected playback mode");
+    assert.ok(sequenceDownload.bytes.includes(Buffer.from('"frameCount": 6')),
+      "ping-pong sequence export should contain a complete forward-and-reverse cycle");
     assert.deepEqual(animationErrors, [],
       "animation project restore and frame-sequence export should not throw runtime errors");
+
+    const animationVideoSupported = await animationPage.evaluate(() =>
+      typeof MediaRecorder !== "undefined" &&
+      typeof document.querySelector("#output")?.captureStream === "function" &&
+      ["video/mp4;codecs=avc1.42E01E", "video/mp4", "video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"]
+        .some(type => MediaRecorder.isTypeSupported(type))
+    );
+    if (animationVideoSupported) {
+      const animationVideoDownload = await downloadFrom(animationPage, "#animationExportVideo");
+      assert.match(animationVideoDownload.download.suggestedFilename(), /-animation\.(?:mp4|webm)$/i);
+      assert.ok(animationVideoDownload.bytes.length > 100,
+        "Animation Studio video export should produce a non-empty media file");
+      assert.match(await animationPage.locator("#animationExportStatus").textContent(), /Готово/,
+        "Animation Studio should finish recording and report the resulting video format");
+    }
 
     // Scrubbing is a preview, not a workspace edit. Leaving the workspace must
     // persist the base settings while retaining the clip for the next visit.

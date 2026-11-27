@@ -1,7 +1,7 @@
 /* TGRMLither Animation Engine — deterministic keyframes and temporal modulation. */
 (function attachAnimationEngine(root) {
   "use strict";
-  const VERSION = 1;
+  const VERSION = 2;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const clone = value => JSON.parse(JSON.stringify(value));
   const RESERVED = new Set(["__proto__", "prototype", "constructor"]);
@@ -159,7 +159,9 @@
         delete tracks[path];
       }
     }
-    return { version: VERSION, durationMs, fps, loop: raw.loop !== false, tracks };
+    const loopMode = ["none", "loop", "pingpong"].includes(raw.loopMode)
+      ? raw.loopMode : raw.loop === false ? "none" : "loop";
+    return { version: VERSION, durationMs, fps, loop: loopMode !== "none", loopMode, tracks };
   }
 
   function setKeyframe(clipInput, path, timeMs, value, easing) {
@@ -168,6 +170,7 @@
     if (!["number", "string", "boolean"].includes(typeof value) || (typeof value === "number" && !Number.isFinite(value))) throw new Error("Недопустимое значение ключевого кадра");
     const time = clamp(Math.round(Number(timeMs) || 0), 0, clip.durationMs);
     const track = clip.tracks[path] || { keyframes: [], oscillator: null };
+    if (!clip.tracks[path] && Object.keys(clip.tracks).length >= 100) throw new Error("В клипе достигнут лимит 100 дорожек");
     if (!track.keyframes.some(frame => frame.timeMs === time) && Object.values(clip.tracks).reduce((sum, item) => sum + item.keyframes.length, 0) >= 1000) throw new Error("В клипе достигнут лимит 1000 ключевых кадров");
     const frame = { timeMs: time, value, easing: ["linear", "easeIn", "easeOut", "easeInOut", "step"].includes(easing) ? easing : "linear" };
     const index = track.keyframes.findIndex(item => item.timeMs === time);
@@ -184,13 +187,42 @@
     const track = clip.tracks[path];
     if (!track) return clip;
     track.keyframes = track.keyframes.filter(frame => frame.timeMs !== Math.round(Number(timeMs)));
-    if (!track.keyframes.length) delete clip.tracks[path];
+    if (!track.keyframes.length && !track.oscillator) delete clip.tracks[path];
+    return clip;
+  }
+
+  function updateKeyframe(clipInput, path, oldTimeMs, nextTimeMs, value, easing) {
+    const clip = normalise(clipInput);
+    if (!validPathSyntax(path)) throw new Error("Недопустимый параметр анимации");
+    const track = clip.tracks[path];
+    if (!track) throw new Error("Дорожка ключевого кадра не найдена");
+    const oldTime = Math.round(Number(oldTimeMs));
+    const index = track.keyframes.findIndex(frame => frame.timeMs === oldTime);
+    if (index < 0) throw new Error("Ключевой кадр больше не существует");
+    const previous = track.keyframes[index];
+    if (typeof value !== typeof previous.value ||
+        (typeof value === "number" && !Number.isFinite(value))) {
+      throw new Error("Тип или значение ключевого кадра некорректны");
+    }
+    const requestedTime = Number(nextTimeMs);
+    if (!Number.isFinite(requestedTime)) throw new Error("Время ключевого кадра должно быть числом");
+    const nextTime = clamp(Math.round(requestedTime), 0, clip.durationMs);
+    if (track.keyframes.some((frame, frameIndex) => frameIndex !== index && frame.timeMs === nextTime)) {
+      throw new Error("На этой позиции уже есть ключевой кадр");
+    }
+    track.keyframes[index] = {
+      timeMs: nextTime,
+      value: typeof value === "string" ? value.slice(0, 160) : value,
+      easing: ["linear", "easeIn", "easeOut", "easeInOut", "step"].includes(easing) ? easing : previous.easing
+    };
+    track.keyframes.sort((a, b) => a.timeMs - b.timeMs);
     return clip;
   }
 
   function setOscillator(clipInput, path, oscillator) {
     const clip = normalise(clipInput);
     if (!validPathSyntax(path)) throw new Error("Недопустимый параметр анимации");
+    if (!clip.tracks[path] && oscillator && Object.keys(clip.tracks).length >= 100) throw new Error("В клипе достигнут лимит 100 дорожек");
     if (!clip.tracks[path]) clip.tracks[path] = { keyframes: [], oscillator: null };
     if (!oscillator) clip.tracks[path].oscillator = null;
     else {
@@ -238,21 +270,74 @@
     return left.value + (right.value - left.value) * t;
   }
 
-  function evaluate(settingsInput, clipInput, timeMs) {
-    const settings = clone(settingsInput || {});
-    const clip = normalise(clipInput);
-    const time = clamp(Number(timeMs) || 0, 0, clip.durationMs);
-    for (const [path, track] of Object.entries(clip.tracks)) {
-      if (!safePath(path, settings)) continue;
-      const fallback = getPath(settings, path);
-      let value = valueAt(track, time, fallback);
-      if (typeof value === "number" && track.oscillator) value += waveAt(time, track.oscillator) * track.oscillator.amount;
-      setPath(settings, path, value);
+  function writeCompiledValue(settings, entry, value) {
+    if (entry.effect) {
+      const enabled = Boolean(value), effect = entry.effect;
+      settings.effects = enabled
+        ? [...new Set([...settings.effects, effect])]
+        : settings.effects.filter(item => item !== effect);
+      return;
     }
-    return settings;
+    let target = settings;
+    for (let index = 0; index < entry.parts.length - 1; index++) target = target[entry.parts[index]];
+    const key = entry.parts[entry.parts.length - 1], current = target[key];
+    if (typeof current === "number") {
+      const next = Number(value);
+      if (Number.isFinite(next)) target[key] = next;
+    } else if (typeof current === "boolean") {
+      target[key] = Boolean(value);
+    } else if (typeof current === "string" && typeof value === "string") {
+      target[key] = value.slice(0, 160);
+    }
   }
 
-  const api = Object.freeze({ version: VERSION, createClip, normalise, listPaths, getPath, setPath, setKeyframe, removeKeyframe, setOscillator, evaluate, waveAt });
+  // Compile once for playback/export. The base settings and clip are snapshotted;
+  // each frame only clones the base and evaluates the already-normalised tracks.
+  function compile(settingsInput, clipInput) {
+    const base = clone(settingsInput || {});
+    const clip = normalise(clipInput);
+    const plan = Object.entries(clip.tracks).filter(([path]) => safePath(path, base)).map(([path, track]) => ({
+      path,
+      parts: path.split("."),
+      effect: path.startsWith("effects.") ? path.slice(8) : null,
+      keyframes: track.keyframes,
+      oscillator: track.oscillator,
+      fallback: getPath(base, path)
+    }));
+    return function evaluateCompiled(timeMs) {
+      const settings = clone(base);
+      const time = clamp(Number(timeMs) || 0, 0, clip.durationMs);
+      for (const entry of plan) {
+        let value = valueAt(entry, time, entry.fallback);
+        if (typeof value === "number" && entry.oscillator) {
+          value += waveAt(time, entry.oscillator) * entry.oscillator.amount;
+        }
+        writeCompiledValue(settings, entry, value);
+      }
+      return settings;
+    };
+  }
+
+  function evaluate(settingsInput, clipInput, timeMs) {
+    return compile(settingsInput, clipInput)(timeMs);
+  }
+
+  function playbackTime(elapsedMs, startMs, durationMs, loopMode) {
+    const duration = Math.max(1, clamp(Math.round(Number(durationMs) || 1), 1, 60000));
+    const start = clamp(Number(startMs) || 0, 0, duration);
+    const elapsedValue = Number(elapsedMs);
+    const elapsed = Number.isFinite(elapsedValue) ? Math.max(0, elapsedValue) : 0;
+    const absolute = start + elapsed;
+    const mode = ["none", "loop", "pingpong"].includes(loopMode) ? loopMode : "loop";
+    if (mode === "none") return Math.min(duration, absolute);
+    if (mode === "pingpong") {
+      const phase = ((absolute % (duration * 2)) + duration * 2) % (duration * 2);
+      return phase <= duration ? phase : duration * 2 - phase;
+    }
+    return ((absolute % duration) + duration) % duration;
+  }
+
+  const api = Object.freeze({ version: VERSION, createClip, normalise, listPaths, getPath, setPath, setKeyframe, updateKeyframe, removeKeyframe, setOscillator, compile, evaluate, playbackTime, waveAt });
   root.TGRMAnimationEngine = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof globalThis !== "undefined" ? globalThis : window);

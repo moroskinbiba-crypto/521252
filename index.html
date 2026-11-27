@@ -36,9 +36,19 @@
 <section id="animationDock" class="animation-dock" aria-label="Animation timeline">
 <div class="animation-head"><div class="animation-title"><strong>ANIMATION STUDIO / KEYFRAMES</strong><small>Анимируйте параметры обработки, эффекты, палитры и формы. Клип хранится локально вместе с проектом.</small></div><div class="animation-actions"><button class="btn sm primary" id="animationPlay" type="button">▶ Воспроизвести</button><button class="btn sm" id="animationStop" type="button" disabled>■ Стоп</button></div></div>
 <div class="animation-toolbar"><div class="animation-field animation-track-field"><label for="animationTrack">Анимируемый параметр</label><select id="animationTrack"></select></div><div class="animation-field"><label for="animationDuration">Длительность · сек</label><input id="animationDuration" type="number" min="0.25" max="60" step="0.25" value="5"></div><div class="animation-field"><label for="animationFps">Кадров в секунду</label><select id="animationFps"><option>12</option><option>15</option><option selected>24</option><option>25</option><option>30</option><option>50</option><option>60</option></select></div><div class="animation-field"><label for="animationEasing">Переход к следующему ключу</label><select id="animationEasing"><option value="linear">Линейно</option><option value="easeIn">Плавный старт</option><option value="easeOut">Плавное завершение</option><option value="easeInOut">Плавно в обе стороны</option><option value="step">Ступенчато</option></select></div></div>
-<div class="animation-options"><label class="animation-check"><input id="animationLoop" type="checkbox" checked> Зациклить клип</label><label class="animation-check">Предпросмотр <select id="animationPreviewMode" class="select"><option value="live">Live</option><option value="balanced">Balanced</option><option value="still">Still</option></select></label><button class="btn sm" id="animationAddKeyframe" type="button">＋ Ключевой кадр</button><button class="btn sm" id="animationDeleteKeyframe" type="button">− Удалить на позиции</button><button class="btn sm" id="animationCaptureBase" type="button">Снять базу настроек</button></div>
+<div class="animation-options"><label class="animation-check">Режим повтора <select id="animationLoopMode" class="select"><option value="none">Один проход</option><option value="loop" selected>Повтор</option><option value="pingpong">Пинг-понг</option></select></label><label class="animation-check">Предпросмотр <select id="animationPreviewMode" class="select"><option value="live">Live</option><option value="balanced">Balanced</option><option value="still">Still</option></select></label><button class="btn sm" id="animationAddKeyframe" type="button">＋ Ключевой кадр</button><button class="btn sm" id="animationDeleteKeyframe" type="button">− Удалить на позиции</button><button class="btn sm" id="animationCaptureBase" type="button">Снять базу настроек</button></div>
 <div class="animation-scrub"><output id="animationTimeLabel">00:00.0</output><input id="animationScrub" type="range" min="0" max="5000" step="1" value="0" aria-label="Позиция в клипе"><output id="animationEndLabel">00:05.0</output></div><div id="animationLanes" class="animation-lanes"><div class="animation-empty">Добавьте ключевой кадр для создания первой дорожки.</div></div>
-<div class="animation-modulators"><div class="animation-status" id="animationSelectedTrackInfo">Выберите параметр и добавьте ключевые кадры.</div><div class="animation-field"><label for="animationWave">Изменение во времени</label><select id="animationWave"><option value="sine">Синус</option><option value="triangle">Треугольник</option><option value="saw">Пила</option><option value="square">Прямоугольник</option></select></div><div class="animation-field"><label for="animationAmplitude">Амплитуда</label><input id="animationAmplitude" type="number" min="-100" max="100" step="1" value="12"></div><div class="animation-field"><label for="animationFrequency">Частота · Hz</label><input id="animationFrequency" type="number" min="0.1" max="8" step="0.1" value="1"></div><button class="btn sm" id="animationOscillator" type="button">＋ Осциллятор</button></div>
+<div class="animation-key-editor" aria-label="Редактирование выбранного ключевого кадра">
+ <div class="animation-key-editor-heading"><strong>Ключевой кадр</strong><small id="animationKeyStatus">Выберите маркер на дорожке, чтобы изменить его точное время и значение.</small></div>
+ <div class="animation-key-editor-fields">
+  <div class="animation-field"><label for="animationKeyTime">Время · сек</label><input id="animationKeyTime" type="number" min="0" max="60" step="0.001" value="0" disabled></div>
+  <div class="animation-field" id="animationKeyValueField"><label for="animationKeyValue">Значение</label><input id="animationKeyValue" type="text" value="" disabled></div>
+  <div class="animation-field hidden" id="animationKeyBooleanField"><label for="animationKeyBoolean">Значение</label><select id="animationKeyBoolean" class="select" disabled><option value="true">Включено</option><option value="false">Выключено</option></select></div>
+  <div class="animation-field"><label for="animationKeyEasing">Переход от этого ключа</label><select id="animationKeyEasing" class="select" disabled><option value="linear">Линейно</option><option value="easeIn">Плавный старт</option><option value="easeOut">Плавное завершение</option><option value="easeInOut">Плавно в обе стороны</option><option value="step">Ступенчато</option></select></div>
+  <button class="btn sm" id="animationKeyApply" type="button" disabled>Применить изменения</button>
+ </div>
+</div>
+<div class="animation-modulators"><div class="animation-status" id="animationSelectedTrackInfo">Выберите параметр и добавьте ключевые кадры.</div><div class="animation-field"><label for="animationWave">Изменение во времени</label><select id="animationWave"><option value="sine">Синус</option><option value="triangle">Треугольник</option><option value="saw">Пила</option><option value="square">Прямоугольник</option></select></div><div class="animation-field"><label for="animationAmplitude">Амплитуда</label><input id="animationAmplitude" type="number" min="-100" max="100" step="1" value="12"></div><div class="animation-field"><label for="animationFrequency">Частота · Hz</label><input id="animationFrequency" type="number" min="0.1" max="8" step="0.1" value="1"></div><div class="animation-field"><label for="animationPhase">Фаза · рад</label><input id="animationPhase" type="number" min="-12.566" max="12.566" step="0.1" value="0"></div><button class="btn sm" id="animationOscillator" type="button">＋ Осциллятор</button></div>
 <div class="animation-export"><button class="btn sm" id="animationExportFrames" type="button">↓ PNG Sequence · ZIP</button><button class="btn sm" id="animationExportVideo" type="button">↓ Видео · MP4 / WebM</button><button class="btn sm" id="animationCancelExport" type="button" disabled>Отмена экспорта</button><span class="animation-status" id="animationExportStatus" role="status">Экспорт выполняется локально в браузере.</span></div><div class="animation-progress" aria-hidden="true"><span id="animationProgress"></span></div></section>
 <section id="presetsView" class="hidden"><div class="heading"><div><div class="eyebrow">КАТАЛОГ / ПРЕСЕТЫ</div><h1>Библиотека пресетов<span style="color:var(--acid)">.</span></h1><p>Выберите стиль и продолжайте редактировать настройки.</p></div><div class="preset-toolbar"><input class="select preset-search" id="presetSearch" type="search" placeholder="Поиск пресетов…" aria-label="Поиск пресетов"><button class="btn sm" id="savePresetLibrary">＋ Мой пресет</button><button class="btn sm" id="exportPresets">↓ JSON</button><button class="btn sm" id="importPresets">↑ Импорт</button></div></div><div class="presetgrid" id="presetGrid"></div><div class="card" style="margin-top:17px"><h2>Мои пресеты</h2><p>Ваши конфигурации сохраняются в этом браузере.</p><div class="filelist" id="customPresets"></div></div></section>
 <section id="batchView" class="hidden"><div class="heading"><div><div class="eyebrow">РАБОЧЕЕ ПРОСТРАНСТВО / ПАКЕТЫ</div><h1>Пакетная обработка<span style="color:var(--acid)">.</span></h1><p>Одна конфигурация — несколько файлов. Локальная обработка.</p></div></div><div class="card"><h2>01 / Добавьте изображения</h2><p>Текущие параметры будут применены к каждому выбранному файлу.</p><div class="drop" id="batchDrop"><div style="font-size:25px;color:var(--acid)">⇧</div><strong>Перетащите файлы сюда</strong><p>PNG · JPG · WEBP · несколько изображений</p><button class="btn" id="batchBrowse">Выбрать файлы</button></div><div class="filelist" id="batchList"></div><div class="batch-progress-meta"><span id="batchProgressLabel" role="status" aria-live="polite">Ожидает файлов</span><span id="batchProgressCount">0 / 0</span></div><div class="progress" id="batchProgressTrack" role="progressbar" aria-label="Прогресс пакетной обработки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="batchProgress"></i></div><div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" id="runBatch">▶ Обработать всё</button><button class="btn" id="cancelBatch" type="button" hidden>Отменить</button><button class="btn" id="downloadBatchZip" disabled>↓ Скачать всё ZIP</button><button class="btn" id="clearBatch">Очистить</button></div></div><div class="card"><h2>02 / Результаты</h2><p>Скачивайте PNG по отдельности или соберите все готовые изображения в один ZIP-архив.</p><div class="filelist" id="batchResults"><span style="font-size:10px;color:var(--muted)">Пока нет результатов.</span></div></div></section>
@@ -2616,7 +2626,7 @@ function normaliseEffectLocks(input,strict=false){
 }
 const AnimationEngine=window.TGRMAnimationEngine;
 let animationClip=AnimationEngine.normalise(loadStore(ANIMATION_STORAGE_KEY,null));
-let animationScrubBase=null,animationCurrentMs=0,animationPlaying=false,animationRaf=0,animationPlayBase=null,animationPlayEpoch=0,animationLastFrameAt=0,animationFrameBusy=false,animationPreviewActive=false,animationScrubPreviewed=false,animationPreviewFrame=null,animationExporting=false,animationCancelRequested=false,animationScrubRequest=0;
+let animationScrubBase=null,animationCurrentMs=0,animationPlaying=false,animationRaf=0,animationPlayBase=null,animationPlayEpoch=0,animationLastFrameAt=0,animationFrameBusy=false,animationPreviewActive=false,animationScrubPreviewed=false,animationPreviewFrame=null,animationExporting=false,animationCancelRequested=false,animationScrubRequest=0,animationSelectedKeyPath=null,animationSelectedKeyTime=null;
 let paletteLocks=loadStore(PALETTE_LOCKS_KEY,{});
 let effectLocks=normaliseEffectLocks(loadStore(EFFECT_LOCKS_STORAGE_KEY,{}));
 let previewBehaviour=loadStore(PREVIEW_BEHAVIOUR_KEY,"live");
@@ -2646,12 +2656,44 @@ function animationRefreshTrackOptions(){
  select.value=paths.includes(prior)?prior:paths.includes("threshold")?"threshold":paths[0]||"";
  animationRefreshSelectedTrack();
 }
+function animationCurrentKeyframe(){
+ const path=animationSelectedPath(),track=animationClip.tracks[path];
+ if(animationSelectedKeyPath!==path||animationSelectedKeyTime===null||!track)return null;
+ const frame=track.keyframes.find(item=>item.timeMs===animationSelectedKeyTime);
+ return frame?{path,track,frame}:null;
+}
+function animationRefreshKeyEditor(){
+ const selected=animationCurrentKeyframe(),time=$("animationKeyTime"),value=$("animationKeyValue"),bool=$("animationKeyBoolean"),easing=$("animationKeyEasing"),apply=$("animationKeyApply");
+ const locked=animationPlaying||animationExporting,enabled=!!selected&&!locked;
+ [time,value,bool,easing,apply].forEach(node=>{if(node)node.disabled=!enabled});
+ $("animationKeyStatus").textContent=selected
+  ? animationTrackLabel(selected.path)+" · "+animationFormatTime(selected.frame.timeMs)+" · "+typeof selected.frame.value
+  : "Выберите маркер на дорожке, чтобы изменить его точное время и значение.";
+ $("animationKeyTime").max=String(animationClip.durationMs/1000);$("animationKeyTime").value=selected?String(selected.frame.timeMs/1000):"0";
+ if(selected&&typeof selected.frame.value==="boolean"){
+  $("animationKeyValueField").classList.add("hidden");$("animationKeyBooleanField").classList.remove("hidden");
+  bool.value=String(selected.frame.value);
+ }else{
+  $("animationKeyBooleanField").classList.add("hidden");$("animationKeyValueField").classList.remove("hidden");
+  value.type=selected&&typeof selected.frame.value==="number"?"number":
+   selected?.path.startsWith("shapeBands.")&&selected.path.endsWith(".color")?"color":"text";
+  value.step="any";value.value=selected?String(selected.frame.value):"";
+ }
+ if(selected)easing.value=selected.frame.easing;
+}
 function animationRefreshSelectedTrack(){
  const path=animationSelectedPath(),track=animationClip.tracks[path],osc=track?.oscillator;
- $("animationWave").value=osc?.wave||"sine";$("animationAmplitude").value=String(osc?.amount??12);$("animationFrequency").value=String(osc?.frequency??1);
+ $("animationWave").value=osc?.wave||"sine";$("animationAmplitude").value=String(osc?.amount??12);
+ $("animationFrequency").value=String(osc?.frequency??1);$("animationPhase").value=String(osc?.phase??0);
  $("animationOscillator").textContent=osc?"− Убрать осциллятор":"＋ Осциллятор";
  const frames=track?.keyframes?.length||0;
- animationSetStatus(path?animationTrackLabel(path)+" · "+frames+" ключевых кадров"+(osc?" · Temporal Variation включён":""):"Параметры недоступны для анимации.");
+ animationSetStatus(path?animationTrackLabel(path)+" · "+frames+" ключевых кадров"+(osc?" · Temporal Variation включён":""):"Параметры недоступны для анимации");
+ animationRefreshKeyEditor();
+}
+function animationSelectKeyframe(path,timeMs){
+ $("animationTrack").value=path;animationSelectedKeyPath=path;animationSelectedKeyTime=timeMs;
+ animationCurrentMs=timeMs;animationRefreshSelectedTrack();animationRenderLanes();
+ animationSetTime(timeMs,true);
 }
 function animationRenderLanes(){
  const box=$("animationLanes");if(!box)return;box.innerHTML="";
@@ -2659,26 +2701,43 @@ function animationRenderLanes(){
  if(!entries.length){const empty=document.createElement("div");empty.className="animation-empty";empty.textContent="Добавьте ключевой кадр для создания первой дорожки.";box.append(empty);return}
  for(const [path,track] of entries){
   const row=document.createElement("div");row.className="animation-lane";
-  const name=document.createElement("button");name.type="button";name.className="animation-lane-name"+(path===animationSelectedPath()?" active":"");name.textContent=animationTrackLabel(path);name.title=path;name.onclick=()=>{$("animationTrack").value=path;animationRefreshSelectedTrack();animationRenderLanes()};
+  const name=document.createElement("button");name.type="button";name.className="animation-lane-name"+(path===animationSelectedPath()?" active":"");name.textContent=animationTrackLabel(path);name.title=path;
+  name.disabled=animationPlaying||animationExporting;name.onclick=()=>{$("animationTrack").value=path;animationSelectedKeyPath=null;animationSelectedKeyTime=null;animationRefreshSelectedTrack();animationRenderLanes()};
   const bar=document.createElement("div");bar.className="animation-lane-track";
-  track.keyframes.forEach(frame=>{const pin=document.createElement("button");pin.type="button";pin.className="animation-key";pin.style.left=(frame.timeMs/animationClip.durationMs*100)+"%";pin.title=animationFormatTime(frame.timeMs)+" · "+String(frame.value);pin.setAttribute("aria-label","Ключевой кадр "+animationFormatTime(frame.timeMs));pin.onclick=()=>{$("animationTrack").value=path;animationRefreshSelectedTrack();animationSetTime(frame.timeMs,true);animationRenderLanes()};bar.append(pin)});
+  track.keyframes.forEach(frame=>{
+   const selected=path===animationSelectedKeyPath&&frame.timeMs===animationSelectedKeyTime;
+   const pin=document.createElement("button");pin.type="button";pin.className="animation-key"+(selected?" selected":"");
+   pin.style.left=(frame.timeMs/animationClip.durationMs*100)+"%";pin.title=animationFormatTime(frame.timeMs)+" · "+String(frame.value);
+   pin.setAttribute("aria-label","Ключевой кадр "+animationFormatTime(frame.timeMs));pin.setAttribute("aria-pressed",String(selected));pin.disabled=animationPlaying||animationExporting;
+   pin.onclick=()=>animationSelectKeyframe(path,frame.timeMs);bar.append(pin);
+  });
   if(track.oscillator){const mark=document.createElement("span");mark.className="animation-oscillator";mark.title="Temporal Variation";bar.append(mark)}
   row.append(name,bar);box.append(row);
  }
 }
+function animationSetBusyControls(){
+ const busy=animationPlaying||animationExporting;
+ ["animationTrack","animationDuration","animationFps","animationLoopMode","animationEasing","animationScrub",
+  "animationAddKeyframe","animationDeleteKeyframe","animationCaptureBase","animationWave","animationAmplitude",
+  "animationFrequency","animationPhase","animationOscillator","animationKeyApply"].forEach(id=>{const node=$(id);if(node)node.disabled=busy});
+ $("animationPlay").disabled=busy;$("animationStop").disabled=!animationPlaying;
+ $("animationExportFrames").disabled=busy;$("animationExportVideo").disabled=busy;$("animationCancelExport").disabled=!animationExporting;
+}
 function animationRefreshUI(){
  if(!$("animationScrub"))return;
- $("animationDuration").value=String(animationClip.durationMs/1000);$("animationFps").value=String(animationClip.fps);$("animationLoop").checked=animationClip.loop;
+ $("animationDuration").value=String(animationClip.durationMs/1000);$("animationFps").value=String(animationClip.fps);$("animationLoopMode").value=animationClip.loopMode|| (animationClip.loop===false?"none":"loop");
  $("animationScrub").max=String(animationClip.durationMs);$("animationScrub").value=String(animationCurrentMs);
  $("animationTimeLabel").textContent=animationFormatTime(animationCurrentMs);$("animationEndLabel").textContent=animationFormatTime(animationClip.durationMs);
- animationRenderLanes();animationRefreshSelectedTrack();
+ animationSelectedKeyTime=animationSelectedKeyPath&&animationClip.tracks[animationSelectedKeyPath]?.keyframes.some(frame=>frame.timeMs===animationSelectedKeyTime)?animationSelectedKeyTime:null;
+ if(animationSelectedKeyTime===null)animationSelectedKeyPath=null;
+ animationRenderLanes();animationRefreshSelectedTrack();animationSetBusyControls();
 }
-function animationSetTime(timeMs,apply=true,baseOverride=null){
+function animationSetTime(timeMs,apply=true,baseOverride=null,evaluator=null){
  animationCurrentMs=Math.max(0,Math.min(animationClip.durationMs,Math.round(Number(timeMs)||0)));
  $("animationScrub").value=String(animationCurrentMs);$("animationTimeLabel").textContent=animationFormatTime(animationCurrentMs);
  if(!apply||!src)return Promise.resolve(false);
  const base=baseOverride||animationScrubBase||cloneSettings(s);
- s=cloneSettings(AnimationEngine.evaluate(base,animationClip,animationCurrentMs));
+ s=evaluator?evaluator(animationCurrentMs):AnimationEngine.evaluate(base,animationClip,animationCurrentMs);
  if(!animationPlaying&&!animationExporting&&!baseOverride){animationScrubPreviewed=true;animationPreviewFrame=cloneSettings(s)}
  animationPreviewActive=true;sync();render();animationPreviewActive=false;
  return waitForProcessingPreview().then(()=>true).catch(()=>false);
@@ -2698,67 +2757,101 @@ function animationAddKeyframe(){
  const value=AnimationEngine.getPath(s,path);if(value===undefined){say("Этот параметр сейчас недоступен");return}
  animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;animationPreviewFrame=null;
  try{animationClip=AnimationEngine.setKeyframe(animationClip,path,animationCurrentMs,value,$("animationEasing").value)}catch(error){say(error.message||"Не удалось добавить ключевой кадр");return}
+ animationSelectedKeyPath=path;animationSelectedKeyTime=animationCurrentMs;
  if(!animationPersist())return;animationRefreshUI();animationSetStatus(animationTrackLabel(path)+" · ключевой кадр "+animationFormatTime(animationCurrentMs));say("Ключевой кадр сохранён");
+}
+function animationApplyKeyframeEdits(){
+ const selected=animationCurrentKeyframe();if(!selected){say("Сначала выберите ключевой кадр");return}
+ const seconds=Number($("animationKeyTime").value),nextTime=Math.round(seconds*1000);
+ if(!Number.isFinite(seconds)||seconds<0||seconds>animationClip.durationMs/1000){say("Время должно находиться внутри длительности клипа");return}
+ let value;
+ if(typeof selected.frame.value==="boolean")value=$("animationKeyBoolean").value==="true";
+ else if(typeof selected.frame.value==="number"){value=Number($("animationKeyValue").value);if(!Number.isFinite(value)){say("Значение должно быть числом");return}}
+ else value=String($("animationKeyValue").value).slice(0,160);
+ try{
+  animationClip=AnimationEngine.updateKeyframe(animationClip,selected.path,selected.frame.timeMs,nextTime,value,$("animationKeyEasing").value);
+ }catch(error){say(error.message||"Не удалось изменить ключевой кадр");return}
+ animationSelectedKeyTime=nextTime;animationCurrentMs=nextTime;
+ if(!animationPersist())return;
+ animationRefreshUI();
+ if(src)animationSetTime(animationCurrentMs,true);
+ say("Ключевой кадр обновлён");
 }
 function animationDeleteKeyframe(){
  const path=animationSelectedPath(),track=animationClip.tracks[path];if(!track?.keyframes?.length){say("На выбранной дорожке нет ключевых кадров");return}
- const nearest=track.keyframes.reduce((best,item)=>Math.abs(item.timeMs-animationCurrentMs)<Math.abs(best.timeMs-animationCurrentMs)?item:best,track.keyframes[0]);
- if(Math.abs(nearest.timeMs-animationCurrentMs)>Math.max(100,animationClip.durationMs*.05)){say("Рядом с курсором нет ключевого кадра");return}
- animationClip=AnimationEngine.removeKeyframe(animationClip,path,nearest.timeMs);if(!animationPersist())return;animationRefreshUI();say("Ключевой кадр удалён");
+ const selected=animationSelectedKeyPath===path?track.keyframes.find(item=>item.timeMs===animationSelectedKeyTime):null;
+ const nearest=selected||track.keyframes.reduce((best,item)=>Math.abs(item.timeMs-animationCurrentMs)<Math.abs(best.timeMs-animationCurrentMs)?item:best,track.keyframes[0]);
+ if(!selected&&Math.abs(nearest.timeMs-animationCurrentMs)>Math.max(100,animationClip.durationMs*.05)){say("Рядом с курсором нет ключевого кадра");return}
+ animationClip=AnimationEngine.removeKeyframe(animationClip,path,nearest.timeMs);
+ animationSelectedKeyPath=null;animationSelectedKeyTime=null;
+ if(!animationPersist())return;animationRefreshUI();say("Ключевой кадр удалён");
 }
 function animationToggleOscillator(){
  const path=animationSelectedPath();if(!path)return;
  const existing=animationClip.tracks[path]?.oscillator;
  if(!existing&&typeof AnimationEngine.getPath(s,path)!=="number"){say("Temporal Variation можно добавить только к числовому параметру");return}
- try{animationClip=AnimationEngine.setOscillator(animationClip,path,existing?null:{wave:$("animationWave").value,amount:Number($("animationAmplitude").value),frequency:Number($("animationFrequency").value)})}catch(error){say(error.message||"Неверные параметры осциллятора");return}
+ try{animationClip=AnimationEngine.setOscillator(animationClip,path,existing?null:{wave:$("animationWave").value,amount:Number($("animationAmplitude").value),frequency:Number($("animationFrequency").value),phase:Number($("animationPhase").value)})}catch(error){say(error.message||"Неверные параметры осциллятора");return}
  if(!animationPersist())return;animationRefreshUI();say(existing?"Temporal Variation выключен":"Temporal Variation включён");
 }
 function animationUpdateOscillator(){
  const path=animationSelectedPath();if(!animationClip.tracks[path]?.oscillator)return;
- try{animationClip=AnimationEngine.setOscillator(animationClip,path,{wave:$("animationWave").value,amount:Number($("animationAmplitude").value),frequency:Number($("animationFrequency").value)});animationPersist();animationRefreshUI()}catch(error){say(error.message||"Неверные параметры осциллятора")}
+ try{animationClip=AnimationEngine.setOscillator(animationClip,path,{wave:$("animationWave").value,amount:Number($("animationAmplitude").value),frequency:Number($("animationFrequency").value),phase:Number($("animationPhase").value)});animationPersist();animationRefreshUI()}catch(error){say(error.message||"Неверные параметры осциллятора")}
 }
 function animationStopPlayback(restore=true){
- if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;animationFrameBusy=false;
+ if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;
  if(animationPlayBase&&restore){s=cloneSettings(animationPlayBase);animationScrubBase=cloneSettings(animationPlayBase);animationPreviewActive=false;animationScrubPreviewed=false;animationPreviewFrame=null;sync();render()}
- animationPlayBase=null;animationCurrentMs=0;animationRefreshUI();$("animationPlay").disabled=false;$("animationStop").disabled=true;
+ animationPlayBase=null;animationRefreshUI();$("animationPlay").disabled=false;$("animationStop").disabled=true;
 }
 function animationPlay(){
  if(animationPlaying){animationStopPlayback(true);return}
  if(!src){say("Сначала откройте изображение");return}
- const hasContent=Object.values(animationClip.tracks).some(track=>track.keyframes.length||track.oscillator);
+ const clip=AnimationEngine.normalise(animationClip);
+ const hasContent=Object.values(clip.tracks).some(track=>track.keyframes.length||track.oscillator);
  if(!hasContent){say("Сначала добавьте ключевые кадры или Temporal Variation");return}
- animationPlayBase=cloneSettings(animationScrubBase||s);animationPlaying=true;animationCurrentMs=0;animationPlayEpoch=performance.now();animationLastFrameAt=0;animationFrameBusy=false;
- $("animationPlay").disabled=true;$("animationStop").disabled=false;
+ const startMs=animationCurrentMs>=clip.durationMs?0:animationCurrentMs;
+ animationCurrentMs=startMs;
+ animationPlayBase=cloneSettings(animationScrubBase||s);
+ const playBase=animationPlayBase,evaluator=AnimationEngine.compile(playBase,clip);
+ animationPlaying=true;animationPlayEpoch=performance.now();animationLastFrameAt=0;
+ $("animationPlay").disabled=true;$("animationStop").disabled=false;animationRefreshUI();
+ const interval=1000/clip.fps;
  const tick=now=>{
   if(!animationPlaying)return;
-  const interval=1000/animationClip.fps,elapsed=now-animationPlayEpoch;let time=elapsed;
-  if(time>=animationClip.durationMs){if(animationClip.loop){animationPlayEpoch+=animationClip.durationMs;time=elapsed%animationClip.durationMs}else{time=animationClip.durationMs;animationSetTime(time,true,animationPlayBase).finally(()=>animationStopPlayback(true));return}}
-  if(!animationFrameBusy&&now-animationLastFrameAt>=interval){animationFrameBusy=true;animationLastFrameAt=now;animationSetTime(time,true,animationPlayBase).finally(()=>{animationFrameBusy=false})}
-  animationRaf=requestAnimationFrame(tick);
+  const elapsed=Math.max(0,now-animationPlayEpoch),absolute=startMs+elapsed;
+  const ended=clip.loopMode==="none"&&absolute>=clip.durationMs;
+  const time=AnimationEngine.playbackTime(elapsed,startMs,clip.durationMs,clip.loopMode);
+  if(!animationFrameBusy&&(ended||now-animationLastFrameAt>=interval)){
+   animationFrameBusy=true;animationLastFrameAt=now;
+   animationSetTime(time,true,playBase,evaluator).catch(()=>false).finally(()=>{
+    animationFrameBusy=false;
+    if(ended&&animationPlaying)animationStopPlayback(true);
+   });
+  }
+  if(animationPlaying)animationRaf=requestAnimationFrame(tick);
  };
  animationRaf=requestAnimationFrame(tick);say("Воспроизведение анимации");
 }
-async function animationRenderFrameAt(timeMs,base){
- animationCurrentMs=Math.max(0,Math.min(animationClip.durationMs,Math.round(timeMs)));
- s=cloneSettings(AnimationEngine.evaluate(base,animationClip,animationCurrentMs));
+async function animationRenderFrameAt(timeMs,base,evaluator=null,durationMs=animationClip.durationMs){
+ animationCurrentMs=Math.max(0,Math.min(durationMs,Math.round(timeMs)));
+ s=evaluator?evaluator(animationCurrentMs):AnimationEngine.evaluate(base,animationClip,animationCurrentMs);
  animationPreviewActive=true;sync();render();animationPreviewActive=false;await waitForProcessingPreview();
  if(!out||!out.width||!out.height)throw Error("Предпросмотр не готов к экспорту");
 }
-function animationRestoreAfterExport(base){
- s=cloneSettings(base);animationScrubBase=cloneSettings(base);animationCurrentMs=0;animationPreviewActive=false;animationScrubPreviewed=false;animationPreviewFrame=null;animationExporting=false;sync();render();animationRefreshUI();
+function animationRestoreAfterExport(base,returnTime=0){
+ s=cloneSettings(base);animationScrubBase=cloneSettings(base);animationCurrentMs=Math.max(0,Math.min(animationClip.durationMs,Math.round(returnTime)));animationPreviewActive=false;animationScrubPreviewed=false;animationPreviewFrame=null;animationExporting=false;sync();render();animationRefreshUI();
  $("animationExportFrames").disabled=false;$("animationExportVideo").disabled=false;$("animationCancelExport").disabled=true;
 }
 async function animationExportSequence(){
  if(animationExporting||animationPlaying)return;if(!src){say("Сначала откройте изображение");return}
  if(!Object.values(animationClip.tracks).some(track=>track.keyframes.length||track.oscillator)){say("Добавьте ключевые кадры или Temporal Variation перед экспортом");return}
- const frames=Math.ceil(animationClip.durationMs/1000*animationClip.fps);
+ const clip=AnimationEngine.normalise(animationClip),playbackDurationMs=clip.durationMs*(clip.loopMode==="pingpong"?2:1),frames=Math.ceil(playbackDurationMs/1000*clip.fps);
  if(frames<2){say("Для последовательности нужно минимум два кадра");return}if(frames>ANIMATION_EXPORT_MAX_FRAMES){say("Слишком много кадров. Максимум 600; уменьшите FPS или длительность.");return}
- const base=cloneSettings(animationScrubBase||s),entries=[];let totalBytes=0,completed=0;
- animationExporting=true;animationCancelRequested=false;$("animationExportFrames").disabled=true;$("animationExportVideo").disabled=true;$("animationCancelExport").disabled=false;
+ const base=cloneSettings(animationScrubBase||s),returnTime=animationCurrentMs,evaluator=AnimationEngine.compile(base,clip),entries=[];let totalBytes=0,completed=0;
+ animationExporting=true;animationCancelRequested=false;animationRefreshUI();
  try{
   for(let index=0;index<frames;index++){
    if(animationCancelRequested)break;
-   const time=Math.min(animationClip.durationMs-1,Math.round(index*1000/animationClip.fps));await animationRenderFrameAt(time,base);
+   const elapsed=Math.min(playbackDurationMs-1,Math.round(index*1000/clip.fps)),time=AnimationEngine.playbackTime(elapsed,0,clip.durationMs,clip.loopMode);await animationRenderFrameAt(time,base,evaluator,clip.durationMs);
    const blob=await new Promise(resolve=>out.toBlob(resolve,"image/png"));if(!blob)throw Error("Не удалось получить PNG кадра");
    totalBytes+=blob.size;if(totalBytes>ANIMATION_EXPORT_MAX_BYTES)throw Error("Последовательность превысила лимит 48 МБ. Уменьшите FPS, длительность или размер исходника.");
    entries.push({name:"frame_"+String(index+1).padStart(5,"0")+".png",blob});completed++;
@@ -2766,29 +2859,33 @@ async function animationExportSequence(){
    await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(!entries.length)throw Error("Экспорт отменён до создания первого кадра");
+  entries.push({name:"animation.json",blob:new Blob([JSON.stringify({
+   format:"tgrmlither-animation-sequence",version:1,clip:{durationMs:clip.durationMs,fps:clip.fps,loopMode:clip.loopMode,tracks:clip.tracks},
+   frameCount:completed,partial:animationCancelRequested
+  },null,2)],{type:"application/json;charset=utf-8"})});
   const zip=await buildZipArchive(entries);download(zip,slug(srcName)+"-animation-frames.zip");
   $("animationExportStatus").textContent=(animationCancelRequested?"Частичный архив · ":"Готово · ")+completed+" PNG";say((animationCancelRequested?"Частичный PNG Sequence экспортирован":"PNG Sequence экспортирован")+" · "+completed+" кадров");
  }catch(error){$("animationExportStatus").textContent=error.message||"Ошибка экспорта";say(error.message||"Не удалось экспортировать кадры")}
- finally{animationRestoreAfterExport(base);$("animationProgress").style.width="0%"}
+ finally{animationRestoreAfterExport(base,returnTime);$("animationProgress").style.width="0%"}
 }
 async function animationExportVideo(){
  if(animationExporting||animationPlaying)return;if(!src){say("Сначала откройте изображение");return}
  if(typeof MediaRecorder==="undefined"||typeof out.captureStream!=="function"){say("Запись видео этим браузером не поддерживается");return}
- const frames=Math.ceil(animationClip.durationMs/1000*animationClip.fps);
+ const clip=AnimationEngine.normalise(animationClip),playbackDurationMs=clip.durationMs*(clip.loopMode==="pingpong"?2:1),frames=Math.ceil(playbackDurationMs/1000*clip.fps);
  if(frames<2||frames>ANIMATION_EXPORT_MAX_FRAMES){say("Количество кадров должно быть от 2 до 600");return}
  const candidates=["video/mp4;codecs=avc1.42E01E","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=candidates.find(type=>MediaRecorder.isTypeSupported(type));
  if(!mime){say("Браузер не предоставляет поддерживаемый MP4/WebM кодек");return}
- const base=cloneSettings(animationScrubBase||s);let stream=null,recorder=null,chunks=[],videoOutputBytes=0,videoOutputLimit=false;
- animationExporting=true;animationCancelRequested=false;$("animationExportFrames").disabled=true;$("animationExportVideo").disabled=true;$("animationCancelExport").disabled=false;
+ const base=cloneSettings(animationScrubBase||s),returnTime=animationCurrentMs,evaluator=AnimationEngine.compile(base,clip);let stream=null,recorder=null,chunks=[],videoOutputBytes=0,videoOutputLimit=false;
+ animationExporting=true;animationCancelRequested=false;animationRefreshUI();
  try{
   stream=out.captureStream(0);const track=stream.getVideoTracks()[0],manualFrames=!!track?.requestFrame;
-  if(!manualFrames){stream.getTracks().forEach(item=>item.stop());stream=out.captureStream(animationClip.fps)}
+  if(!manualFrames){stream.getTracks().forEach(item=>item.stop());stream=out.captureStream(clip.fps)}
   recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8000000});
   const stopped=new Promise((resolve,reject)=>{recorder.ondataavailable=event=>{if(event.data&&event.data.size){videoOutputBytes+=event.data.size;if(videoOutputBytes>ANIMATION_VIDEO_MAX_BYTES){videoOutputLimit=true;animationCancelRequested=true;return}chunks.push(event.data)}};recorder.onerror=()=>reject(new Error("Ошибка кодирования видео"));recorder.onstop=resolve});
-  recorder.start(250);const frameInterval=1000/animationClip.fps;
+  recorder.start(250);const frameInterval=1000/clip.fps;
   for(let index=0;index<frames;index++){
    if(animationCancelRequested)break;
-   const started=performance.now(),time=Math.min(animationClip.durationMs-1,Math.round(index*frameInterval));await animationRenderFrameAt(time,base);
+   const started=performance.now(),elapsed=Math.min(playbackDurationMs-1,Math.round(index*frameInterval)),time=AnimationEngine.playbackTime(elapsed,0,clip.durationMs,clip.loopMode);await animationRenderFrameAt(time,base,evaluator,clip.durationMs);
    if(manualFrames)track.requestFrame();const remaining=frameInterval-(performance.now()-started);if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
    $("animationProgress").style.width=Math.round((index+1)/frames*100)+"%";$("animationExportStatus").textContent="Видео · "+(index+1)+" / "+frames;
   }
@@ -2797,18 +2894,18 @@ async function animationExportVideo(){
   const mp4=(recorder.mimeType||mime).toLowerCase().includes("mp4"),extension=mp4?"mp4":"webm";download(blob,slug(srcName)+"-animation."+extension);
   $("animationExportStatus").textContent=(animationCancelRequested?"Частичное видео · ":"Готово · ")+extension.toUpperCase();say((mp4?"MP4":"WebM")+(animationCancelRequested?" · частичный экспорт":" экспортирован"));
  }catch(error){if(recorder&&recorder.state!=="inactive")try{recorder.stop()}catch(stopError){}$("animationExportStatus").textContent=error.message||"Ошибка записи";say(error.message||"Не удалось записать видео")}
- finally{if(stream)stream.getTracks().forEach(track=>track.stop());chunks=[];animationRestoreAfterExport(base);$("animationProgress").style.width="0%"}
+ finally{if(stream)stream.getTracks().forEach(track=>track.stop());chunks=[];animationRestoreAfterExport(base,returnTime);$("animationProgress").style.width="0%"}
 }
 function initAnimationStudio(){
  if(!$("animationDock")||!AnimationEngine)return;
  animationClip=AnimationEngine.normalise(loadStore(ANIMATION_STORAGE_KEY,animationClip));animationScrubBase=cloneSettings(s);
  $("animationPreviewMode").value=previewBehaviour;animationRefreshTrackOptions();animationRefreshUI();
- $("animationTrack").onchange=()=>{animationRefreshSelectedTrack();animationRenderLanes()};
- $("animationAddKeyframe").onclick=animationAddKeyframe;$("animationDeleteKeyframe").onclick=animationDeleteKeyframe;$("animationCaptureBase").onclick=animationCaptureBase;$("animationOscillator").onclick=animationToggleOscillator;
- ["animationWave","animationAmplitude","animationFrequency"].forEach(id=>$(id).onchange=animationUpdateOscillator);
+ $("animationTrack").onchange=()=>{animationSelectedKeyPath=null;animationSelectedKeyTime=null;animationRefreshSelectedTrack();animationRenderLanes()};
+ $("animationAddKeyframe").onclick=animationAddKeyframe;$("animationDeleteKeyframe").onclick=animationDeleteKeyframe;$("animationCaptureBase").onclick=animationCaptureBase;$("animationOscillator").onclick=animationToggleOscillator;$("animationKeyApply").onclick=animationApplyKeyframeEdits;
+ ["animationWave","animationAmplitude","animationFrequency","animationPhase"].forEach(id=>$(id).onchange=animationUpdateOscillator);
  $("animationDuration").onchange=()=>{animationClip.durationMs=Math.round(clamp(Number($("animationDuration").value)||5,.25,60)*1000);animationClip=AnimationEngine.normalise(animationClip);animationCurrentMs=Math.min(animationCurrentMs,animationClip.durationMs);animationPersist();animationRefreshUI()};
  $("animationFps").onchange=()=>{animationClip.fps=clamp(Number($("animationFps").value)||24,1,60);animationPersist();animationRefreshUI()};
- $("animationLoop").onchange=()=>{animationClip.loop=$("animationLoop").checked;animationPersist()};
+ $("animationLoopMode").onchange=()=>{animationClip.loopMode=$("animationLoopMode").value;animationClip.loop=animationClip.loopMode!=="none";animationPersist();animationRefreshUI()};
  $("animationScrub").oninput=()=>{const value=Number($("animationScrub").value);animationCurrentMs=value;$("animationTimeLabel").textContent=animationFormatTime(value);if(animationPlaying)return;if(animationScrubRequest)cancelAnimationFrame(animationScrubRequest);animationScrubRequest=requestAnimationFrame(()=>{animationScrubRequest=0;animationSetTime(value,true)})};
  $("animationPlay").onclick=animationPlay;$("animationStop").onclick=()=>animationStopPlayback(true);
  $("animationExportFrames").onclick=animationExportSequence;$("animationExportVideo").onclick=animationExportVideo;$("animationCancelExport").onclick=()=>{animationCancelRequested=true;$("animationExportStatus").textContent="Остановка после текущего кадра…"};
@@ -2820,7 +2917,7 @@ function initAnimationStudio(){
   if(target)animationCommitManualEdit(target,true);
  });
  $("animationDock").classList.toggle("hidden",!["editor","shape","script"].includes(mode));
- window.__tgrmAnimationStatus=()=>({clip:AnimationEngine.normalise(animationClip),timeMs:animationCurrentMs,playing:animationPlaying,previewBehaviour});
+ window.__tgrmAnimationStatus=()=>({clip:AnimationEngine.normalise(animationClip),timeMs:animationCurrentMs,playing:animationPlaying,selectedKey:animationCurrentKeyframe()?{path:animationSelectedKeyPath,timeMs:animationSelectedKeyTime}:null,previewBehaviour});
  window.addEventListener("pagehide",()=>{if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;animationCancelRequested=true;if(previewRenderTimer)clearTimeout(previewRenderTimer);previewRenderTimer=0});
 }
 function shuffleUnlockedPalette(){

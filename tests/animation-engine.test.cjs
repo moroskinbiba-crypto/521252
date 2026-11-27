@@ -57,6 +57,50 @@ assert.equal(nestedResult.shapeBands[0].color, "#ffffff", "discrete band colours
 assert.equal(nestedResult.effects.includes("noise"), true);
 assert.equal(Engine.evaluate(settings, nested, 1000).effects.includes("noise"), false);
 
+let editable = Engine.createClip({ durationMs: 2000, fps: 24 });
+editable = Engine.setKeyframe(editable, "threshold", 0, 10, "linear");
+editable = Engine.setKeyframe(editable, "threshold", 1000, 50, "easeOut");
+editable = Engine.updateKeyframe(editable, "threshold", 1000, 1250, 60, "easeInOut");
+assert.deepEqual(editable.tracks.threshold.keyframes[1],
+  { timeMs: 1250, value: 60, easing: "easeInOut" },
+  "a selected keyframe can be retimed and edited without replacing the other keys");
+assert.throws(
+  () => Engine.updateKeyframe(editable, "threshold", 1250, 0, 70, "linear"),
+  /уже есть/,
+  "moving a keyframe onto another key must fail rather than overwrite it"
+);
+assert.equal(editable.tracks.threshold.keyframes[0].value, 10,
+  "a rejected keyframe move must not mutate the source clip");
+
+let booleanEdit = Engine.createClip({ durationMs: 1000 });
+booleanEdit = Engine.setKeyframe(booleanEdit, "invert", 0, false);
+booleanEdit = Engine.updateKeyframe(booleanEdit, "invert", 0, 250, true, "step");
+assert.equal(booleanEdit.tracks.invert.keyframes[0].value, true,
+  "boolean keyframes should be editable without changing their value type");
+assert.throws(() => Engine.updateKeyframe(booleanEdit, "invert", 250, 500, 1, "linear"),
+  /Тип/, "keyframe editing must reject a value with the wrong type");
+
+let retainedOscillator = Engine.createClip({ durationMs: 1000 });
+retainedOscillator = Engine.setKeyframe(retainedOscillator, "brightness", 0, 0);
+retainedOscillator = Engine.setOscillator(retainedOscillator, "brightness", {
+  wave: "sine", amount: 5, frequency: 1
+});
+retainedOscillator = Engine.removeKeyframe(retainedOscillator, "brightness", 0);
+assert.ok(retainedOscillator.tracks.brightness.oscillator,
+  "deleting the last keyframe must preserve an oscillator-only track");
+
+const compiledBase = { threshold: 0 };
+const compiledClip = Engine.createClip({ durationMs: 1000 });
+const preparedClip = Engine.setKeyframe(compiledClip, "threshold", 0, 0, "linear");
+const prepared = Engine.setKeyframe(preparedClip, "threshold", 1000, 100, "linear");
+const evaluatePrepared = Engine.compile(compiledBase, prepared);
+assert.equal(evaluatePrepared(500).threshold, Engine.evaluate(compiledBase, prepared, 500).threshold,
+  "compiled and one-shot evaluation should be identical");
+compiledBase.threshold = 900;
+prepared.tracks.threshold.keyframes[1].value = 900;
+assert.equal(evaluatePrepared(500).threshold, 50,
+  "a compiled evaluator must use an immutable base/clip snapshot");
+
 let oscillator = Engine.createClip({ durationMs: 1000 });
 oscillator = Engine.setOscillator(oscillator, "brightness", {
   wave: "sine", amount: 12, frequency: 1, phase: 0
@@ -64,6 +108,16 @@ oscillator = Engine.setOscillator(oscillator, "brightness", {
 assert.ok(Math.abs(Engine.evaluate(settings, oscillator, 250).brightness - 12) < 1e-8,
   "oscillator-only tracks should modulate a base value");
 assert.equal(Engine.evaluate(settings, oscillator, 750).brightness, -12);
+assert.equal(Engine.playbackTime(250, 500, 1000, "none"), 750);
+assert.equal(Engine.playbackTime(750, 500, 1000, "none"), 1000);
+assert.equal(Engine.playbackTime(750, 500, 1000, "loop"), 250);
+assert.equal(Engine.playbackTime(750, 500, 1000, "pingpong"), 750);
+assert.equal(Engine.playbackTime(1500, 500, 1000, "pingpong"), 0,
+  "ping-pong playback should reverse at both clip boundaries");
+assert.equal(Engine.playbackTime(Infinity, 0, 1000, "loop"), 0,
+  "non-finite elapsed time must never propagate NaN into the playhead");
+assert.throws(() => Engine.updateKeyframe(editable, "threshold", 1250, Infinity, 80, "linear"),
+  /Время/, "keyframe retiming must reject non-finite times");
 
 const normalised = Engine.normalise({
   durationMs: 999999, fps: 0, loop: false,
@@ -79,7 +133,11 @@ const normalised = Engine.normalise({
 });
 assert.equal(normalised.durationMs, 60000);
 assert.equal(normalised.fps, 24);
+assert.equal(Engine.normalise({ loop: true }).loopMode, "loop");
+assert.equal(Engine.normalise({ loopMode: "pingpong", loop: false }).loopMode, "pingpong",
+  "an explicit loopMode takes precedence over the legacy boolean");
 assert.equal(normalised.loop, false);
+assert.equal(normalised.loopMode, "none", "legacy loop:false should migrate to one-pass mode");
 assert.equal(normalised.tracks.threshold.keyframes.length, 2);
 assert.equal(normalised.tracks.threshold.keyframes[0].value, 30);
 assert.ok(normalised.tracks.brightness.oscillator);
