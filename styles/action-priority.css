@@ -1,0 +1,10 @@
+
+/* Keep the most-used editing actions first, grouped by task. */
+.stageactions{align-items:center}
+.stageactions .action-group{display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-width:0}
+.stageactions .action-group+.action-group{border-left:1px solid var(--line);padding-left:7px}
+.stageactions .action-group .btn,.stageactions .action-group .select{white-space:nowrap}
+@media(max-width:740px){
+  .stageactions .action-group{flex:0 1 auto;gap:4px}
+  .stageactions .action-group+.action-group{border-left:0;padding-left:0}
+}
