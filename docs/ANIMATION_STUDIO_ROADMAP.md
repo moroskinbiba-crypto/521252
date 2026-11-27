@@ -143,3 +143,27 @@ The timeline currently targets the Editor, Shape Lab, and Script Slayer workspac
 - Lock preferences are scoped per workspace, saved locally, and included in user backup/restore.
 - Both the main Random Style action and the Shuffle fallback that generates an effect selection respect the same lock map.
 - Browser smoke coverage checks locked-on and locked-off effects across repeated randomizations, reload and backup export.
+
+
+## Animation Studio v2 follow-up — 2026-11-27
+
+### Delivered in this branch
+
+- Keyframes can be selected directly on a lane and edited with exact time (milliseconds represented as seconds), typed value, and outgoing easing. Retiming onto an occupied key position is rejected instead of silently replacing another key.
+- Playback starts from the current playhead. Stop restores the non-animated workspace settings but leaves the playhead where playback stopped, so the next run can continue from that position.
+- Playback modes are explicit: one pass, loop, and ping-pong. Old projects and backups that only contain the boolean `loop` field are migrated to the equivalent new mode.
+- Oscillator phase is editable in the UI and remains bounded by the engine's existing phase limits.
+- Playback and each export now compile a validated clip/base-settings snapshot once. Per-frame evaluation reuses that plan instead of normalising, sorting and validating the entire track map for every frame. Each frame still receives an isolated settings clone, so no frame can mutate the saved base or the compiled clip.
+- Sequence/video exports use a frozen clip snapshot and restore the user's original playhead after completion or cancellation. The current frame-count, byte-size and cancellation limits remain in place.
+
+### Stability and compatibility
+
+- The engine format is version 2, but the normalizer continues to accept version-1 clips and the old `loop` boolean.
+- Track and keyframe limits remain enforced. The edit operation rejects key collisions and invalid value types.
+- No new runtime dependency, network request, rendering pipeline, Worker protocol, or project file format is introduced.
+- The active clip is still shared by Editor, Shape Lab and Script Slayer. Per-workspace clip isolation remains a separate migration because it must preserve existing global clips, user backups, and legacy project JSON without losing animation data.
+
+### Validation added
+
+- Unit coverage for exact keyframe edits, collision rejection, loop migration, loop/ping-pong time mapping and compiled-evaluator snapshot isolation.
+- Browser smoke coverage for selecting/editing a keyframe and persisting ping-pong mode.
