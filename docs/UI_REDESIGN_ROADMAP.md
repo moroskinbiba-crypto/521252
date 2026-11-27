@@ -42,10 +42,10 @@
 
 ## Stage 2 — Header, inspector and workspace ergonomics
 
-**Status: contextual inspector navigation and accurate reset naming implemented; deeper restructuring planned.**
+**Status: contextual navigation, collapsible specialist groups and a clearer quick-export hierarchy implemented.**
 
 - Keep image loading as a prominent primary action and group secondary actions by frequency.
-- Use contextual quick navigation for long inspector panels.
+- Use contextual quick navigation for long inspector panels.\n- Collapse specialist Shape Lab threshold/band/preset groups and Neo Glow detail controls behind native, keyboard-operable disclosures. Keep the Neo Glow master switch visible.\n- Keep common PNG/JPEG/project shortcuts in the Inspector, put SVG/CMYK/print parameters in an advanced disclosure, and separate procedural motion from static export actions.
 - Separate common controls from advanced controls without changing the saved settings model.
 - Make section resets explicit and scoped; the current workspace reset must never be labelled as a group-only reset.
 - Replace synthetic-only preset cards with source-aware previews in a later pass. Previews must be rendered off the main interaction path and cached with strict memory limits.
