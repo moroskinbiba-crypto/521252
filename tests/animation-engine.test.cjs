@@ -72,6 +72,23 @@ assert.throws(
 assert.equal(editable.tracks.threshold.keyframes[0].value, 10,
   "a rejected keyframe move must not mutate the source clip");
 
+let booleanEdit = Engine.createClip({ durationMs: 1000 });
+booleanEdit = Engine.setKeyframe(booleanEdit, "invert", 0, false);
+booleanEdit = Engine.updateKeyframe(booleanEdit, "invert", 0, 250, true, "step");
+assert.equal(booleanEdit.tracks.invert.keyframes[0].value, true,
+  "boolean keyframes should be editable without changing their value type");
+assert.throws(() => Engine.updateKeyframe(booleanEdit, "invert", 250, 500, 1, "linear"),
+  /Тип/, "keyframe editing must reject a value with the wrong type");
+
+let retainedOscillator = Engine.createClip({ durationMs: 1000 });
+retainedOscillator = Engine.setKeyframe(retainedOscillator, "brightness", 0, 0);
+retainedOscillator = Engine.setOscillator(retainedOscillator, "brightness", {
+  wave: "sine", amount: 5, frequency: 1
+});
+retainedOscillator = Engine.removeKeyframe(retainedOscillator, "brightness", 0);
+assert.ok(retainedOscillator.tracks.brightness.oscillator,
+  "deleting the last keyframe must preserve an oscillator-only track");
+
 const compiledBase = { threshold: 0 };
 const compiledClip = Engine.createClip({ durationMs: 1000 });
 const preparedClip = Engine.setKeyframe(compiledClip, "threshold", 0, 0, "linear");
