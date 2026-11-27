@@ -1990,7 +1990,7 @@ async function downloadFrom(page, selector) {
     );
     if (animationVideoSupported) {
       const animationVideoDownload = await downloadFrom(animationPage, "#animationExportVideo");
-      assert.match(animationVideoDownload.download.suggestedFilename(), /-animation\\.(?:mp4|webm)$/i);
+      assert.match(animationVideoDownload.download.suggestedFilename(), /-animation\.(?:mp4|webm)$/i);
       assert.ok(animationVideoDownload.bytes.length > 100,
         "Animation Studio video export should produce a non-empty media file");
       assert.match(await animationPage.locator("#animationExportStatus").textContent(), /Готово/,
