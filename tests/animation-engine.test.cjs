@@ -105,4 +105,59 @@ assert.ok(Engine.listPaths(settings).includes("algorithmLayers.0.enabled"));
 assert.ok(Engine.listPaths(settings).includes("effects.noise"));
 assert.ok(Engine.listPaths(settings).includes("algorithmLayers.0.opacity"));
 
+
+const beforeArrayLengths = {
+  effects: settings.effects.length,
+  shapeBands: settings.shapeBands.length,
+  algorithmLayers: settings.algorithmLayers.length,
+  customViewBox: settings.shapeBands[0].customViewBox.length
+};
+for (const path of [
+  "effects.length",
+  "shapeBands.length",
+  "algorithmLayers.length",
+  "shapeBands.0.customViewBox.0",
+  "shapeBands.000.size",
+  "algorithmLayers.0.constructor"
+]) {
+  assert.equal(Engine.setPath(settings, path, 1000000), false,
+    "array structure and unsupported array paths must not be writable: " + path);
+}
+assert.deepEqual({
+  effects: settings.effects.length,
+  shapeBands: settings.shapeBands.length,
+  algorithmLayers: settings.algorithmLayers.length,
+  customViewBox: settings.shapeBands[0].customViewBox.length
+}, beforeArrayLengths, "rejected animation paths must not mutate source array structure");
+
+const hostileClipInput = JSON.parse(JSON.stringify({
+  durationMs: 1000,
+  tracks: {
+    "shapeBands.length": { keyframes: [{ timeMs: 0, value: 1000000 }] },
+    "algorithmLayers.length": { keyframes: [{ timeMs: 0, value: 1000000 }] },
+    "effects.length": { keyframes: [{ timeMs: 0, value: 1000000 }] },
+    "shapeBands.0.size": { keyframes: [{ timeMs: 0, value: 77 }] }
+  }
+}));
+Object.defineProperty(hostileClipInput.tracks, "__proto__", {
+  enumerable: true, configurable: true, writable: true,
+  value: { keyframes: [{ timeMs: 0, value: 1 }] }
+});
+const hostileClip = Engine.normalise(hostileClipInput);
+assert.equal(Object.getPrototypeOf(hostileClip.tracks), null,
+  "normalized track maps should not inherit attacker-controlled properties");
+assert.equal(Object.prototype.hasOwnProperty.call(hostileClip.tracks, "__proto__"), false,
+  "reserved prototype paths must be discarded during import");
+const hostileResult = Engine.evaluate(settings, hostileClip, 500);
+assert.equal(hostileResult.shapeBands.length, beforeArrayLengths.shapeBands,
+  "imported clips must not expand the Shape Lab array");
+assert.equal(hostileResult.algorithmLayers.length, beforeArrayLengths.algorithmLayers,
+  "imported clips must not expand the algorithm-layer array");
+assert.equal(hostileResult.effects.length, beforeArrayLengths.effects,
+  "imported clips must not change the effects array length");
+assert.equal(hostileResult.shapeBands[0].size, 77,
+  "valid nested animation paths must continue to work");
+assert.equal(Object.prototype.polluted, undefined,
+  "hostile imported tracks must not pollute Object.prototype");
+
 console.log("Animation engine tests passed: interpolation, easing, discrete tracks, nested paths, oscillators, limits and unsafe-path rejection.");
