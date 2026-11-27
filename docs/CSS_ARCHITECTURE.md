@@ -10,7 +10,7 @@ The stylesheet links in `index.html` are ordered deliberately:
 2. `styles/xp-shell.css` — Windows XP Luna shell. Its link keeps the stable DOM id `xpShellStyles` and starts with `media="not all"`; the shell selector in JavaScript switches this media value at runtime.
 3. `styles/action-priority.css` — preview action grouping.
 4. `styles/animation-studio.css` — timeline and animation controls.
-5. `styles/ui-foundation.css` — newest shared UI primitives, including Inspector quick navigation and dialog sizing.
+5. `styles/ui-foundation.css` — newest shared UI primitives, including Inspector quick navigation, dialog sizing and collapsible specialist groups.
 
 The extraction preserved the original declaration text and order. It is an asset-boundary change, not a selector rewrite or a redesign. Do not alphabetize links or combine/reorder rules without checking both shells and the full responsive matrix.
 
