@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "feat/ui-foundation-2026-11"]
   workflow_dispatch:
 
 permissions:
