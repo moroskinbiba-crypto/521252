@@ -73,7 +73,7 @@
 
 - Every modal must have dialog semantics, a programmatic name, initial focus, focus containment, Escape behavior and focus restoration.
 - Every form field must have a label or an accessible name; don't rely on placeholder text.
-- Test keyboard-only use, reduced-motion settings, touch target size and custom-theme contrast. Custom colors remain unrestricted, but the UI now reports WCAG contrast failures for text/surfaces and accent visibility instead of silently accepting unreadable combinations.
+- Test keyboard-only use, reduced-motion settings, touch target size and custom-theme contrast. Custom colors remain unrestricted, but the UI now reports WCAG contrast failures for text/surfaces and accent visibility instead of silently accepting unreadable combinations. The Paper theme's muted text token was darkened slightly so every built-in theme passes the same contrast checks.
 - Add automated screenshot comparison only after reviewed reference images are committed.
 - Keep browser compatibility coverage on Chromium, Firefox and WebKit and add new rendering tests only when they are deterministic across engines.
 
