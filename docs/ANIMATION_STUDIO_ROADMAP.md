@@ -154,7 +154,7 @@ The timeline currently targets the Editor, Shape Lab, and Script Slayer workspac
 - Playback modes are explicit: one pass, loop, and ping-pong. Old projects and backups that only contain the boolean `loop` field are migrated to the equivalent new mode.
 - Oscillator phase is editable in the UI and remains bounded by the engine's existing phase limits.
 - Playback and each export now compile a validated clip/base-settings snapshot once. Per-frame evaluation reuses that plan instead of normalising, sorting and validating the entire track map for every frame. Each frame still receives an isolated settings clone, so no frame can mutate the saved base or the compiled clip.
-- Sequence/video exports use a frozen clip snapshot and restore the user's original playhead after completion or cancellation. The current frame-count, byte-size and cancellation limits remain in place.
+- Sequence/video exports use a frozen clip snapshot and restore the user's original playhead after completion or cancellation. Ping-pong exports contain a complete forward-and-reverse pass; PNG ZIPs include an `animation.json` manifest with FPS, duration, loop mode, track data, frame count and partial-export state. The current frame-count, byte-size and cancellation limits remain in place.
 
 ### Stability and compatibility
 
