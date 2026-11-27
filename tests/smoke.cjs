@@ -1945,6 +1945,7 @@ async function downloadFrom(page, selector) {
     );
     await setAnimationTime(125);
     await animationPage.waitForFunction(() => window.__tgrmAnimationStatus().timeMs === 125);
+    await animationPage.evaluate(() => window.__tgrmlitherWaitForPreview());
     const transientEditorThreshold = await animationPage.evaluate(() =>
       Number(document.querySelector("#threshold")?.value)
     );
@@ -1973,6 +1974,7 @@ async function downloadFrom(page, selector) {
     // the new base, rather than being discarded on the next workspace change.
     await setAnimationTime(125);
     await animationPage.waitForFunction(() => window.__tgrmAnimationStatus().timeMs === 125);
+    await animationPage.evaluate(() => window.__tgrmlitherWaitForPreview());
     await animationPage.locator("#threshold").evaluate(el => {
       el.value = "30";
       el.dispatchEvent(new Event("input", { bubbles: true }));
