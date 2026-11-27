@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "tgrmlither-";
-const CACHE = "tgrmlither-v19";
+const CACHE = "tgrmlither-v20";
 const ASSETS = ["./", "./index.html", "./processing-worker.js", "./animation-engine.js", "./manifest.webmanifest", "./icon.svg"];
 
 function inScope(url) {
