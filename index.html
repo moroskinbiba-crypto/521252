@@ -11,998 +11,18 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <title>TGRMLither — Browser Image Studio</title>
-<style>
-:root{color-scheme:dark;--bg:#11130f;--panel:#191c17;--panel2:#20241e;--line:#30372c;--text:#eff3e9;--muted:#9aa393;--acid:#cafa6a;--purple:#b5a3ff;--r:14px}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 78% -20%,#cafa6a0b,transparent 45%),var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a[href]:focus-visible,summary:focus-visible{outline:2px solid var(--acid);outline-offset:2px}button:disabled{opacity:.5;cursor:not-allowed}.hidden{display:none!important}
-header{height:68px;padding:0 22px;display:flex;align-items:center;gap:24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#11130ff2;backdrop-filter:blur(18px);z-index:5}.brand{display:flex;gap:10px;align-items:center;min-width:195px}.mark{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;width:32px;height:32px;border:1px solid #546345;border-radius:9px;padding:4px}.mark i{background:var(--acid);border-radius:1px}.mark i:nth-child(2),.mark i:nth-child(4),.mark i:nth-child(8){opacity:.25}.mark i:nth-child(3),.mark i:nth-child(6){opacity:.65}.brand b{font-size:14px;letter-spacing:.13em}.brand small{display:block;font-size:8px;letter-spacing:.18em;color:var(--muted);margin-top:2px}.topnav{display:flex;gap:3px;flex:1}.navbtn{border:0;background:transparent;color:var(--muted);border-radius:8px;padding:9px 11px;font-size:11px}.navbtn:hover,.navbtn.active{color:var(--text);background:#ffffff08}.navbtn.active{box-shadow:inset 0 -2px var(--acid)}.topright{display:flex;gap:8px;align-items:center}.local{font-size:10px;color:#bfccbb;white-space:nowrap}.live{display:inline-block;width:6px;height:6px;background:var(--acid);border-radius:100%;margin-right:6px;box-shadow:0 0 9px #cafa6a90}
-.btn{border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text);font-size:11px;font-weight:650;padding:9px 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn:hover{border-color:#69795a;background:#282e23}.btn.primary{background:var(--acid);border-color:var(--acid);color:#14170f}.btn.primary:hover{background:#dafc9c}.btn.ghost{background:transparent}.btn.sm{padding:6px 8px;font-size:10px}.btn.full{width:100%}
-.layout{display:grid;grid-template-columns:206px minmax(280px,1fr) 292px;min-height:calc(100vh - 68px)}aside.left{padding:21px 13px 15px 15px;border-right:1px solid var(--line);background:#141712aa;display:flex;flex-direction:column;gap:23px}.sectionlabel{font-size:9px;font-weight:800;letter-spacing:.16em;color:#7f8979;padding:0 10px 7px}.menu{display:grid;gap:3px}.menu button{display:flex;align-items:center;gap:10px;border:1px solid transparent;border-radius:9px;padding:10px;background:transparent;text-align:left;color:#abb5a4;font-size:11px}.menu button .mi{width:18px;text-align:center;font-size:15px}.menu button .tag{margin-left:auto;font-size:8px;color:#7d8875}.menu button:hover{background:#ffffff05;color:var(--text)}.menu button.active{color:var(--acid);background:#cafa6a0b;border-color:#cafa6a20}.privacy{margin-top:auto;border:1px solid var(--line);border-radius:12px;padding:12px;background:linear-gradient(145deg,#cafa6a0a,transparent)}.privacy strong{font-size:10px}.privacy p{font-size:10px;color:var(--muted);margin:6px 0 10px}.privacy span{font-size:9px;color:var(--acid)}
-main{min-width:0;padding:24px 24px 32px}.heading{display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:18px}.eyebrow{color:var(--acid);font-size:9px;letter-spacing:.16em;font-weight:800}.heading h1{font-size:24px;line-height:1.2;letter-spacing:-.04em;margin:6px 0;font-weight:760}.heading p{font-size:11px;color:var(--muted);margin:0}.badges{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap}.pill{padding:5px 8px;border:1px solid var(--line);border-radius:99px;font-size:9px;color:#aeb8a8;white-space:nowrap}.pill.green{color:var(--acid);border-color:#cafa6a33}
-.stagebar{background:var(--panel);border:1px solid var(--line);border-bottom:0;border-radius:13px 13px 0 0;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}.stagebar .filename{font-size:10px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stagebar .filename:before{content:"";display:inline-block;width:6px;height:6px;border-radius:99px;background:var(--acid);margin-right:8px}.stageactions{display:flex;align-items:center;gap:5px;flex-shrink:0}.select{background:#11140f;color:#dfe8d7;border:1px solid #353d30;border-radius:8px;padding:8px;font-size:10px;max-width:145px}
-.stage{height:calc(100vh - 300px);min-height:400px;max-height:780px;border:1px solid var(--line);border-radius:0 0 13px 13px;background-color:#151812;background-image:radial-gradient(#7d88702b .7px,transparent .7px);background-size:13px 13px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.canvaswrap{width:100%;height:100%;padding:18px;display:flex;align-items:center;justify-content:center}.canvaswrap canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 12px 45px #0008;border:1px solid #ffffff16}.empty{display:none;max-width:290px;text-align:center;padding:20px}.emptyicon{width:64px;height:64px;border:1px solid #cafa6a34;border-radius:18px;margin:0 auto 14px;display:grid;place-items:center;font-size:30px;color:var(--acid)}.empty h2{font-size:16px;margin:0 0 7px}.empty p{color:var(--muted);font-size:11px}.stage.drag{outline:2px dashed var(--acid);outline-offset:-8px;background-color:#24311a}.stagefoot{padding:11px 2px 0;display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font-size:9px}.stats{display:flex;gap:12px;flex-wrap:wrap}.stats b{font-weight:650;color:#dce5d5}.textbtn{background:transparent;color:#b5c0ae;border:0;padding:5px 0;font-size:9px}.textbtn:hover{color:var(--acid)}
-aside.right{padding:21px 15px 24px;border-left:1px solid var(--line);background:#141712aa}.inspectorhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}.inspectorhead strong{font-size:12px}.linkbtn{border:0;background:transparent;color:#919c88;font-size:10px}.linkbtn:hover{color:var(--acid)}.control{padding-bottom:17px;margin-bottom:17px;border-bottom:1px solid var(--line)}.controltitle{font-size:9px;color:#c7d1c1;font-weight:800;letter-spacing:.12em;display:flex;justify-content:space-between;gap:5px;margin-bottom:12px}.controltitle small{font-size:8px;color:#788371;font-weight:500;letter-spacing:0}.field{margin-bottom:12px}.field:last-child{margin-bottom:0}.fieldtop{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-bottom:7px}.field label{font-size:10px;color:#c9d2c3}.val{color:var(--acid);font-size:10px;font-variant-numeric:tabular-nums}.range{width:100%;height:4px;accent-color:var(--acid)}.select.full{width:100%;max-width:none}.switchrow{display:flex;justify-content:space-between;align-items:center;color:#b9c4b2;font-size:10px;margin:9px 0}.switch{appearance:none;display:inline-block;flex:0 0 auto;width:30px;height:17px;min-width:30px;margin:0;padding:0;border:0;border-radius:99px;background:#3b4235;position:relative;cursor:pointer;vertical-align:middle}.switch:before{content:"";position:absolute;width:11px;height:11px;top:3px;left:3px;border-radius:50%;background:#9ba593;transition:.15s}.switch[aria-checked="true"]{background:#cafa6a80}.switch[aria-checked="true"]:before{left:16px;background:var(--acid)}
-.palettes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.palette{border:1px solid var(--line);border-radius:8px;padding:4px;background:#11140f;min-width:0}.palette.active{border-color:var(--acid);box-shadow:0 0 0 1px #cafa6a24}.swatches{display:flex;height:21px;overflow:hidden;border-radius:4px;gap:2px}.swatches i{flex:1}.pname{font-size:7px;text-align:center;color:#aab4a4;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.effects{display:grid;gap:6px}.effect{display:flex;align-items:center;gap:7px;border:1px solid #2b3227;border-radius:8px;padding:8px;font-size:10px;color:#c0cbbb}.effect input{accent-color:var(--acid)}.effect small{margin-left:auto;font-size:8px;color:#7a8673}
-.presetgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.preset{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);color:var(--text);text-align:left;padding:0}.preset:hover{border-color:#8b9d70;transform:translateY(-2px)}.previewart{height:130px;overflow:hidden;background:#141710}.previewart canvas{height:100%;width:100%;object-fit:cover;image-rendering:pixelated}.presetinfo{padding:11px}.ptag{font-size:8px;letter-spacing:.1em;color:var(--acid);display:block;margin-bottom:5px}.presetname{font-size:11px;font-weight:750}.presetdesc{font-size:9px;color:var(--muted);margin-top:4px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;margin-bottom:12px}.card h2{font-size:13px;margin:0 0 6px}.card p{font-size:10px;color:var(--muted);margin:0 0 13px}.drop{border:1px dashed #526044;border-radius:11px;padding:24px;text-align:center;background:#cafa6a05}.drop strong{display:block;margin:7px 0;font-size:12px}.drop p{margin-bottom:10px}.filelist{display:grid;gap:7px;margin-top:12px}.fileitem{display:flex;gap:9px;align-items:center;border:1px solid var(--line);background:#11140f;border-radius:9px;padding:9px}.fileicon{width:30px;height:30px;display:grid;place-items:center;border-radius:7px;background:#cafa6a12;color:var(--acid)}.filetext{min-width:0;flex:1}.filetext b{font-size:10px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.filetext small{font-size:9px;color:var(--muted)}.progress{height:3px;background:#30382b;border-radius:9px;overflow:hidden;margin-top:10px}.progress i{display:block;width:0;height:100%;background:var(--acid);transition:width .2s}
-.ascii{margin-top:13px;border:1px solid var(--line);border-radius:10px;background:#080b08;overflow:hidden}.ascii summary{padding:10px;font-size:10px;color:var(--acid);cursor:pointer}.ascii pre{margin:0;padding:10px;max-height:280px;overflow:auto;white-space:pre;font:8px/1.05 monospace;color:var(--acid)}
-.toast{position:fixed;bottom:18px;left:50%;transform:translate(-50%,15px);opacity:0;pointer-events:none;z-index:20;background:#20271a;border:1px solid #536044;color:#eef8e5;padding:10px 14px;border-radius:10px;font-size:11px;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}.modalbg{position:fixed;inset:0;background:#0009;z-index:30;display:grid;place-items:center;padding:16px}.modal{max-width:420px;width:100%;background:#1a1e17;border:1px solid var(--line);border-radius:14px;padding:20px}.modal h2{margin:0 0 5px;font-size:15px}.modal p{color:var(--muted);font-size:10px}.modal input{width:100%;padding:10px;border:1px solid var(--line);background:#10130f;color:var(--text);border-radius:8px;margin:5px 0 13px}.modalactions{display:flex;justify-content:flex-end;gap:8px}
-@media(max-width:1140px){.layout{grid-template-columns:180px minmax(270px,1fr)}aside.right{grid-column:2;border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.inspectorhead{grid-column:1/-1;margin:0}.control{margin-bottom:0}.stage{height:540px}.topnav{display:none}}
-@media(max-width:740px){header{height:auto;min-height:60px;padding:11px;gap:10px}.brand{min-width:0;flex:1}.brand small,.local{display:none}.topright .btn{padding:8px}.layout{display:flex;flex-direction:column}.left{border-right:0!important;border-bottom:1px solid var(--line);padding:8px!important}.left .sectionlabel,.left>div:nth-child(2),.privacy{display:none}.menu{display:flex;overflow-x:auto}.menu button{white-space:nowrap;padding:8px}.menu button .tag{display:none}main{padding:18px 11px 24px}.heading h1{font-size:21px}.badges{display:none}.stage{height:52vh;min-height:300px}.stagebar{padding:8px}.stageactions .btn{padding:7px}.stageactions .select{max-width:85px;padding:7px}.canvaswrap{padding:10px}.stagefoot{font-size:8px}.stats{gap:7px}.stagefoot .textbtn{display:none}aside.right{display:block;padding:17px 13px}.control{margin-bottom:17px}.presetgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.previewart{height:100px}}
-
-/* Compact Dither Boy-inspired controls */
-header{height:56px;padding:0 16px;gap:18px}.brand small{display:none}.brand{min-width:155px}.layout{grid-template-columns:174px minmax(280px,1fr) 278px}aside.left{padding:16px 10px;gap:17px}main{padding:18px 18px 24px}.heading{margin-bottom:12px}.heading h1{font-size:19px;margin:4px 0}.heading p{font-size:10px}.eyebrow,.badges{display:none}.stage{height:calc(100vh - 240px);min-height:360px}.stagebar{padding:8px 10px}.stagefoot{padding-top:8px}.control{padding-bottom:12px;margin-bottom:12px}.controltitle{margin-bottom:9px}.field{margin-bottom:9px}.palette{padding:3px}.swatches{height:18px}.pname{font-size:7px}.effect{padding:6px}.effects{gap:5px}.inspectorhead{margin-bottom:12px}.privacy{padding:9px}.privacy p{margin:4px 0 7px}.navbtn{padding:7px 9px}.topright .btn{padding:7px 10px}
-.custom-colors{border:1px solid var(--line);border-radius:9px;padding:9px;margin-top:9px;background:#11140f}.custom-colors-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:#c7d1c1;font-size:9px}.color-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.color-pick{min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:8px;color:var(--muted)}.color-pick input{width:100%;height:28px;padding:0;border:1px solid #3b4433;background:#151812;border-radius:5px;cursor:pointer}.effect-control{border:1px solid #2b3227;border-radius:8px;padding:7px}.effect-control .effect{border:0;padding:0 0 6px}.effect-intensity{display:flex;align-items:center;gap:8px}.effect-intensity input{width:100%;min-width:0;accent-color:var(--acid);height:4px}.effect-intensity output{font-size:9px;color:var(--acid);min-width:28px;text-align:right}.field input[type="text"]{width:100%;color:var(--text);background:#11140f;border:1px solid var(--line);border-radius:7px;padding:8px;font-size:10px}.color-select-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.color-select-row .field{min-width:0}.color-select-row input[type=color]{width:100%;height:33px;border:1px solid var(--line);border-radius:7px;background:#11140f;padding:3px}
-@media(max-width:1140px){.layout{grid-template-columns:160px minmax(260px,1fr)}.stage{height:480px}main{padding:16px}.inspectorhead{grid-column:1/-1}}
-@media(max-width:740px){header{min-height:56px;padding:9px}.brand{min-width:0}.topnav{display:flex;overflow-x:auto}.topnav .navbtn{white-space:nowrap;padding:7px}.topright .local,.topright #offlineBtn{display:none}.layout{display:flex;flex-direction:column}.left{padding:7px!important}.left .sectionlabel,.left>div:nth-child(2),.privacy{display:none}.menu button{padding:7px 9px}.heading h1{font-size:18px}.stage{height:50vh;min-height:300px}.stagebar{padding:7px}.stageactions .btn{padding:6px}.stageactions .select{max-width:80px}.canvaswrap{padding:8px}.stagefoot{font-size:8px}aside.right{display:block;padding:14px}main{padding:15px 10px 20px}.presetgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.effect-order-actions{display:inline-flex;gap:3px;margin-left:auto}.effect-order-actions button{border:1px solid var(--line);background:#171b13;color:var(--muted);border-radius:4px;padding:1px 4px;font-size:9px;cursor:pointer}.shape-bands{display:grid;gap:7px;margin:10px 0}.shape-band{background:#11140f;border:1px solid var(--line);border-radius:7px;padding:7px}.shape-band>b{display:block;font-size:9px;margin-bottom:6px;color:var(--muted)}.shape-band-row{display:grid;grid-template-columns:1fr 1fr 28px;gap:5px;align-items:center}.shape-band-row .select{min-width:0;padding:5px}.shape-band-row input[type=color]{width:28px;height:25px;padding:2px;background:#111;border:1px solid var(--line);border-radius:5px}.glyph-preview{margin-top:5px;border:1px solid var(--line);border-radius:6px;background:#0a0c09;color:var(--acid);font:12px/1.6 ui-monospace,monospace;letter-spacing:1px;overflow:hidden;white-space:nowrap;padding:5px 7px}.shape-bands{max-height:400px;overflow:auto}.effect-order-actions{display:inline-flex;gap:3px;margin-left:auto}.effect-order-actions button{border:1px solid var(--line);background:#171b13;color:var(--muted);border-radius:4px;padding:1px 4px;font-size:9px;cursor:pointer}.ascii-neoglow{margin-top:9px;padding:8px;border:1px solid var(--line);border-radius:7px;background:#10130e}.ascii-neoglow .switchrow{font-size:10px}.ascii-neoglow .field{margin-top:8px}
-/* TGRMLither workstation layout: keep the canvas visible while controls scroll independently. */
-html,body{height:100%;overflow:hidden}
-body{height:100vh;height:100dvh;overflow:hidden}
-.layout{height:calc(100vh - 56px);height:calc(100dvh - 56px);min-height:0;overflow:hidden;align-items:stretch}
-.layout>.left,.layout>main,.layout>aside.right{min-height:0;max-height:100%;overscroll-behavior:contain}
-.layout>.left{height:100%;overflow-y:auto;scrollbar-width:thin}
-.layout>main{height:100%;overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain}
-.layout>aside.right{height:100%;max-height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-bottom:16px}
-@media(min-width:901px){
-  .layout{grid-template-columns:174px minmax(0,1fr) 278px}
-  body[data-mode="presets"] .layout{grid-template-columns:174px minmax(0,1fr) 0}
-  body[data-mode="presets"] .layout>aside.right{display:none!important}
-  body[data-mode="presets"] .layout>main{grid-column:2}
-}
-@media(min-width:741px) and (max-width:900px){
-  .layout{grid-template-columns:minmax(0,1fr) minmax(250px,42%)}
-  .layout>.left{display:none}
-  .layout>main{grid-column:1;padding:12px;min-width:0}
-  .layout>aside.right{grid-column:2;grid-row:1;display:block;border-left:1px solid var(--line);border-top:0;padding:14px 11px}
-  body[data-mode="presets"] .layout{grid-template-columns:minmax(0,1fr) 0}
-  body[data-mode="presets"] .layout>main{grid-column:1/-1}
-  body[data-mode="presets"] .layout>aside.right{display:none!important}
-  .stage{height:clamp(250px,58vh,480px);min-height:230px}
-}
-@media(max-width:740px){
-  header{height:56px;min-height:56px;flex:0 0 56px}
-  .brand{min-width:0;gap:7px}
-  .brand b{font-size:12px;letter-spacing:.04em}
-  .brand .mark{width:28px;height:28px}
-  .topright #topExport{padding:7px 9px;font-size:10px}
-  .layout{height:calc(100vh - 56px);height:calc(100dvh - 56px);min-height:0;display:flex;flex-direction:column;overflow:hidden}
-  .layout>.left{display:block;flex:0 0 43px;height:43px;max-height:43px;overflow:hidden;border:0;border-bottom:1px solid var(--line);padding:3px 5px!important}
-  .layout>.left>div:first-child{height:100%}
-  .layout>.left .menu{height:100%;align-items:center;overflow-x:auto;overflow-y:hidden;white-space:nowrap}
-  .layout>.left .menu button{flex:0 0 auto;padding:6px 9px;font-size:10px}
-  .layout>main{flex:0 0 49%;height:49%;max-height:49%;width:100%;min-height:0;overflow-y:auto;padding:8px 9px 10px!important}
-  .layout>aside.right{flex:1 1 0;height:auto;max-height:none;min-height:0;width:100%;overflow-y:auto;border-left:0;border-top:1px solid var(--line);padding:10px 12px 20px!important}
-  .heading{margin-bottom:7px;gap:8px}
-  .heading h1{font-size:17px;line-height:1.2;margin-bottom:3px}
-  .heading p{font-size:9px;margin:0}
-  .eyebrow{font-size:8px;margin-bottom:3px}
-  .badges{display:none}
-  .stagebar{padding:5px;gap:5px}
-  .filename{max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px}
-  .stageactions{gap:4px}
-  .stageactions .btn{padding:5px 6px;font-size:9px}
-  .stageactions .select{padding:5px;max-width:68px;font-size:9px}
-  .stage{height:clamp(150px,23vh,235px);min-height:150px;max-height:235px;border-radius:0 0 9px 9px}
-  .canvaswrap{padding:6px}
-  .stagefoot{padding-top:5px;font-size:8px;gap:4px}
-  .stats{gap:6px}
-  .stats span{font-size:7px}
-  #dimensions{font-size:7px}
-  .stagefoot .textbtn{font-size:8px}
-  body[data-mode="presets"] .layout>main{flex:1 1 auto;height:auto;max-height:none}
-  body[data-mode="presets"] .layout>aside.right{display:none!important}
-  .presetgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-  .previewart{height:90px}
-}
-
-
-/* Responsive workstation shell; all colour comes from the active theme. */
-:root{--ui-font:"Onest",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;--mono-font:"IBM Plex Mono",ui-monospace,"Cascadia Code",monospace}
-html,body{min-width:0}
-body{font-family:var(--ui-font);font-size:14px;line-height:1.45}
-header{height:64px;min-height:64px;padding:0 16px;gap:12px;position:sticky;top:0;z-index:20}
-.brand{min-width:145px;flex:0 0 auto;gap:9px}
-.brand b{font:800 14px/1.25 var(--ui-font);letter-spacing:.025em}
-.brand small{font:500 9px/1.3 var(--mono-font);letter-spacing:.12em}
-#openImage{flex:0 0 auto;white-space:nowrap}
-.topnav{display:flex;align-items:center;flex:1;min-width:0;gap:3px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
-.topnav .navbtn{flex:0 0 auto;white-space:nowrap;font:600 12px/1.3 var(--ui-font);padding:8px 9px}
-.topright{flex:0 0 auto;gap:7px}
-.topright .btn{white-space:nowrap}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,360px);height:calc(100vh - 64px);height:calc(100dvh - 64px);min-height:0;max-height:none;overflow:hidden;gap:0;align-items:stretch;background:var(--bg)}
-.layout>.left{display:none!important}
-.layout>main{grid-column:1;grid-row:1;min-width:0;min-height:0;height:100%;max-height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:18px 20px 26px;background:transparent;border:0;scrollbar-width:thin}
-.layout>aside.right{grid-column:2;grid-row:1;width:auto;min-width:0;height:100%;max-height:100%;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:18px 15px 24px;background:var(--panel);border:0;border-left:1px solid var(--line);scrollbar-width:thin}
-body[data-mode="presets"] .layout{grid-template-columns:minmax(0,1fr) 0}
-body[data-mode="presets"] .layout>main{grid-column:1;width:100%;border:0}
-body[data-mode="presets"] .layout>aside.right{display:none!important}
-.heading{margin-bottom:12px;align-items:flex-start}
-.heading h1{font:800 22px/1.2 var(--ui-font);letter-spacing:-.025em;margin:5px 0}
-.heading p{font:400 12px/1.5 var(--ui-font);margin:0;color:var(--muted)}
-.eyebrow,.sectionlabel,.controltitle small,.pill,.stats,#dimensions,.topright .local{font-family:var(--mono-font)}
-.stagebar{gap:8px;flex-wrap:wrap}
-.stagebar .filename{flex:1 1 125px;min-width:0}
-.stageactions{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex:0 1 auto;min-width:0;flex-wrap:wrap}
-.stageactions .btn{font:600 11px/1.25 var(--ui-font);padding:6px 8px}
-.stageactions .select{max-width:100px}
-.stage{height:clamp(260px,calc(100dvh - 260px),760px);min-height:250px;max-height:none}
-.canvaswrap{position:relative;min-width:0;min-height:0}
-.canvaswrap canvas{max-width:100%;max-height:100%;object-fit:contain}
-.stagefoot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:10px}
-.stagefoot>div{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
-.stats{gap:10px;flex-wrap:wrap}
-.file-status{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:99px;padding:3px 7px;color:var(--muted);font:500 9px/1.4 var(--mono-font)}
-.file-status[data-state="demo"]{color:var(--acid);border-color:color-mix(in srgb,var(--acid) 35%,var(--line))}
-.file-status[data-state="dirty"]{color:#a75b17;border-color:#a75b17}
-.file-status[data-state="exported"]{color:var(--acid)}
-.inspectorhead{position:sticky;top:-18px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0 12px;margin:0 0 12px;background:var(--panel);border-bottom:1px solid var(--line)}
-.inspectorhead strong{font:800 13px/1.35 var(--ui-font);color:var(--text)}
-.inspector-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-#advancedToggle{font-size:10px;padding:5px 7px}
-.control{padding-bottom:13px;margin-bottom:13px}
-.controltitle{font:800 10px/1.45 var(--ui-font);letter-spacing:.05em}
-.field label,.switchrow{font:500 12px/1.4 var(--ui-font)}
-.select,.btn,input,textarea{font-family:var(--ui-font)}
-.select{background:var(--panel2);border-color:var(--line);color:var(--text);font-size:12px;max-width:100%}
-.select.full{width:100%;max-width:none}
-.btn{font:650 12px/1.35 var(--ui-font);border-radius:9px}
-.btn.sm{font-size:11px;padding:6px 8px}
-.linkbtn{font:600 11px/1.3 var(--ui-font);white-space:nowrap}
-.preset-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}.preset-search{width:min(220px,45vw);max-width:100%}.presetgrid{grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px}
-.previewart{height:118px}
-.presetinfo{padding:10px}
-.presetname{font:750 12px/1.4 var(--ui-font)}
-.presetdesc{font:400 11px/1.45 var(--ui-font)}
-.algorithm-tools{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:5px;margin:7px 0}
-.algorithm-tools input{min-width:0;width:100%}
-.algorithm-tools .btn{white-space:nowrap;padding:6px 7px}
-.compare-controls{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
-.compare-controls label{font:500 10px/1.3 var(--mono-font);color:var(--muted)}
-.compare-controls input{width:100px;accent-color:var(--acid);touch-action:pan-y}
-.compare-controls output{min-width:32px;font:600 10px/1.3 var(--mono-font);color:var(--acid)}
-.compare-before{position:absolute;z-index:3;display:block;max-width:none!important;max-height:none!important;object-fit:fill!important;pointer-events:none;border:0!important;box-shadow:none!important;clip-path:inset(0 calc(100% - var(--compare-position,50%)) 0 0)}
-.compare-divider{position:absolute;z-index:4;top:0;width:2px;background:var(--acid);box-shadow:0 0 0 1px #0005;pointer-events:none}
-.compare-divider:after{content:"↔";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--acid);color:var(--bg);font:700 13px/1 var(--ui-font)}
-body:not([data-inspector-level="advanced"]) #serpentineControl,
-body:not([data-inspector-level="advanced"]) #serpentineHint,
-body:not([data-inspector-level="advanced"]) #patternAngleControl,
-body:not([data-inspector-level="advanced"]) #patternShapeControl,
-body:not([data-inspector-level="advanced"]) #markScaleControl,
-body:not([data-inspector-level="advanced"]) #smoothingControl,
-body:not([data-inspector-level="advanced"]) #glitchDepthControl,
-
-body:not([data-inspector-level="advanced"]) .print-export-settings{display:none!important}
-.shape-custom-import{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;margin:8px 0 10px;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--panel2)}
-#shapeSvgStatus{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
-.effect-control .effect label{display:block;flex:1;min-width:0;margin:0;padding:0;color:inherit;font-size:inherit;cursor:pointer;user-select:none}
-.effect-control .effect-toggle[role="checkbox"]{-webkit-appearance:none!important;appearance:none!important}
-.algorithm-layer-list{display:grid;gap:7px;margin-top:8px}
-.algorithm-layer{border:1px solid var(--line);border-radius:9px;padding:8px;background:var(--panel2);display:grid;gap:7px;min-width:0}
-.algorithm-layer-head{display:flex;align-items:center;gap:6px;font-size:10px}
-.algorithm-layer-head strong{font-size:10px}.algorithm-layer-head .stack-spacer{flex:1}
-.algorithm-layer-head button,.algorithm-layer-remove{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:6px;padding:4px 6px;font-size:10px}
-.algorithm-layer .fieldtop{margin-bottom:4px}.algorithm-layer .select{width:100%;max-width:100%;min-width:0}
-.algorithm-layer .stack-opacity{width:100%;min-width:0;accent-color:var(--acid)}
-.algorithm-layer .stack-layer-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.stack-empty{font-size:10px;color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:9px}
-.print-export-settings{display:grid;gap:8px;margin-top:9px;border:1px solid var(--line);border-radius:8px;padding:9px;background:var(--panel2)}
-.print-export-settings label{font-size:11px;color:var(--muted)}
-.print-export-settings select,.print-export-settings input[type=number]{width:100%;min-width:0}
-.print-export-settings input[type=range]{width:100%;accent-color:var(--acid)}
-.print-export-settings .field{margin-bottom:0}
-.palette-library{border:1px solid var(--line);border-radius:9px;margin-top:9px;padding:9px;background:var(--panel2);display:grid;gap:7px}
-.palette-library-head{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:10px;color:var(--text)}
-.palette-library-head small{color:var(--muted);font-size:9px}
-.palette-library input[type=text]{width:100%;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px;font-size:12px}
-.palette-library-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.palette-library .btn{font-size:10px;padding:6px}
-.palette-library .select{max-width:none;width:100%;min-width:0}
-.export-modal{max-width:460px}
-.export-modal .export-fields{display:grid;gap:8px;margin:12px 0}
-.export-modal label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
-.export-modal .select{width:100%;max-width:none}
-.export-modal .export-note{font-size:11px;line-height:1.5;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
-html:fullscreen{background:var(--bg);overflow:hidden}
-html:fullscreen body{width:100vw;height:100vh;height:100dvh;overflow:hidden}
-@media(min-width:1200px){
- .layout{grid-template-columns:minmax(0,1fr) minmax(330px,370px)}
- .layout>main{padding:20px 24px 30px}
- .layout>aside.right{padding:20px 18px 28px}
- .stage{height:clamp(300px,calc(100dvh - 245px),800px)}
-}
-@media(min-width:741px) and (max-width:1099px){
- header{gap:7px;padding:0 9px}
- .brand{min-width:112px;gap:6px}
- .brand b{font-size:12px}
- .brand small,.topright .local,.topright #offlineBtn{display:none}
- .topnav .navbtn{font-size:11px;padding:7px}
- .topright{gap:4px}
- .layout{grid-template-columns:minmax(0,1fr) minmax(275px,34%)}
- .layout>main{padding:12px}
- .layout>aside.right{padding:12px 10px}
- .stage{height:clamp(230px,calc(100dvh - 250px),600px);min-height:220px}
- .stageactions{gap:3px}
-}
-@media(max-width:740px){
- html,body{width:100%;height:100%;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior:none}
- body{display:flex;flex-direction:column;min-width:0}
- header{flex:0 0 auto;width:100%;height:auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;grid-template-rows:auto auto;align-items:center;gap:5px;padding:max(5px,env(safe-area-inset-top)) 8px 4px;overflow:visible}
- .brand{grid-column:1;grid-row:1;min-width:0;max-width:100%;gap:6px}
- .brand .mark{width:27px;height:27px;flex:0 0 27px;padding:3px;gap:2px}
- header .brand b,.brand b{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
- .brand small{display:none}
- #openImage{grid-column:2;grid-row:1;display:inline-flex;align-items:center;justify-content:center;width:max-content;min-width:max-content;height:32px;padding:0 10px;font-size:11px;line-height:1;white-space:nowrap;overflow:visible}
- #openImage:before{content:none}
- .topright{grid-column:3;grid-row:1;margin:0;min-width:0;gap:4px;justify-content:flex-end}
- .topright .local,.topright #offlineBtn{display:none}
- .topright #topExport{height:32px;padding:4px 8px;font-size:11px;white-space:nowrap}
- .theme-menu>summary{min-width:32px;padding:5px}
- .theme-menu-panel{top:48px!important;right:5px!important}
- .topnav{grid-column:1/-1;grid-row:2;order:0;display:flex;width:100%;min-width:0;height:36px;max-height:36px;gap:4px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;overscroll-behavior-x:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
- .topnav .navbtn{flex:0 0 auto;min-height:32px;padding:5px 9px;font-size:12px;white-space:nowrap;scroll-snap-align:start}
- .layout{display:flex;flex:1 1 auto;flex-direction:column;gap:0;width:100%;height:auto;min-height:0;max-height:none;overflow:hidden;align-items:stretch}
- .layout>.left{display:none!important}
- .layout>main{display:block;flex:0 0 clamp(275px,45dvh,430px);height:auto;max-height:none;min-height:0;width:100%;min-width:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:8px 9px 10px;border:0;border-bottom:1px solid var(--line)}
- .layout>aside.right{display:block;flex:1 1 0;height:auto;max-height:none;min-height:0;width:100%;min-width:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px max(18px,env(safe-area-inset-bottom));border:0;border-top:1px solid var(--line)}
- .heading{display:flex;align-items:flex-start;gap:8px;margin:0 0 7px;min-width:0}
- .heading>div{min-width:0}
- .heading h1{font-size:17px;line-height:1.25;margin:2px 0 3px;overflow-wrap:anywhere}
- .heading p{font-size:11px;line-height:1.4;margin:0}
- .eyebrow,.badges{display:none}
- .stagebar{display:flex;align-items:center;flex-wrap:wrap;gap:5px;padding:5px}
- .stagebar .filename{flex:1 1 90px;min-width:0;max-width:none;font-size:10px;overflow:hidden;text-overflow:ellipsis}
- .stageactions{display:flex;flex:1 1 100%;min-width:0;max-width:100%;flex-wrap:wrap;gap:4px;justify-content:flex-start}
- .stageactions .btn,.stageactions .select{font-size:11px;line-height:1.3;padding:5px 6px;max-width:none;min-height:30px}
- .stage{height:clamp(135px,23dvh,230px);min-height:130px;max-height:none;width:100%}
- .canvaswrap{min-width:0;min-height:0;padding:6px}
- .canvaswrap canvas{max-width:100%;max-height:100%;object-fit:contain}
- .stagefoot{align-items:flex-start;flex-wrap:wrap;gap:5px;padding-top:5px;font-size:10px}
- .stagefoot>div{gap:5px}
- .stats{gap:6px;flex-wrap:wrap}
- .stats span,#dimensions{font-size:10px;line-height:1.4}
- .stagefoot .textbtn{font-size:10px}
- .compare-controls{width:100%;justify-content:flex-start}
- .compare-controls input{flex:1;min-width:90px}
- .layout>aside.right .control{padding-bottom:10px;margin-bottom:10px}
- .layout>aside.right .field{min-width:0}
- .layout>aside.right input[type=range]{min-width:0;touch-action:pan-y}
- .layout>aside.right .select,.layout>aside.right select{max-width:100%;min-width:0}
- .effects{grid-template-columns:minmax(0,1fr)!important}
- .effect-control{min-width:0}
- .effect-control .effect{min-height:36px}
- .effect-control .effect input[type=checkbox]{width:20px;height:20px;flex-basis:20px}
- .presetgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
- .preset{min-width:0}
- .previewart{height:clamp(82px,13dvh,120px)}
- .presetname{overflow-wrap:anywhere;font-size:11px}
- .video-stage{height:clamp(135px,21dvh,220px);min-height:130px;width:100%}
- #videoOutput{max-width:100%;max-height:100%}
- .video-time-row{gap:5px;flex-wrap:wrap}
- .video-time-row span{min-width:50px;font-size:12px}
- .video-hint{font-size:11px;line-height:1.4}
- body[data-mode="presets"] .layout>main{flex:1 1 0;height:auto;max-height:none;min-height:0;border-bottom:0}
- body[data-mode="presets"] .layout>aside.right{display:none!important}
- body[data-mode="presets"] #presetsView{width:100%;min-width:0}
- body[data-mode="presets"] .presetgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
- body[data-mode="batch"] .layout>main,body[data-mode="video"] .layout>main{flex:1 1 0;height:auto;max-height:none;min-height:0}
- .algorithm-tools{grid-template-columns:minmax(0,1fr) auto}
- #algorithmFavoritesOnly{grid-column:1/-1}
- .inspectorhead{top:-10px}
-}
-@media(max-width:380px){
- header{grid-template-columns:minmax(0,1fr) max-content max-content;gap:4px;padding-left:6px;padding-right:6px}
- #openImage{min-width:max-content;padding:0 8px;font-size:11px}
- .brand{gap:4px}.brand .mark{width:24px;height:24px;flex-basis:24px}
- header .brand b,.brand b{font-size:11px}
- .topnav .navbtn{padding:5px 7px;font-size:11px}
- .topright #topExport{padding:4px 6px;font-size:11px}
- .layout>main{flex-basis:clamp(260px,44dvh,360px)}
- .stageactions .btn,.stageactions .select{padding:4px 5px}
- .presetgrid{gap:5px}
- .compare-controls input{min-width:65px}
-}
-@media(max-height:520px) and (max-width:740px){
- header{gap:3px}
- .topnav{height:32px;max-height:32px}
- .topnav .navbtn{min-height:28px;padding:4px 8px}
- .layout>main{flex-basis:46dvh}
- .stage{height:clamp(110px,20dvh,170px);min-height:110px}
- .video-stage{height:clamp(110px,19dvh,155px);min-height:110px}
- .heading h1{font-size:15px}
-}
-
-/* Theme sharing and expanded Shape Shifter controls. */
-.theme-menu{position:relative;display:inline-flex;align-items:center;z-index:12}.theme-menu>summary{list-style:none;min-width:34px;padding:7px 9px;text-align:center;cursor:pointer}.theme-menu>summary::-webkit-details-marker{display:none}.theme-menu-panel{position:absolute;right:0;top:calc(100% + 9px);width:min(300px,calc(100vw - 20px));display:grid;gap:8px;padding:13px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 55px #0009;z-index:60;color:var(--text)}.theme-menu-panel label{font-size:10px;color:var(--muted)}.theme-menu-panel input[type=text]{min-width:0;width:100%;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--text);padding:8px;font-size:10px}.theme-status{font-size:9px;color:var(--muted)}.theme-custom-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.theme-custom-grid label{display:flex;flex-direction:column;gap:4px;min-width:0;font-size:8px}.theme-custom-grid input[type=color]{width:100%;height:27px;min-width:0;border:1px solid var(--line);border-radius:5px;padding:2px;background:var(--panel2);cursor:pointer}
-.shape-custom-import{display:grid;gap:6px;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}.shape-custom-import>span{font-size:9px;line-height:1.4;color:var(--muted)}.shape-thresholds{border:1px solid var(--line);border-radius:9px;padding:9px;margin:10px 0;background:var(--panel)}.shape-thresholds .controltitle{margin-bottom:8px}.shape-band-angle{display:grid;grid-template-columns:35px minmax(0,1fr) 30px;gap:5px;align-items:center;margin-top:7px;font-size:9px;color:var(--muted)}.shape-band-angle output{font-size:9px;color:var(--acid);text-align:right}.shape-preset-panel{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:9px;background:var(--panel)}.shape-preset-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:6px}.shape-preset-actions .btn{min-width:0}.shape-preset-panel input[type=text],.shape-preset-panel textarea{width:100%;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px;font:10px/1.4 inherit}.shape-preset-panel textarea{resize:vertical;font:10px/1.35 ui-monospace,monospace;overflow-wrap:anywhere}.shape-bands{max-height:520px;overflow:auto}
-.active-palette-editor{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:9px;margin-top:10px}.active-palette-editor>p{font-size:9px;color:var(--muted);line-height:1.45;margin:6px 0 9px}.active-palette-colors{display:grid;gap:5px;margin-bottom:8px}.active-palette-row{display:grid;grid-template-columns:23px 34px minmax(0,1fr) 28px;gap:6px;align-items:center;padding:4px 5px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.active-palette-row>span{font-size:9px;color:var(--muted)}.active-palette-row input[type=color]{width:32px;height:25px;padding:1px;border:1px solid var(--line);border-radius:4px;background:var(--panel2);cursor:pointer}.active-palette-row code{font:9px ui-monospace,monospace;color:var(--text);overflow:hidden;text-overflow:ellipsis}.active-palette-row button{padding:2px 5px;min-width:24px}.active-palette-row button:disabled{opacity:.25}
-body[data-theme="paper"] .active-palette-editor,body[data-theme="paper"] .active-palette-row{background:var(--panel);border-color:var(--line)}
-body[data-theme="terminal"]{--bg:#07140c;--panel:#0c2114;--panel2:#12301c;--line:#285239;--text:#e1ffe8;--muted:#8fbd9c;--acid:#72ffa0;--purple:#b3f3c5}
-body[data-theme="violet"]{--bg:#110d1b;--panel:#1c1428;--panel2:#291c3a;--line:#433152;--text:#f2eaff;--muted:#b5a6c6;--acid:#ff84d8;--purple:#b8a5ff}
-body[data-theme="paper"]{color-scheme:light;--bg:#eee9dc;--panel:#faf6eb;--panel2:#e3dccb;--line:#bcb29d;--text:#272820;--muted:#6f7164;--acid:#bd4b2e;--purple:#6852a6;background:var(--bg);color:var(--text)}
-body[data-theme="paper"] header{background:#eee9dcf2;border-color:var(--line)}body[data-theme="paper"] aside.left,body[data-theme="paper"] aside.right{background:#e3dccbd9;border-color:var(--line)}body[data-theme="paper"] .stage{background-color:#e4dece;background-image:radial-gradient(#756b552b .7px,transparent .7px);border-color:var(--line)}
-body[data-theme="paper"] .stagebar,body[data-theme="paper"] .card,body[data-theme="paper"] .fileitem,body[data-theme="paper"] .palette,body[data-theme="paper"] .custom-colors,body[data-theme="paper"] .shape-band,body[data-theme="paper"] .shape-custom-import,body[data-theme="paper"] .shape-thresholds,body[data-theme="paper"] .shape-preset-panel,body[data-theme="paper"] .theme-menu-panel{background:var(--panel);border-color:var(--line);color:var(--text)}
-body[data-theme="paper"] .btn,body[data-theme="paper"] .select,body[data-theme="paper"] .field input[type=text],body[data-theme="paper"] .palette-library input[type=text],body[data-theme="paper"] .modal input{background:var(--panel2);border-color:var(--line);color:var(--text)}body[data-theme="paper"] .btn.primary{background:var(--acid);border-color:var(--acid);color:#fff}body[data-theme="paper"] .effect,body[data-theme="paper"] .menu button,body[data-theme="paper"] .field label,body[data-theme="paper"] .shape-band>b{color:var(--text)}body[data-theme="paper"] .ascii{background:#f7f0df;border-color:var(--line)}body[data-theme="paper"] .ascii pre{color:#8b3d2b}
-@media(max-width:740px){.theme-menu-panel{position:fixed;top:58px;right:8px}.shape-band-row{grid-template-columns:minmax(0,1fr) minmax(50px,.7fr) 28px}.shape-preset-actions{grid-template-columns:1fr 1fr}}
-
-/* Keep the theme drawer clear of workspace navigation, with independent scrolling. */
-.theme-menu-panel{position:fixed!important;top:62px!important;right:8px!important;width:min(320px,calc(100vw - 16px))!important;max-height:calc(100dvh - 72px);overflow:auto}
-@media(max-width:740px){.theme-menu-panel{top:96px!important;right:5px!important;width:min(320px,calc(100vw - 10px))!important;max-height:calc(100dvh - 104px)}}
-@media (prefers-reduced-motion: reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-
-@media(max-width:740px){.preset-toolbar{width:100%}.preset-search{flex:1 1 100%;width:100%}}
-
-.range-number{width:60px;min-width:48px;flex:0 0 60px;padding:3px 5px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--text);font:500 11px/1.3 var(--mono-font);font-variant-numeric:tabular-nums}
-.fieldtop label{flex:1;min-width:0}
-.fieldtop .val{flex:0 0 auto}
-.export-modal input[type=range]{width:100%;accent-color:var(--acid)}
-
-/* Restored shared component styling, now themed independently from the optional XP shell. */
-.effect-control{position:relative;display:block;border:1px solid var(--line);border-radius:9px;background:var(--panel2);padding:7px;isolation:isolate;overflow:visible}
-.effect-control.is-active{background:color-mix(in srgb,var(--acid) 10%,var(--panel2));border-color:color-mix(in srgb,var(--acid) 55%,var(--line))}
-.effect-control .effect{position:relative;z-index:2;display:flex;align-items:center;gap:7px;width:100%;min-height:29px;border:0;border-radius:6px;padding:2px 1px 6px;color:var(--text);cursor:pointer;user-select:none;pointer-events:auto;font:500 12px/1.35 var(--ui-font)}
-.effect-control .effect-toggle[role="checkbox"]{position:relative;z-index:3;display:inline-flex;align-items:center;justify-content:center;flex:0 0 18px;width:18px;height:18px;min-width:18px;margin:0 3px 0 0;padding:0;border:1px solid var(--line);border-radius:4px;appearance:none;background:var(--bg);color:var(--acid);box-shadow:inset 0 1px 2px #0002;cursor:pointer;pointer-events:auto}
-.effect-control .effect-toggle[role="checkbox"][aria-checked="true"]{background:color-mix(in srgb,var(--acid) 20%,var(--panel));border-color:var(--acid)}
-.effect-control .effect-toggle[role="checkbox"][aria-checked="true"]::after{content:"✓";font:700 13px/1 var(--ui-font);color:var(--acid);position:absolute;left:2px;top:1px}
-.effect-control .effect-toggle:focus-visible{outline:2px solid var(--acid);outline-offset:2px}
-.effect-control .effect-lock{display:inline-flex!important;visibility:visible!important;opacity:1!important;position:relative;z-index:5;align-items:center;justify-content:center;flex:0 0 28px;width:28px;height:26px;min-width:28px;margin:0 2px 0 0;padding:0;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--muted);cursor:pointer;pointer-events:auto}
-.effect-control .effect-lock svg{display:block;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-.effect-control .effect-lock[aria-pressed="true"]{border-color:var(--acid);background:color-mix(in srgb,var(--acid) 12%,var(--panel));color:var(--acid)}
-.effect-control .effect-lock:focus-visible{outline:2px solid var(--acid);outline-offset:2px}
-@media(max-width:740px){.effect-control .effect-lock{flex-basis:32px;width:32px;height:32px;min-width:32px}}
-.effect-control .effect small{margin-left:auto;color:var(--muted);font:500 9px/1.3 var(--mono-font)}
-.effect-control .effect-order-actions{position:relative;z-index:4;display:inline-flex;margin:0 0 5px auto;gap:3px}
-.effect-order-actions button{background:var(--panel);border:1px solid var(--line);border-radius:5px;color:var(--text);padding:2px 6px;font:500 10px/1.2 var(--ui-font);cursor:pointer}
-.effect-order-actions button:active{transform:translateY(1px)}
-.effect-intensity{position:relative;z-index:1;display:flex;align-items:center;gap:7px}
-.effect-intensity input[type="range"]{pointer-events:auto;cursor:pointer;min-width:0;flex:1;accent-color:var(--acid)}
-.effect-intensity output{color:var(--acid);font:600 10px/1.3 var(--mono-font);min-width:30px;text-align:right}
-.custom-colors,.ascii-neoglow,.shape-band,.card,.drop,.fileitem,.ascii{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text)}
-.custom-colors,.ascii-neoglow{padding:9px}
-.custom-colors-head,.shape-band>b{color:var(--text)}
-.color-pick{font-size:10px;color:var(--muted)}
-.color-pick input,.shape-band-row input[type=color],.color-select-row input[type=color]{border:1px solid var(--line);border-radius:6px;background:var(--panel2);padding:2px}
-.color-grid{gap:6px}
-.effects{gap:7px}
-.effect{color:var(--text)}
-.shape-bands{display:grid;gap:7px;margin:10px 0;max-height:400px;overflow:auto}
-.shape-band{padding:8px}
-.shape-band>b{display:block;font-size:10px;margin-bottom:6px}
-.shape-band-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 28px;gap:5px;align-items:center}
-.shape-band-row .select{min-width:0;padding:5px}
-.shape-band-row input[type=color]{width:28px;height:25px}
-.glyph-preview{margin-top:5px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--acid);font:12px/1.6 var(--mono-font);letter-spacing:1px;overflow:hidden;white-space:nowrap;padding:5px 7px}
-.ascii-neoglow{margin-top:9px}
-.ascii-neoglow .switchrow{font-size:11px}
-.ascii-neoglow .field{margin-top:8px}
-.drop{background:color-mix(in srgb,var(--acid) 5%,var(--panel2));border-style:dashed;border-color:color-mix(in srgb,var(--acid) 40%,var(--line))}
-.fileitem{background:var(--panel2)}
-.fileicon{border:1px solid var(--line);border-radius:7px;background:color-mix(in srgb,var(--acid) 10%,var(--panel2))}
-.progress{height:5px;border:1px solid var(--line);border-radius:99px;background:var(--panel2)}
-.progress i{background:var(--acid);border-right:1px solid color-mix(in srgb,var(--acid) 60%,var(--line))}
-.ascii{background:var(--bg)}
-.ascii summary{font-size:11px;color:var(--acid)}
-.ascii pre{font:12px/1.2 var(--mono-font);color:var(--acid)}
-.toast{border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font:500 12px/1.4 var(--ui-font);box-shadow:0 8px 30px #0003}
-.modalbg{background:#0008;backdrop-filter:blur(3px)}
-.modal{border:1px solid var(--line);border-radius:13px;background:var(--panel);color:var(--text);box-shadow:0 18px 70px #0005}
-.modal h2{font:800 16px/1.35 var(--ui-font);color:var(--text)}
-.modal p{color:var(--muted);font-size:12px}
-.modal input{border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:12px/1.4 var(--ui-font)}
-#videoView{min-height:100%}
-.video-stage{height:clamp(240px,calc(100dvh - 240px),700px);min-height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-#videoEmpty{display:block;position:absolute;max-width:340px}
-#videoOutput{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated;background:var(--panel2);border:1px solid var(--line);box-shadow:0 8px 30px #0003}
-.video-timeline{margin-top:8px;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}
-.video-time-row{display:flex;align-items:center;gap:9px}
-.video-time-row span{min-width:60px;text-align:center;color:var(--acid);font:600 10px/1.3 var(--mono-font)}
-#videoTimeline{flex:1;min-width:0;accent-color:var(--acid)}
-.video-hint{margin-top:6px;color:var(--muted);font-size:11px;line-height:1.45}
-@media(max-width:740px){
- .effect-control{padding:7px}
- .shape-band-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 28px}
- .shape-bands{max-height:320px}
- .video-stage{height:clamp(135px,21dvh,220px);min-height:130px}
- #videoOutput{max-width:100%;max-height:100%}
- .video-time-row{gap:5px;flex-wrap:wrap}
- .video-time-row span{min-width:50px;font-size:11px}
- .video-hint{font-size:11px}
-}
-
-
-.batch-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:9px 1px 5px;color:var(--muted);font:500 10px/1.4 var(--mono-font)}.batch-progress-meta #batchProgressCount{color:var(--text);font-variant-numeric:tabular-nums}.progress[role="progressbar"]{overflow:hidden}#cancelBatch[hidden]{display:none!important}
-
-.image-loading{position:absolute;z-index:8;inset:12px;display:flex;align-items:center;justify-content:center;gap:13px;padding:18px;border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 92%,transparent);box-shadow:0 14px 48px #0008;backdrop-filter:blur(8px);text-align:left}
-.image-loading-spinner{width:27px;height:27px;flex:0 0 27px;border:3px solid var(--line);border-top-color:var(--acid);border-radius:50%;animation:tgrm-image-spin .8s linear infinite}
-.image-loading-copy{display:grid;gap:4px;min-width:0}
-.image-loading-copy strong{font-size:12px;color:var(--text);overflow-wrap:anywhere}
-.image-loading-copy small{font-size:10px;color:var(--muted)}
-@keyframes tgrm-image-spin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.image-loading-spinner{animation:none;border-top-color:var(--acid)}}
-@media(max-width:740px){.image-loading{inset:7px;padding:10px;gap:9px}.image-loading-copy strong{font-size:11px}.image-loading-copy small{font-size:9px}}
-
-@media(max-width:740px){
-  .topnav [data-mode]{min-height:36px;padding:8px 11px}
-  .layout>.left .menu button{min-height:36px;padding:8px 11px}
-  .topright .btn,.theme-menu>summary{min-height:36px}
-  .stageactions .btn,.stageactions .select{min-height:34px}
-  .layout main .select,.layout aside.right .select,.layout aside.right input:not([type=range]){min-height:36px}
-  .layout aside.right input[type=range],#compareRange,#videoTimeline{height:32px;min-height:32px;touch-action:pan-x}
-  .layout aside.right .effect-toggle,.layout aside.right .effect-order-actions button,.layout aside.right .effect-lock{min-width:32px;min-height:32px}
-  .layout aside.right .switch{width:38px;height:22px;min-width:38px}
-  .layout aside.right .switch:before{width:14px;height:14px;top:4px;left:4px}
-  .layout aside.right .switch[aria-checked="true"]:before{left:20px}
-  .layout aside.right .fieldtop{min-height:24px}
-  .layout aside.right .btn{min-height:34px}
-}</style>
-<style id="xpShellStyles" media="not all">
-/* Full Luna / Windows XP skin: real blue title bars, silver controls and crisp pixel geometry. */
-body[data-shell="xp"]{
-  color-scheme:light;
-  --bg:#dbe7f5;
-  --panel:#ece9d8;
-  --panel2:#f7f5ec;
-  --line:#7f9db9;
-  --text:#1c2b3a;
-  --muted:#526a82;
-  --acid:#0054e3;
-  --purple:#316ac5;
-  --xp-title:#0054e3;
-  --xp-title-light:#3b8cff;
-  --xp-title-dark:#003c9d;
-  --xp-frame:#7f9db9;
-  --xp-face:#ece9d8;
-  --xp-highlight:#316ac5;
-  --xp-selection:#0a246a;
-  font-family:Tahoma,"Microsoft Sans Serif",Arial,sans-serif!important;
-  font-size:13px;
-  line-height:1.4;
-  color:var(--text)!important;
-  background:
-    linear-gradient(0deg,transparent 0 68%,#ffffff18 68% 68.25%,transparent 68.25%),
-    radial-gradient(ellipse at 4% 120%,#3f8d38 0 19%,transparent 19.3%),
-    radial-gradient(ellipse at 86% 118%,#2b852d 0 25%,transparent 25.3%),
-    linear-gradient(180deg,#72b7f8 0%,#b8ddff 42%,#8acb5c 42.5%,#479839 100%)!important;
-}
-body[data-shell="xp"] :is(button,input,select,textarea){
-  font-family:Tahoma,"Microsoft Sans Serif",Arial,sans-serif!important;
-  letter-spacing:0!important;
-  text-shadow:none;
-}
-body[data-shell="xp"] :is(h1,h2,h3,h4,label,small,output){
-  font-family:Tahoma,"Microsoft Sans Serif",Arial,sans-serif!important;
-}
-body[data-shell="xp"] a{color:#003c9d}
-body[data-shell="xp"] ::selection{background:#316ac5;color:#fff}
-body[data-shell="xp"] :is(button,input,select,textarea,a,summary):focus-visible{
-  outline:1px dotted #003c74!important;
-  outline-offset:2px;
-}
-body[data-shell="xp"] header{
-  background:linear-gradient(180deg,#83bdff 0%,#4c99ff 13%,#1671ee 14%,#0864dd 52%,#0054ce 53%,#003fa8 100%)!important;
-  color:#fff!important;
-  border:1px solid #174ea6;
-  border-bottom:1px solid #003780;
-  box-shadow:inset 1px 1px #d7eaff,inset -1px -1px #00316f;
-  backdrop-filter:none;
-}
-body[data-shell="xp"] .brand{gap:8px;text-decoration:none}
-body[data-shell="xp"] .brand b{
-  font-family:Tahoma,"Microsoft Sans Serif",Arial,sans-serif!important;
-  font-size:14px;line-height:1.2;font-weight:700;letter-spacing:0;color:#fff;
-  text-shadow:1px 1px #164d9b;
-}
-body[data-shell="xp"] .brand small{display:none}
-body[data-shell="xp"] .mark{
-  border:1px solid #d8e9ff;border-radius:0;padding:3px;gap:2px;
-  background:linear-gradient(135deg,#fff,#9ac8ff);
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #5f8fcd;
-}
-body[data-shell="xp"] .mark i{border-radius:0;background:#0054e3}
-body[data-shell="xp"] .mark i:nth-child(2n){background:#80c342}
-body[data-shell="xp"] .topnav{gap:2px}
-body[data-shell="xp"] .navbtn{
-  border:1px solid transparent;border-radius:0;color:#fff;padding:7px 9px;
-  font:600 12px/1.25 Tahoma,"Microsoft Sans Serif",Arial,sans-serif;
-  text-shadow:0 1px #174d98;
-}
-body[data-shell="xp"] .navbtn:hover{
-  background:linear-gradient(#74b4ff,#3279d8);
-  border-color:#b9d9ff;color:#fff;
-  box-shadow:inset 1px 1px #b8d8ff,inset -1px -1px #194fa1;
-}
-body[data-shell="xp"] .navbtn.active{
-  background:linear-gradient(180deg,#fff 0%,#f8fbff 55%,#e0eafa 100%);
-  color:#003c74;border:1px solid #fff;border-bottom-color:#d0dced;
-  text-shadow:none;box-shadow:inset 1px 1px #fff,inset -1px -1px #aabfd7;
-}
-body[data-shell="xp"] .topright{gap:5px}
-body[data-shell="xp"] .local{color:#e9f5ff}
-body[data-shell="xp"] .live{background:#9be35d;box-shadow:0 0 0 1px #3e8b31}
-body[data-shell="xp"] .btn{
-  appearance:none;
-  border:1px solid #7f9db9;
-  border-radius:0;
-  background:linear-gradient(180deg,#fff 0%,#f7f7f2 48%,#e3e6e9 100%);
-  color:#172b44;
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #b3c1cf,1px 1px 0 #c3cfdd;
-  font:500 12px/1.25 Tahoma,"Microsoft Sans Serif",Arial,sans-serif;
-  padding:6px 10px;
-  text-shadow:none;
-  transform:none;
-}
-body[data-shell="xp"] .btn:hover{
-  border-color:#316ac5;
-  background:linear-gradient(180deg,#fff 0%,#eaf4ff 48%,#cbdff8 100%);
-  color:#003c74;
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #8baed9,1px 1px 0 #a7bfdc;
-}
-body[data-shell="xp"] .btn:active,
-body[data-shell="xp"] .btn.primary:active{
-  border:1px solid #5b7898;
-  background:linear-gradient(180deg,#cbd8e7,#f0f4f9);
-  box-shadow:inset 1px 1px #8ba0b8,inset -1px -1px #fff;
-  transform:translate(1px,1px);
-}
-body[data-shell="xp"] .btn:disabled{color:#8995a2;opacity:.72}
-body[data-shell="xp"] .btn.primary{
-  border:1px solid #003c74;
-  background:linear-gradient(180deg,#62a5ff 0%,#2175e8 42%,#0758bf 100%);
-  color:#fff;font-weight:700;
-  box-shadow:inset 1px 1px #a9d2ff,inset -1px -1px #003c8c,1px 1px 0 #98abc3;
-}
-body[data-shell="xp"] .btn.primary:hover{
-  background:linear-gradient(180deg,#80b8ff 0%,#3c8df5 45%,#1265cc 100%);
-  color:#fff;
-}
-body[data-shell="xp"] #openImage.btn{
-  border-color:#2e721a;
-  background:linear-gradient(180deg,#b5ec75 0%,#77c63f 45%,#4a9d22 100%);
-  color:#103d0e;
-  box-shadow:inset 1px 1px #e8ffc7,inset -1px -1px #387a20,1px 1px 0 #245e1c;
-  font-weight:700;
-}
-body[data-shell="xp"] #openImage.btn:hover{
-  background:linear-gradient(180deg,#d1f79b 0%,#91d851 48%,#62b52d 100%);
-}
-body[data-shell="xp"] .btn.ghost{background:#ece9d8}
-body[data-shell="xp"] .btn.sm{padding:5px 8px;font-size:11px}
-body[data-shell="xp"] .btn.full{width:100%}
-body[data-shell="xp"] .layout{
-  gap:0;background:transparent!important;
-}
-body[data-shell="xp"] .layout>main,
-body[data-shell="xp"] .layout>aside.right{
-  border:1px solid #7f9db9;
-  border-radius:0;
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #c0d1e3;
-}
-body[data-shell="xp"] .layout>main{
-  border-right:0;
-  background:#ece9d8!important;
-}
-body[data-shell="xp"] .layout>aside.right{
-  border-left:1px solid #7f9db9;
-  background:linear-gradient(90deg,#e4eaf2 0%,#ece9d8 7%)!important;
-}
-body[data-shell="xp"] .heading{margin-bottom:14px}
-body[data-shell="xp"] .heading h1{
-  font:700 21px/1.25 Tahoma,"Microsoft Sans Serif",Arial,sans-serif;
-  letter-spacing:0;color:#123e72;text-shadow:1px 1px #fff;margin:4px 0 5px;
-}
-body[data-shell="xp"] .heading p{color:#435b72;font-size:12px}
-body[data-shell="xp"] .eyebrow{color:#245e9d;font-size:10px;letter-spacing:.04em}
-body[data-shell="xp"] .sectionlabel{
-  color:#194f8c;font-family:Tahoma,Arial,sans-serif!important;
-  font-size:10px;letter-spacing:.04em;font-weight:700;
-}
-body[data-shell="xp"] .stagebar{
-  background:linear-gradient(180deg,#fff 0%,#f6f7f8 45%,#e2e7ec 100%);
-  border:1px solid #7f9db9;border-bottom:0;border-radius:0;color:#203e61;
-  box-shadow:inset 1px 1px #fff;
-}
-body[data-shell="xp"] .stagebar .filename{
-  font:600 11px/1.25 Tahoma,Arial,sans-serif;color:#203e61;text-shadow:none;
-}
-body[data-shell="xp"] .stagebar .filename:before{
-  border-radius:0;background:#4f9c2e;box-shadow:none;
-}
-body[data-shell="xp"] .stageactions{gap:3px}
-body[data-shell="xp"] .stageactions .action-group{gap:3px}
-body[data-shell="xp"] .stageactions .action-group+.action-group{border-left:1px solid #bac8d8;padding-left:5px}
-body[data-shell="xp"] .stageactions .select{max-width:108px}
-body[data-shell="xp"] .select,
-body[data-shell="xp"] select,
-body[data-shell="xp"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
-body[data-shell="xp"] textarea{
-  border:1px solid #7f9db9;border-radius:0;
-  background:#fff;color:#172b44;
-  box-shadow:inset 1px 1px #c3c3c3;
-  padding:6px 7px;
-}
-body[data-shell="xp"] .select.full{width:100%;max-width:none}
-body[data-shell="xp"] .range,
-body[data-shell="xp"] input[type="range"]{
-  accent-color:#316ac5;cursor:pointer;
-}
-body[data-shell="xp"] input[type="range"]{
-  height:14px;min-height:14px;appearance:none;background:transparent;
-}
-body[data-shell="xp"] input[type="range"]::-webkit-slider-runnable-track{
-  height:6px;border:1px solid #9aaec4;background:linear-gradient(#d8e2ef,#fff);
-  border-radius:0;box-shadow:inset 1px 1px #d2d2d2;
-}
-body[data-shell="xp"] input[type="range"]::-webkit-slider-thumb{
-  appearance:none;width:13px;height:15px;margin-top:-5px;border:1px solid #567ba4;
-  border-radius:0;background:linear-gradient(90deg,#fefefe,#c8dbee);
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #91adcf;
-}
-body[data-shell="xp"] input[type="range"]::-moz-range-track{
-  height:6px;border:1px solid #9aaec4;background:linear-gradient(#d8e2ef,#fff);border-radius:0;
-}
-body[data-shell="xp"] input[type="range"]::-moz-range-thumb{
-  width:11px;height:13px;border:1px solid #567ba4;border-radius:0;background:linear-gradient(90deg,#fff,#c8dbee);
-}
-body[data-shell="xp"] .inspectorhead{
-  padding-bottom:9px;margin-bottom:12px;border-bottom:1px solid #aabed3;
-}
-body[data-shell="xp"] .inspectorhead strong{
-  color:#164c89;font:700 14px/1.3 Tahoma,Arial,sans-serif!important;letter-spacing:0;
-}
-body[data-shell="xp"] .linkbtn{color:#174f8c;text-decoration:underline}
-body[data-shell="xp"] .control{
-  border-bottom:1px dotted #9badc1;padding-bottom:13px;margin-bottom:13px;
-}
-body[data-shell="xp"] .controltitle{
-  color:#174f8c;font:700 11px/1.3 Tahoma,Arial,sans-serif!important;
-  letter-spacing:.02em;margin-bottom:9px;
-}
-body[data-shell="xp"] .controltitle small{color:#637991;font:400 10px Tahoma,Arial,sans-serif!important}
-body[data-shell="xp"] .field label,
-body[data-shell="xp"] .switchrow{color:#293f56}
-body[data-shell="xp"] .field label{font-size:11px}
-body[data-shell="xp"] .val{color:#174f8c;font-weight:700}
-body[data-shell="xp"] .switchrow{margin:8px 0}
-body[data-shell="xp"] .switch{
-  width:34px;height:18px;border:1px solid #819ab5;border-radius:2px;
-  background:linear-gradient(#d4dce5,#f7f7f7);box-shadow:inset 1px 1px #aebdcd;
-}
-body[data-shell="xp"] .switch:before{
-  width:11px;height:12px;top:2px;left:2px;border-radius:0;
-  background:linear-gradient(#fff,#d1dce8);border:1px solid #8da1b6;box-sizing:border-box;
-}
-body[data-shell="xp"] .switch[aria-checked="true"]{background:linear-gradient(#80b3ed,#cfe4ff)}
-body[data-shell="xp"] .switch[aria-checked="true"]:before{left:18px;background:linear-gradient(#8dcc5c,#e0f8bf);border-color:#5c9637}
-body[data-shell="xp"] .palettes{gap:5px}
-body[data-shell="xp"] .palette{
-  border:1px solid #9aadc1;border-radius:0;padding:4px;background:#f7f5ec;
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #d1d8df;
-}
-body[data-shell="xp"] .palette.active{
-  border:1px solid #316ac5;background:#e3efff;
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #9fbce3,0 0 0 1px #6f9dd8;
-}
-body[data-shell="xp"] .swatches{height:20px;border-radius:0;gap:1px}
-body[data-shell="xp"] .pname{font:10px Tahoma,Arial,sans-serif;color:#2b4258}
-body[data-shell="xp"] .effect{
-  border:1px solid #aabbd0;border-radius:0;background:linear-gradient(#fafafa,#e7ebf0);
-  color:#263f58;padding:6px;
-}
-body[data-shell="xp"] .effect:hover{background:#e4f0ff;border-color:#6d9ddd}
-body[data-shell="xp"] .effect input{accent-color:#316ac5}
-body[data-shell="xp"] .effect-control{
-  border:1px solid #9aafc7;border-radius:0;background:#e8edf4;
-  padding:6px;box-shadow:inset 1px 1px #fff,inset -1px -1px #c5d2df;
-}
-body[data-shell="xp"] .effect-control.is-active{
-  border-color:#4d83c7;background:#dceaff;
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #acc8ed;
-}
-body[data-shell="xp"] .effect-control .effect{
-  border:0;border-radius:0;background:transparent;
-  box-shadow:none;color:#223a55;
-}
-body[data-shell="xp"] .effect-control .effect:hover{background:#cfe4ff}
-body[data-shell="xp"] .effect-control .effect-toggle[role="checkbox"]{
-  border:1px solid #7d94ad;border-radius:0;background:#fff;
-  box-shadow:inset 1px 1px #d1d1d1;
-}
-body[data-shell="xp"] .effect-control .effect-toggle[role="checkbox"][aria-checked="true"]{
-  background:#e9f4ff;color:#003c74;box-shadow:inset 1px 1px #b9d7fa;
-}
-body[data-shell="xp"] .effect-control .effect-toggle[role="checkbox"][aria-checked="true"]::after{
-  color:#003c74;
-}
-body[data-shell="xp"] .effect-control .effect-lock{border:1px solid #8fa5be;border-radius:0;background:linear-gradient(#fff,#e1e8f0);color:#5f7389}
-body[data-shell="xp"] .effect-control .effect-lock[aria-pressed="true"]{border-color:#4b88c9;background:linear-gradient(#edf6ff,#cfe4ff);color:#003c74}
-body[data-shell="xp"] .effect small{color:#5f7389}
-body[data-shell="xp"] .effect-order-actions button{
-  border:1px solid #8fa5be;border-radius:0;background:linear-gradient(#fff,#e1e8f0);
-  color:#174f8c;box-shadow:inset 1px 1px #fff;
-}
-body[data-shell="xp"] .effect-intensity output{color:#174f8c}
-body[data-shell="xp"] .card,
-body[data-shell="xp"] .drop,
-body[data-shell="xp"] .custom-colors,
-body[data-shell="xp"] .shape-band,
-body[data-shell="xp"] .shape-custom-import,
-body[data-shell="xp"] .shape-thresholds,
-body[data-shell="xp"] .shape-preset-panel,
-body[data-shell="xp"] .active-palette-editor,
-body[data-shell="xp"] .palette-library,
-body[data-shell="xp"] .algorithm-layer{
-  background:#f3f4f0;border:1px solid #9aaec4;border-radius:0;
-  box-shadow:inset 1px 1px #fff;
-}
-body[data-shell="xp"] .card{padding:13px}
-body[data-shell="xp"] .card h2{
-  color:#164c89;font:700 14px/1.3 Tahoma,Arial,sans-serif!important;letter-spacing:0;
-}
-body[data-shell="xp"] .card p,
-body[data-shell="xp"] .shape-custom-import>span,
-body[data-shell="xp"] .active-palette-editor>p{color:#50677e}
-body[data-shell="xp"] .drop{
-  background-color:#eaf3fd;
-  background-image:linear-gradient(90deg,#d7e8fb 1px,transparent 1px),linear-gradient(#d7e8fb 1px,transparent 1px);
-  background-size:8px 8px;border:1px dashed #5c8fca;
-}
-body[data-shell="xp"] .drop strong{color:#174f8c}
-body[data-shell="xp"] .fileitem{
-  border:1px solid #9aadc1;border-radius:0;background:#fff;
-  box-shadow:inset 1px 1px #e1e1e1;
-}
-body[data-shell="xp"] .fileicon{border-radius:0;background:#dceaff;color:#174f8c;border:1px solid #b3cbe6}
-body[data-shell="xp"] .filetext b{color:#1c3552}
-body[data-shell="xp"] .filetext small{color:#5b6f84}
-body[data-shell="xp"] .progress{height:8px;border:1px solid #8fa6be;border-radius:0;background:#fff}
-body[data-shell="xp"] .progress i{background:repeating-linear-gradient(90deg,#316ac5 0 7px,#fff 7px 8px);border-right:1px solid #164e9d}
-body[data-shell="xp"] .presetgrid{gap:8px}
-body[data-shell="xp"] .preset{
-  border:1px solid #90a8c3;border-radius:0;background:#f2f4f5;color:#1b3550;
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #c3cfdd;
-  transition:none;
-}
-body[data-shell="xp"] .preset:hover{
-  border-color:#316ac5;background:#e6f1ff;transform:none;
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #a8c6ea;
-}
-body[data-shell="xp"] .previewart{background:#d9e4ef;border-bottom:1px solid #9aafc7}
-body[data-shell="xp"] .previewart canvas{image-rendering:pixelated}
-body[data-shell="xp"] .presetinfo{padding:10px;background:linear-gradient(#fbfcfd,#e8edf3)}
-body[data-shell="xp"] .ptag{color:#245e9d;font-size:9px;letter-spacing:.02em}
-body[data-shell="xp"] .presetname{font:700 12px/1.35 Tahoma,Arial,sans-serif}
-body[data-shell="xp"] .presetdesc{color:#526a82}
-body[data-shell="xp"] .preset-toolbar .select,
-body[data-shell="xp"] .preset-search{background:#fff;color:#172b44}
-body[data-shell="xp"] .ascii{
-  margin-top:12px;border:1px solid #7f9db9;border-radius:0;background:#182b42;
-  box-shadow:inset 1px 1px #07101c;
-}
-body[data-shell="xp"] .ascii summary{
-  padding:8px;background:linear-gradient(#fff,#dfe8f1);border-bottom:1px solid #8fa6be;
-  color:#174f8c;font:700 11px Tahoma,Arial,sans-serif;
-}
-body[data-shell="xp"] .ascii pre{
-  color:#b7e986;font:10px/1.15 "Lucida Console",monospace;
-}
-body[data-shell="xp"] .glyph-preview{
-  border:1px inset #7f9db9;border-radius:0;background:#fff;color:#174f8c;
-  font:12px/1.6 "Lucida Console",monospace;
-}
-body[data-shell="xp"] .shape-bands{border-radius:0}
-body[data-shell="xp"] .shape-preset-actions .btn{min-width:0}
-body[data-shell="xp"] .video-stage{
-  border:2px inset #a1b3c7;border-radius:0;background:#dce5ef;
-}
-body[data-shell="xp"] .video-timeline{
-  background:#e7ecf2;border:1px solid #a0b4cc;padding:8px;margin-top:8px;
-}
-body[data-shell="xp"] .video-time-row{color:#23415f}
-body[data-shell="xp"] .video-time-row input{accent-color:#316ac5}
-body[data-shell="xp"] .video-hint{color:#536a81}
-body[data-shell="xp"] .stage{
-  border:2px inset #9aadc1;border-radius:0;
-  background-color:#fff;
-  background-image:linear-gradient(45deg,#d9e4ef 25%,transparent 25%),linear-gradient(-45deg,#d9e4ef 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#d9e4ef 75%),linear-gradient(-45deg,transparent 75%,#d9e4ef 75%);
-  background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;
-}
-body[data-shell="xp"] .canvaswrap canvas{
-  image-rendering:pixelated;
-  box-shadow:2px 2px 0 #aebdce,4px 4px 0 #d0d9e4;
-  border:1px solid #7f9db9;
-}
-body[data-shell="xp"] .stagefoot{color:#526a82}
-body[data-shell="xp"] .stats b{color:#174f8c}
-body[data-shell="xp"] .textbtn,
-body[data-shell="xp"] .linkbtn{color:#174f8c;text-decoration:underline}
-body[data-shell="xp"] .textbtn:hover,
-body[data-shell="xp"] .linkbtn:hover{color:#003c74}
-body[data-shell="xp"] .file-status{color:#526a82}
-body[data-shell="xp"] .pill{
-  border:1px solid #a2b5ca;border-radius:0;background:#f6f7f5;color:#37536f;
-}
-body[data-shell="xp"] .pill.green{border-color:#8db37a;background:#edf8e8;color:#2c6c1d}
-body[data-shell="xp"] .theme-menu-panel{
-  border:1px solid #477db9;border-radius:0;background:#ece9d8;color:#1c2b3a;
-  box-shadow:2px 2px 0 #7990a9,4px 4px 0 #b9c8d8;
-}
-body[data-shell="xp"] .theme-menu-panel label{color:#334e69}
-body[data-shell="xp"] .theme-menu-panel :is(input[type="text"],select){
-  border:1px solid #7f9db9;border-radius:0;background:#fff;color:#1c2b3a;
-}
-body[data-shell="xp"] .theme-status{color:#526a82}
-body[data-shell="xp"] .theme-custom-grid input[type="color"],
-body[data-shell="xp"] .color-pick input,
-body[data-shell="xp"] input[type="color"]{
-  border:1px solid #7f9db9;border-radius:0;background:#fff;padding:2px;
-}
-body[data-shell="xp"] .palette-library-grid .btn{font-size:11px}
-body[data-shell="xp"] .palette-library-head{color:#1c3e63}
-body[data-shell="xp"] .palette-library-head small{color:#5e7186}
-body[data-shell="xp"] .active-palette-row{
-  border:1px solid #a5b7ca;border-radius:0;background:#fff;
-}
-body[data-shell="xp"] .active-palette-row input[type="color"]{
-  border:1px solid #7f9db9;border-radius:0;
-}
-body[data-shell="xp"] .algorithm-layer{
-  background:#eef3f8;border:1px solid #9aafc7;border-radius:0;
-}
-body[data-shell="xp"] .algorithm-layer-head{color:#1d3d5d}
-body[data-shell="xp"] .algorithm-layer-head button,
-body[data-shell="xp"] .algorithm-layer-remove{
-  border:1px solid #7f9db9;border-radius:0;background:linear-gradient(#fff,#e1e8f0);
-  color:#174f8c;
-}
-body[data-shell="xp"] .stack-empty{
-  border:1px dashed #8da5bf;border-radius:0;background:#f5f6f7;color:#526a82;
-}
-body[data-shell="xp"] .print-export-settings{
-  border:1px solid #9aafc7;border-radius:0;background:#e7edf4;
-}
-body[data-shell="xp"] .export-modal .export-note{
-  border:1px solid #9aafc7;border-radius:0;background:#eaf1f8;color:#35516f;
-}
-body[data-shell="xp"] .modalbg{background:rgba(13,35,63,.58);backdrop-filter:none}
-body[data-shell="xp"] .modal{
-  padding:18px;border:1px solid #477db9;border-radius:0;background:#ece9d8;color:#1c2b3a;
-  box-shadow:2px 2px 0 #6f88a5,4px 4px 0 rgba(8,35,71,.25);
-}
-body[data-shell="xp"] .modal h2{
-  margin:-18px -18px 12px;padding:9px 12px;
-  border-bottom:1px solid #003b83;
-  color:#fff;background:linear-gradient(180deg,#70adff 0%,#2479e9 20%,#0864d8 55%,#003f9d 100%);
-  font:700 13px/1.3 Tahoma,Arial,sans-serif!important;
-  text-shadow:1px 1px #174d98;
-}
-body[data-shell="xp"] .modal p{color:#425a73}
-body[data-shell="xp"] .modal input{
-  border:1px solid #7f9db9;border-radius:0;background:#fff;color:#172b44;box-shadow:inset 1px 1px #ccc;
-}
-body[data-shell="xp"] .modalactions{gap:7px}
-body[data-shell="xp"] .toast{
-  border:1px solid #316ac5;border-radius:0;background:linear-gradient(#fff,#e6effa);
-  color:#173858;padding:9px 13px;box-shadow:2px 2px 0 #8ea4bd;
-}
-body[data-shell="xp"] .emptyicon{
-  border:2px outset #7f9db9;border-radius:0;background:linear-gradient(#fff,#dce8f5);
-  color:#316ac5;box-shadow:inset 1px 1px #fff;
-}
-body[data-shell="xp"] .empty h2{color:#174f8c}
-body[data-shell="xp"] .empty p{color:#4e6278}
-body[data-shell="xp"] .privacy{
-  margin-top:auto;border:1px solid #84a0bd;border-radius:0;
-  background:linear-gradient(#f9faf8,#e2e9f0);
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #c0ccda;
-}
-body[data-shell="xp"] .privacy strong{color:#174f8c}
-body[data-shell="xp"] .privacy p{color:#526a82}
-body[data-shell="xp"] .privacy span{color:#31721d}
-body[data-shell="xp"] .custom-colors-head{color:#20466b}
-body[data-shell="xp"] .color-pick{color:#526a82}
-body[data-shell="xp"] .shape-band>b{color:#174f8c}
-body[data-shell="xp"] .shape-band-row .select{background:#fff;color:#172b44}
-body[data-shell="xp"] .shape-band-angle{color:#526a82}
-body[data-shell="xp"] .shape-band-angle output{color:#174f8c}
-body[data-shell="xp"] .shape-preset-panel input[type="text"],
-body[data-shell="xp"] .shape-preset-panel textarea,
-body[data-shell="xp"] .palette-library input[type="text"]{
-  background:#fff;color:#172b44;border:1px solid #7f9db9;border-radius:0;
-}
-body[data-shell="xp"] .range-number{
-  background:#fff;color:#174f8c;border:1px solid #7f9db9;border-radius:0;
-}
-body[data-shell="xp"] .compare-controls label{color:#526a82}
-body[data-shell="xp"] .compare-controls output{color:#174f8c}
-body[data-shell="xp"] .compare-divider{background:#316ac5;box-shadow:0 0 0 1px #fff}
-body[data-shell="xp"] .compare-divider:after{
-  background:#316ac5;color:#fff;border:1px solid #fff;border-radius:0;
-}
-body[data-shell="xp"] .action-group+.action-group{border-left-color:#bac8d8}
-body[data-shell="xp"] .effect-order-actions button:hover,
-body[data-shell="xp"] .algorithm-layer-head button:hover,
-body[data-shell="xp"] .algorithm-layer-remove:hover{background:#dcecff}
-body[data-shell="xp"] .linkbtn:hover{background:#dcecff}
-body[data-shell="xp"] .filetext b,
-body[data-shell="xp"] .presetname{color:#1c3552}
-body[data-shell="xp"] .fieldtop .range-number{font:11px Tahoma,Arial,sans-serif}
-body[data-shell="xp"] .stageactions .select{border-radius:0}
-body[data-shell="xp"] .effect input[type="checkbox"],
-body[data-shell="xp"] input[type="checkbox"]:not(.switch),
-body[data-shell="xp"] input[type="radio"]{accent-color:#316ac5}
-body[data-shell="xp"] ::-webkit-scrollbar{width:14px;height:14px}
-body[data-shell="xp"] ::-webkit-scrollbar-track{
-  background:#e7edf4;border:1px solid #a1b5ca;
-}
-body[data-shell="xp"] ::-webkit-scrollbar-thumb{
-  border:1px solid #6f8faf;border-radius:0;
-  background:linear-gradient(90deg,#f9fbfd 0%,#d8e4f1 45%,#b7cce3 100%);
-  box-shadow:inset 1px 1px #fff,inset -1px -1px #9ab0c8;
-}
-body[data-shell="xp"] ::-webkit-scrollbar-button{
-  display:block;height:14px;width:14px;
-  background:linear-gradient(#fff,#cfdceb);border:1px solid #93a9c1;
-}
-body[data-shell="xp"] *{border-radius:0}
-body[data-shell="xp"] .btn,
-body[data-shell="xp"] .theme-menu>summary,
-body[data-shell="xp"] .theme-menu-panel,
-body[data-shell="xp"] .modal,
-body[data-shell="xp"] .stage,
-body[data-shell="xp"] .stagebar,
-body[data-shell="xp"] .palette,
-body[data-shell="xp"] .preset,
-body[data-shell="xp"] .effect-control{border-radius:0!important}
-@media(max-width:740px){
-  body[data-shell="xp"] header{border-width:1px;box-shadow:inset 1px 1px #cce4ff}
-  body[data-shell="xp"] .topnav .navbtn{padding:6px 8px}
-  body[data-shell="xp"] .topnav .navbtn.active{border-color:#fff;background:linear-gradient(#fff,#dce8f7);color:#003c74}
-  body[data-shell="xp"] .layout>main{border:0;border-bottom:1px solid #7f9db9}
-  body[data-shell="xp"] .layout>aside.right{border:0;border-top:1px solid #7f9db9}
-  body[data-shell="xp"] .stageactions .action-group+.action-group{border-left:0;padding-left:0}
-  body[data-shell="xp"] .stageactions .btn{min-height:30px}
-  body[data-shell="xp"] .modal{max-width:calc(100vw - 24px)}
-  body[data-shell="xp"] .theme-menu-panel{max-width:calc(100vw - 12px)}
-}
-@media(prefers-reduced-motion:reduce){
- body[data-shell="xp"] *,body[data-shell="xp"] *::before,body[data-shell="xp"] *::after{
-  transition:none!important;animation:none!important;
- }
-}
-</style>
-<style id="actionPriorityStyles">
-/* Keep the most-used editing actions first, grouped by task. */
-.stageactions{align-items:center}
-.stageactions .action-group{display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-width:0}
-.stageactions .action-group+.action-group{border-left:1px solid var(--line);padding-left:7px}
-.stageactions .action-group .btn,.stageactions .action-group .select{white-space:nowrap}
-@media(max-width:740px){
-  .stageactions .action-group{flex:0 1 auto;gap:4px}
-  .stageactions .action-group+.action-group{border-left:0;padding-left:0}
-}
-</style>
-<style id="animationStudioStyles">
-.animation-dock{margin:18px 0 24px;padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel);min-width:0}
-.animation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.animation-title strong{display:block;font-size:12px;letter-spacing:.08em}.animation-title small{display:block;margin-top:3px;color:var(--muted);font-size:9px}
-.animation-actions,.animation-options,.animation-export{display:flex;flex-wrap:wrap;gap:7px;align-items:center}.animation-toolbar{display:grid;grid-template-columns:minmax(180px,1.4fr) repeat(3,minmax(90px,.65fr));gap:8px;align-items:end}
-.animation-field{min-width:0;display:grid;gap:4px}.animation-field label{font-size:9px;color:var(--muted)}.animation-field select,.animation-field input:not([type=checkbox]){min-width:0;width:100%;height:34px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--text);font-size:11px}
-.animation-options{margin-top:9px}.animation-check{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}
-.animation-scrub{display:grid;grid-template-columns:62px minmax(0,1fr) 62px;gap:9px;align-items:center;margin-top:13px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}.animation-scrub output{font:600 10px/1.2 ui-monospace,monospace;color:var(--acid);text-align:center}.animation-scrub input{width:100%;min-width:0;accent-color:var(--acid);touch-action:pan-x}
-.animation-lanes{display:grid;gap:6px;margin-top:9px;max-height:210px;overflow:auto}.animation-empty{padding:14px;border:1px dashed var(--line);border-radius:8px;text-align:center;color:var(--muted);font-size:10px}.animation-lane{display:grid;grid-template-columns:minmax(115px,180px) minmax(0,1fr);gap:8px;align-items:center}
-.animation-lane-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;background:transparent;color:var(--text);text-align:left;font-size:10px;padding:6px}.animation-lane-name.active{color:var(--acid)}.animation-lane-track{height:28px;position:relative;border:1px solid var(--line);border-radius:6px;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(25% - 1px),var(--line) 25%)}
-.animation-key{position:absolute;top:50%;width:11px;height:11px;padding:0;transform:translate(-50%,-50%) rotate(45deg);border:1px solid var(--acid);border-radius:2px;background:var(--acid)}.animation-oscillator{position:absolute;right:5px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--purple)}
-.animation-modulators{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}.animation-modulators .animation-field{width:110px}.animation-status{min-width:0;flex:1;color:var(--muted);font-size:9px}
-.animation-progress{width:100%;height:5px;margin-top:9px;overflow:hidden;border-radius:5px;background:var(--panel2)}.animation-progress>span{display:block;width:0;height:100%;background:var(--acid);transition:width .1s linear}.animation-export{margin-top:10px}.animation-export .btn{min-height:34px}
-@media(max-width:740px){.animation-dock{padding:10px;margin:12px 0 18px}.animation-head{align-items:flex-start;flex-direction:column}.animation-toolbar{grid-template-columns:1fr 1fr}.animation-track-field{grid-column:1/-1}.animation-modulators .animation-field{flex:1 1 90px;width:auto}.animation-lane{grid-template-columns:100px minmax(0,1fr);gap:5px}.animation-scrub{grid-template-columns:48px minmax(0,1fr) 48px;padding:7px}.animation-lanes{max-height:180px}}
-.active-palette-row{grid-template-columns:24px minmax(0,1fr) 64px 30px 30px!important}.active-palette-lock[aria-pressed=true]{border-color:var(--acid);color:var(--acid)}
-</style>
+<link rel="stylesheet" href="./styles/base.css" data-standalone-inline>
+<link rel="stylesheet" href="./styles/xp-shell.css" id="xpShellStyles" media="not all" data-standalone-inline>
+<link rel="stylesheet" href="./styles/action-priority.css" id="actionPriorityStyles" data-standalone-inline>
+<link rel="stylesheet" href="./styles/animation-studio.css" id="animationStudioStyles" data-standalone-inline>
+<link rel="stylesheet" href="./styles/ui-foundation.css" id="uiFoundationStyles" data-standalone-inline>
 </head>
 <body data-mode="editor" data-shell="xp" data-inspector-level="basic">
 <header>
 <a class="brand" href="#" id="homeLogo" aria-label="TGRMLither"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span><b>TGRMLither</b><small>PIXEL IMAGE STUDIO</small></span></a>
 <button class="btn primary" id="openImage" title="Загрузить изображение" aria-label="Загрузить изображение">▣ Загрузить</button>
 <nav class="topnav" aria-label="Рабочие пространства"><button class="navbtn active" data-mode="editor">Редактор</button><button class="navbtn" data-mode="presets">Пресеты</button><button class="navbtn" data-mode="shape">Shape Lab</button><button class="navbtn" data-mode="script">Script Slayer</button><button class="navbtn" data-mode="batch">Пакетно</button><button class="navbtn" data-mode="video">Видео</button></nav>
-<div class="topright"><span class="local"><i class="live"></i>локально</span><details class="theme-menu" id="themeMenu"><summary class="btn sm" title="Тема интерфейса и код обмена">◐</summary><div class="theme-menu-panel"><label for="themePicker">Тема интерфейса</label><select id="themePicker" class="select full"><option value="night">Acid Night</option><option value="terminal">Terminal Green</option><option value="violet">Violet Signal</option><option value="paper">Paper Studio</option><option value="custom">Моя тема</option></select><label for="shellPicker">Оболочка интерфейса</label><select id="shellPicker" class="select full"><option value="xp" selected>Windows XP Luna</option><option value="studio">Современная студия</option></select><div class="theme-custom-grid" id="themeCustomColors"><label>Фон<input type="color" id="themeColorBg" value="#11130f"></label><label>Панель<input type="color" id="themeColorPanel" value="#191c17"></label><label>Вложенная<input type="color" id="themeColorPanel2" value="#20241e"></label><label>Границы<input type="color" id="themeColorLine" value="#30372c"></label><label>Текст<input type="color" id="themeColorText" value="#eff3e9"></label><label>Вторичный<input type="color" id="themeColorMuted" value="#9aa393"></label><label>Акцент<input type="color" id="themeColorAcid" value="#cafa6a"></label><label>Второй акцент<input type="color" id="themeColorPurple" value="#b5a3ff"></label></div><button class="btn sm full" id="applyCustomTheme" type="button">Применить мои цвета</button><button class="btn sm full" id="makeThemeCode" type="button">↗ Создать / скопировать код темы</button><label for="themeCodeInput">Код темы для импорта</label><input type="text" id="themeCodeInput" placeholder="TGRMTHEME1:…" autocomplete="off"><button class="btn sm full" id="applyThemeCode" type="button">Применить код темы</button><div class="theme-custom-grid" style="margin-top:9px"><button class="btn sm" id="exportUserBackup" type="button">↓ Резервная копия</button><button class="btn sm" id="importUserBackup" type="button">↑ Восстановить</button></div><small class="theme-status" id="themeStatus">Тема сохраняется в этом браузере.</small></div></details><button class="btn" id="offlineBtn" title="Скачать автономную HTML-версию">↓ Офлайн HTML</button><button class="btn primary" id="topExport">↓ Экспорт</button></div>
+<div class="topright"><span class="local"><i class="live"></i>локально</span><details class="theme-menu" id="themeMenu"><summary class="btn sm" title="Тема интерфейса и код обмена">◐</summary><div class="theme-menu-panel"><label for="themePicker">Тема интерфейса</label><select id="themePicker" class="select full"><option value="night">Acid Night</option><option value="terminal">Terminal Green</option><option value="violet">Violet Signal</option><option value="paper">Paper Studio</option><option value="custom">Моя тема</option></select><label for="shellPicker">Оболочка интерфейса</label><select id="shellPicker" class="select full"><option value="xp" selected>Windows XP Luna</option><option value="studio">Современная студия</option></select><div class="theme-custom-grid" id="themeCustomColors"><label>Фон<input type="color" id="themeColorBg" value="#11130f"></label><label>Панель<input type="color" id="themeColorPanel" value="#191c17"></label><label>Вложенная<input type="color" id="themeColorPanel2" value="#20241e"></label><label>Границы<input type="color" id="themeColorLine" value="#30372c"></label><label>Текст<input type="color" id="themeColorText" value="#eff3e9"></label><label>Вторичный<input type="color" id="themeColorMuted" value="#9aa393"></label><label>Акцент<input type="color" id="themeColorAcid" value="#cafa6a"></label><label>Второй акцент<input type="color" id="themeColorPurple" value="#b5a3ff"></label></div><button class="btn sm full" id="applyCustomTheme" type="button">Применить мои цвета</button><button class="btn sm full" id="makeThemeCode" type="button">↗ Создать / скопировать код темы</button><label for="themeCodeInput">Код темы для импорта</label><input type="text" id="themeCodeInput" placeholder="TGRMTHEME1:…" autocomplete="off"><button class="btn sm full" id="applyThemeCode" type="button">Применить код темы</button><div class="theme-custom-grid" style="margin-top:9px"><button class="btn sm" id="exportUserBackup" type="button">↓ Резервная копия</button><button class="btn sm" id="importUserBackup" type="button">↑ Восстановить</button></div><small class="theme-status" id="themeStatus">Тема сохраняется в этом браузере.</small><small class="theme-status theme-contrast-warning" id="themeContrastWarning" role="status" aria-live="polite"></small></div></details><button class="btn" id="offlineBtn" title="Скачать автономную HTML-версию">↓ Офлайн HTML</button><button class="btn primary" id="topExport">↓ Экспорт</button></div>
 </header>
 <div class="layout">
 <main>
@@ -1015,10 +35,10 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 </section>
 <section id="animationDock" class="animation-dock" aria-label="Animation timeline">
 <div class="animation-head"><div class="animation-title"><strong>ANIMATION STUDIO / KEYFRAMES</strong><small>Анимируйте параметры обработки, эффекты, палитры и формы. Клип хранится локально вместе с проектом.</small></div><div class="animation-actions"><button class="btn sm primary" id="animationPlay" type="button">▶ Воспроизвести</button><button class="btn sm" id="animationStop" type="button" disabled>■ Стоп</button></div></div>
-<div class="animation-toolbar"><div class="animation-field animation-track-field"><label for="animationTrack">Анимируемый параметр</label><select id="animationTrack"></select></div><div class="animation-field"><label for="animationDuration">Длительность · сек</label><input id="animationDuration" type="number" min="0.25" max="60" step="0.25" value="5"></div><div class="animation-field"><label for="animationFps">Кадров в секунду</label><select id="animationFps"><option>12</option><option>15</option><option selected>24</option><option>25</option><option>30</option><option>50</option><option>60</option></select></div><div class="animation-field"><label for="animationEasing">Переход к следующему ключу</label><select id="animationEasing"><option value="linear">Linear</option><option value="easeIn">Ease In</option><option value="easeOut">Ease Out</option><option value="easeInOut">Ease In-Out</option><option value="step">Hold / Step</option></select></div></div>
+<div class="animation-toolbar"><div class="animation-field animation-track-field"><label for="animationTrack">Анимируемый параметр</label><select id="animationTrack"></select></div><div class="animation-field"><label for="animationDuration">Длительность · сек</label><input id="animationDuration" type="number" min="0.25" max="60" step="0.25" value="5"></div><div class="animation-field"><label for="animationFps">Кадров в секунду</label><select id="animationFps"><option>12</option><option>15</option><option selected>24</option><option>25</option><option>30</option><option>50</option><option>60</option></select></div><div class="animation-field"><label for="animationEasing">Переход к следующему ключу</label><select id="animationEasing"><option value="linear">Линейно</option><option value="easeIn">Плавный старт</option><option value="easeOut">Плавное завершение</option><option value="easeInOut">Плавно в обе стороны</option><option value="step">Ступенчато</option></select></div></div>
 <div class="animation-options"><label class="animation-check"><input id="animationLoop" type="checkbox" checked> Зациклить клип</label><label class="animation-check">Предпросмотр <select id="animationPreviewMode" class="select"><option value="live">Live</option><option value="balanced">Balanced</option><option value="still">Still</option></select></label><button class="btn sm" id="animationAddKeyframe" type="button">＋ Ключевой кадр</button><button class="btn sm" id="animationDeleteKeyframe" type="button">− Удалить на позиции</button><button class="btn sm" id="animationCaptureBase" type="button">Снять базу настроек</button></div>
 <div class="animation-scrub"><output id="animationTimeLabel">00:00.0</output><input id="animationScrub" type="range" min="0" max="5000" step="1" value="0" aria-label="Позиция в клипе"><output id="animationEndLabel">00:05.0</output></div><div id="animationLanes" class="animation-lanes"><div class="animation-empty">Добавьте ключевой кадр для создания первой дорожки.</div></div>
-<div class="animation-modulators"><div class="animation-status" id="animationSelectedTrackInfo">Выберите параметр и добавьте ключевые кадры.</div><div class="animation-field"><label for="animationWave">Temporal Variation</label><select id="animationWave"><option value="sine">Sine</option><option value="triangle">Triangle</option><option value="saw">Saw</option><option value="square">Square</option></select></div><div class="animation-field"><label for="animationAmplitude">Амплитуда</label><input id="animationAmplitude" type="number" min="-100" max="100" step="1" value="12"></div><div class="animation-field"><label for="animationFrequency">Частота · Hz</label><input id="animationFrequency" type="number" min="0.1" max="8" step="0.1" value="1"></div><button class="btn sm" id="animationOscillator" type="button">＋ Осциллятор</button></div>
+<div class="animation-modulators"><div class="animation-status" id="animationSelectedTrackInfo">Выберите параметр и добавьте ключевые кадры.</div><div class="animation-field"><label for="animationWave">Изменение во времени</label><select id="animationWave"><option value="sine">Синус</option><option value="triangle">Треугольник</option><option value="saw">Пила</option><option value="square">Прямоугольник</option></select></div><div class="animation-field"><label for="animationAmplitude">Амплитуда</label><input id="animationAmplitude" type="number" min="-100" max="100" step="1" value="12"></div><div class="animation-field"><label for="animationFrequency">Частота · Hz</label><input id="animationFrequency" type="number" min="0.1" max="8" step="0.1" value="1"></div><button class="btn sm" id="animationOscillator" type="button">＋ Осциллятор</button></div>
 <div class="animation-export"><button class="btn sm" id="animationExportFrames" type="button">↓ PNG Sequence · ZIP</button><button class="btn sm" id="animationExportVideo" type="button">↓ Видео · MP4 / WebM</button><button class="btn sm" id="animationCancelExport" type="button" disabled>Отмена экспорта</button><span class="animation-status" id="animationExportStatus" role="status">Экспорт выполняется локально в браузере.</span></div><div class="animation-progress" aria-hidden="true"><span id="animationProgress"></span></div></section>
 <section id="presetsView" class="hidden"><div class="heading"><div><div class="eyebrow">КАТАЛОГ / ПРЕСЕТЫ</div><h1>Библиотека пресетов<span style="color:var(--acid)">.</span></h1><p>Выберите стиль и продолжайте редактировать настройки.</p></div><div class="preset-toolbar"><input class="select preset-search" id="presetSearch" type="search" placeholder="Поиск пресетов…" aria-label="Поиск пресетов"><button class="btn sm" id="savePresetLibrary">＋ Мой пресет</button><button class="btn sm" id="exportPresets">↓ JSON</button><button class="btn sm" id="importPresets">↑ Импорт</button></div></div><div class="presetgrid" id="presetGrid"></div><div class="card" style="margin-top:17px"><h2>Мои пресеты</h2><p>Ваши конфигурации сохраняются в этом браузере.</p><div class="filelist" id="customPresets"></div></div></section>
 <section id="batchView" class="hidden"><div class="heading"><div><div class="eyebrow">РАБОЧЕЕ ПРОСТРАНСТВО / ПАКЕТЫ</div><h1>Пакетная обработка<span style="color:var(--acid)">.</span></h1><p>Одна конфигурация — несколько файлов. Локальная обработка.</p></div></div><div class="card"><h2>01 / Добавьте изображения</h2><p>Текущие параметры будут применены к каждому выбранному файлу.</p><div class="drop" id="batchDrop"><div style="font-size:25px;color:var(--acid)">⇧</div><strong>Перетащите файлы сюда</strong><p>PNG · JPG · WEBP · несколько изображений</p><button class="btn" id="batchBrowse">Выбрать файлы</button></div><div class="filelist" id="batchList"></div><div class="batch-progress-meta"><span id="batchProgressLabel" role="status" aria-live="polite">Ожидает файлов</span><span id="batchProgressCount">0 / 0</span></div><div class="progress" id="batchProgressTrack" role="progressbar" aria-label="Прогресс пакетной обработки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="batchProgress"></i></div><div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" id="runBatch">▶ Обработать всё</button><button class="btn" id="cancelBatch" type="button" hidden>Отменить</button><button class="btn" id="downloadBatchZip" disabled>↓ Скачать всё ZIP</button><button class="btn" id="clearBatch">Очистить</button></div></div><div class="card"><h2>02 / Результаты</h2><p>Скачивайте PNG по отдельности или соберите все готовые изображения в один ZIP-архив.</p><div class="filelist" id="batchResults"><span style="font-size:10px;color:var(--muted)">Пока нет результатов.</span></div></div></section>
@@ -1030,7 +50,20 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 </section>
 </main>
 <aside class="right" id="inspector">
-<div class="inspectorhead"><strong id="inspectorTitle">Эффекты и настройки</strong><div class="inspector-actions"><button class="btn sm" id="advancedToggle" type="button" aria-pressed="false" title="Показать расширенные параметры">Дополнительно</button><button class="linkbtn" id="reset" title="Сбросить настройки только текущего пространства">Сбросить группу ↺</button></div></div>
+<div class="inspectorhead"><strong id="inspectorTitle">Эффекты и настройки</strong><div class="inspector-actions"><button class="btn sm" id="advancedToggle" type="button" aria-pressed="false" title="Показать расширенные параметры">Дополнительно</button><button class="linkbtn" id="reset" title="Сбросить настройки только текущего пространства">Сбросить пространство ↺</button></div></div><nav class="inspector-jump-nav" id="inspectorJumpNav" aria-label="Быстрый переход по настройкам">
+<button type="button" data-inspector-target="coreAlgorithmControl">Алгоритм</button>
+<button type="button" data-inspector-target="toneControl">Тон</button>
+<button type="button" data-inspector-target="paletteControl">Палитра</button>
+<button type="button" data-inspector-target="generalEffectsControl">Эффекты</button>
+<button type="button" data-inspector-target="algorithmStackControl">Слои</button>
+<button type="button" data-inspector-target="shapeControl">Формы</button>
+<button type="button" data-inspector-target="asciiControl">Символы</button>
+<button type="button" data-inspector-target="exportControl">Экспорт</button>
+<button type="button" data-inspector-target="shapeEffectsControl">Эффекты форм</button>
+<button type="button" data-inspector-target="scriptEffectsControl">Эффекты символов</button>
+<button type="button" data-inspector-target="batchEffectsControl">Эффекты пакета</button>
+<button type="button" data-inspector-target="videoEffectsControl">Эффекты видео</button>
+</nav>
 <section class="control" id="coreAlgorithmControl"><div class="controltitle"><span>01 / Алгоритм</span><small>ДВИЖОК ДИЗЕРИНГА</small></div>
 <div class="field" id="algorithmPickerField"><div class="fieldtop"><label for="algorithm">Тип обработки</label></div><div class="algorithm-tools"><input class="select full" id="algorithmSearch" type="search" placeholder="Поиск алгоритма…" aria-label="Поиск алгоритма"><button class="btn sm" id="favoriteAlgorithm" type="button" aria-pressed="false" title="Добавить текущий алгоритм в избранное">☆</button><button class="btn sm" id="algorithmFavoritesOnly" type="button" aria-pressed="false">Избранное</button></div><select class="select full" id="algorithm">
 <optgroup label="ERROR DIFFUSION · 15"><option value="floyd">Floyd–Steinberg</option><option value="atkinson">Atkinson</option><option value="jarvis">Jarvis–Judice–Ninke</option><option value="stucki">Stucki</option><option value="burkes">Burkes</option><option value="sierra">Sierra</option><option value="sierra2">Sierra Two-Row</option><option value="sierraLite">Sierra Lite</option><option value="fan">Fan</option><option value="shiau2">Shiau 2</option><option value="shiau3">Shiau 3</option><option value="stevenson">Stevenson–Arce</option><option value="falseFloyd">False Floyd–Steinberg</option><option value="twoRow">Two-row diffusion</option><option value="simpleDiff">Simple diffusion</option></optgroup>
@@ -1050,7 +83,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 </section>
 <section class="control" id="toneControl"><div class="controltitle"><span>02 / Тональность</span><small>IMAGE TUNING</small></div>
 <div class="field"><div class="fieldtop"><label for="contrast">Контраст</label><output class="val" id="contrastV">100%</output></div><input class="range" id="contrast" type="range" min="50" max="180" value="100"></div>
-<div class="field"><div class="fieldtop"><label for="brightness">Яркость</label><output class="val" id="brightnessV">0</output></div><input class="range" id="brightness" type="range" min="-80" max="80" value="0"></div><div class="field"><div class="fieldtop"><label for="midtones">Midtones</label><output class="val" id="midtonesV">50%</output></div><input class="range" id="midtones" type="range" min="0" max="100" value="50"></div><div class="field"><div class="fieldtop"><label for="highlights">Highlights</label><output class="val" id="highlightsV">50%</output></div><input class="range" id="highlights" type="range" min="0" max="100" value="50"></div>
+<div class="field"><div class="fieldtop"><label for="brightness">Яркость</label><output class="val" id="brightnessV">0</output></div><input class="range" id="brightness" type="range" min="-80" max="80" value="0"></div><div class="field"><div class="fieldtop"><label for="midtones">Полутона</label><output class="val" id="midtonesV">50%</output></div><input class="range" id="midtones" type="range" min="0" max="100" value="50"></div><div class="field"><div class="fieldtop"><label for="highlights">Света</label><output class="val" id="highlightsV">50%</output></div><input class="range" id="highlights" type="range" min="0" max="100" value="50"></div>
 <div class="field"><div class="fieldtop"><label for="blur">Размытие перед дизерингом</label><output class="val" id="blurV">0 px</output></div><input class="range" id="blur" type="range" min="0" max="5" value="0"></div>
 <div class="field hidden" id="smoothingControl"><div class="fieldtop"><label for="smoothing">Сглаживание результата</label><output class="val" id="smoothingV">0%</output></div><input class="range" id="smoothing" type="range" min="0" max="100" value="0"></div>
 <div class="field hidden" id="blendControl"><div class="fieldtop"><label for="blend">Смешение с оригиналом</label><output class="val" id="blendV">100%</output></div><input class="range" id="blend" type="range" min="0" max="100" value="100"><small style="display:block;color:var(--muted);font-size:9px;margin-top:5px">0% — оригинал, 100% — полная обработка.</small></div>
@@ -1063,7 +96,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 </div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px"><button class="btn sm" id="useCustomPalette">Моя палитра</button><button class="btn sm" id="extractPalette">Извлечь из фото</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px"><button class="btn sm" id="exportPalette">↓ Палитра JSON</button><button class="btn sm" id="importPalette">↑ Палитра JSON</button></div></div>
 <div class="palette-library">
  <div class="palette-library-head"><strong>Библиотека палитр</strong><small id="paletteLibraryCount">0 сохранено</small></div>
- <input type="text" id="paletteLibraryName" maxlength="48" placeholder="Название активной палитры">
+ <label class="sr-only" for="paletteLibraryName">Название палитры</label><input type="text" id="paletteLibraryName" maxlength="48" placeholder="Название активной палитры" autocomplete="off">
  <button class="btn sm full" id="savePaletteToLibrary" type="button">☆ Сохранить палитру</button>
  <select id="paletteLibrarySelect" class="select full" aria-label="Сохранённые палитры"></select>
  <div class="palette-library-grid"><button class="btn sm" id="applyLibraryPalette" type="button">Применить</button><button class="btn sm" id="deleteLibraryPalette" type="button">Удалить</button></div>
@@ -1089,20 +122,20 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <button class="btn sm full" type="button" id="addAlgorithmLayer">＋ Добавить слой</button>
 <div class="algorithm-layer-list" id="algorithmLayerList"></div>
 </section>
-<section class="control" id="shapeControl"><div class="controltitle"><span>05 / Shape Lab</span><small>SHAPE SHIFTER</small></div>
+<section class="control" id="shapeControl"><div class="controltitle"><span>Shape Lab · формы</span><small>SHAPE SHIFTER</small></div>
 <div class="field"><div class="fieldtop"><label for="shape">Форма по умолчанию</label></div><select class="select full" id="shape"><option value="circle">Круги</option><option value="square">Квадраты</option><option value="diamond">Ромбы</option><option value="triangle">Треугольники</option><option value="line">Линии</option><option value="cross">Кресты</option><option value="hexagon">Шестиугольники</option><option value="star">Звёзды</option><option value="ring">Кольца</option><option value="chevron">Шевроны</option><option value="custom">Своя SVG-форма</option></select></div>
 <div class="field"><div class="fieldtop"><label for="jitter">Вариативность размера</label><output class="val" id="jitterV">20%</output></div><input class="range" id="jitter" type="range" min="0" max="80" value="20"></div>
 <div class="field"><div class="fieldtop"><label for="shapeDistribution">Распределение размера</label></div><select class="select full" id="shapeDistribution"><option value="uniform">Равномерное</option><option value="radial">Радиальное</option><option value="horizontal">По горизонтали</option><option value="vertical">По вертикали</option><option value="random">Органичное</option><option value="wave">Волновое</option><option value="edge">По контрасту краёв</option></select></div>
 <div class="field"><div class="fieldtop"><label for="shapeRotation">Общий поворот</label><output class="val" id="shapeRotationV">0°</output></div><input class="range" id="shapeRotation" type="range" min="-180" max="180" value="0"></div>
 <div class="shape-custom-import"><div class="field"><label for="shapeImportBand">К какому диапазону применить SVG</label><select class="select full" id="shapeImportBand"><option value="0">Shadows / тени</option><option value="1">Low mids / тёмные полутона</option><option value="2">High mids / светлые полутона</option><option value="3">Highlights / света</option></select></div><button class="btn sm" id="shapeSvgImportBtn" type="button">＋ Импортировать SVG-форму</button><span id="shapeSvgStatus">11 встроенных форм · свой SVG можно назначить любому диапазону</span></div>
-<div class="shape-thresholds"><div class="controltitle"><span>ГРАНИЦЫ ЯРКОСТИ</span><small>0–100%</small></div>
+<details class="shape-thresholds inspector-collapsible"><summary class="controltitle"><span>ГРАНИЦЫ ЯРКОСТИ</span><small>0–100%</small></summary>
 <div class="field"><div class="fieldtop"><label for="shapeThreshold0">Тени → тёмные полутона</label><output class="val" id="shapeThreshold0V">25%</output></div><input class="range" id="shapeThreshold0" type="range" min="5" max="85" value="25"></div>
 <div class="field"><div class="fieldtop"><label for="shapeThreshold1">Тёмные → светлые полутона</label><output class="val" id="shapeThreshold1V">50%</output></div><input class="range" id="shapeThreshold1" type="range" min="15" max="90" value="50"></div>
-<div class="field"><div class="fieldtop"><label for="shapeThreshold2">Полутона → света</label><output class="val" id="shapeThreshold2V">75%</output></div><input class="range" id="shapeThreshold2" type="range" min="25" max="95" value="75"></div></div>
-<div class="shape-bands"><div class="controltitle"><span>ФОРМЫ ПО ДИАПАЗОНАМ</span><small>SHAPE / SIZE / COLOR / ANGLE</small></div>
-<div class="shape-band"><b>01 · Shadows</b><div class="shape-band-row"><select class="select" id="bandShape0" aria-label="Форма Shadows"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize0" min="20" max="180" value="55" aria-label="Размер Shadows"><input type="color" id="bandColor0" value="#334b2b" aria-label="Цвет Shadows"></div><div class="shape-band-angle"><label for="bandRotation0">Угол</label><input type="range" class="range" id="bandRotation0" min="-180" max="180" value="0"><output id="bandRotation0V">0°</output></div></div><div class="shape-band"><b>02 · Low mids</b><div class="shape-band-row"><select class="select" id="bandShape1" aria-label="Форма Low mids"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize1" min="20" max="180" value="70" aria-label="Размер Low mids"><input type="color" id="bandColor1" value="#7a9a47" aria-label="Цвет Low mids"></div><div class="shape-band-angle"><label for="bandRotation1">Угол</label><input type="range" class="range" id="bandRotation1" min="-180" max="180" value="0"><output id="bandRotation1V">0°</output></div></div><div class="shape-band"><b>03 · High mids</b><div class="shape-band-row"><select class="select" id="bandShape2" aria-label="Форма High mids"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize2" min="20" max="180" value="85" aria-label="Размер High mids"><input type="color" id="bandColor2" value="#b8d785" aria-label="Цвет High mids"></div><div class="shape-band-angle"><label for="bandRotation2">Угол</label><input type="range" class="range" id="bandRotation2" min="-180" max="180" value="0"><output id="bandRotation2V">0°</output></div></div><div class="shape-band"><b>04 · Highlights</b><div class="shape-band-row"><select class="select" id="bandShape3" aria-label="Форма Highlights"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize3" min="20" max="180" value="100" aria-label="Размер Highlights"><input type="color" id="bandColor3" value="#d9efad" aria-label="Цвет Highlights"></div><div class="shape-band-angle"><label for="bandRotation3">Угол</label><input type="range" class="range" id="bandRotation3" min="-180" max="180" value="0"><output id="bandRotation3V">0°</output></div></div></div>
-<div class="shape-preset-panel"><div class="controltitle"><span>БИБЛИОТЕКА SHAPE SHIFTER</span><small>LOCAL / SHAREABLE</small></div><div class="field"><label for="shapePresetSelect">Пресеты форм</label><select class="select full" id="shapePresetSelect"></select></div><div class="field"><label for="shapePresetName">Название собственного пресета</label><input type="text" id="shapePresetName" maxlength="48" placeholder="Например, Star field"></div><div class="shape-preset-actions"><button class="btn sm" id="applyShapePreset" type="button">Применить</button><button class="btn sm" id="saveShapePreset" type="button">☆ Сохранить</button><button class="btn sm" id="deleteShapePreset" type="button">Удалить</button></div><div class="shape-preset-actions"><button class="btn sm" id="exportShapePreset" type="button">↓ JSON</button><button class="btn sm" id="importShapePreset" type="button">↑ Импорт JSON</button></div><div class="field" style="margin-top:10px"><label for="shapeShareCode">Код формы для обмена</label><textarea id="shapeShareCode" rows="3" placeholder="Создайте код после настройки формы"></textarea></div><div class="shape-preset-actions"><button class="btn sm" id="makeShapeCode" type="button">↗ Создать / скопировать</button><button class="btn sm" id="applyShapeCode" type="button">Применить код</button></div></div></section>
-<section class="control" id="asciiControl"><div class="controltitle"><span>06 / Script Slayer</span><small>CHARACTER ENGINE</small></div>
+<div class="field"><div class="fieldtop"><label for="shapeThreshold2">Полутона → света</label><output class="val" id="shapeThreshold2V">75%</output></div><input class="range" id="shapeThreshold2" type="range" min="25" max="95" value="75"></div></details>
+<details class="shape-bands inspector-collapsible"><summary class="controltitle"><span>ФОРМЫ ПО ДИАПАЗОНАМ</span><small>SHAPE / SIZE / COLOR / ANGLE</small></summary>
+<div class="shape-band"><b>01 · Shadows</b><div class="shape-band-row"><select class="select" id="bandShape0" aria-label="Форма Shadows"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize0" min="20" max="180" value="55" aria-label="Размер Shadows"><input type="color" id="bandColor0" value="#334b2b" aria-label="Цвет Shadows"></div><div class="shape-band-angle"><label for="bandRotation0">Угол</label><input type="range" class="range" id="bandRotation0" min="-180" max="180" value="0"><output id="bandRotation0V">0°</output></div></div><div class="shape-band"><b>02 · Low mids</b><div class="shape-band-row"><select class="select" id="bandShape1" aria-label="Форма Low mids"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize1" min="20" max="180" value="70" aria-label="Размер Low mids"><input type="color" id="bandColor1" value="#7a9a47" aria-label="Цвет Low mids"></div><div class="shape-band-angle"><label for="bandRotation1">Угол</label><input type="range" class="range" id="bandRotation1" min="-180" max="180" value="0"><output id="bandRotation1V">0°</output></div></div><div class="shape-band"><b>03 · High mids</b><div class="shape-band-row"><select class="select" id="bandShape2" aria-label="Форма High mids"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize2" min="20" max="180" value="85" aria-label="Размер High mids"><input type="color" id="bandColor2" value="#b8d785" aria-label="Цвет High mids"></div><div class="shape-band-angle"><label for="bandRotation2">Угол</label><input type="range" class="range" id="bandRotation2" min="-180" max="180" value="0"><output id="bandRotation2V">0°</output></div></div><div class="shape-band"><b>04 · Highlights</b><div class="shape-band-row"><select class="select" id="bandShape3" aria-label="Форма Highlights"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize3" min="20" max="180" value="100" aria-label="Размер Highlights"><input type="color" id="bandColor3" value="#d9efad" aria-label="Цвет Highlights"></div><div class="shape-band-angle"><label for="bandRotation3">Угол</label><input type="range" class="range" id="bandRotation3" min="-180" max="180" value="0"><output id="bandRotation3V">0°</output></div></div></details>
+<details class="shape-preset-panel inspector-collapsible"><summary class="controltitle"><span>БИБЛИОТЕКА SHAPE SHIFTER</span><small>LOCAL / SHAREABLE</small></summary><div class="field"><label for="shapePresetSelect">Пресеты форм</label><select class="select full" id="shapePresetSelect"></select></div><div class="field"><label for="shapePresetName">Название собственного пресета</label><input type="text" id="shapePresetName" maxlength="48" placeholder="Например, Star field"></div><div class="shape-preset-actions"><button class="btn sm" id="applyShapePreset" type="button">Применить</button><button class="btn sm" id="saveShapePreset" type="button">☆ Сохранить</button><button class="btn sm" id="deleteShapePreset" type="button">Удалить</button></div><div class="shape-preset-actions"><button class="btn sm" id="exportShapePreset" type="button">↓ JSON</button><button class="btn sm" id="importShapePreset" type="button">↑ Импорт JSON</button></div><div class="field" style="margin-top:10px"><label for="shapeShareCode">Код формы для обмена</label><textarea id="shapeShareCode" rows="3" placeholder="Создайте код после настройки формы"></textarea></div><div class="shape-preset-actions"><button class="btn sm" id="makeShapeCode" type="button">↗ Создать / скопировать</button><button class="btn sm" id="applyShapeCode" type="button">Применить код</button></div></details></section>
+<section class="control" id="asciiControl"><div class="controltitle"><span>Script Slayer · символы</span><small>CHARACTER ENGINE</small></div>
 <div class="field"><div class="fieldtop"><label for="asciiWidth">Ширина символов</label><output class="val" id="asciiWidthV">100</output></div><input class="range" id="asciiWidth" type="range" min="32" max="220" value="100"></div><p id="asciiLimitWarning" class="hidden" role="status" style="font-size:10px;color:var(--muted);margin:8px 0">Очень вытянутое изображение: сетка ASCII ограничена по размеру, чтобы сохранить отзывчивость редактора.</p>
 <div class="field"><div class="fieldtop"><label for="asciiSet">Набор символов</label></div><select class="select full" id="asciiSet"><optgroup label="CLASSIC / PIXELS"><option value="classic">Classic ASCII</option><option value="lowercase">Lowercase</option><option value="uppercase">Uppercase</option><option value="latin">Extended Latin</option><option value="digits">Numbers</option><option value="hex">Hexadecimal</option><option value="binary">Binary</option><option value="binaryBlocks">Binary Blocks</option><option value="punctuation">Punctuation</option><option value="symbols">Symbols</option><option value="math">Mathematical</option><option value="currency">Currencies</option><option value="morse">Morse-like</option><option value="monospaced">Monospaced Blocks</option></optgroup><optgroup label="GEOMETRIC / ABSTRACT"><option value="geometric">Geometric</option><option value="squares">Squares</option><option value="triangles">Triangles</option><option value="circles">Circles</option><option value="stars">Stars</option><option value="blocks">Blocks</option><option value="shades">Shading</option><option value="boxdraw">Box Drawing</option><option value="arrows">Arrows</option><option value="arrowsWide">Arrows · Wide</option><option value="ornamental">Ornaments</option><option value="emoji">Glyph Mosaic</option></optgroup><optgroup label="SIGNS / GAMES"><option value="cards">Playing Cards</option><option value="chess">Chess</option><option value="dice">Dice</option><option value="domino">Domino</option><option value="music">Music</option><option value="astrology">Astrology</option><option value="alchemy">Alchemy</option><option value="medieval">Medieval</option><option value="runes">Runes</option><option value="runes2">Runes · Angular</option></optgroup><optgroup label="LANGUAGES / BRAILLE"><option value="braille">Braille</option><option value="brailleFine">Braille · Fine</option><option value="cyrillic">Cyrillic</option><option value="greek">Greek</option><option value="hebrew">Hebrew</option><option value="arabic">Arabic</option><option value="hiragana">Hiragana</option><option value="katakana">Katakana</option><option value="hangul">Hangul</option><option value="kanji">Kanji</option><option value="thai">Thai</option><option value="devanagari">Devanagari</option></optgroup></select><div class="glyph-preview" id="glyphPreview" aria-live="polite"></div></div>
 <div class="field"><div class="fieldtop"><label for="asciiDepth">Глубина символов</label><output class="val" id="asciiDepthV">10</output></div><input class="range" id="asciiDepth" type="range" min="2" max="16" value="10"></div>
@@ -1111,15 +144,20 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <div class="field"><div class="fieldtop"><label for="asciiCustomChars">Вставить свои символы (до 10)</label><output class="val" id="asciiCustomCount">0 / 10</output></div><input type="text" id="asciiCustomChars" maxlength="10" placeholder="Например: ░▒▓█◆"></div>
 <div class="field"><div class="fieldtop"><label for="asciiColorMode">Цвет символов</label></div><select class="select full" id="asciiColorMode"><option value="palette">Цветовая палитра</option><option value="source">Цвет исходного изображения</option><option value="mono">Один цвет</option></select></div>
 <div class="field"><div class="fieldtop"><label for="asciiBgMode">Фон</label></div><select class="select full" id="asciiBgMode"><option value="transparent">Прозрачный</option><option value="solid">Заливка фона</option></select></div>
-<div class="color-select-row"><div class="field"><div class="fieldtop"><label for="asciiBgColor">Цвет фона</label></div><input type="color" id="asciiBgColor" value="#07110a"></div><div class="field"><div class="fieldtop"><label for="asciiTextColor">Цвет текста</label></div><input type="color" id="asciiTextColor" value="#cafa6a"></div></div><div class="ascii-neoglow"><div class="switchrow"><label for="neoGlowEnabled">Neo Glow · подсветка символов</label><button type="button" class="switch" id="neoGlowEnabled" role="switch" aria-checked="false" aria-label="Включить Neo Glow"></button></div><div class="field"><div class="fieldtop"><label for="neoGlowDirection">Направление свечения</label></div><select class="select full" id="neoGlowDirection"><option value="horizontal">Горизонтально →</option><option value="reverse">Горизонтально ←</option><option value="vertical">Вертикально ↓</option><option value="radial">Из центра</option></select></div><div class="field"><div class="fieldtop"><label for="neoGlowPhase">Положение полосы</label><output class="val" id="neoGlowPhaseV">50%</output></div><input class="range" id="neoGlowPhase" type="range" min="0" max="100" step="0.1" value="50"></div><div class="field"><div class="fieldtop"><label for="neoGlowLength">Ширина световой полосы</label><output class="val" id="neoGlowLengthV">18%</output></div><input class="range" id="neoGlowLength" type="range" min="2" max="60" value="18"></div><div class="field"><div class="fieldtop"><label for="neoGlowBrightness">Яркость свечения</label><output class="val" id="neoGlowBrightnessV">90%</output></div><input class="range" id="neoGlowBrightness" type="range" min="0" max="100" value="90"></div><div class="field"><div class="fieldtop"><label for="neoGlowVisibility">Видимость вне полосы</label><output class="val" id="neoGlowVisibilityV">12%</output></div><input class="range" id="neoGlowVisibility" type="range" min="0" max="100" value="12"></div><div class="field"><div class="fieldtop"><label for="neoGlowColor">Цвет свечения</label></div><input type="color" id="neoGlowColor" value="#cafa6a"></div></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px"><button class="btn sm" id="asciiPlay">▶ Анимация</button><button class="btn sm" id="asciiStop" disabled>■ Стоп</button></div><button class="btn full sm" id="asciiExportWebm" style="margin-top:7px">↓ Экспорт анимации WebM · 4 с</button><button class="btn full" id="downloadTxt" style="margin-top:7px">↓ Скачать ASCII .txt</button></section><section id="exportControl"><div class="controltitle"><span>ЭКСПОРТ</span><small>ЛОКАЛЬНЫЙ ФАЙЛ</small></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn primary" id="png">↓ PNG</button><button class="btn" id="jpg">↓ JPEG</button><button class="btn" id="copy">▣ Копировать</button><button class="btn" id="saveProject">▱ Проект</button></div><div class="field" style="margin-top:10px"><div class="fieldtop"><label for="jpegQuality">Качество JPEG</label><output class="val" id="jpegQualityV">94%</output></div><input class="range" id="jpegQuality" type="range" min="70" max="100" value="94"></div><div class="print-export-settings">
+<div class="color-select-row"><div class="field"><div class="fieldtop"><label for="asciiBgColor">Цвет фона</label></div><input type="color" id="asciiBgColor" value="#07110a"></div><div class="field"><div class="fieldtop"><label for="asciiTextColor">Цвет текста</label></div><input type="color" id="asciiTextColor" value="#cafa6a"></div></div><div class="ascii-neoglow"><div class="switchrow"><label for="neoGlowEnabled">Neo Glow · подсветка символов</label><button type="button" class="switch" id="neoGlowEnabled" role="switch" aria-checked="false" aria-label="Включить Neo Glow"></button></div><details class="ascii-neoglow-options inspector-collapsible"><summary>Параметры свечения</summary><div class="field"><div class="fieldtop"><label for="neoGlowDirection">Направление свечения</label></div><select class="select full" id="neoGlowDirection"><option value="horizontal">Горизонтально →</option><option value="reverse">Горизонтально ←</option><option value="vertical">Вертикально ↓</option><option value="radial">Из центра</option></select></div><div class="field"><div class="fieldtop"><label for="neoGlowPhase">Положение полосы</label><output class="val" id="neoGlowPhaseV">50%</output></div><input class="range" id="neoGlowPhase" type="range" min="0" max="100" step="0.1" value="50"></div><div class="field"><div class="fieldtop"><label for="neoGlowLength">Ширина световой полосы</label><output class="val" id="neoGlowLengthV">18%</output></div><input class="range" id="neoGlowLength" type="range" min="2" max="60" value="18"></div><div class="field"><div class="fieldtop"><label for="neoGlowBrightness">Яркость свечения</label><output class="val" id="neoGlowBrightnessV">90%</output></div><input class="range" id="neoGlowBrightness" type="range" min="0" max="100" value="90"></div><div class="field"><div class="fieldtop"><label for="neoGlowVisibility">Видимость вне полосы</label><output class="val" id="neoGlowVisibilityV">12%</output></div><input class="range" id="neoGlowVisibility" type="range" min="0" max="100" value="12"></div><div class="field"><div class="fieldtop"><label for="neoGlowColor">Цвет свечения</label></div><input type="color" id="neoGlowColor" value="#cafa6a"></div></details></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px"><button class="btn sm" id="asciiPlay">▶ Анимация</button><button class="btn sm" id="asciiStop" disabled>■ Стоп</button></div><button class="btn full sm" id="asciiExportWebm" style="margin-top:7px">↓ Экспорт анимации WebM · 4 с</button><button class="btn full" id="downloadTxt" style="margin-top:7px">↓ Скачать ASCII .txt</button></section><section id="exportControl">
+<div class="controltitle"><span>БЫСТРЫЕ ДЕЙСТВИЯ</span><small>PNG / JPEG / PROJECT</small></div>
+<p class="export-note">Частые команды — здесь. Полный выбор форматов доступен через кнопку «Экспорт» в верхней панели.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn primary" id="png">↓ PNG</button><button class="btn" id="jpg">↓ JPEG</button><button class="btn" id="copy">▣ Копировать</button><button class="btn" id="saveProject">▱ Проект</button></div>
+<div class="field" style="margin-top:10px"><div class="fieldtop"><label for="jpegQuality">Качество JPEG</label><output class="val" id="jpegQualityV">94%</output></div><input class="range" id="jpegQuality" type="range" min="70" max="100" value="94"></div>
+<details class="inspector-collapsible advanced-export-group"><summary>Вектор и печать</summary><div class="print-export-settings">
 <div class="field"><label for="vectorDetail">Детализация SVG</label><select class="select full" id="vectorDetail"><option value="320">Компактная · 320 px</option><option value="1024" selected>Высокая · 1024 px</option><option value="2048">Печать · 2048 px</option><option value="source">Исходное разрешение</option></select></div>
 <div class="field"><div class="fieldtop"><label for="vectorThreshold">Порог чёрного вектора</label><output class="val" id="vectorThresholdV">145</output></div><input class="range" id="vectorThreshold" type="range" min="0" max="255" value="145"></div>
 <div class="field"><label for="printDpi">Плотность печати (DPI)</label><input class="select" id="printDpi" type="number" min="72" max="1200" step="1" value="300"></div>
 <div class="field"><div class="fieldtop"><label for="cmykCell">Размер точки CMYK</label><output class="val" id="cmykCellV">8 px</output></div><input class="range" id="cmykCell" type="range" min="4" max="24" value="8"></div>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"><button class="btn sm" id="svgColor">SVG · Цвет</button><button class="btn sm" id="svgBlack">SVG · Ч/Б</button><button class="btn sm" id="svgCmyk" style="grid-column:1/-1">↓ CMYK-пластины · SVG</button></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px"><button class="btn sm" id="temporalPlay">▶ Motion</button><button class="btn sm" id="temporalStop">■ Stop</button><button class="btn sm" id="temporalRecord" style="grid-column:1/-1">↓ Record WebM · 6 sec</button></div><p style="font-size:9px;color:var(--muted);margin:9px 0 0">SVG хранит векторные контуры; CMYK — отдельные именованные пластины. DPI задаёт физический размер на печати.</p></section>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"><button class="btn sm" id="svgColor">SVG · Цвет</button><button class="btn sm" id="svgBlack">SVG · Ч/Б</button><button class="btn sm" id="svgCmyk" style="grid-column:1/-1">↓ CMYK-пластины · SVG</button></div><p style="font-size:9px;color:var(--muted);margin:9px 0 0">SVG хранит векторные контуры; CMYK — отдельные именованные пластины. DPI задаёт физический размер на печати.</p></details>
+<details class="inspector-collapsible temporal-motion-group"><summary>Процедурное движение</summary><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px"><button class="btn sm" id="temporalPlay">▶ Движение</button><button class="btn sm" id="temporalStop">■ Стоп</button><button class="btn sm" id="temporalRecord" style="grid-column:1/-1">↓ Записать WebM · 6 с</button></div></details>
+</section>
 </aside>
 </div>
 <input class="hidden" type="file" id="imageInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/svg+xml,.svg">
@@ -1129,12 +167,64 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <input class="hidden" type="file" id="batchInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" multiple>
 <input class="hidden" type="file" id="projectInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteInput" accept=".json,application/json"><input class="hidden" type="file" id="presetInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteLibraryInput" accept=".json,application/json"><input class="hidden" type="file" id="userBackupInput" accept=".json,application/json">
 <div class="toast" id="toast" role="status"></div>
-<div class="modalbg hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle"><div class="modal export-modal"><h2 id="exportModalTitle">Экспорт результата</h2><p>Выберите формат и проверьте параметры перед сохранением файла.</p><div class="export-fields"><div><label for="exportFormat">Что экспортировать</label><select id="exportFormat" class="select full"><option value="png">PNG — изображение с прозрачностью</option><option value="jpeg">JPEG — фотография, сжатие</option><option value="svgColor">SVG — цветной вектор</option><option value="svgBlack">SVG — чёрно-белый вектор</option><option value="svgCmyk">SVG — CMYK-пластины</option><option value="project">Проект TGRMLither (JSON)</option><option value="copy">Копировать результат</option></select></div><div class="hidden" id="exportJpegSettings"><label for="exportJpegQuality">Качество JPEG · <output id="exportJpegQualityValue">94%</output></label><input type="range" id="exportJpegQuality" min="70" max="100" value="94"></div><div class="export-note" id="exportSummary">Локальная обработка · файл не загружается на сервер.</div></div><div class="modalactions"><button class="btn" id="exportCancel" type="button">Отмена</button><button class="btn primary" id="exportConfirm" type="button">Экспортировать</button></div></div></div><div class="modalbg hidden" id="modal"><div class="modal"><h2 id="modalTitle">Сохранить пресет</h2><p>Название будет сохранено локально в браузере.</p><input id="presetName" maxlength="48" placeholder="Например, Moss print"><div class="modalactions"><button class="btn" id="modalCancel">Отмена</button><button class="btn primary" id="modalSave">Сохранить</button></div></div></div>
+<div class="modalbg hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle" aria-hidden="true"><div class="modal export-modal"><h2 id="exportModalTitle">Экспорт результата</h2><p>Выберите формат и проверьте параметры перед сохранением файла.</p><div class="export-fields"><div><label for="exportFormat">Что экспортировать</label><select id="exportFormat" class="select full"><option value="png">PNG — изображение с прозрачностью</option><option value="jpeg">JPEG — фотография, сжатие</option><option value="svgColor">SVG — цветной вектор</option><option value="svgBlack">SVG — чёрно-белый вектор</option><option value="svgCmyk">SVG — CMYK-пластины</option><option value="project">Проект TGRMLither (JSON)</option><option value="copy">Копировать результат</option></select></div><div class="hidden" id="exportJpegSettings"><label for="exportJpegQuality">Качество JPEG · <output id="exportJpegQualityValue">94%</output></label><input type="range" id="exportJpegQuality" min="70" max="100" value="94"></div><div class="export-note" id="exportSummary">Локальная обработка · файл не загружается на сервер.</div></div><div class="modalactions"><button class="btn" id="exportCancel" type="button">Отмена</button><button class="btn primary" id="exportConfirm" type="button">Экспортировать</button></div></div></div><div class="modalbg hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true"><div class="modal"><h2 id="modalTitle">Сохранить пресет</h2><p>Название будет сохранено локально в браузере.</p><label class="sr-only" for="presetName">Название пресета</label><input id="presetName" maxlength="48" placeholder="Например, Moss print" autocomplete="off"><div class="modalactions"><button class="btn" id="modalCancel" type="button">Отмена</button><button class="btn primary" id="modalSave" type="button">Сохранить</button></div></div></div>
 <script src="./animation-engine.js"></script>
 <script>
 "use strict";
 (function(){
 const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const DIALOG_IDS=["modal","exportModal"];
+const DIALOG_FOCUSABLE='button:not([disabled]),a[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+let dialogReturnFocus=null;
+function dialogFocusables(overlay){
+ return Array.from(overlay.querySelectorAll(DIALOG_FOCUSABLE)).filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility!=="hidden");
+}
+function openAccessibleDialog(id,focusTargetId){
+ const overlay=$(id);if(!overlay)return;
+ if(DIALOG_IDS.every(dialogId=>$(dialogId)?.classList.contains("hidden")))dialogReturnFocus=document.activeElement;
+ overlay.classList.remove("hidden");overlay.setAttribute("aria-hidden","false");
+ const target=$(focusTargetId)||dialogFocusables(overlay)[0]||overlay;
+ requestAnimationFrame(()=>{if(!overlay.classList.contains("hidden"))target.focus({preventScroll:true})});
+}
+function closeAccessibleDialog(id){
+ const overlay=$(id);if(!overlay)return;
+ overlay.classList.add("hidden");overlay.setAttribute("aria-hidden","true");
+ if(DIALOG_IDS.every(dialogId=>$(dialogId)?.classList.contains("hidden"))){
+  const target=dialogReturnFocus;dialogReturnFocus=null;
+  if(target?.isConnected&&!target.disabled)target.focus({preventScroll:true});
+ }
+}
+function trapAccessibleDialogFocus(event){
+ const activeId=DIALOG_IDS.find(id=>!$(id)?.classList.contains("hidden"));
+ if(!activeId)return false;
+ const overlay=$(activeId),items=dialogFocusables(overlay);
+ if(!items.length){event.preventDefault();return true}
+ const first=items[0],last=items[items.length-1];
+ if(event.shiftKey&&(document.activeElement===first||!overlay.contains(document.activeElement))){event.preventDefault();last.focus()}
+ else if(!event.shiftKey&&(document.activeElement===last||!overlay.contains(document.activeElement))){event.preventDefault();first.focus()}
+ return true;
+}
+function refreshInspectorNavigation(){
+ const nav=$("inspectorJumpNav");if(!nav)return;
+ if(nav.dataset.bound!=="true"){
+  nav.dataset.bound="true";
+  nav.addEventListener("click",event=>{
+   const button=event.target.closest("[data-inspector-target]");if(!button||button.hidden)return;
+   nav.querySelectorAll("[aria-current]").forEach(item=>item.removeAttribute("aria-current"));
+   button.setAttribute("aria-current","location");
+   const target=$(button.dataset.inspectorTarget);
+   if(target)target.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  });
+ }
+ let visibleCount=0;
+ nav.querySelectorAll("[data-inspector-target]").forEach(button=>{
+  const target=$(button.dataset.inspectorTarget);
+  const visible=!!target&&!target.classList.contains("hidden")&&getComputedStyle(target).display!=="none";
+  button.hidden=!visible;if(visible)visibleCount++;
+ });
+ nav.classList.toggle("hidden",visibleCount===0||$("inspector").classList.contains("hidden"));
+}
+
 const resourceMetrics={
  scratchCanvasesCreated:0,scratchCanvasesReleased:0,scratchPixelsReleased:0,sourceCanvasesReleased:0,
  imageBitmapsCreated:0,imageBitmapsClosed:0,imageBitmapsTransferred:0,lateImageBitmapsClosed:0,
@@ -1663,13 +753,41 @@ const APP_THEMES={
  night:{name:"Acid Night",vars:{"--bg":"#11130f","--panel":"#191c17","--panel2":"#20241e","--line":"#30372c","--text":"#eff3e9","--muted":"#9aa393","--acid":"#cafa6a","--purple":"#b5a3ff"}},
  terminal:{name:"Terminal Green",vars:{"--bg":"#07140c","--panel":"#0c2114","--panel2":"#12301c","--line":"#285239","--text":"#e1ffe8","--muted":"#8fbd9c","--acid":"#72ffa0","--purple":"#b3f3c5"}},
  violet:{name:"Violet Signal",vars:{"--bg":"#110d1b","--panel":"#1c1428","--panel2":"#291c3a","--line":"#433152","--text":"#f2eaff","--muted":"#b5a6c6","--acid":"#ff84d8","--purple":"#b8a5ff"}},
- paper:{name:"Paper Studio",vars:{"--bg":"#eee9dc","--panel":"#faf6eb","--panel2":"#e3dccb","--line":"#bcb29d","--text":"#272820","--muted":"#6f7164","--acid":"#bd4b2e","--purple":"#6852a6"}}
+ paper:{name:"Paper Studio",vars:{"--bg":"#eee9dc","--panel":"#faf6eb","--panel2":"#e3dccb","--line":"#bcb29d","--text":"#272820","--muted":"#5f6156","--acid":"#bd4b2e","--purple":"#6852a6"}}
 };
 const THEME_KEYS=["--bg","--panel","--panel2","--line","--text","--muted","--acid","--purple"];
 const THEME_COLOR_INPUTS={"themeColorBg":"--bg","themeColorPanel":"--panel","themeColorPanel2":"--panel2","themeColorLine":"--line","themeColorText":"--text","themeColorMuted":"--muted","themeColorAcid":"--acid","themeColorPurple":"--purple"};
 function safeThemeVars(vars){if(!vars||typeof vars!=="object")throw Error("theme");const clean={};for(const key of THEME_KEYS){const v=vars[key];if(typeof v!=="string"||!/^#[0-9a-f]{6}$/i.test(v))throw Error("theme color");clean[key]=v.toLowerCase()}return clean}
+function themeRelativeLuminance(color){
+ const channels=hex(color).map(value=>{const c=value/255;return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4)});
+ return .2126*channels[0]+.7152*channels[1]+.0722*channels[2];
+}
+function themeContrastRatio(a,b){
+ const la=themeRelativeLuminance(a),lb=themeRelativeLuminance(b);
+ return (Math.max(la,lb)+.05)/(Math.min(la,lb)+.05);
+}
+function updateThemeContrastWarning(vars){
+ const notice=$("themeContrastWarning");if(!notice)return [];
+ const checks=[
+  ["текст / фон",vars["--text"],vars["--bg"],4.5],
+  ["текст / панель",vars["--text"],vars["--panel"],4.5],
+  ["текст / вложенная панель",vars["--text"],vars["--panel2"],4.5],
+  ["вторичный текст / фон",vars["--muted"],vars["--bg"],4.5],
+  ["вторичный текст / панель",vars["--muted"],vars["--panel"],4.5],
+  ["вторичный текст / вложенная панель",vars["--muted"],vars["--panel2"],4.5],
+  ["акцент / фон",vars["--acid"],vars["--bg"],3],
+  ["второй акцент / панель",vars["--purple"],vars["--panel"],3]
+ ];
+ const failures=checks.map(([name,foreground,background,minimum])=>({name,ratio:themeContrastRatio(foreground,background),minimum}))
+  .filter(item=>item.ratio<item.minimum);
+ notice.dataset.state=failures.length?"warning":"ok";
+ notice.textContent=failures.length
+  ?"Низкий контраст: "+failures.map(item=>item.name+" "+item.ratio.toFixed(1).replace(".",",")+":1 (нужно ≥"+String(item.minimum).replace(".",",")+")").join("; ")+". Мелкий текст или акценты могут читаться хуже."
+  :"";
+ return failures;
+}
 function syncThemeColorInputs(vars){for(const [id,key] of Object.entries(THEME_COLOR_INPUTS)){const el=$(id);if(el&&vars[key])el.value=vars[key]}}
-function applyTheme(theme,persist=true){let id,vars;if(typeof theme==="string"&&Object.prototype.hasOwnProperty.call(APP_THEMES,theme)){id=theme;vars={...APP_THEMES[theme].vars}}else if(theme&&typeof theme==="object"){id=theme.id==="custom"?"custom":(Object.prototype.hasOwnProperty.call(APP_THEMES,theme.id)?theme.id:"custom");vars=safeThemeVars(theme.vars)}else{id="night";vars={...APP_THEMES.night.vars}}for(const key of THEME_KEYS)document.documentElement.style.setProperty(key,vars[key]);document.documentElement.style.colorScheme=id==="paper"?"light":"dark";document.body.dataset.theme=id;const themeMeta=document.querySelector('meta[name="theme-color"]');if(themeMeta)themeMeta.content=vars["--bg"]||vars["--panel"]||"#245edb";if($("themePicker"))$("themePicker").value=id;syncThemeColorInputs(vars);const persisted=persist?store("tgrmlither-theme",{id,vars}):true;return {id,vars,persisted}}
+function applyTheme(theme,persist=true){let id,vars;if(typeof theme==="string"&&Object.prototype.hasOwnProperty.call(APP_THEMES,theme)){id=theme;vars={...APP_THEMES[theme].vars}}else if(theme&&typeof theme==="object"){id=theme.id==="custom"?"custom":(Object.prototype.hasOwnProperty.call(APP_THEMES,theme.id)?theme.id:"custom");vars=safeThemeVars(theme.vars)}else{id="night";vars={...APP_THEMES.night.vars}}for(const key of THEME_KEYS)document.documentElement.style.setProperty(key,vars[key]);document.documentElement.style.colorScheme=id==="paper"?"light":"dark";document.body.dataset.theme=id;const themeMeta=document.querySelector('meta[name="theme-color"]');if(themeMeta)themeMeta.content=vars["--bg"]||vars["--panel"]||"#245edb";if($("themePicker"))$("themePicker").value=id;syncThemeColorInputs(vars);updateThemeContrastWarning(vars);const persisted=persist?store("tgrmlither-theme",{id,vars}):true;return {id,vars,persisted}}
 function bindThemeControls(){const saved=loadStore("tgrmlither-theme",null);try{applyTheme(saved||"night",false)}catch(err){applyTheme("night",false)}$("themePicker").onchange=()=>{const id=$("themePicker").value;if(id==="custom"){$("themeStatus").textContent="Настройте восемь цветов ниже и нажмите «Применить мои цвета».";syncThemeColorInputs(Object.fromEntries(THEME_KEYS.map(k=>[k,getComputedStyle(document.documentElement).getPropertyValue(k).trim()])));return}applyTheme(id)};$("applyCustomTheme").onclick=()=>{try{const vars=Object.fromEntries(THEME_KEYS.map(k=>[k,$(Object.keys(THEME_COLOR_INPUTS).find(id=>THEME_COLOR_INPUTS[id]===k)).value]));const result=applyTheme({id:"custom",vars});$("themeStatus").textContent=result.persisted?"Собственная тема применена и сохранена.":"Цвета применены, но не сохранены. Проверьте свободное место в хранилище.";if(result.persisted)say("Собственная тема сохранена")}catch(err){say("Не удалось применить собственную тему")}};$("makeThemeCode").onclick=async()=>{const id=document.body.dataset.theme||"night",vars=Object.fromEntries(THEME_KEYS.map(k=>[k,getComputedStyle(document.documentElement).getPropertyValue(k).trim()]));const code=encodeShareCode("TGRMTHEME1:",{format:"tgrmlither-theme",version:1,id,vars});$("themeCodeInput").value=code;const copied=await copyText(code);$("themeStatus").textContent=copied?"Код скопирован — можно отправлять.":"Код создан в поле, скопируйте его вручную.";say(copied?"Код темы скопирован":"Код темы готов")};$("applyThemeCode").onclick=()=>{try{const doc=decodeShareCode($("themeCodeInput").value,"TGRMTHEME1:");if(doc.format!=="tgrmlither-theme"||doc.version!==1)throw Error("format");const result=applyTheme({id:doc.id,vars:safeThemeVars(doc.vars)});$("themeStatus").textContent=result.persisted?"Тема «"+(Object.prototype.hasOwnProperty.call(APP_THEMES,result.id)?APP_THEMES[result.id].name:"Моя тема")+"» применена и сохранена.":"Тема применена, но не сохранена. Проверьте свободное место в хранилище.";if(result.persisted)say("Код темы применён")}catch(err){$("themeStatus").textContent="Код темы неверный или повреждён.";say("Не удалось применить код темы")}};document.addEventListener("pointerdown",event=>{const menu=$("themeMenu");if(menu?.open&&!menu.contains(event.target))menu.open=false});document.addEventListener("keydown",event=>{if(event.key==="Escape"&&$("themeMenu")?.open)$("themeMenu").open=false})}
 
 function hex(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
@@ -2361,9 +1479,9 @@ function openExportModal(){
  $("exportJpegQuality").value=$("jpegQuality").value;$("exportJpegQualityValue").textContent=$("jpegQuality").value+"%";
  updateExportFormatUI();
  
- $("exportModal").classList.remove("hidden");$("exportFormat").focus();
+ openAccessibleDialog("exportModal","exportFormat");
 }
-function closeExportModal(){$("exportModal").classList.add("hidden")}
+function closeExportModal(){closeAccessibleDialog("exportModal")}
 async function confirmExport(){
  const format=$("exportFormat").value;closeExportModal();
  if(format!=="project"&&original){original=false;$("toggleOriginal").textContent="◉ Показать оригинал";render()}
@@ -2742,7 +1860,34 @@ function download(blob,name){
 }
 async function exportImage(type="png"){if(!src){say("Сначала загрузите изображение");return}if(original){original=false;render()}await waitForProcessingPreview();const quality=clamp(Number($("jpegQuality")?.value??s.jpegQuality??94)/100,.7,1);out.toBlob(b=>{if(!b){say("Экспорт не удался");return}download(b,slug(srcName)+"-TGRMLither."+(type==="jpeg"?"jpg":type));markResultExported();say(type==="jpeg"?"JPEG экспортирован":"PNG экспортирован")},type==="jpeg"?"image/jpeg":"image/png",type==="jpeg"?quality:undefined)}
 function project(){if(animationExporting||animationPlaying){say("Сначала остановите анимацию или завершите экспорт");return}if(!src){say("Сначала загрузите изображение");return}try{if(WORKSPACE_NAMES.includes(mode))saveWorkspaceSettings(mode);const source=src.toDataURL("image/png");if(source.length>MAX_PROJECT_FILE_BYTES){say("Проект слишком велик для сохранения. Уменьшите изображение и повторите экспорт.");return}const projectSettings=cloneSettings(animationScrubPreviewed&&animationScrubBase?animationScrubBase:s);const p={format:"tgrmlither-project",version:2,workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",sourceName:srcName,source,settings:projectSettings,workspaces:workspaceSettings,animation:animationClip},json=JSON.stringify(p);if(json.length>MAX_PROJECT_FILE_BYTES){say("Файл проекта превышает лимит 160 МБ. Уменьшите изображение и повторите экспорт.");return}download(new Blob([json],{type:"application/json"}),slug(srcName)+".tgrmlither.json");say("Проект сохранён")}catch(error){say("Не удалось сохранить проект. Попробуйте уменьшить изображение и повторить экспорт.")}}
-async function saveStandalone(){try{let html="<!doctype html>\n"+document.documentElement.outerHTML;const closeTag="<"+"/script>",scriptTag="<"+"script src=\"./animation-engine.js\">"+closeTag;if(html.includes(scriptTag)){const response=await fetch(new URL("./animation-engine.js",document.baseURI));if(!response.ok)throw Error("Не удалось встроить Animation Engine в автономный файл");const source=await response.text();html=html.replace(scriptTag,"<"+"script>\n"+source+"\n"+closeTag)}download(new Blob([html],{type:"text/html;charset=utf-8"}),"TGRMLither-offline.html");say("Автономная HTML-версия скачана")}catch(error){say(error?.message||"Не удалось создать автономный HTML-файл")}}
+async function saveStandalone(){
+ try{
+  const snapshot=document.documentElement.cloneNode(true);
+  const localStyles=Array.from(snapshot.querySelectorAll('link[data-standalone-inline]'));
+  await Promise.all(localStyles.map(async link=>{
+   const href=link.getAttribute("href");
+   const response=await fetch(new URL(href,document.baseURI));
+   if(!response.ok)throw Error("Не удалось встроить файл стилей: "+href);
+   const style=document.createElement("style");
+   if(link.id)style.id=link.id;
+   if(link.media)style.media=link.media;
+   style.textContent=await response.text();
+   link.replaceWith(style);
+  }));
+  let html="<!doctype html>\n"+snapshot.outerHTML;
+  const closeTag="<"+"/script>",scriptTag="<"+"script src=\"./animation-engine.js\">"+closeTag;
+  if(html.includes(scriptTag)){
+   const response=await fetch(new URL("./animation-engine.js",document.baseURI));
+   if(!response.ok)throw Error("Не удалось встроить Animation Engine в автономный файл");
+   const source=await response.text();
+   html=html.replace(scriptTag,"<"+"script>\n"+source+"\n"+closeTag);
+  }
+  download(new Blob([html],{type:"text/html;charset=utf-8"}),"TGRMLither-offline.html");
+  say("Автономная HTML-версия скачана");
+ }catch(error){
+  say(error?.message||"Не удалось создать автономный HTML-файл");
+ }
+}
 function openImage(){ $("imageInput").click() }
 function setMode(m){
  if(!["editor","presets","shape","script","batch","video"].includes(m))m="editor";
@@ -2803,7 +1948,7 @@ function setMode(m){
   $("algorithm").value="bayer4";sync();render();
  }else if(m==="editor"){
   $("pageTitle").innerHTML='Редактор изображения<span style="color:var(--acid)">.</span>';
-  $("pageSubtitle").textContent="64 стилистических режима, палитры и независимый стек постобработки.";
+  $("pageSubtitle").textContent="65 стилистических режима, палитры и независимый стек постобработки.";
   sync();render();
  }else if(m==="batch"){
   $("algorithm").value=s.algorithm;sync();renderBatch();
@@ -2812,6 +1957,7 @@ function setMode(m){
  }else if(m==="presets")renderPresets();
  if(WORKSPACE_NAMES.includes(m))saveWorkspaceSettings(m);
  if(["editor","shape","script"].includes(m)){animationScrubBase=cloneSettings(s);animationCurrentMs=0;animationScrubPreviewed=false;animationPreviewFrame=null;animationRefreshTrackOptions();animationRefreshUI()}
+ refreshInspectorNavigation();
 }
 function makeCard(p){let b=document.createElement("button");b.className="preset";let art=document.createElement("div");art.className="previewart";let c=document.createElement("canvas");c.width=300;c.height=145;let x=c.getContext("2d"),cs=(pal[p.c.palette||"moss"]||pal.moss).c;let g=x.createLinearGradient(0,0,300,145);cs.forEach((col,i)=>g.addColorStop(i/Math.max(1,cs.length-1),col));x.fillStyle=g;x.fillRect(0,0,300,145);x.fillStyle=cs[cs.length-1];x.beginPath();x.arc(210,38,25,0,7);x.fill();x.fillStyle=cs[Math.floor((cs.length-1)/2)];x.beginPath();x.moveTo(0,110);x.lineTo(62,52);x.lineTo(128,115);x.lineTo(195,72);x.lineTo(265,120);x.lineTo(300,93);x.lineTo(300,145);x.lineTo(0,145);x.closePath();x.fill();for(let yy=0;yy<145;yy+=p.c.scale||5)for(let xx=0;xx<300;xx+=p.c.scale||5){if((xx+yy)%17<4){x.fillStyle=cs[0];x.fillRect(xx,yy,2,2)}}art.append(c);let info=document.createElement("div");info.className="presetinfo";info.innerHTML='<span class="ptag"></span><div class="presetname"></div><div class="presetdesc"></div>';info.querySelector(".ptag").textContent=p.tag||"MY PRESET";info.querySelector(".presetname").textContent=p.name;info.querySelector(".presetdesc").textContent=p.desc||"Моя конфигурация";b.append(art,info);b.onclick=()=>{setMode("editor");s=cloneSettings({...def,...p.c});if(["shape","ascii"].includes(s.algorithm))s.algorithm="bayer4";workspaceSettings.editor=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Пресет: "+p.name)};return b}
 function renderPresets(){
@@ -2849,7 +1995,7 @@ function renderPresets(){
   row.append(txt,use,del);box.append(row);
  });
 }
-function savePreset(){ $("modalTitle").textContent="Сохранить пресет";$("modal").classList.remove("hidden");$("presetName").value="";$("presetName").focus();$("modalSave").onclick=()=>{let name=$("presetName").value.trim();if(!name){say("Введите название");return}const stored=loadStore("ditherlab-presets",[]),base=Array.isArray(stored)?stored.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,99):[],next=[{name:name.slice(0,48),desc:"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",c:cloneSettings(s)},...base];if(!store("ditherlab-presets",next))return;custom=next;$("modal").classList.add("hidden");renderPresets();say("Пресет сохранён")}}
+function savePreset(){ $("modalTitle").textContent="Сохранить пресет";$("presetName").value="";openAccessibleDialog("modal","presetName");$("modalSave").onclick=()=>{let name=$("presetName").value.trim();if(!name){say("Введите название");return}const stored=loadStore("ditherlab-presets",[]),base=Array.isArray(stored)?stored.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,99):[],next=[{name:name.slice(0,48),desc:"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",c:cloneSettings(s)},...base];if(!store("ditherlab-presets",next))return;custom=next;closeAccessibleDialog("modal");renderPresets();say("Пресет сохранён")}}
 function renderBatch(){let box=$("batchList");box.innerHTML="";const hasBatchResults=!!$("batchResults")?.querySelector(".fileitem");if($("batchProgressCount")&&!batchRunning&&!hasBatchResults)$("batchProgressCount").textContent=batch.length+" выбрано";if($("batchProgressLabel")&&!batchRunning&&!hasBatchResults){if(!batch.length)$("batchProgressLabel").textContent="Ожидает файлов";else $("batchProgressLabel").textContent="Готово к обработке"}if(!batch.length){box.textContent="Выбранные файлы появятся здесь.";box.style.color="var(--muted)";box.style.fontSize="10px";return}batch.forEach((f,i)=>{let row=document.createElement("div");row.className="fileitem";let icon=document.createElement("div");icon.className="fileicon";icon.textContent="▧";let txt=document.createElement("div");txt.className="filetext";txt.innerHTML="<b></b><small></small>";txt.querySelector("b").textContent=f.name;txt.querySelector("small").textContent=(f.size/1048576).toFixed(2)+" MB";let rm=document.createElement("button");rm.className="btn sm";rm.textContent="×";rm.disabled=batchRunning;rm.onclick=()=>{if(batchRunning)return;batch.splice(i,1);renderBatch()};row.append(icon,txt,rm);box.append(row)})}
 function addBatch(files){if(batchRunning){say("Дождитесь завершения пакетной обработки");return}const images=Array.from(files).filter(f=>f.type.startsWith("image/")),available=Math.max(0,MAX_BATCH_FILES-batch.length),accepted=images.slice(0,available);batch.push(...accepted);$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent=batch.length+" выбрано";$("batchProgressLabel").textContent=batch.length?"Готово к обработке":"Ожидает файлов";renderBatch();if(images.length>accepted.length)say("Ограничение пакетной обработки — "+MAX_BATCH_FILES+" изображений; добавлено "+accepted.length);else say(accepted.length?"Добавлено файлов: "+accepted.length:"Выберите файлы изображений")}
 function revokeBatchDownloadUrls(){for(const url of batchDownloadUrls)URL.revokeObjectURL(url);batchDownloadUrls=[];resourceMetrics.batchResultUrls=0}
@@ -3775,7 +2921,7 @@ let stage=$("stage");
  });
  document.addEventListener("dragover",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});
  document.addEventListener("drop",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});
-$("modalCancel").onclick=()=>$("modal").classList.add("hidden");$("modal").onclick=e=>{if(e.target===$("modal"))$("modal").classList.add("hidden")};document.addEventListener("keydown",e=>{const key=e.key.toLowerCase(),target=e.target,textEditing=target?.isContentEditable||(target?.matches?.("input,textarea")&&["text","search","url","email","password","number"].includes(String(target.type||"").toLowerCase()));if((e.ctrlKey||e.metaKey)&&key==="o"){e.preventDefault();openImage();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="z"){e.preventDefault();if(e.shiftKey)redoAction();else undoAction();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="y"){e.preventDefault();redoAction();return}if(e.key==="Escape"){$("modal").classList.add("hidden");closeExportModal()}});
+$("modalCancel").onclick=()=>closeAccessibleDialog("modal");$("modal").onclick=e=>{if(e.target===$("modal"))closeAccessibleDialog("modal")};document.addEventListener("keydown",e=>{const key=e.key.toLowerCase(),target=e.target,textEditing=target?.isContentEditable||(target?.matches?.("input,textarea")&&["text","search","url","email","password","number"].includes(String(target.type||"").toLowerCase()));if((e.ctrlKey||e.metaKey)&&key==="o"){e.preventDefault();openImage();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="z"){e.preventDefault();if(e.shiftKey)redoAction();else undoAction();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="y"){e.preventDefault();redoAction();return}if(e.key==="Tab"&&trapAccessibleDialogFocus(e))return;if(e.key==="Escape"){if(!$("exportModal").classList.contains("hidden"))closeExportModal();else closeAccessibleDialog("modal")}});
 if("serviceWorker"in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register("./sw.js").catch(()=>{});
 }
 init();

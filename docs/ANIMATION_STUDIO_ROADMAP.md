@@ -82,7 +82,7 @@ Acceptance: complete CI pass; no live deployment claim unless GitHub Pages deplo
 
 ## Implementation status — 2026-11-26
 
-All six implementation stages above are present on `feat/animation-studio-1.4.0`. The branch is proposed in PR #23; it is not merged into `main`.
+All six implementation stages above were delivered from `feat/animation-studio-1.4.0` and merged into `main` on 2026-11-27 through PR #23 (merge commit `eb08d9ffaa86d4d3cac7a05649b757014e13156f`). PR #24 subsequently restored the mobile upload label and visible effect-lock controls. The current mainline baseline is `0e55d2be78c98d04bf6cb5cd120c5f6125ce439d`.
 
 - Stage 0: existing app guardrails retained; the new engine is isolated and no server/runtime dependency was added.
 - Stage 1: keyframe engine supports numeric, toggle and enumerated parameters, easing, bounded track/keyframe counts, safe paths and per-track oscillators.

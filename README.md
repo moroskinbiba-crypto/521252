@@ -37,11 +37,25 @@ Timeline playback and export use a fixed settings snapshot and restore the origi
 
 ## Workstation interface
 
-The editor opens in a clean studio layout with the preview as the main focus and contextual controls in the inspector. Use **Дополнительно** to reveal technical parameters, search algorithms by name, or keep frequently used algorithms in favourites. **До / после** overlays the original image with an adjustable comparison divider. Undo and redo are available through the toolbar and Ctrl/Cmd+Z or Ctrl/Cmd+Shift+Z. The export dialog brings PNG, JPEG, SVG, CMYK plates, project JSON and copy-to-clipboard actions together. The Animation Studio adds keyframe-based parameter animation and frame/video export. The editor now opens in a full Windows XP Luna-inspired shell by default: vivid blue title bars, silver-gray window chrome, classic beveled controls, square pixel-crisp borders, and the green primary image-loading button. The modern studio remains available in the appearance menu. The preset catalogue includes search across built-in and saved presets.
+The editor opens in a clean studio layout with the preview as the main focus and contextual controls in the inspector. The inspector's quick-jump bar moves between the control groups available in the active workspace. Longer Shape Lab and Script Slayer sections are collapsible, so specialist parameters do not crowd everyday controls. The export panel keeps common PNG/JPEG/project shortcuts visible; vector/print and procedural-motion controls are grouped separately, while the top Export Center remains the main format chooser. Use **Дополнительно** to reveal technical parameters, search algorithms by name, or keep frequently used algorithms in favourites. **До / после** overlays the original image with an adjustable comparison divider. Undo and redo are available through the toolbar and Ctrl/Cmd+Z or Ctrl/Cmd+Shift+Z. The export dialog brings PNG, JPEG, SVG, CMYK plates, project JSON and copy-to-clipboard actions together. The Animation Studio adds keyframe-based parameter animation and frame/video export. The editor now opens in a full Windows XP Luna-inspired shell by default: vivid blue title bars, silver-gray window chrome, classic beveled controls, square pixel-crisp borders, and the green primary image-loading button. The modern studio remains available in the appearance menu. The preset catalogue includes search across built-in and saved presets.
 
 ## Run from source
 
 Open `index.html`, or run `python -m http.server 8080` in the repository folder and open `http://localhost:8080`.
+
+## Quality checks and visual audit
+
+Run the deterministic local checks with:
+
+```sh
+npm run check:syntax
+npm run test:engine
+npm run test:assets
+```
+
+The GitHub Actions browser suite additionally exercises the application in Chromium, Firefox and WebKit. A responsive UI audit switches through all six workspaces at 320, 360, 390, 430, 768, 1024, 1280 and 1440 px in the default shell, then repeats a representative 320, 390, 768 and 1280 px matrix in the alternate Studio shell. It checks layout boundaries and dialog keyboard focus, and uploads workspace/inspector screenshots as a short-lived workflow artifact. These captures are review material, not automatic pixel-diff baselines; golden images are only appropriate after a human has approved the expected appearance.
+
+See [the UI redesign roadmap](docs/UI_REDESIGN_ROADMAP.md) for the staged CSS, ergonomics and accessibility plan.
 
 ## Compatibility note
 

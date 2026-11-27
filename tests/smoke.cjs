@@ -336,6 +336,8 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("body").getAttribute("data-mode"), "shape");
     assert.equal(await page.locator("#algorithmPickerField").isVisible(), false, "Shape Lab uses its own workspace, not the standard algorithm picker");
     assert.equal(await page.locator("#shapeControl").isVisible(), true, "Shape Lab settings should only appear in Shape Lab");
+    await page.locator('#shapeControl details.shape-bands > summary').click();
+    await page.locator('#shapeControl details.shape-preset-panel > summary').click();
     assert.equal(await page.locator("#shapeEffectsControl").isVisible(), true, "Shape Lab has an independent effect stack");
     assert.equal(await page.locator("#scriptEffectsControl").isVisible(), false, "Script Slayer effects must stay hidden in Shape Lab");
     assert.equal(await page.locator("#batchEffectsControl").isVisible(), false);
@@ -392,6 +394,7 @@ async function downloadFrom(page, selector) {
     assert.equal(await page.locator("#asciiControl").isVisible(), true, "Script Slayer controls should be visible in Script Slayer");
     assert.equal(await page.locator("#generalEffectsControl").isVisible(), false, "standard effect stack must not appear in Script Slayer");
     assert.equal(await page.locator("#scriptEffectsControl").isVisible(), true, "Script Slayer has its own effect stack");
+    await page.locator("#asciiControl details.ascii-neoglow-options > summary").click();
     assert.equal(await page.locator("#shapeEffectsControl").isVisible(), false, "Shape Lab effects must stay hidden in Script Slayer");
     assert.equal(await page.locator("#batchEffectsControl").isVisible(), false);
     assert.equal(await page.locator("#videoEffectsControl").isVisible(), false);
@@ -1009,6 +1012,16 @@ async function downloadFrom(page, selector) {
     await page.locator("#homeLogo").click();
 
     // Vector export supports print sizing and layered CMYK plates.
+    const advancedInspector = page.locator("#advancedToggle");
+    if (await advancedInspector.getAttribute("aria-pressed") !== "true") {
+      await advancedInspector.click();
+    }
+    const advancedExport = page.locator("#exportControl details.advanced-export-group");
+    if (await advancedExport.getAttribute("open") === null) {
+      await advancedExport.locator("summary").click();
+    }
+    assert.equal(await page.locator("#vectorDetail").isVisible(), true,
+      "vector and print controls should be reachable in the expanded advanced export group");
     await page.locator("#vectorDetail").selectOption("source");
     const blackSvg = await downloadFrom(page, "#svgBlack");
     const blackSvgText = blackSvg.bytes.toString("utf8");
@@ -1026,7 +1039,15 @@ async function downloadFrom(page, selector) {
 
     const offline = await downloadFrom(page, "#offlineBtn");
     assert.match(offline.download.suggestedFilename(), /TGRMLither-offline\.html$/);
-    assert.ok(offline.bytes.toString("utf8").includes("TGRMLither — Browser Image Studio"));
+    const offlineHtml = offline.bytes.toString("utf8");
+    assert.ok(offlineHtml.includes("TGRMLither — Browser Image Studio"));
+    assert.match(offlineHtml, /<style id="xpShellStyles"/, "standalone export should inline the XP theme stylesheet");
+    assert.match(offlineHtml, /<style id="uiFoundationStyles"/, "standalone export should inline the latest UI foundation");
+    assert.match(offlineHtml, /\.inspector-jump-nav\s*\{/, "standalone export should include Inspector navigation styles");
+    assert.equal((offlineHtml.match(/<link[^>]*data-standalone-inline/g) || []).length, 0,
+      "standalone export must not depend on external local CSS files");
+    assert.equal((offlineHtml.match(/href=["']\.\/styles\//g) || []).length, 0,
+      "all app stylesheets should be embedded into the standalone file");
     assert.equal(await page.locator("#fullscreenBtn").count(), 1, "editor should provide an explicit full-screen control");
     assert.match(await page.locator("#fullscreenBtn").getAttribute("aria-label"), /весь экран/i);
     if (await page.evaluate(() => !!document.fullscreenEnabled && typeof document.documentElement.requestFullscreen === "function")) {
