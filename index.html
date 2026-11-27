@@ -996,6 +996,51 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 @media(max-width:740px){.animation-dock{padding:10px;margin:12px 0 18px}.animation-head{align-items:flex-start;flex-direction:column}.animation-toolbar{grid-template-columns:1fr 1fr}.animation-track-field{grid-column:1/-1}.animation-modulators .animation-field{flex:1 1 90px;width:auto}.animation-lane{grid-template-columns:100px minmax(0,1fr);gap:5px}.animation-scrub{grid-template-columns:48px minmax(0,1fr) 48px;padding:7px}.animation-lanes{max-height:180px}}
 .active-palette-row{grid-template-columns:24px minmax(0,1fr) 64px 30px 30px!important}.active-palette-lock[aria-pressed=true]{border-color:var(--acid);color:var(--acid)}
 </style>
+<style id="uiFoundationStyles">
+/*
+ * UI foundation — additive layer.
+ * Keep these shared primitives last in the cascade until visual baselines exist;
+ * future CSS extraction must preserve the standalone HTML export path.
+ */
+:root{
+ --ui-control-height:34px;
+ --ui-focus-offset:3px;
+ --ui-panel-gap:8px;
+ --ui-sticky-offset:64px;
+}
+.sr-only{
+ position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+ overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+.inspector-jump-nav{
+ position:sticky;top:var(--ui-sticky-offset);z-index:4;
+ display:flex;gap:5px;align-items:center;overflow-x:auto;overscroll-behavior-x:contain;
+ margin:-5px 0 15px;padding:7px;
+ border:1px solid var(--line);border-radius:9px;
+ background:var(--panel);box-shadow:0 5px 16px #00000012;
+ scrollbar-width:thin;scrollbar-color:var(--muted) transparent;
+}
+.inspector-jump-nav button{
+ flex:0 0 auto;min-height:30px;padding:5px 9px;
+ border:1px solid transparent;border-radius:6px;background:transparent;
+ color:var(--muted);font-size:9px;font-weight:650;white-space:nowrap;
+}
+.inspector-jump-nav button:hover,
+.inspector-jump-nav button[aria-current="location"]{
+ border-color:var(--line);background:var(--panel2);color:var(--text);
+}
+#inspector .control,#inspector #exportControl{scroll-margin-top:82px}
+#modal[role="dialog"],#exportModal[role="dialog"]{overscroll-behavior:contain}
+.modalbg[role="dialog"] .modal{max-height:min(90dvh,720px);overflow:auto}
+@media(max-width:740px){
+ .inspector-jump-nav{top:58px;margin:-3px 0 12px;padding:5px}
+ .inspector-jump-nav button{min-height:32px;padding:6px 10px}
+ #inspector .control,#inspector #exportControl{scroll-margin-top:70px}
+}
+@media(prefers-reduced-motion:reduce){
+ .inspector-jump-nav{scroll-behavior:auto}
+}
+</style>
 </head>
 <body data-mode="editor" data-shell="xp" data-inspector-level="basic">
 <header>
@@ -1015,10 +1060,10 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 </section>
 <section id="animationDock" class="animation-dock" aria-label="Animation timeline">
 <div class="animation-head"><div class="animation-title"><strong>ANIMATION STUDIO / KEYFRAMES</strong><small>Анимируйте параметры обработки, эффекты, палитры и формы. Клип хранится локально вместе с проектом.</small></div><div class="animation-actions"><button class="btn sm primary" id="animationPlay" type="button">▶ Воспроизвести</button><button class="btn sm" id="animationStop" type="button" disabled>■ Стоп</button></div></div>
-<div class="animation-toolbar"><div class="animation-field animation-track-field"><label for="animationTrack">Анимируемый параметр</label><select id="animationTrack"></select></div><div class="animation-field"><label for="animationDuration">Длительность · сек</label><input id="animationDuration" type="number" min="0.25" max="60" step="0.25" value="5"></div><div class="animation-field"><label for="animationFps">Кадров в секунду</label><select id="animationFps"><option>12</option><option>15</option><option selected>24</option><option>25</option><option>30</option><option>50</option><option>60</option></select></div><div class="animation-field"><label for="animationEasing">Переход к следующему ключу</label><select id="animationEasing"><option value="linear">Linear</option><option value="easeIn">Ease In</option><option value="easeOut">Ease Out</option><option value="easeInOut">Ease In-Out</option><option value="step">Hold / Step</option></select></div></div>
+<div class="animation-toolbar"><div class="animation-field animation-track-field"><label for="animationTrack">Анимируемый параметр</label><select id="animationTrack"></select></div><div class="animation-field"><label for="animationDuration">Длительность · сек</label><input id="animationDuration" type="number" min="0.25" max="60" step="0.25" value="5"></div><div class="animation-field"><label for="animationFps">Кадров в секунду</label><select id="animationFps"><option>12</option><option>15</option><option selected>24</option><option>25</option><option>30</option><option>50</option><option>60</option></select></div><div class="animation-field"><label for="animationEasing">Переход к следующему ключу</label><select id="animationEasing"><option value="linear">Линейно</option><option value="easeIn">Плавный старт</option><option value="easeOut">Плавное завершение</option><option value="easeInOut">Плавно в обе стороны</option><option value="step">Ступенчато</option></select></div></div>
 <div class="animation-options"><label class="animation-check"><input id="animationLoop" type="checkbox" checked> Зациклить клип</label><label class="animation-check">Предпросмотр <select id="animationPreviewMode" class="select"><option value="live">Live</option><option value="balanced">Balanced</option><option value="still">Still</option></select></label><button class="btn sm" id="animationAddKeyframe" type="button">＋ Ключевой кадр</button><button class="btn sm" id="animationDeleteKeyframe" type="button">− Удалить на позиции</button><button class="btn sm" id="animationCaptureBase" type="button">Снять базу настроек</button></div>
 <div class="animation-scrub"><output id="animationTimeLabel">00:00.0</output><input id="animationScrub" type="range" min="0" max="5000" step="1" value="0" aria-label="Позиция в клипе"><output id="animationEndLabel">00:05.0</output></div><div id="animationLanes" class="animation-lanes"><div class="animation-empty">Добавьте ключевой кадр для создания первой дорожки.</div></div>
-<div class="animation-modulators"><div class="animation-status" id="animationSelectedTrackInfo">Выберите параметр и добавьте ключевые кадры.</div><div class="animation-field"><label for="animationWave">Temporal Variation</label><select id="animationWave"><option value="sine">Sine</option><option value="triangle">Triangle</option><option value="saw">Saw</option><option value="square">Square</option></select></div><div class="animation-field"><label for="animationAmplitude">Амплитуда</label><input id="animationAmplitude" type="number" min="-100" max="100" step="1" value="12"></div><div class="animation-field"><label for="animationFrequency">Частота · Hz</label><input id="animationFrequency" type="number" min="0.1" max="8" step="0.1" value="1"></div><button class="btn sm" id="animationOscillator" type="button">＋ Осциллятор</button></div>
+<div class="animation-modulators"><div class="animation-status" id="animationSelectedTrackInfo">Выберите параметр и добавьте ключевые кадры.</div><div class="animation-field"><label for="animationWave">Изменение во времени</label><select id="animationWave"><option value="sine">Синус</option><option value="triangle">Треугольник</option><option value="saw">Пила</option><option value="square">Прямоугольник</option></select></div><div class="animation-field"><label for="animationAmplitude">Амплитуда</label><input id="animationAmplitude" type="number" min="-100" max="100" step="1" value="12"></div><div class="animation-field"><label for="animationFrequency">Частота · Hz</label><input id="animationFrequency" type="number" min="0.1" max="8" step="0.1" value="1"></div><button class="btn sm" id="animationOscillator" type="button">＋ Осциллятор</button></div>
 <div class="animation-export"><button class="btn sm" id="animationExportFrames" type="button">↓ PNG Sequence · ZIP</button><button class="btn sm" id="animationExportVideo" type="button">↓ Видео · MP4 / WebM</button><button class="btn sm" id="animationCancelExport" type="button" disabled>Отмена экспорта</button><span class="animation-status" id="animationExportStatus" role="status">Экспорт выполняется локально в браузере.</span></div><div class="animation-progress" aria-hidden="true"><span id="animationProgress"></span></div></section>
 <section id="presetsView" class="hidden"><div class="heading"><div><div class="eyebrow">КАТАЛОГ / ПРЕСЕТЫ</div><h1>Библиотека пресетов<span style="color:var(--acid)">.</span></h1><p>Выберите стиль и продолжайте редактировать настройки.</p></div><div class="preset-toolbar"><input class="select preset-search" id="presetSearch" type="search" placeholder="Поиск пресетов…" aria-label="Поиск пресетов"><button class="btn sm" id="savePresetLibrary">＋ Мой пресет</button><button class="btn sm" id="exportPresets">↓ JSON</button><button class="btn sm" id="importPresets">↑ Импорт</button></div></div><div class="presetgrid" id="presetGrid"></div><div class="card" style="margin-top:17px"><h2>Мои пресеты</h2><p>Ваши конфигурации сохраняются в этом браузере.</p><div class="filelist" id="customPresets"></div></div></section>
 <section id="batchView" class="hidden"><div class="heading"><div><div class="eyebrow">РАБОЧЕЕ ПРОСТРАНСТВО / ПАКЕТЫ</div><h1>Пакетная обработка<span style="color:var(--acid)">.</span></h1><p>Одна конфигурация — несколько файлов. Локальная обработка.</p></div></div><div class="card"><h2>01 / Добавьте изображения</h2><p>Текущие параметры будут применены к каждому выбранному файлу.</p><div class="drop" id="batchDrop"><div style="font-size:25px;color:var(--acid)">⇧</div><strong>Перетащите файлы сюда</strong><p>PNG · JPG · WEBP · несколько изображений</p><button class="btn" id="batchBrowse">Выбрать файлы</button></div><div class="filelist" id="batchList"></div><div class="batch-progress-meta"><span id="batchProgressLabel" role="status" aria-live="polite">Ожидает файлов</span><span id="batchProgressCount">0 / 0</span></div><div class="progress" id="batchProgressTrack" role="progressbar" aria-label="Прогресс пакетной обработки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="batchProgress"></i></div><div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" id="runBatch">▶ Обработать всё</button><button class="btn" id="cancelBatch" type="button" hidden>Отменить</button><button class="btn" id="downloadBatchZip" disabled>↓ Скачать всё ZIP</button><button class="btn" id="clearBatch">Очистить</button></div></div><div class="card"><h2>02 / Результаты</h2><p>Скачивайте PNG по отдельности или соберите все готовые изображения в один ZIP-архив.</p><div class="filelist" id="batchResults"><span style="font-size:10px;color:var(--muted)">Пока нет результатов.</span></div></div></section>
@@ -1030,7 +1075,16 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 </section>
 </main>
 <aside class="right" id="inspector">
-<div class="inspectorhead"><strong id="inspectorTitle">Эффекты и настройки</strong><div class="inspector-actions"><button class="btn sm" id="advancedToggle" type="button" aria-pressed="false" title="Показать расширенные параметры">Дополнительно</button><button class="linkbtn" id="reset" title="Сбросить настройки только текущего пространства">Сбросить группу ↺</button></div></div>
+<div class="inspectorhead"><strong id="inspectorTitle">Эффекты и настройки</strong><div class="inspector-actions"><button class="btn sm" id="advancedToggle" type="button" aria-pressed="false" title="Показать расширенные параметры">Дополнительно</button><button class="linkbtn" id="reset" title="Сбросить настройки только текущего пространства">Сбросить пространство ↺</button></div></div><nav class="inspector-jump-nav" id="inspectorJumpNav" aria-label="Быстрый переход по настройкам">
+<button type="button" data-inspector-target="coreAlgorithmControl">Алгоритм</button>
+<button type="button" data-inspector-target="toneControl">Тон</button>
+<button type="button" data-inspector-target="paletteControl">Палитра</button>
+<button type="button" data-inspector-target="generalEffectsControl">Эффекты</button>
+<button type="button" data-inspector-target="algorithmStackControl">Слои</button>
+<button type="button" data-inspector-target="shapeControl">Формы</button>
+<button type="button" data-inspector-target="asciiControl">Символы</button>
+<button type="button" data-inspector-target="exportControl">Экспорт</button>
+</nav>
 <section class="control" id="coreAlgorithmControl"><div class="controltitle"><span>01 / Алгоритм</span><small>ДВИЖОК ДИЗЕРИНГА</small></div>
 <div class="field" id="algorithmPickerField"><div class="fieldtop"><label for="algorithm">Тип обработки</label></div><div class="algorithm-tools"><input class="select full" id="algorithmSearch" type="search" placeholder="Поиск алгоритма…" aria-label="Поиск алгоритма"><button class="btn sm" id="favoriteAlgorithm" type="button" aria-pressed="false" title="Добавить текущий алгоритм в избранное">☆</button><button class="btn sm" id="algorithmFavoritesOnly" type="button" aria-pressed="false">Избранное</button></div><select class="select full" id="algorithm">
 <optgroup label="ERROR DIFFUSION · 15"><option value="floyd">Floyd–Steinberg</option><option value="atkinson">Atkinson</option><option value="jarvis">Jarvis–Judice–Ninke</option><option value="stucki">Stucki</option><option value="burkes">Burkes</option><option value="sierra">Sierra</option><option value="sierra2">Sierra Two-Row</option><option value="sierraLite">Sierra Lite</option><option value="fan">Fan</option><option value="shiau2">Shiau 2</option><option value="shiau3">Shiau 3</option><option value="stevenson">Stevenson–Arce</option><option value="falseFloyd">False Floyd–Steinberg</option><option value="twoRow">Two-row diffusion</option><option value="simpleDiff">Simple diffusion</option></optgroup>
@@ -1050,7 +1104,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 </section>
 <section class="control" id="toneControl"><div class="controltitle"><span>02 / Тональность</span><small>IMAGE TUNING</small></div>
 <div class="field"><div class="fieldtop"><label for="contrast">Контраст</label><output class="val" id="contrastV">100%</output></div><input class="range" id="contrast" type="range" min="50" max="180" value="100"></div>
-<div class="field"><div class="fieldtop"><label for="brightness">Яркость</label><output class="val" id="brightnessV">0</output></div><input class="range" id="brightness" type="range" min="-80" max="80" value="0"></div><div class="field"><div class="fieldtop"><label for="midtones">Midtones</label><output class="val" id="midtonesV">50%</output></div><input class="range" id="midtones" type="range" min="0" max="100" value="50"></div><div class="field"><div class="fieldtop"><label for="highlights">Highlights</label><output class="val" id="highlightsV">50%</output></div><input class="range" id="highlights" type="range" min="0" max="100" value="50"></div>
+<div class="field"><div class="fieldtop"><label for="brightness">Яркость</label><output class="val" id="brightnessV">0</output></div><input class="range" id="brightness" type="range" min="-80" max="80" value="0"></div><div class="field"><div class="fieldtop"><label for="midtones">Полутона</label><output class="val" id="midtonesV">50%</output></div><input class="range" id="midtones" type="range" min="0" max="100" value="50"></div><div class="field"><div class="fieldtop"><label for="highlights">Света</label><output class="val" id="highlightsV">50%</output></div><input class="range" id="highlights" type="range" min="0" max="100" value="50"></div>
 <div class="field"><div class="fieldtop"><label for="blur">Размытие перед дизерингом</label><output class="val" id="blurV">0 px</output></div><input class="range" id="blur" type="range" min="0" max="5" value="0"></div>
 <div class="field hidden" id="smoothingControl"><div class="fieldtop"><label for="smoothing">Сглаживание результата</label><output class="val" id="smoothingV">0%</output></div><input class="range" id="smoothing" type="range" min="0" max="100" value="0"></div>
 <div class="field hidden" id="blendControl"><div class="fieldtop"><label for="blend">Смешение с оригиналом</label><output class="val" id="blendV">100%</output></div><input class="range" id="blend" type="range" min="0" max="100" value="100"><small style="display:block;color:var(--muted);font-size:9px;margin-top:5px">0% — оригинал, 100% — полная обработка.</small></div>
@@ -1089,7 +1143,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <button class="btn sm full" type="button" id="addAlgorithmLayer">＋ Добавить слой</button>
 <div class="algorithm-layer-list" id="algorithmLayerList"></div>
 </section>
-<section class="control" id="shapeControl"><div class="controltitle"><span>05 / Shape Lab</span><small>SHAPE SHIFTER</small></div>
+<section class="control" id="shapeControl"><div class="controltitle"><span>Shape Lab · формы</span><small>SHAPE SHIFTER</small></div>
 <div class="field"><div class="fieldtop"><label for="shape">Форма по умолчанию</label></div><select class="select full" id="shape"><option value="circle">Круги</option><option value="square">Квадраты</option><option value="diamond">Ромбы</option><option value="triangle">Треугольники</option><option value="line">Линии</option><option value="cross">Кресты</option><option value="hexagon">Шестиугольники</option><option value="star">Звёзды</option><option value="ring">Кольца</option><option value="chevron">Шевроны</option><option value="custom">Своя SVG-форма</option></select></div>
 <div class="field"><div class="fieldtop"><label for="jitter">Вариативность размера</label><output class="val" id="jitterV">20%</output></div><input class="range" id="jitter" type="range" min="0" max="80" value="20"></div>
 <div class="field"><div class="fieldtop"><label for="shapeDistribution">Распределение размера</label></div><select class="select full" id="shapeDistribution"><option value="uniform">Равномерное</option><option value="radial">Радиальное</option><option value="horizontal">По горизонтали</option><option value="vertical">По вертикали</option><option value="random">Органичное</option><option value="wave">Волновое</option><option value="edge">По контрасту краёв</option></select></div>
@@ -1102,7 +1156,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <div class="shape-bands"><div class="controltitle"><span>ФОРМЫ ПО ДИАПАЗОНАМ</span><small>SHAPE / SIZE / COLOR / ANGLE</small></div>
 <div class="shape-band"><b>01 · Shadows</b><div class="shape-band-row"><select class="select" id="bandShape0" aria-label="Форма Shadows"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize0" min="20" max="180" value="55" aria-label="Размер Shadows"><input type="color" id="bandColor0" value="#334b2b" aria-label="Цвет Shadows"></div><div class="shape-band-angle"><label for="bandRotation0">Угол</label><input type="range" class="range" id="bandRotation0" min="-180" max="180" value="0"><output id="bandRotation0V">0°</output></div></div><div class="shape-band"><b>02 · Low mids</b><div class="shape-band-row"><select class="select" id="bandShape1" aria-label="Форма Low mids"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize1" min="20" max="180" value="70" aria-label="Размер Low mids"><input type="color" id="bandColor1" value="#7a9a47" aria-label="Цвет Low mids"></div><div class="shape-band-angle"><label for="bandRotation1">Угол</label><input type="range" class="range" id="bandRotation1" min="-180" max="180" value="0"><output id="bandRotation1V">0°</output></div></div><div class="shape-band"><b>03 · High mids</b><div class="shape-band-row"><select class="select" id="bandShape2" aria-label="Форма High mids"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize2" min="20" max="180" value="85" aria-label="Размер High mids"><input type="color" id="bandColor2" value="#b8d785" aria-label="Цвет High mids"></div><div class="shape-band-angle"><label for="bandRotation2">Угол</label><input type="range" class="range" id="bandRotation2" min="-180" max="180" value="0"><output id="bandRotation2V">0°</output></div></div><div class="shape-band"><b>04 · Highlights</b><div class="shape-band-row"><select class="select" id="bandShape3" aria-label="Форма Highlights"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="triangle">Triangle</option><option value="line">Line</option><option value="cross">Cross</option><option value="hexagon">Hexagon</option><option value="star">Star</option><option value="ring">Ring</option><option value="chevron">Chevron</option><option value="custom">Custom SVG</option></select><input type="range" class="range" id="bandSize3" min="20" max="180" value="100" aria-label="Размер Highlights"><input type="color" id="bandColor3" value="#d9efad" aria-label="Цвет Highlights"></div><div class="shape-band-angle"><label for="bandRotation3">Угол</label><input type="range" class="range" id="bandRotation3" min="-180" max="180" value="0"><output id="bandRotation3V">0°</output></div></div></div>
 <div class="shape-preset-panel"><div class="controltitle"><span>БИБЛИОТЕКА SHAPE SHIFTER</span><small>LOCAL / SHAREABLE</small></div><div class="field"><label for="shapePresetSelect">Пресеты форм</label><select class="select full" id="shapePresetSelect"></select></div><div class="field"><label for="shapePresetName">Название собственного пресета</label><input type="text" id="shapePresetName" maxlength="48" placeholder="Например, Star field"></div><div class="shape-preset-actions"><button class="btn sm" id="applyShapePreset" type="button">Применить</button><button class="btn sm" id="saveShapePreset" type="button">☆ Сохранить</button><button class="btn sm" id="deleteShapePreset" type="button">Удалить</button></div><div class="shape-preset-actions"><button class="btn sm" id="exportShapePreset" type="button">↓ JSON</button><button class="btn sm" id="importShapePreset" type="button">↑ Импорт JSON</button></div><div class="field" style="margin-top:10px"><label for="shapeShareCode">Код формы для обмена</label><textarea id="shapeShareCode" rows="3" placeholder="Создайте код после настройки формы"></textarea></div><div class="shape-preset-actions"><button class="btn sm" id="makeShapeCode" type="button">↗ Создать / скопировать</button><button class="btn sm" id="applyShapeCode" type="button">Применить код</button></div></div></section>
-<section class="control" id="asciiControl"><div class="controltitle"><span>06 / Script Slayer</span><small>CHARACTER ENGINE</small></div>
+<section class="control" id="asciiControl"><div class="controltitle"><span>Script Slayer · символы</span><small>CHARACTER ENGINE</small></div>
 <div class="field"><div class="fieldtop"><label for="asciiWidth">Ширина символов</label><output class="val" id="asciiWidthV">100</output></div><input class="range" id="asciiWidth" type="range" min="32" max="220" value="100"></div><p id="asciiLimitWarning" class="hidden" role="status" style="font-size:10px;color:var(--muted);margin:8px 0">Очень вытянутое изображение: сетка ASCII ограничена по размеру, чтобы сохранить отзывчивость редактора.</p>
 <div class="field"><div class="fieldtop"><label for="asciiSet">Набор символов</label></div><select class="select full" id="asciiSet"><optgroup label="CLASSIC / PIXELS"><option value="classic">Classic ASCII</option><option value="lowercase">Lowercase</option><option value="uppercase">Uppercase</option><option value="latin">Extended Latin</option><option value="digits">Numbers</option><option value="hex">Hexadecimal</option><option value="binary">Binary</option><option value="binaryBlocks">Binary Blocks</option><option value="punctuation">Punctuation</option><option value="symbols">Symbols</option><option value="math">Mathematical</option><option value="currency">Currencies</option><option value="morse">Morse-like</option><option value="monospaced">Monospaced Blocks</option></optgroup><optgroup label="GEOMETRIC / ABSTRACT"><option value="geometric">Geometric</option><option value="squares">Squares</option><option value="triangles">Triangles</option><option value="circles">Circles</option><option value="stars">Stars</option><option value="blocks">Blocks</option><option value="shades">Shading</option><option value="boxdraw">Box Drawing</option><option value="arrows">Arrows</option><option value="arrowsWide">Arrows · Wide</option><option value="ornamental">Ornaments</option><option value="emoji">Glyph Mosaic</option></optgroup><optgroup label="SIGNS / GAMES"><option value="cards">Playing Cards</option><option value="chess">Chess</option><option value="dice">Dice</option><option value="domino">Domino</option><option value="music">Music</option><option value="astrology">Astrology</option><option value="alchemy">Alchemy</option><option value="medieval">Medieval</option><option value="runes">Runes</option><option value="runes2">Runes · Angular</option></optgroup><optgroup label="LANGUAGES / BRAILLE"><option value="braille">Braille</option><option value="brailleFine">Braille · Fine</option><option value="cyrillic">Cyrillic</option><option value="greek">Greek</option><option value="hebrew">Hebrew</option><option value="arabic">Arabic</option><option value="hiragana">Hiragana</option><option value="katakana">Katakana</option><option value="hangul">Hangul</option><option value="kanji">Kanji</option><option value="thai">Thai</option><option value="devanagari">Devanagari</option></optgroup></select><div class="glyph-preview" id="glyphPreview" aria-live="polite"></div></div>
 <div class="field"><div class="fieldtop"><label for="asciiDepth">Глубина символов</label><output class="val" id="asciiDepthV">10</output></div><input class="range" id="asciiDepth" type="range" min="2" max="16" value="10"></div>
@@ -1119,7 +1173,7 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <div class="field"><div class="fieldtop"><label for="cmykCell">Размер точки CMYK</label><output class="val" id="cmykCellV">8 px</output></div><input class="range" id="cmykCell" type="range" min="4" max="24" value="8"></div>
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"><button class="btn sm" id="svgColor">SVG · Цвет</button><button class="btn sm" id="svgBlack">SVG · Ч/Б</button><button class="btn sm" id="svgCmyk" style="grid-column:1/-1">↓ CMYK-пластины · SVG</button></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px"><button class="btn sm" id="temporalPlay">▶ Motion</button><button class="btn sm" id="temporalStop">■ Stop</button><button class="btn sm" id="temporalRecord" style="grid-column:1/-1">↓ Record WebM · 6 sec</button></div><p style="font-size:9px;color:var(--muted);margin:9px 0 0">SVG хранит векторные контуры; CMYK — отдельные именованные пластины. DPI задаёт физический размер на печати.</p></section>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px"><button class="btn sm" id="temporalPlay">▶ Движение</button><button class="btn sm" id="temporalStop">■ Стоп</button><button class="btn sm" id="temporalRecord" style="grid-column:1/-1">↓ Записать WebM · 6 с</button></div><p style="font-size:9px;color:var(--muted);margin:9px 0 0">SVG хранит векторные контуры; CMYK — отдельные именованные пластины. DPI задаёт физический размер на печати.</p></section>
 </aside>
 </div>
 <input class="hidden" type="file" id="imageInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/svg+xml,.svg">
@@ -1129,12 +1183,64 @@ body[data-shell="xp"] .effect-control{border-radius:0!important}
 <input class="hidden" type="file" id="batchInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" multiple>
 <input class="hidden" type="file" id="projectInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteInput" accept=".json,application/json"><input class="hidden" type="file" id="presetInput" accept=".json,application/json"><input class="hidden" type="file" id="paletteLibraryInput" accept=".json,application/json"><input class="hidden" type="file" id="userBackupInput" accept=".json,application/json">
 <div class="toast" id="toast" role="status"></div>
-<div class="modalbg hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle"><div class="modal export-modal"><h2 id="exportModalTitle">Экспорт результата</h2><p>Выберите формат и проверьте параметры перед сохранением файла.</p><div class="export-fields"><div><label for="exportFormat">Что экспортировать</label><select id="exportFormat" class="select full"><option value="png">PNG — изображение с прозрачностью</option><option value="jpeg">JPEG — фотография, сжатие</option><option value="svgColor">SVG — цветной вектор</option><option value="svgBlack">SVG — чёрно-белый вектор</option><option value="svgCmyk">SVG — CMYK-пластины</option><option value="project">Проект TGRMLither (JSON)</option><option value="copy">Копировать результат</option></select></div><div class="hidden" id="exportJpegSettings"><label for="exportJpegQuality">Качество JPEG · <output id="exportJpegQualityValue">94%</output></label><input type="range" id="exportJpegQuality" min="70" max="100" value="94"></div><div class="export-note" id="exportSummary">Локальная обработка · файл не загружается на сервер.</div></div><div class="modalactions"><button class="btn" id="exportCancel" type="button">Отмена</button><button class="btn primary" id="exportConfirm" type="button">Экспортировать</button></div></div></div><div class="modalbg hidden" id="modal"><div class="modal"><h2 id="modalTitle">Сохранить пресет</h2><p>Название будет сохранено локально в браузере.</p><input id="presetName" maxlength="48" placeholder="Например, Moss print"><div class="modalactions"><button class="btn" id="modalCancel">Отмена</button><button class="btn primary" id="modalSave">Сохранить</button></div></div></div>
+<div class="modalbg hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle" aria-hidden="true"><div class="modal export-modal"><h2 id="exportModalTitle">Экспорт результата</h2><p>Выберите формат и проверьте параметры перед сохранением файла.</p><div class="export-fields"><div><label for="exportFormat">Что экспортировать</label><select id="exportFormat" class="select full"><option value="png">PNG — изображение с прозрачностью</option><option value="jpeg">JPEG — фотография, сжатие</option><option value="svgColor">SVG — цветной вектор</option><option value="svgBlack">SVG — чёрно-белый вектор</option><option value="svgCmyk">SVG — CMYK-пластины</option><option value="project">Проект TGRMLither (JSON)</option><option value="copy">Копировать результат</option></select></div><div class="hidden" id="exportJpegSettings"><label for="exportJpegQuality">Качество JPEG · <output id="exportJpegQualityValue">94%</output></label><input type="range" id="exportJpegQuality" min="70" max="100" value="94"></div><div class="export-note" id="exportSummary">Локальная обработка · файл не загружается на сервер.</div></div><div class="modalactions"><button class="btn" id="exportCancel" type="button">Отмена</button><button class="btn primary" id="exportConfirm" type="button">Экспортировать</button></div></div></div><div class="modalbg hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true"><div class="modal"><h2 id="modalTitle">Сохранить пресет</h2><p>Название будет сохранено локально в браузере.</p><label class="sr-only" for="presetName">Название пресета</label><input id="presetName" maxlength="48" placeholder="Например, Moss print" autocomplete="off"><div class="modalactions"><button class="btn" id="modalCancel" type="button">Отмена</button><button class="btn primary" id="modalSave" type="button">Сохранить</button></div></div></div>
 <script src="./animation-engine.js"></script>
 <script>
 "use strict";
 (function(){
 const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const DIALOG_IDS=["modal","exportModal"];
+const DIALOG_FOCUSABLE='button:not([disabled]),a[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+let dialogReturnFocus=null;
+function dialogFocusables(overlay){
+ return Array.from(overlay.querySelectorAll(DIALOG_FOCUSABLE)).filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility!=="hidden");
+}
+function openAccessibleDialog(id,focusTargetId){
+ const overlay=$(id);if(!overlay)return;
+ if(DIALOG_IDS.every(dialogId=>$(dialogId)?.classList.contains("hidden")))dialogReturnFocus=document.activeElement;
+ overlay.classList.remove("hidden");overlay.setAttribute("aria-hidden","false");
+ const target=$(focusTargetId)||dialogFocusables(overlay)[0]||overlay;
+ requestAnimationFrame(()=>{if(!overlay.classList.contains("hidden"))target.focus({preventScroll:true})});
+}
+function closeAccessibleDialog(id){
+ const overlay=$(id);if(!overlay)return;
+ overlay.classList.add("hidden");overlay.setAttribute("aria-hidden","true");
+ if(DIALOG_IDS.every(dialogId=>$(dialogId)?.classList.contains("hidden"))){
+  const target=dialogReturnFocus;dialogReturnFocus=null;
+  if(target?.isConnected&&!target.disabled)target.focus({preventScroll:true});
+ }
+}
+function trapAccessibleDialogFocus(event){
+ const activeId=DIALOG_IDS.find(id=>!$(id)?.classList.contains("hidden"));
+ if(!activeId)return false;
+ const overlay=$(activeId),items=dialogFocusables(overlay);
+ if(!items.length){event.preventDefault();return true}
+ const first=items[0],last=items[items.length-1];
+ if(event.shiftKey&&(document.activeElement===first||!overlay.contains(document.activeElement))){event.preventDefault();last.focus()}
+ else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+ return true;
+}
+function refreshInspectorNavigation(){
+ const nav=$("inspectorJumpNav");if(!nav)return;
+ if(nav.dataset.bound!=="true"){
+  nav.dataset.bound="true";
+  nav.addEventListener("click",event=>{
+   const button=event.target.closest("[data-inspector-target]");if(!button||button.hidden)return;
+   nav.querySelectorAll("[aria-current]").forEach(item=>item.removeAttribute("aria-current"));
+   button.setAttribute("aria-current","location");
+   const target=$(button.dataset.inspectorTarget);
+   if(target)target.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  });
+ }
+ let visibleCount=0;
+ nav.querySelectorAll("[data-inspector-target]").forEach(button=>{
+  const target=$(button.dataset.inspectorTarget);
+  const visible=!!target&&!target.classList.contains("hidden")&&getComputedStyle(target).display!=="none";
+  button.hidden=!visible;if(visible)visibleCount++;
+ });
+ nav.classList.toggle("hidden",visibleCount===0||$("inspector").classList.contains("hidden"));
+}
+
 const resourceMetrics={
  scratchCanvasesCreated:0,scratchCanvasesReleased:0,scratchPixelsReleased:0,sourceCanvasesReleased:0,
  imageBitmapsCreated:0,imageBitmapsClosed:0,imageBitmapsTransferred:0,lateImageBitmapsClosed:0,
@@ -2361,9 +2467,9 @@ function openExportModal(){
  $("exportJpegQuality").value=$("jpegQuality").value;$("exportJpegQualityValue").textContent=$("jpegQuality").value+"%";
  updateExportFormatUI();
  
- $("exportModal").classList.remove("hidden");$("exportFormat").focus();
+ openAccessibleDialog("exportModal","exportFormat");
 }
-function closeExportModal(){$("exportModal").classList.add("hidden")}
+function closeExportModal(){closeAccessibleDialog("exportModal")}
 async function confirmExport(){
  const format=$("exportFormat").value;closeExportModal();
  if(format!=="project"&&original){original=false;$("toggleOriginal").textContent="◉ Показать оригинал";render()}
@@ -2803,7 +2909,7 @@ function setMode(m){
   $("algorithm").value="bayer4";sync();render();
  }else if(m==="editor"){
   $("pageTitle").innerHTML='Редактор изображения<span style="color:var(--acid)">.</span>';
-  $("pageSubtitle").textContent="64 стилистических режима, палитры и независимый стек постобработки.";
+  $("pageSubtitle").textContent="65 стилистических режима, палитры и независимый стек постобработки.";
   sync();render();
  }else if(m==="batch"){
   $("algorithm").value=s.algorithm;sync();renderBatch();
@@ -2812,6 +2918,7 @@ function setMode(m){
  }else if(m==="presets")renderPresets();
  if(WORKSPACE_NAMES.includes(m))saveWorkspaceSettings(m);
  if(["editor","shape","script"].includes(m)){animationScrubBase=cloneSettings(s);animationCurrentMs=0;animationScrubPreviewed=false;animationPreviewFrame=null;animationRefreshTrackOptions();animationRefreshUI()}
+ refreshInspectorNavigation();
 }
 function makeCard(p){let b=document.createElement("button");b.className="preset";let art=document.createElement("div");art.className="previewart";let c=document.createElement("canvas");c.width=300;c.height=145;let x=c.getContext("2d"),cs=(pal[p.c.palette||"moss"]||pal.moss).c;let g=x.createLinearGradient(0,0,300,145);cs.forEach((col,i)=>g.addColorStop(i/Math.max(1,cs.length-1),col));x.fillStyle=g;x.fillRect(0,0,300,145);x.fillStyle=cs[cs.length-1];x.beginPath();x.arc(210,38,25,0,7);x.fill();x.fillStyle=cs[Math.floor((cs.length-1)/2)];x.beginPath();x.moveTo(0,110);x.lineTo(62,52);x.lineTo(128,115);x.lineTo(195,72);x.lineTo(265,120);x.lineTo(300,93);x.lineTo(300,145);x.lineTo(0,145);x.closePath();x.fill();for(let yy=0;yy<145;yy+=p.c.scale||5)for(let xx=0;xx<300;xx+=p.c.scale||5){if((xx+yy)%17<4){x.fillStyle=cs[0];x.fillRect(xx,yy,2,2)}}art.append(c);let info=document.createElement("div");info.className="presetinfo";info.innerHTML='<span class="ptag"></span><div class="presetname"></div><div class="presetdesc"></div>';info.querySelector(".ptag").textContent=p.tag||"MY PRESET";info.querySelector(".presetname").textContent=p.name;info.querySelector(".presetdesc").textContent=p.desc||"Моя конфигурация";b.append(art,info);b.onclick=()=>{setMode("editor");s=cloneSettings({...def,...p.c});if(["shape","ascii"].includes(s.algorithm))s.algorithm="bayer4";workspaceSettings.editor=cloneSettings(s);store("tgrmlithering-workspaces",workspaceSettings);sync();render();say("Пресет: "+p.name)};return b}
 function renderPresets(){
@@ -2849,7 +2956,7 @@ function renderPresets(){
   row.append(txt,use,del);box.append(row);
  });
 }
-function savePreset(){ $("modalTitle").textContent="Сохранить пресет";$("modal").classList.remove("hidden");$("presetName").value="";$("presetName").focus();$("modalSave").onclick=()=>{let name=$("presetName").value.trim();if(!name){say("Введите название");return}const stored=loadStore("ditherlab-presets",[]),base=Array.isArray(stored)?stored.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,99):[],next=[{name:name.slice(0,48),desc:"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",c:cloneSettings(s)},...base];if(!store("ditherlab-presets",next))return;custom=next;$("modal").classList.add("hidden");renderPresets();say("Пресет сохранён")}}
+function savePreset(){ $("modalTitle").textContent="Сохранить пресет";$("presetName").value="";openAccessibleDialog("modal","presetName");$("modalSave").onclick=()=>{let name=$("presetName").value.trim();if(!name){say("Введите название");return}const stored=loadStore("ditherlab-presets",[]),base=Array.isArray(stored)?stored.filter(p=>p&&typeof p.name==="string"&&p.c&&typeof p.c==="object").slice(0,99):[],next=[{name:name.slice(0,48),desc:"Пользовательская комбинация",workspace:WORKSPACE_NAMES.includes(mode)?mode:"editor",c:cloneSettings(s)},...base];if(!store("ditherlab-presets",next))return;custom=next;closeAccessibleDialog("modal");renderPresets();say("Пресет сохранён")}}
 function renderBatch(){let box=$("batchList");box.innerHTML="";const hasBatchResults=!!$("batchResults")?.querySelector(".fileitem");if($("batchProgressCount")&&!batchRunning&&!hasBatchResults)$("batchProgressCount").textContent=batch.length+" выбрано";if($("batchProgressLabel")&&!batchRunning&&!hasBatchResults){if(!batch.length)$("batchProgressLabel").textContent="Ожидает файлов";else $("batchProgressLabel").textContent="Готово к обработке"}if(!batch.length){box.textContent="Выбранные файлы появятся здесь.";box.style.color="var(--muted)";box.style.fontSize="10px";return}batch.forEach((f,i)=>{let row=document.createElement("div");row.className="fileitem";let icon=document.createElement("div");icon.className="fileicon";icon.textContent="▧";let txt=document.createElement("div");txt.className="filetext";txt.innerHTML="<b></b><small></small>";txt.querySelector("b").textContent=f.name;txt.querySelector("small").textContent=(f.size/1048576).toFixed(2)+" MB";let rm=document.createElement("button");rm.className="btn sm";rm.textContent="×";rm.disabled=batchRunning;rm.onclick=()=>{if(batchRunning)return;batch.splice(i,1);renderBatch()};row.append(icon,txt,rm);box.append(row)})}
 function addBatch(files){if(batchRunning){say("Дождитесь завершения пакетной обработки");return}const images=Array.from(files).filter(f=>f.type.startsWith("image/")),available=Math.max(0,MAX_BATCH_FILES-batch.length),accepted=images.slice(0,available);batch.push(...accepted);$("batchProgress").style.width="0%";$("batchProgressTrack").setAttribute("aria-valuenow","0");$("batchProgressCount").textContent=batch.length+" выбрано";$("batchProgressLabel").textContent=batch.length?"Готово к обработке":"Ожидает файлов";renderBatch();if(images.length>accepted.length)say("Ограничение пакетной обработки — "+MAX_BATCH_FILES+" изображений; добавлено "+accepted.length);else say(accepted.length?"Добавлено файлов: "+accepted.length:"Выберите файлы изображений")}
 function revokeBatchDownloadUrls(){for(const url of batchDownloadUrls)URL.revokeObjectURL(url);batchDownloadUrls=[];resourceMetrics.batchResultUrls=0}
@@ -3775,7 +3882,7 @@ let stage=$("stage");
  });
  document.addEventListener("dragover",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});
  document.addEventListener("drop",e=>{if(Array.from(e.dataTransfer?.types||[]).includes("Files"))e.preventDefault()});
-$("modalCancel").onclick=()=>$("modal").classList.add("hidden");$("modal").onclick=e=>{if(e.target===$("modal"))$("modal").classList.add("hidden")};document.addEventListener("keydown",e=>{const key=e.key.toLowerCase(),target=e.target,textEditing=target?.isContentEditable||(target?.matches?.("input,textarea")&&["text","search","url","email","password","number"].includes(String(target.type||"").toLowerCase()));if((e.ctrlKey||e.metaKey)&&key==="o"){e.preventDefault();openImage();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="z"){e.preventDefault();if(e.shiftKey)redoAction();else undoAction();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="y"){e.preventDefault();redoAction();return}if(e.key==="Escape"){$("modal").classList.add("hidden");closeExportModal()}});
+$("modalCancel").onclick=()=>closeAccessibleDialog("modal");$("modal").onclick=e=>{if(e.target===$("modal"))closeAccessibleDialog("modal")};document.addEventListener("keydown",e=>{const key=e.key.toLowerCase(),target=e.target,textEditing=target?.isContentEditable||(target?.matches?.("input,textarea")&&["text","search","url","email","password","number"].includes(String(target.type||"").toLowerCase()));if((e.ctrlKey||e.metaKey)&&key==="o"){e.preventDefault();openImage();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="z"){e.preventDefault();if(e.shiftKey)redoAction();else undoAction();return}if((e.ctrlKey||e.metaKey)&&!textEditing&&key==="y"){e.preventDefault();redoAction();return}if(e.key==="Tab"&&trapAccessibleDialogFocus(e))return;if(e.key==="Escape"){if(!$("exportModal").classList.contains("hidden"))closeExportModal();else closeAccessibleDialog("modal")}});
 if("serviceWorker"in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register("./sw.js").catch(()=>{});
 }
 init();
