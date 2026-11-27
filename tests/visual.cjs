@@ -197,6 +197,7 @@ async function switchMode(page, mode) {
     assert.notEqual(await temporalGroup.getAttribute("open"), null);
 
 
+    await page.setViewportSize({ width: 1280, height: 800 });
     const themeMenu = page.locator("#themeMenu");
     await themeMenu.locator("summary").click();
     await page.locator("#themePicker").selectOption("custom");
