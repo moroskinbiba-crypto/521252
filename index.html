@@ -92,7 +92,7 @@
 </div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px"><button class="btn sm" id="useCustomPalette">Моя палитра</button><button class="btn sm" id="extractPalette">Извлечь из фото</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px"><button class="btn sm" id="exportPalette">↓ Палитра JSON</button><button class="btn sm" id="importPalette">↑ Палитра JSON</button></div></div>
 <div class="palette-library">
  <div class="palette-library-head"><strong>Библиотека палитр</strong><small id="paletteLibraryCount">0 сохранено</small></div>
- <input type="text" id="paletteLibraryName" maxlength="48" placeholder="Название активной палитры">
+ <label class="sr-only" for="paletteLibraryName">Название палитры</label><input type="text" id="paletteLibraryName" maxlength="48" placeholder="Название активной палитры" autocomplete="off">
  <button class="btn sm full" id="savePaletteToLibrary" type="button">☆ Сохранить палитру</button>
  <select id="paletteLibrarySelect" class="select full" aria-label="Сохранённые палитры"></select>
  <div class="palette-library-grid"><button class="btn sm" id="applyLibraryPalette" type="button">Применить</button><button class="btn sm" id="deleteLibraryPalette" type="button">Удалить</button></div>
