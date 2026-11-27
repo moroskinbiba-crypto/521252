@@ -77,4 +77,4 @@ body:not([data-inspector-level="advanced"]) #exportControl .advanced-export-grou
 /* Theme contrast feedback is advisory: custom palettes stay creative and are never blocked. */
 .theme-contrast-warning{display:block;margin-top:4px;color:var(--acid);font-size:9px;line-height:1.45;overflow-wrap:anywhere}
 .theme-contrast-warning:empty{display:none}
-.theme-contrast-warning[data-state="warning"]{color:var(--acid)}
+.theme-contrast-warning[data-state="warning"]{color:#8f1d14;background:#fff1f0;border:1px solid #e8a39c;padding:6px 7px;border-radius:6px}
