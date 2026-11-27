@@ -2669,7 +2669,7 @@ function animationRefreshKeyEditor(){
  $("animationKeyStatus").textContent=selected
   ? animationTrackLabel(selected.path)+" · "+animationFormatTime(selected.frame.timeMs)+" · "+typeof selected.frame.value
   : "Выберите маркер на дорожке, чтобы изменить его точное время и значение.";
- $("animationKeyTime").value=selected?String(selected.frame.timeMs/1000):"0";
+ $("animationKeyTime").max=String(animationClip.durationMs/1000);$("animationKeyTime").value=selected?String(selected.frame.timeMs/1000):"0";
  if(selected&&typeof selected.frame.value==="boolean"){
   $("animationKeyValueField").classList.add("hidden");$("animationKeyBooleanField").classList.remove("hidden");
   bool.value=String(selected.frame.value);
@@ -2714,6 +2714,14 @@ function animationRenderLanes(){
   row.append(name,bar);box.append(row);
  }
 }
+function animationSetBusyControls(){
+ const busy=animationPlaying||animationExporting;
+ ["animationTrack","animationDuration","animationFps","animationLoopMode","animationEasing","animationScrub",
+  "animationAddKeyframe","animationDeleteKeyframe","animationCaptureBase","animationWave","animationAmplitude",
+  "animationFrequency","animationPhase","animationOscillator","animationKeyApply"].forEach(id=>{const node=$(id);if(node)node.disabled=busy});
+ $("animationPlay").disabled=busy;$("animationStop").disabled=!animationPlaying;
+ $("animationExportFrames").disabled=busy;$("animationExportVideo").disabled=busy;$("animationCancelExport").disabled=!animationExporting;
+}
 function animationRefreshUI(){
  if(!$("animationScrub"))return;
  $("animationDuration").value=String(animationClip.durationMs/1000);$("animationFps").value=String(animationClip.fps);$("animationLoopMode").value=animationClip.loopMode|| (animationClip.loop===false?"none":"loop");
@@ -2721,7 +2729,7 @@ function animationRefreshUI(){
  $("animationTimeLabel").textContent=animationFormatTime(animationCurrentMs);$("animationEndLabel").textContent=animationFormatTime(animationClip.durationMs);
  animationSelectedKeyTime=animationSelectedKeyPath&&animationClip.tracks[animationSelectedKeyPath]?.keyframes.some(frame=>frame.timeMs===animationSelectedKeyTime)?animationSelectedKeyTime:null;
  if(animationSelectedKeyTime===null)animationSelectedKeyPath=null;
- animationRenderLanes();animationRefreshSelectedTrack();
+ animationRenderLanes();animationRefreshSelectedTrack();animationSetBusyControls();
 }
 function animationSetTime(timeMs,apply=true,baseOverride=null,evaluator=null){
  animationCurrentMs=Math.max(0,Math.min(animationClip.durationMs,Math.round(Number(timeMs)||0)));
@@ -2789,7 +2797,7 @@ function animationUpdateOscillator(){
  try{animationClip=AnimationEngine.setOscillator(animationClip,path,{wave:$("animationWave").value,amount:Number($("animationAmplitude").value),frequency:Number($("animationFrequency").value),phase:Number($("animationPhase").value)});animationPersist();animationRefreshUI()}catch(error){say(error.message||"Неверные параметры осциллятора")}
 }
 function animationStopPlayback(restore=true){
- if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;animationFrameBusy=false;
+ if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;
  if(animationPlayBase&&restore){s=cloneSettings(animationPlayBase);animationScrubBase=cloneSettings(animationPlayBase);animationPreviewActive=false;animationScrubPreviewed=false;animationPreviewFrame=null;sync();render()}
  animationPlayBase=null;animationRefreshUI();$("animationPlay").disabled=false;$("animationStop").disabled=true;
 }
@@ -2803,7 +2811,7 @@ function animationPlay(){
  animationCurrentMs=startMs;
  animationPlayBase=cloneSettings(animationScrubBase||s);
  const playBase=animationPlayBase,evaluator=AnimationEngine.compile(playBase,clip);
- animationPlaying=true;animationPlayEpoch=performance.now();animationLastFrameAt=0;animationFrameBusy=false;
+ animationPlaying=true;animationPlayEpoch=performance.now();animationLastFrameAt=0;
  $("animationPlay").disabled=true;$("animationStop").disabled=false;animationRefreshUI();
  const interval=1000/clip.fps;
  const tick=now=>{
@@ -2838,7 +2846,7 @@ async function animationExportSequence(){
  const clip=AnimationEngine.normalise(animationClip),frames=Math.ceil(clip.durationMs/1000*clip.fps);
  if(frames<2){say("Для последовательности нужно минимум два кадра");return}if(frames>ANIMATION_EXPORT_MAX_FRAMES){say("Слишком много кадров. Максимум 600; уменьшите FPS или длительность.");return}
  const base=cloneSettings(animationScrubBase||s),returnTime=animationCurrentMs,evaluator=AnimationEngine.compile(base,clip),entries=[];let totalBytes=0,completed=0;
- animationExporting=true;animationCancelRequested=false;$("animationExportFrames").disabled=true;$("animationExportVideo").disabled=true;$("animationCancelExport").disabled=false;
+ animationExporting=true;animationCancelRequested=false;animationRefreshUI();
  try{
   for(let index=0;index<frames;index++){
    if(animationCancelRequested)break;
@@ -2863,7 +2871,7 @@ async function animationExportVideo(){
  const candidates=["video/mp4;codecs=avc1.42E01E","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=candidates.find(type=>MediaRecorder.isTypeSupported(type));
  if(!mime){say("Браузер не предоставляет поддерживаемый MP4/WebM кодек");return}
  const base=cloneSettings(animationScrubBase||s),returnTime=animationCurrentMs,evaluator=AnimationEngine.compile(base,clip);let stream=null,recorder=null,chunks=[],videoOutputBytes=0,videoOutputLimit=false;
- animationExporting=true;animationCancelRequested=false;$("animationExportFrames").disabled=true;$("animationExportVideo").disabled=true;$("animationCancelExport").disabled=false;
+ animationExporting=true;animationCancelRequested=false;animationRefreshUI();
  try{
   stream=out.captureStream(0);const track=stream.getVideoTracks()[0],manualFrames=!!track?.requestFrame;
   if(!manualFrames){stream.getTracks().forEach(item=>item.stop());stream=out.captureStream(animationClip.fps)}
