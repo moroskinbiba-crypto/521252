@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "serve": "python -m http.server 8080",
-    "check:syntax": "node --check animation-engine.js && node --check processing-worker.js && node --check tests/animation-engine.test.cjs && node --check tests/smoke.cjs && node --check tests/compat.cjs && node --check tests/visual.cjs",
-    "test:engine": "node tests/animation-engine.test.cjs"
+    "check:syntax": "node --check animation-engine.js && node --check processing-worker.js && node --check tests/animation-engine.test.cjs && node --check tests/smoke.cjs && node --check tests/compat.cjs && node --check tests/visual.cjs && node --check tests/css-assets.test.cjs",
+    "test:engine": "node tests/animation-engine.test.cjs",
+    "test:assets": "node tests/css-assets.test.cjs"
   }
 }
