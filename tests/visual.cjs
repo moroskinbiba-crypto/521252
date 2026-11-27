@@ -213,6 +213,11 @@ async function switchMode(page, mode) {
     await page.locator("#themePicker").selectOption("night");
     assert.equal(await contrastNotice.innerText(), "",
       "switching to a built-in accessible theme should clear custom contrast warnings");
+    for (const builtInTheme of ["paper", "terminal", "violet"]) {
+      await page.locator("#themePicker").selectOption(builtInTheme);
+      assert.equal(await contrastNotice.innerText(), "",
+        builtInTheme + " built-in theme should meet the contrast thresholds without warnings");
+    }
     await themeMenu.evaluate(element => { element.open = false; });
 
     // Dialogs must name themselves, take focus, trap keyboard navigation and return focus.
