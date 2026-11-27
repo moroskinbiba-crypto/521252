@@ -2060,7 +2060,7 @@ function updateRenderControls(cfg,renderMode,metadata=null){
 function loadImage(c,n,isDemo=false){
  if(animationExporting){say("Сначала завершите или отмените экспорт анимации");return false}
  if(animationPlaying)animationStopPlayback(true);
- else if(animationScrubPreviewed&&animationScrubBase){s=cloneSettings(animationScrubBase);animationScrubPreviewed=false;animationCurrentMs=0;sync();render()}
+ else if(animationScrubPreviewed&&animationScrubBase){s=cloneSettings(animationScrubBase);animationScrubPreviewed=false;animationCurrentMs=0;sync();render();animationRefreshUI()}
  const previousSource=src,previousSourceCopy=processingSourceCanvasCopy;
  src=c;srcName=n||"image";demo=isDemo;original=false;resultDirty=false;lastExported=false;lastRenderedSignature="";hasRendered=false;compareEnabled=false;
  setProcessingSource(c);
@@ -2711,6 +2711,9 @@ function setMode(m){
    }
  }
  if(WORKSPACE_NAMES.includes(previousMode))saveWorkspaceSettings(previousMode);
+ if(WORKSPACE_NAMES.includes(previousMode)&&animationScrubPreviewed&&animationScrubBase){
+  s=cloneSettings(animationScrubBase);animationScrubPreviewed=false;animationCurrentMs=0;
+ }
  mode=m;
  if(m==="video"&&previousMode!=="video"&&$("videoSource")?.readyState>=2)requestAnimationFrame(()=>renderVideoFrame());
  if(WORKSPACE_NAMES.includes(m)){
