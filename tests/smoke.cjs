@@ -2060,6 +2060,7 @@ async function downloadFrom(page, selector) {
     assert.equal(await effectToggle("scanlines").getAttribute("aria-checked"), "true");
     assert.equal(await effectToggle("glow").getAttribute("aria-checked"), "false");
 
+    await effectLockPage.locator("#themeMenu > summary").click();
     const effectBackup = await downloadFrom(effectLockPage, "#exportUserBackup");
     const effectBackupJson = JSON.parse(effectBackup.bytes.toString("utf8"));
     assert.deepEqual(effectBackupJson.data["tgrmlither-effect-locks"].editor,
