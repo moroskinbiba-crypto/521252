@@ -3470,6 +3470,13 @@ function animationSetTime(timeMs,apply=true,baseOverride=null){
  animationPreviewActive=true;sync();render();animationPreviewActive=false;
  return waitForProcessingPreview().then(()=>true).catch(()=>false);
 }
+function animationCommitManualEdit(target,persist=false){
+ if(!animationScrubPreviewed||animationPlaying||animationExporting||!WORKSPACE_NAMES.includes(mode)||
+    !target||target.closest("#animationDock")||!target.closest("#inspector"))return false;
+ animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;
+ if(persist)saveWorkspaceSettings(mode);
+ return true;
+}
 function animationCaptureBase(){if(!src){say("Сначала откройте изображение");return}animationScrubBase=cloneSettings(s);animationScrubPreviewed=false;animationSetStatus("Базовые настройки текущего рабочего пространства сохранены.");say("База анимации обновлена")}
 function animationAddKeyframe(){
  if(!src){say("Сначала откройте изображение");return}
@@ -3592,6 +3599,12 @@ function initAnimationStudio(){
  $("animationPlay").onclick=animationPlay;$("animationStop").onclick=()=>animationStopPlayback(true);
  $("animationExportFrames").onclick=animationExportSequence;$("animationExportVideo").onclick=animationExportVideo;$("animationCancelExport").onclick=()=>{animationCancelRequested=true;$("animationExportStatus").textContent="Остановка после текущего кадра…"};
  $("animationPreviewMode").onchange=()=>{const previous=previewBehaviour,next=$("animationPreviewMode").value;if(!store(PREVIEW_BEHAVIOUR_KEY,next)){previewBehaviour=previous;$("animationPreviewMode").value=previous;say("Не удалось сохранить режим предпросмотра")}else{previewBehaviour=next;say("Предпросмотр: "+previewBehaviour)}};
+ document.addEventListener("input",event=>animationCommitManualEdit(event.target,false));
+ document.addEventListener("change",event=>animationCommitManualEdit(event.target,true));
+ document.addEventListener("click",event=>{
+  const target=event.target.closest("#inspector .effect-toggle, #inspector #neoGlowEnabled, #inspector #randomize, #inspector #shuffle");
+  if(target)animationCommitManualEdit(target,true);
+ });
  $("animationDock").classList.toggle("hidden",!["editor","shape","script"].includes(mode));
  window.__tgrmAnimationStatus=()=>({clip:AnimationEngine.normalise(animationClip),timeMs:animationCurrentMs,playing:animationPlaying,previewBehaviour});
  window.addEventListener("pagehide",()=>{if(animationRaf)cancelAnimationFrame(animationRaf);animationRaf=0;animationPlaying=false;animationCancelRequested=true;if(previewRenderTimer)clearTimeout(previewRenderTimer);previewRenderTimer=0});
