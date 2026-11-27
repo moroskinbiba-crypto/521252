@@ -1931,6 +1931,23 @@ async function downloadFrom(page, selector) {
       Number(document.querySelector("#threshold")?.value) === 20
     );
 
+    await animationPage.locator("#animationLanes .animation-key").nth(1).click();
+    assert.equal(await animationPage.locator("#animationKeyApply").isEnabled(), true,
+      "selecting a timeline marker should enable exact keyframe editing");
+    await animationPage.locator("#animationKeyTime").fill("1.25");
+    await animationPage.locator("#animationKeyValue").fill("50");
+    await animationPage.locator("#animationKeyEasing").selectOption("easeInOut");
+    await animationPage.locator("#animationKeyApply").click();
+    await animationPage.waitForFunction(() => {
+      const keys = window.__tgrmAnimationStatus().clip.tracks.threshold?.keyframes || [];
+      return keys.some(frame => frame.timeMs === 1250 && frame.value === 50 && frame.easing === "easeInOut");
+    });
+    await animationPage.locator("#animationLoopMode").selectOption("pingpong");
+    assert.equal(await animationPage.evaluate(() => window.__tgrmAnimationStatus().clip.loopMode),
+      "pingpong", "the ping-pong mode should be stored in the clip");
+    assert.deepEqual(animationErrors, [],
+      "keyframe editing and loop-mode selection should not throw browser runtime errors");
+
     const animationProjectDownload = await downloadFrom(animationPage, "#saveProjectMenu");
     const animationProject = JSON.parse(animationProjectDownload.bytes.toString("utf8"));
     assert.equal(animationProject.animation.tracks.threshold.keyframes.length, 2,
