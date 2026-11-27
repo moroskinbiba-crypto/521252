@@ -1905,6 +1905,10 @@ async function downloadFrom(page, selector) {
     assert.equal(await animationPage.evaluate(() =>
       window.__tgrmAnimationStatus().clip.tracks.threshold?.keyframes.length
     ), 2, "animation clips should survive a browser reload");
+    await setAnimationTime(500);
+    await animationPage.waitForFunction(() =>
+      Number(document.querySelector("#threshold")?.value) === 20
+    );
 
     const animationProjectDownload = await downloadFrom(animationPage, "#saveProjectMenu");
     const animationProject = JSON.parse(animationProjectDownload.bytes.toString("utf8"));
