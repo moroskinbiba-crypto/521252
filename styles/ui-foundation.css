@@ -42,3 +42,34 @@
 @media(prefers-reduced-motion:reduce){
  .inspector-jump-nav{scroll-behavior:auto}
 }
+
+/* Collapsible secondary controls keep specialist workspaces readable without removing any settings. */
+.inspector-collapsible>summary{
+ position:relative;display:flex;align-items:center;gap:8px;min-height:34px;
+ padding-right:24px;cursor:pointer;list-style:none;user-select:none;
+}
+.inspector-collapsible>summary::-webkit-details-marker{display:none}
+.inspector-collapsible>summary::after{
+ content:"＋";position:absolute;right:5px;top:50%;transform:translateY(-50%);
+ color:var(--acid);font:600 13px/1 ui-monospace,monospace;
+}
+.inspector-collapsible[open]>summary::after{content:"−"}
+.inspector-collapsible>summary:focus-visible{outline:2px solid var(--acid);outline-offset:3px}
+.shape-thresholds.inspector-collapsible>summary{margin-bottom:0}
+.shape-thresholds.inspector-collapsible[open]>summary{margin-bottom:8px}
+.shape-bands.inspector-collapsible>summary{padding:2px 22px 6px 0}
+.shape-preset-panel.inspector-collapsible>summary{padding-bottom:8px}
+.ascii-neoglow-options{margin-top:8px;padding-top:7px;border-top:1px solid var(--line)}
+.ascii-neoglow-options>summary{font-size:9px;color:var(--muted)}
+.export-note{margin:0 0 9px;color:var(--muted);font-size:9px;line-height:1.45}
+.advanced-export-group{margin-top:10px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.advanced-export-group>summary{padding:2px 22px 2px 1px;font-size:10px;font-weight:650}
+.advanced-export-group[open]>.print-export-settings{margin-top:8px}
+.advanced-export-group[open]>div[style*="grid-template-columns"]{margin-top:8px!important}
+.temporal-motion-group{margin-top:9px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.temporal-motion-group>summary{font-size:10px;font-weight:650}
+body:not([data-inspector-level="advanced"]) #exportControl .advanced-export-group{display:none!important}
+@media(max-width:740px){
+ .inspector-collapsible>summary{min-height:38px}
+ .advanced-export-group,.temporal-motion-group{padding:7px}
+}
