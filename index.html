@@ -2701,13 +2701,13 @@ function animationRenderLanes(){
  for(const [path,track] of entries){
   const row=document.createElement("div");row.className="animation-lane";
   const name=document.createElement("button");name.type="button";name.className="animation-lane-name"+(path===animationSelectedPath()?" active":"");name.textContent=animationTrackLabel(path);name.title=path;
-  name.onclick=()=>{$("animationTrack").value=path;animationSelectedKeyPath=null;animationSelectedKeyTime=null;animationRefreshSelectedTrack();animationRenderLanes()};
+  name.disabled=animationPlaying||animationExporting;name.onclick=()=>{$("animationTrack").value=path;animationSelectedKeyPath=null;animationSelectedKeyTime=null;animationRefreshSelectedTrack();animationRenderLanes()};
   const bar=document.createElement("div");bar.className="animation-lane-track";
   track.keyframes.forEach(frame=>{
    const selected=path===animationSelectedKeyPath&&frame.timeMs===animationSelectedKeyTime;
    const pin=document.createElement("button");pin.type="button";pin.className="animation-key"+(selected?" selected":"");
    pin.style.left=(frame.timeMs/animationClip.durationMs*100)+"%";pin.title=animationFormatTime(frame.timeMs)+" · "+String(frame.value);
-   pin.setAttribute("aria-label","Ключевой кадр "+animationFormatTime(frame.timeMs));pin.setAttribute("aria-pressed",String(selected));
+   pin.setAttribute("aria-label","Ключевой кадр "+animationFormatTime(frame.timeMs));pin.setAttribute("aria-pressed",String(selected));pin.disabled=animationPlaying||animationExporting;
    pin.onclick=()=>animationSelectKeyframe(path,frame.timeMs);bar.append(pin);
   });
   if(track.oscillator){const mark=document.createElement("span");mark.className="animation-oscillator";mark.title="Temporal Variation";bar.append(mark)}
@@ -2843,14 +2843,14 @@ function animationRestoreAfterExport(base,returnTime=0){
 async function animationExportSequence(){
  if(animationExporting||animationPlaying)return;if(!src){say("Сначала откройте изображение");return}
  if(!Object.values(animationClip.tracks).some(track=>track.keyframes.length||track.oscillator)){say("Добавьте ключевые кадры или Temporal Variation перед экспортом");return}
- const clip=AnimationEngine.normalise(animationClip),frames=Math.ceil(clip.durationMs/1000*clip.fps);
+ const clip=AnimationEngine.normalise(animationClip),playbackDurationMs=clip.durationMs*(clip.loopMode==="pingpong"?2:1),frames=Math.ceil(playbackDurationMs/1000*clip.fps);
  if(frames<2){say("Для последовательности нужно минимум два кадра");return}if(frames>ANIMATION_EXPORT_MAX_FRAMES){say("Слишком много кадров. Максимум 600; уменьшите FPS или длительность.");return}
  const base=cloneSettings(animationScrubBase||s),returnTime=animationCurrentMs,evaluator=AnimationEngine.compile(base,clip),entries=[];let totalBytes=0,completed=0;
  animationExporting=true;animationCancelRequested=false;animationRefreshUI();
  try{
   for(let index=0;index<frames;index++){
    if(animationCancelRequested)break;
-   const time=Math.min(clip.durationMs-1,Math.round(index*1000/clip.fps));await animationRenderFrameAt(time,base,evaluator,clip.durationMs);
+   const elapsed=Math.min(playbackDurationMs-1,Math.round(index*1000/clip.fps)),time=AnimationEngine.playbackTime(elapsed,0,clip.durationMs,clip.loopMode);await animationRenderFrameAt(time,base,evaluator,clip.durationMs);
    const blob=await new Promise(resolve=>out.toBlob(resolve,"image/png"));if(!blob)throw Error("Не удалось получить PNG кадра");
    totalBytes+=blob.size;if(totalBytes>ANIMATION_EXPORT_MAX_BYTES)throw Error("Последовательность превысила лимит 48 МБ. Уменьшите FPS, длительность или размер исходника.");
    entries.push({name:"frame_"+String(index+1).padStart(5,"0")+".png",blob});completed++;
@@ -2858,6 +2858,10 @@ async function animationExportSequence(){
    await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(!entries.length)throw Error("Экспорт отменён до создания первого кадра");
+  entries.push({name:"animation.json",blob:new Blob([JSON.stringify({
+   format:"tgrmlither-animation-sequence",version:1,clip:{durationMs:clip.durationMs,fps:clip.fps,loopMode:clip.loopMode,tracks:clip.tracks},
+   frameCount:completed,partial:animationCancelRequested
+  },null,2)],{type:"application/json;charset=utf-8"})});
   const zip=await buildZipArchive(entries);download(zip,slug(srcName)+"-animation-frames.zip");
   $("animationExportStatus").textContent=(animationCancelRequested?"Частичный архив · ":"Готово · ")+completed+" PNG";say((animationCancelRequested?"Частичный PNG Sequence экспортирован":"PNG Sequence экспортирован")+" · "+completed+" кадров");
  }catch(error){$("animationExportStatus").textContent=error.message||"Ошибка экспорта";say(error.message||"Не удалось экспортировать кадры")}
@@ -2866,7 +2870,7 @@ async function animationExportSequence(){
 async function animationExportVideo(){
  if(animationExporting||animationPlaying)return;if(!src){say("Сначала откройте изображение");return}
  if(typeof MediaRecorder==="undefined"||typeof out.captureStream!=="function"){say("Запись видео этим браузером не поддерживается");return}
- const clip=AnimationEngine.normalise(animationClip),frames=Math.ceil(clip.durationMs/1000*clip.fps);
+ const clip=AnimationEngine.normalise(animationClip),playbackDurationMs=clip.durationMs*(clip.loopMode==="pingpong"?2:1),frames=Math.ceil(playbackDurationMs/1000*clip.fps);
  if(frames<2||frames>ANIMATION_EXPORT_MAX_FRAMES){say("Количество кадров должно быть от 2 до 600");return}
  const candidates=["video/mp4;codecs=avc1.42E01E","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=candidates.find(type=>MediaRecorder.isTypeSupported(type));
  if(!mime){say("Браузер не предоставляет поддерживаемый MP4/WebM кодек");return}
@@ -2880,7 +2884,7 @@ async function animationExportVideo(){
   recorder.start(250);const frameInterval=1000/clip.fps;
   for(let index=0;index<frames;index++){
    if(animationCancelRequested)break;
-   const started=performance.now(),time=Math.min(clip.durationMs-1,Math.round(index*frameInterval));await animationRenderFrameAt(time,base,evaluator,clip.durationMs);
+   const started=performance.now(),elapsed=Math.min(playbackDurationMs-1,Math.round(index*frameInterval)),time=AnimationEngine.playbackTime(elapsed,0,clip.durationMs,clip.loopMode);await animationRenderFrameAt(time,base,evaluator,clip.durationMs);
    if(manualFrames)track.requestFrame();const remaining=frameInterval-(performance.now()-started);if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
    $("animationProgress").style.width=Math.round((index+1)/frames*100)+"%";$("animationExportStatus").textContent="Видео · "+(index+1)+" / "+frames;
   }
