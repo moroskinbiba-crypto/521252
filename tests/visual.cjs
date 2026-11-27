@@ -166,6 +166,83 @@ async function switchMode(page, mode) {
     }
 
 
+    // Exercise the alternate Studio shell at representative phone, tablet and desktop widths.
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const themeMenuForShell = page.locator("#themeMenu");
+    if (!(await themeMenuForShell.evaluate(element => element.open))) {
+      await themeMenuForShell.locator("summary").click();
+    }
+    await page.locator("#shellPicker").selectOption("studio");
+    assert.equal(await page.locator("body").getAttribute("data-shell"), "studio");
+    assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "not all",
+      "Studio shell should disable the XP stylesheet");
+    await themeMenuForShell.evaluate(element => { element.open = false; });
+
+    const studioWidths = [
+      { width: 320, height: 780 },
+      { width: 390, height: 844 },
+      { width: 768, height: 1024 },
+      { width: 1280, height: 800 }
+    ];
+    for (const mode of modes) {
+      await switchMode(page, mode);
+      for (const viewport of studioWidths) {
+        await page.setViewportSize(viewport);
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        const layout = await page.evaluate(() => {
+          const upload = document.querySelector("#openImage");
+          const rect = upload?.getBoundingClientRect();
+          const isVisible = element => !!element && element.getClientRects().length > 0 &&
+            getComputedStyle(element).display !== "none" && getComputedStyle(element).visibility !== "hidden";
+          return {
+            width: innerWidth,
+            documentWidth: document.documentElement.scrollWidth,
+            uploadText: upload?.innerText || "",
+            uploadWidth: rect?.width || 0,
+            uploadLeft: rect?.left ?? -1,
+            uploadRight: rect?.right ?? Infinity,
+            inspectorVisible: isVisible(document.querySelector("#inspector")),
+            quickNavVisible: isVisible(document.querySelector("#inspectorJumpNav")),
+            shell: document.body.dataset.shell
+          };
+        });
+        assert.equal(layout.shell, "studio", "Studio shell should remain selected while switching workspaces");
+        assert.ok(layout.documentWidth <= viewport.width + 1,
+          "Studio " + mode + "/" + viewport.width + ": page should not overflow horizontally");
+        assert.match(layout.uploadText, /Загрузить/,
+          "Studio " + mode + "/" + viewport.width + ": upload action should keep its full label");
+        assert.ok(layout.uploadWidth >= 80 && layout.uploadLeft >= -1 && layout.uploadRight <= viewport.width + 1,
+          "Studio " + mode + "/" + viewport.width + ": upload action should remain visible within the viewport");
+        if (mode === "presets") {
+          assert.equal(layout.inspectorVisible, false);
+        } else {
+          assert.equal(layout.inspectorVisible, true, "Studio " + mode + ": contextual Inspector should remain visible");
+          assert.equal(layout.quickNavVisible, true, "Studio " + mode + ": Inspector navigation should remain visible");
+        }
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.screenshot({
+          path: path.join(outputDir, safeName(mode) + "-" + viewport.width + "-studio-workspace.png"),
+          animations: "disabled"
+        });
+        captures++;
+        if (mode !== "presets") {
+          await page.locator("#inspector").screenshot({
+            path: path.join(outputDir, safeName(mode) + "-" + viewport.width + "-studio-inspector.png"),
+            animations: "disabled"
+          });
+          captures++;
+        }
+      }
+    }
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await themeMenuForShell.locator("summary").click();
+    await page.locator("#shellPicker").selectOption("xp");
+    assert.equal(await page.locator("body").getAttribute("data-shell"), "xp");
+    assert.equal(await page.locator("#xpShellStyles").getAttribute("media"), "all",
+      "returning to XP shell should re-enable the XP stylesheet");
+    await themeMenuForShell.evaluate(element => { element.open = false; });
+
     await page.setViewportSize({ width: 390, height: 844 });
     await switchMode(page, "shape");
     const shapeGroups = page.locator("#shapeControl details.inspector-collapsible");
