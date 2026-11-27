@@ -1011,6 +1011,16 @@ async function downloadFrom(page, selector) {
     await page.locator("#homeLogo").click();
 
     // Vector export supports print sizing and layered CMYK plates.
+    const advancedInspector = page.locator("#advancedToggle");
+    if (await advancedInspector.getAttribute("aria-pressed") !== "true") {
+      await advancedInspector.click();
+    }
+    const advancedExport = page.locator("#exportControl details.advanced-export-group");
+    if (await advancedExport.getAttribute("open") === null) {
+      await advancedExport.locator("summary").click();
+    }
+    assert.equal(await page.locator("#vectorDetail").isVisible(), true,
+      "vector and print controls should be reachable in the expanded advanced export group");
     await page.locator("#vectorDetail").selectOption("source");
     const blackSvg = await downloadFrom(page, "#svgBlack");
     const blackSvgText = blackSvg.bytes.toString("utf8");
