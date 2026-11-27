@@ -50,6 +50,7 @@ Run the deterministic local checks with:
 ```sh
 npm run check:syntax
 npm run test:engine
+npm run test:assets
 ```
 
 The GitHub Actions browser suite additionally exercises the application in Chromium, Firefox and WebKit. A responsive UI audit switches through all six workspaces at 320, 360, 390, 430, 768, 1024, 1280 and 1440 px, checks layout boundaries and dialog keyboard focus, and uploads workspace/inspector screenshots as a short-lived workflow artifact. These captures are review material, not automatic pixel-diff baselines; golden images are only appropriate after a human has approved the expected appearance.
