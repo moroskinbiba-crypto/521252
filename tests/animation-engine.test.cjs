@@ -114,6 +114,10 @@ assert.equal(Engine.playbackTime(750, 500, 1000, "loop"), 250);
 assert.equal(Engine.playbackTime(750, 500, 1000, "pingpong"), 750);
 assert.equal(Engine.playbackTime(1500, 500, 1000, "pingpong"), 0,
   "ping-pong playback should reverse at both clip boundaries");
+assert.equal(Engine.playbackTime(Infinity, 0, 1000, "loop"), 0,
+  "non-finite elapsed time must never propagate NaN into the playhead");
+assert.throws(() => Engine.updateKeyframe(editable, "threshold", 1250, Infinity, 80, "linear"),
+  /Время/, "keyframe retiming must reject non-finite times");
 
 const normalised = Engine.normalise({
   durationMs: 999999, fps: 0, loop: false,
