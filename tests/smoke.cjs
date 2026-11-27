@@ -1967,8 +1967,16 @@ async function downloadFrom(page, selector) {
       null, { timeout: 15000 }
     );
 
-    await animationPage.locator("#animationDuration").fill("0.25");
+    await animationPage.locator("#animationDuration").evaluate(el => {
+      el.value = "0.25";
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
     await animationPage.locator("#animationFps").selectOption("12");
+    assert.deepEqual(await animationPage.evaluate(() => {
+      const clip = window.__tgrmAnimationStatus().clip;
+      return { durationMs: clip.durationMs, fps: clip.fps, loopMode: clip.loopMode };
+    }), { durationMs: 250, fps: 12, loopMode: "pingpong" },
+    "the short ping-pong export fixture should be applied before encoding");
     const sequenceDownload = await downloadFrom(animationPage, "#animationExportFrames");
     assert.match(sequenceDownload.download.suggestedFilename(), /animation-frames\.zip$/i);
     assert.equal(sequenceDownload.bytes.subarray(0, 4).toString("binary"), "PK\x03\x04",
