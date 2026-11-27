@@ -1948,21 +1948,6 @@ async function downloadFrom(page, selector) {
     assert.deepEqual(animationErrors, [],
       "keyframe editing and loop-mode selection should not throw browser runtime errors");
 
-    const animationVideoSupported = await animationPage.evaluate(() =>
-      typeof MediaRecorder !== "undefined" &&
-      typeof document.querySelector("#output")?.captureStream === "function" &&
-      ["video/mp4;codecs=avc1.42E01E", "video/mp4", "video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"]
-        .some(type => MediaRecorder.isTypeSupported(type))
-    );
-    if (animationVideoSupported) {
-      const animationVideoDownload = await downloadFrom(animationPage, "#animationExportVideo");
-      assert.match(animationVideoDownload.download.suggestedFilename(), /-animation\\.(?:mp4|webm)$/i);
-      assert.ok(animationVideoDownload.bytes.length > 100,
-        "Animation Studio video export should produce a non-empty media file");
-      assert.match(await animationPage.locator("#animationExportStatus").textContent(), /Готово/,
-        "Animation Studio should finish recording and report the resulting video format");
-    }
-
     const animationProjectDownload = await downloadFrom(animationPage, "#saveProjectMenu");
     const animationProject = JSON.parse(animationProjectDownload.bytes.toString("utf8"));
     assert.equal(animationProject.animation.tracks.threshold.keyframes.length, 2,
@@ -1996,6 +1981,21 @@ async function downloadFrom(page, selector) {
       "ping-pong sequence export should contain a complete forward-and-reverse cycle");
     assert.deepEqual(animationErrors, [],
       "animation project restore and frame-sequence export should not throw runtime errors");
+
+    const animationVideoSupported = await animationPage.evaluate(() =>
+      typeof MediaRecorder !== "undefined" &&
+      typeof document.querySelector("#output")?.captureStream === "function" &&
+      ["video/mp4;codecs=avc1.42E01E", "video/mp4", "video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"]
+        .some(type => MediaRecorder.isTypeSupported(type))
+    );
+    if (animationVideoSupported) {
+      const animationVideoDownload = await downloadFrom(animationPage, "#animationExportVideo");
+      assert.match(animationVideoDownload.download.suggestedFilename(), /-animation\\.(?:mp4|webm)$/i);
+      assert.ok(animationVideoDownload.bytes.length > 100,
+        "Animation Studio video export should produce a non-empty media file");
+      assert.match(await animationPage.locator("#animationExportStatus").textContent(), /Готово/,
+        "Animation Studio should finish recording and report the resulting video format");
+    }
 
     // Scrubbing is a preview, not a workspace edit. Leaving the workspace must
     // persist the base settings while retaining the clip for the next visit.
